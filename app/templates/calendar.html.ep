@@ -1,0 +1,8 @@
+<html>
+%= stylesheet '/css/calendar.css'
+
+<body>
+    This is content
+</body>
+
+</html>

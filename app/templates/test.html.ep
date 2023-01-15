@@ -1,0 +1,14 @@
+<html>
+%= stylesheet '/css/global.css'
+
+<body>
+
+    <h1>test</h1>
+
+    Calendar page as HTML:
+    <br>
+    <iframe src="/calendar/html" width="480" height="800" style="border: 1px solid black; padding: 1em; margin: 1em">
+
+</body>
+
+</html>

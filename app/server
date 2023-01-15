@@ -1,0 +1,36 @@
+#!/usr/bin/env perl
+
+use strict;
+
+use FindBin qw($Bin);
+use lib "$Bin/../lib";
+
+use Mojolicious::Lite;
+use DDP;
+
+# Static files are automatically served from the /public subfolder.
+
+get '/ping' => sub {
+    my $self   = shift;
+    my $result = {};
+    return $self->render(json => { status => 'ok' });
+};
+
+get '/calendar/html' => sub {
+    my $self   = shift;
+    my $result = {};
+
+    #return $self->render(json => { status => 'failure', message => 'FIXME TODO' });
+    return $self->render(template => 'calendar', format => 'html');
+};
+
+get '/' => sub {
+    my $self = shift;
+
+    #return $self->render(text => 'test', format => 'html');
+    return $self->render(template => 'test', format => 'html');
+};
+
+app->secrets(['My very secret passphsasdfi903478ty90 e8gd opasjf23[f- rase.']);   # FIXME  FIXME
+plugin 'TagHelpers';
+app->start;
