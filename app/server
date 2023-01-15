@@ -18,10 +18,16 @@ get '/ping' => sub {
 
 get '/calendar/html' => sub {
     my $self   = shift;
-    my $result = {};
 
     #return $self->render(json => { status => 'failure', message => 'FIXME TODO' });
     return $self->render(template => 'calendar', format => 'html');
+};
+
+get '/calendar/png' => sub {
+    my $self   = shift;
+
+    my $bytes = 'foobar';
+    return $self->render(data => $bytes, format => 'png');
 };
 
 get '/' => sub {

@@ -2,7 +2,17 @@
 %= stylesheet '/css/calendar.css'
 
 <body>
+    <div class="top-month-header">
+        <div class="month-name">SEPTEMBER</div>
+    </div>
+    <div class="day-number-big">31</div>
+
+
+
     This is content
+
+    <p style="font-family: DIN; font-size: 3rem">This is DIN font 12345</p>
+    <p style="font-family: DINCondensed; font-size: 3rem">This is DIN Condensed Bold font 12345</p>
 </body>
 
 </html>

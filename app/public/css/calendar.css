@@ -1,3 +1,50 @@
-html {
+/* resets */
+
+html,
+body {
     background-color: aqua;
+    font-size: 12pt;
+}
+
+html,
+body,
+div,
+p {
+    padding: 0;
+    margin: 0;
+}
+
+
+/* fonts */
+
+@font-face {
+    font-family: 'DIN';
+    src: url('/fonts/DIN.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'DINCondensed';
+    src: url('/fonts/DINCondensed-Bold.ttf') format('truetype');
+}
+
+body {
+    background-color: burlywood;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+div.top-month-header {
+    width: 100%;
+    padding-bottom: 0.2em;
+    margin-bottom: 0.2em;
+    border-bottom: 3px solid black;
+    font-size: 2rem;
+    font-weight: bold;
+    background-color: cadetblue;
+}
+
+div.day-number-big {
+    font-family: 'DINCondensed', 'Arial Narrow', Arial, sans-serif;
+    font-size: 24rem;
+    line-height: 20rem;
+    background-color: coral;
 }
