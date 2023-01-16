@@ -1,0 +1,3 @@
+#!/bin/bash
+
+node_modules/.bin/pageres http://localhost:8081/calendar/html 480x800 --filename='app/public/images/current_dynamic_calendar' --overwrite --format=png
