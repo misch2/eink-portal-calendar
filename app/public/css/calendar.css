@@ -58,7 +58,7 @@ div div div div {
 }
 
 body {
-    background-color: burlywood;
+    /* background-color: burlywood; */
     font-family: 'DIN';
 }
 
@@ -99,7 +99,7 @@ div.day-of-week-block {
     top: 370px;
     left: 0px;
     width: 100%;
-    height: 115px;
+    height: 145px;
     font-family: 'DIN';
     font-size: 24px;
     border-bottom: 2px solid black;
@@ -111,7 +111,7 @@ div.row-dow-number-and-name {
     justify-content: space-between;
     height: 24px;
     width: auto;
-    padding-bottom: 8px;
+    padding-bottom: 7px;
     border-bottom: 2px solid black;
 }
 
@@ -119,7 +119,7 @@ div.row-dow-bars {
     display: flex;
     flex-flow: row wrap;
     justify-content: start;
-    padding: 5px 0;
+    padding: 6px 0;
 }
 
 div.row-dow-single-bar {
@@ -128,4 +128,47 @@ div.row-dow-single-bar {
     margin-right: 3px;
     background-color: black;
     /* border-radius: 3px; */
+}
+
+div.icons-container {
+    position: absolute;
+    top: 525px;
+    left: 0px;
+    width: 100%;
+    height: 145px;
+    display: flex;
+    flex-flow: row wrap;
+    /* background-color: brown; */
+}
+
+.icon {
+    height: 70px;
+    width: 70px;
+    background-image: url("/images/custom-portal-sign-icons-cropped.png");
+    background-size: 1250px;
+    border: 1px solid black;
+    margin: 0 5px 5px 0;
+}
+
+.icon-a1 {
+    background-position: -4px -4px;
+}
+
+.icon-a2 {
+    background-position: -81px -4px;
+}
+
+.icon-a3 {
+    background-position: -160px -4px;
+}
+
+.icon-a4 {
+    background-position: -238px -4px;
+}
+
+img.aperture-logo {
+    position: absolute;
+    top: 700px;
+    left: 0px;
+    height: 30px;
 }

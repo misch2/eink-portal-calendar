@@ -4,12 +4,7 @@
 <!-- FIXME FIXME wkhtmlto... doesn't support "flex" :-() -->
 
 <body>
-    <!-- <div style="font-family: DIN">DIN FONT 1234567890</div>
-    <div style="font-family: DINBold">DIN Bold FONT 1234567890</div>
-    <div style="font-family: DINCondensed">DIN Condensed FONT 1234567890</div>
- -->
     <div id="spacer">
-
         <div class="top-month-header">
             <div class="month-name">
                 <%= uc($date->month_name) %>
@@ -35,11 +30,18 @@
             </div>
         </div>
 
-        <!-- 
-    This is content
+        <div class="icons-container">
+            <div class="icon icon-a1"></div>
+            <div class="icon icon-a2"></div>
+            <div class="icon icon-a3"></div>
+            <div class="icon icon-a4"></div>
+            <div class="icon icon-a1"></div>
+            <div class="icon icon-a2"></div>
+            <div class="icon icon-a3"></div>
+            <div class="icon icon-a4"></div>
+        </div>
 
-    <p style="font-family: DIN; font-size: 3rem ">This is DIN font 12345</p>
-    <p style="font-family: DINCondensed; font-size: 3rem ">This is DIN Condensed Bold font 12345</p> -->
+        <img src="/images/Aperture_Laboratories_Logo.png" class="aperture-logo">
     </div>
 </body>
 
