@@ -87,7 +87,7 @@ div.top-month-header {
 
 div.day-number-big {
     position: absolute;
-    top: -35px;
+    top: -25px;
     left: 0px;
     font-family: 'DINCondensed';
     font-size: 400px;
@@ -142,12 +142,12 @@ div.icons-container {
 }
 
 .icon {
-    height: 70px;
-    width: 70px;
+    height: 65px;
+    width: 65px;
     background-image: url("/images/custom-portal-sign-icons-cropped.png");
-    background-size: 1250px;
+    background-size: 1150px;
     border: 1px solid black;
-    margin: 0 5px 5px 0;
+    margin: 0 10px 10px 0;
 }
 
 .icon-a1 {
@@ -155,15 +155,15 @@ div.icons-container {
 }
 
 .icon-a2 {
-    background-position: -81px -4px;
+    background-position: -75px -4px;
 }
 
 .icon-a3 {
-    background-position: -160px -4px;
+    background-position: -147px -4px;
 }
 
 .icon-a4 {
-    background-position: -238px -4px;
+    background-position: -218px -4px;
 }
 
 img.aperture-logo {

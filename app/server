@@ -20,13 +20,10 @@ get '/ping' => sub {
 get '/calendar/html' => sub {
     my $self   = shift;
 
-    #return $self->render(json => { status => 'failure', message => 'FIXME TODO' });
-
     my $dt = DateTime->now();
     #$dt = DateTime->new(year => '2023', month => 7, day => 31);  # mock
-    $dt->set_locale('en-US');
 
-    #p $dt;
+    $dt->set_locale('en-US');
     $self->stash(date => $dt);
 
     return $self->render(template => 'calendar', format => 'html');
@@ -35,7 +32,7 @@ get '/calendar/html' => sub {
 get '/calendar/png' => sub {
     my $self   = shift;
 
-    my $bytes = 'foobar';
+    my $bytes = 'foobar';   # FIXME
     return $self->render(data => $bytes, format => 'png');
 };
 
