@@ -1,18 +1,46 @@
 <html>
 %= stylesheet '/css/calendar.css'
 
+<!-- FIXME FIXME wkhtmlto... doesn't support "flex" :-() -->
+
 <body>
-    <div class="top-month-header">
-        <div class="month-name">SEPTEMBER</div>
-    </div>
-    <div class="day-number-big">31</div>
+    <!-- <div style="font-family: DIN">DIN FONT 1234567890</div>
+    <div style="font-family: DINBold">DIN Bold FONT 1234567890</div>
+    <div style="font-family: DINCondensed">DIN Condensed FONT 1234567890</div>
+ -->
+    <div id="spacer">
 
+        <div class="top-month-header">
+            <div class="month-name">
+                <%= uc($date->month_name) %>
+            </div>
+        </div>
+        <div class="day-number-big">
+            <%= $date->day %>
+        </div>
 
+        <div class="day-of-week-block">
+            <div class="row-dow-number-and-name ">
+                <div>
+                    <%= $date->day .'/'. $date->month_length %>
+                </div>
+                <div>
+                    <%= uc($date->day_name) %>
+                </div>
+            </div>
+            <div class="row-dow-bars">
+                % for (1 .. $date->day) {
+                <div class="row-dow-single-bar"></div>
+                % }
+            </div>
+        </div>
 
+        <!-- 
     This is content
 
-    <p style="font-family: DIN; font-size: 3rem">This is DIN font 12345</p>
-    <p style="font-family: DINCondensed; font-size: 3rem">This is DIN Condensed Bold font 12345</p>
+    <p style="font-family: DIN; font-size: 3rem ">This is DIN font 12345</p>
+    <p style="font-family: DINCondensed; font-size: 3rem ">This is DIN Condensed Bold font 12345</p> -->
+    </div>
 </body>
 
 </html>

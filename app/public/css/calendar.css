@@ -2,8 +2,9 @@
 
 html,
 body {
-    background-color: aqua;
+    /* background-color: aqua; */
     font-size: 12pt;
+    font-family: 'Times New Roman', Times, serif;
 }
 
 html,
@@ -15,36 +16,116 @@ p {
 }
 
 
+/* debug */
+
+div,
+p {
+    /* border: 3px dotted gray; */
+}
+
+div {
+    /* background-color: cadetblue; */
+}
+
+div div {
+    /* background-color: coral; */
+}
+
+div div div {
+    /* background-color: bisque; */
+}
+
+div div div div {
+    /* background-color: darkolivegreen; */
+}
+
+
 /* fonts */
 
 @font-face {
     font-family: 'DIN';
-    src: url('/fonts/DIN.ttf') format('truetype');
+    src: url('/fonts/D-DIN.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'DINBold';
+    src: url('/fonts/D-DIN-Bold.otf') format('opentype');
 }
 
 @font-face {
     font-family: 'DINCondensed';
-    src: url('/fonts/DINCondensed-Bold.ttf') format('truetype');
+    src: url('/fonts/D-DINCondensed.otf') format('opentype');
 }
 
 body {
     background-color: burlywood;
-    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    font-family: 'DIN';
+}
+
+div#spacer {
+    position: absolute;
+    top: 50px;
+    left: 80px;
+    height: 700px;
+    width: 390px;
+    /* padding: 10px 20px 30px 40px;
+    margin: 10px 20px 30px 40px; */
+    /* background-color: gainsboro; */
 }
 
 div.top-month-header {
+    position: absolute;
+    top: 0px;
+    left: 0px;
     width: 100%;
     padding-bottom: 0.2em;
     margin-bottom: 0.2em;
-    border-bottom: 3px solid black;
-    font-size: 2rem;
-    font-weight: bold;
-    background-color: cadetblue;
+    font-family: 'DIN';
+    font-size: 24px;
+    border-bottom: 2px solid black;
 }
 
 div.day-number-big {
-    font-family: 'DINCondensed', 'Arial Narrow', Arial, sans-serif;
-    font-size: 24rem;
-    line-height: 20rem;
-    background-color: coral;
+    position: absolute;
+    top: -35px;
+    left: 0px;
+    font-family: 'DINCondensed';
+    font-size: 400px;
+    transform: scale(0.8, 1) translate(-40px, 0);
+}
+
+div.day-of-week-block {
+    position: absolute;
+    top: 370px;
+    left: 0px;
+    width: 100%;
+    height: 115px;
+    font-family: 'DIN';
+    font-size: 24px;
+    border-bottom: 2px solid black;
+}
+
+div.row-dow-number-and-name {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+    height: 24px;
+    width: auto;
+    padding-bottom: 8px;
+    border-bottom: 2px solid black;
+}
+
+div.row-dow-bars {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: start;
+    padding: 5px 0;
+}
+
+div.row-dow-single-bar {
+    width: 5px;
+    height: 30px;
+    margin-right: 3px;
+    background-color: black;
+    /* border-radius: 3px; */
 }
