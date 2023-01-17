@@ -2,7 +2,7 @@ all: modules run
 
 modules:
 	# Perl modules from cpanfile.snapshot
-	cpanm --install deps .
+	cpanm --installdeps .
 	carton install
 	# NPM modules from the package-lock.json file
 	npm ci
