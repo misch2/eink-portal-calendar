@@ -1,8 +1,6 @@
 <html>
 %= stylesheet '/css/calendar.css'
 
-<!-- FIXME FIXME wkhtmlto... doesn't support "flex" :-() -->
-
 <body>
     <div id="spacer">
         <div class="top-month-header">
@@ -10,12 +8,13 @@
                 <%= uc($date->month_name) %>
             </div>
         </div>
+
         <div class="day-number-big">
             <%= $date->day %>
         </div>
 
         <div class="day-of-week-block">
-            <div class="row-dow-number-and-name ">
+            <div class="dow-number-and-name">
                 <div>
                     <%= $date->day .'/'. $date->month_length %>
                 </div>
@@ -23,9 +22,10 @@
                     <%= uc($date->day_name) %>
                 </div>
             </div>
-            <div class="row-dow-bars">
+            <div class="separator"></div>
+            <div class="bunch-of-bars">
                 % for (1 .. $date->day) {
-                <div class="row-dow-single-bar"></div>
+                <div class="bar"></div>
                 % }
             </div>
         </div>

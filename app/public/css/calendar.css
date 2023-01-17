@@ -68,8 +68,6 @@ div#spacer {
     left: 80px;
     height: 700px;
     width: 390px;
-    /* padding: 10px 20px 30px 40px;
-    margin: 10px 20px 30px 40px; */
     /* background-color: gainsboro; */
 }
 
@@ -105,29 +103,27 @@ div.day-of-week-block {
     border-bottom: 2px solid black;
 }
 
-div.row-dow-number-and-name {
+div.day-of-week-block div.separator {
+    margin-top: 7px;
+    border-bottom: 2px solid black;
+    margin-bottom: 6px;
+}
+
+div.dow-number-and-name {
     display: flex;
-    flex-flow: row wrap;
     justify-content: space-between;
     height: 24px;
-    width: auto;
-    padding-bottom: 7px;
-    border-bottom: 2px solid black;
 }
 
-div.row-dow-bars {
+div.bunch-of-bars {
     display: flex;
-    flex-flow: row wrap;
-    justify-content: start;
-    padding: 6px 0;
+    gap: 3px;
 }
 
-div.row-dow-single-bar {
+div.bunch-of-bars div.bar {
     width: 5px;
     height: 30px;
-    margin-right: 3px;
     background-color: black;
-    /* border-radius: 3px; */
 }
 
 div.icons-container {

@@ -49,5 +49,5 @@ get '/' => sub {
 plugin 'TagHelpers';
 plugin 'RenderFile';
 
-app->secrets(['My very secret passphsasdfi903478ty90 e8gd opasjf23[f- rase.']);    # FIXME  FIXME
+app->secrets([ $ENV{MOJO_SECRET_PASSPHRASE} ]);
 app->start;

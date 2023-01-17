@@ -2,7 +2,7 @@
 
 # load ENV settings
 . ./.env
-export MOJO_MODE
+export MOJO_MODE MOJO_SECRET_PASSPHRASE
 
 # run the webserver
 echo "starting server in $MOJO_MODE mode"
