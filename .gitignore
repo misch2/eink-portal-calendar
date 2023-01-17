@@ -3,4 +3,4 @@ config/
 node_modules/
 .env
 app/hypnotoad.pid
-app/generated_images/*
+app/generated_images/*.png
