@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# load ENV settings
+. ./.env
+export MOJO_MODE
+
+# run the webserver
+echo "starting server in $MOJO_MODE mode"
+if [ $MOJO_MODE == "development" ]; then
+    morbo -v -l 'http://*:8081' -w app/ app/server
+else
+    app/server daemon -l "http://*:${PORT}"
+fi

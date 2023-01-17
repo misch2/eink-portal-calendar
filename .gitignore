@@ -1,3 +1,5 @@
 local/
 config/
 node_modules/
+.env
+app/hypnotoad.pid
