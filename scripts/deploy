@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# load ENV settings
+. ./.env
+
+carton bundle
+rsync -az vendor/ ${DEPLOY_TARGET}/vendor/
+git push
+git push production

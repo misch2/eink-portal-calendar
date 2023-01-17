@@ -1,10 +1,14 @@
-all: install_modules run
+all: modules run
 
-install_modules:
-	# install Perl modules from cpanfile.snapshot
+modules:
+	# Perl modules from cpanfile.snapshot
+	cpanm --install deps .
 	carton install
-	# install NPM modules from the package-lock.json file
+	# NPM modules from the package-lock.json file
 	npm ci
 
 run:
 	scripts/run_server
+
+deploy: modules
+	scripts/deploy
