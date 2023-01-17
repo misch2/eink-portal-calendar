@@ -8,4 +8,3 @@ install_modules:
 
 run:
 	scripts/run_server
-	

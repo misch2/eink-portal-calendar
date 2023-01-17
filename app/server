@@ -18,9 +18,10 @@ get '/ping' => sub {
 };
 
 get '/calendar/html' => sub {
-    my $self   = shift;
+    my $self = shift;
 
     my $dt = DateTime->now();
+
     #$dt = DateTime->new(year => '2023', month => 7, day => 31);  # mock
 
     $dt->set_locale('en-US');
@@ -30,19 +31,23 @@ get '/calendar/html' => sub {
 };
 
 get '/calendar/png' => sub {
-    my $self   = shift;
+    my $self = shift;
 
-    my $bytes = 'foobar';   # FIXME
-    return $self->render(data => $bytes, format => 'png');
+    return $self->render_file(
+        'filepath'            => "$Bin/generated_images/current_calendar.png",
+        'format'              => 'png',
+        'content_disposition' => 'inline',
+    ) || $self->render(json => { status => "No calendar available" });
 };
 
 get '/' => sub {
     my $self = shift;
 
-    #return $self->render(text => 'test', format => 'html');
     return $self->render(template => 'test', format => 'html');
 };
 
-app->secrets(['My very secret passphsasdfi903478ty90 e8gd opasjf23[f- rase.']);   # FIXME  FIXME
 plugin 'TagHelpers';
+plugin 'RenderFile';
+
+app->secrets(['My very secret passphsasdfi903478ty90 e8gd opasjf23[f- rase.']);    # FIXME  FIXME
 app->start;

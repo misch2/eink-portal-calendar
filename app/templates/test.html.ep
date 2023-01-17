@@ -17,7 +17,7 @@
         <div>
             Calendar page as IMG with fixed size:
             <br>
-            <img src="/images/current_dynamic_calendar.png" style="border: 1px solid blue">
+            <img src="/calendar/png" style="border: 1px solid black">
         </div>
     </div>
 </body>

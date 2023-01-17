@@ -1,3 +1,7 @@
 #!/bin/bash
 
-node_modules/.bin/pageres http://localhost:8081/calendar/html 480x800 --filename='app/public/images/current_dynamic_calendar' --overwrite --format=png
+# load ENV settings
+. ./.env
+
+# convert the page
+node_modules/.bin/pageres http://localhost:${PORT}/calendar/html 480x800 --filename='app/generated_images/current_calendar' --overwrite --format=png
