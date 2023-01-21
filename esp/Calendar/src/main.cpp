@@ -2,6 +2,7 @@
 
 // core libraries from ESP8266 Arduino
 #include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
 // #include <DNSServer.h>
 // #include <ESP8266mDNS.h>
 // #include <ESP8266WebServer.h>
@@ -11,8 +12,11 @@
 #include <GFX.h>
 #include <PNGdec.h>
 #include <GxEPD2_BW.h>
+#include <GxEPD2_BW.h>
 
 #include <time.h>
+
+#include "secrets_config.h"
 
 #define DEBUG
 
@@ -38,6 +42,7 @@ GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(GxEPD2_750_T7(/*CS=D
 #include "Open_Sans_ExtraBold_120.h"
 
 WiFiManager wifiManager;
+WiFiClient wifiClient; // for HTTP requests
 
 void stopWiFi()
 {
@@ -51,7 +56,7 @@ void stopWiFi()
 
   WiFi.persistent(false); // do not reset settings (SSID/password) when disconnecting
   // WiFi.disconnect(true);   // no, this resets the password too (even when only in current session, it's enough to prevent WiFiManager to reconnect)
-  WiFi.mode(WIFI_OFF);  // this is sufficient
+  WiFi.mode(WIFI_OFF); // this is sufficient
   WiFi.persistent(true);
 
   DEBUG_PRINT("WiFi shutdown took %lums", millis() - start);
@@ -260,29 +265,51 @@ void setup()
   showText("test1", 200, 300, 0); // landscape
   showText("test2", 400, 100, 1); // portrait
   display.powerOff();
-  delay(3000);
+  // delay(3000);
 
-  full_white();
-  delay(1000);
-  display.powerOff();
-  stopWiFi();
-  delay(1000);
-  start_time = next_time = previous_time = previous_full_update = millis();
+  // full_white();
+  // delay(1000);
+  // display.powerOff();
+  // stopWiFi();
+  // delay(1000);
+  // start_time = next_time = previous_time = previous_full_update = millis();
   Serial.println("setup done");
 }
+
+HTTPClient http;
 
 void loop()
 {
   // uncomment for continuous clock simulation test
   // clock_test();
 
+  Serial.println("----------------------------------------");
   Serial.println("loop start");
 
   startWiFi();
-  delay(2000);
+
+  String url = CALENDAR_URL;
+  http.begin(wifiClient, url);
+  int httpResponseCode = http.GET();
+  Serial.print("HTTP Response code: ");
+  Serial.println(httpResponseCode);
+  if (httpResponseCode == 200)
+  {
+    String payload = http.getString();
+    Serial.print("Response length: ");
+    Serial.println(payload.length());
+  }
+  http.end();
+
+  // display the image
+  // FIXME
+
+  // sleep
+
   display.powerOff();
   stopWiFi();
 
   Serial.println("loop end (+wait)");
-  delay(10000);
+  Serial.println("");
+  delay(100000);
 }
