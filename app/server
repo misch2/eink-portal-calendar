@@ -8,6 +8,9 @@ use lib "$Bin/../lib";
 use Mojolicious::Lite;
 use DDP;
 use DateTime;
+use DateTime::Format::Strptime;
+use File::Slurp;
+use Imager;
 
 # Static files are automatically served from the /public subfolder.
 
@@ -19,20 +22,17 @@ get '/ping' => sub {
 
 get '/calendar/html' => sub {
     my $self = shift;
+    return html_calendar($self, DateTime->now());
+};
 
-    my $dt = DateTime->now();
-
-    #$dt = DateTime->new(year => '2023', month => 7, day => 31);  # mock
-
-    $dt->set_locale('en-US');
-    $self->stash(date => $dt);
-
-    return $self->render(template => 'calendar', format => 'html');
+get '/calendar/html/:date' => sub {
+    my $self = shift;
+    my $dt   = DateTime::Format::Strptime->new(pattern => '%Y-%m-%d')->parse_datetime($self->stash('date'));
+    return html_calendar($self, $dt);
 };
 
 get '/calendar/png' => sub {
     my $self = shift;
-
     return $self->render_file(
         'filepath'            => "$Bin/generated_images/current_calendar.png",
         'format'              => 'png',
@@ -40,9 +40,30 @@ get '/calendar/png' => sub {
     ) || $self->render(json => { status => "No calendar available" });
 };
 
-get '/' => sub {
+get '/calendar/bitmap/:firstrow/:lastrow' => sub {
     my $self = shift;
 
+    my $firstrow = $self->stash('firstrow');
+    my $lastrow  = $self->stash('lastrow');
+
+    my $img = Imager->new(file => "$Bin/generated_images/current_calendar.png") or die Imager->errstr;
+
+    my $out = '';
+    # foreach my $y (0 .. $img->getheight - 1) {
+    foreach my $y ($firstrow .. $lastrow) {
+        foreach my $x (0 .. $img->getwidth - 1) {
+            my $color = $img->getpixel(x => $x, y => $y);
+            my @rgb   = $color->rgba;
+            #printf("%d\t%d\t%d\t%d\t%d\n", $x, $y, @rgb[ 0, 1, 2 ]);
+            my $grayscale2bit = $rgb[0] >> 6;
+            $out .= $grayscale2bit;
+        }
+    }
+    return $self->render(text => $out);
+};
+
+get '/' => sub {
+    my $self = shift;
     return $self->render(template => 'test', format => 'html');
 };
 
@@ -51,3 +72,19 @@ plugin 'RenderFile';
 
 app->secrets([ $ENV{MOJO_SECRET_PASSPHRASE} ]);
 app->start;
+
+########################################################################
+sub html_calendar {
+    my $self = shift;
+    my $dt   = shift;
+
+    $dt->set_locale('en-US');
+    return $self->render(
+        template => 'calendar',
+        format   => 'html',
+
+        # other variables
+        date => $dt
+    );
+
+}
