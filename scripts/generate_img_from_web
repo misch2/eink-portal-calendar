@@ -5,3 +5,6 @@
 
 # convert the page
 node_modules/.bin/pageres http://localhost:${PORT}/calendar/html 480x800 --filename='app/generated_images/current_calendar' --overwrite --format=png
+#convert app/generated_images/current_calendar.png -rotate 90 -threshold 50% -monochrome -colorspace gray app/generated_images/current_calendar.bmp
+#convert app/generated_images/current_calendar.png -rotate 90 -colorspace gray app/generated_images/current_calendar.bmp
+convert app/generated_images/current_calendar.png -rotate 90 -alpha off -type palette -colorspace Gray app/generated_images/current_calendar.bmp
