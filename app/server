@@ -48,9 +48,10 @@ get '/calendar/png' => sub {
 get '/calendar/bitmap' => sub {
     my $self = shift;
 
-    my $rotate = $self->req->param('rotate') // 0;
-    my $flip   = $self->req->param('flip')   // '';
-    my $format = $self->req->param('format') // 'png';
+    my $rotate    = $self->req->param('rotate')    // 0;
+    my $flip      = $self->req->param('flip')      // '';
+    my $format    = $self->req->param('format')    // 'png';
+    my $threshold = $self->req->param('threshold') // undef;
 
     my $img = Imager->new(file => "$Bin/generated_images/current_calendar.png") or die Imager->errstr;
     my $tmp;
@@ -82,6 +83,11 @@ get '/calendar/bitmap' => sub {
     }
     die $img->errstr unless $tmp;
     $img = $tmp;
+
+    if (defined $threshold) {
+        my @map = map { $_ >= $threshold ? 255 : 0 } 0 .. 255;
+        $img->map(all => \@map);    # inplace conversion
+    }
 
     if ($format eq 'png') {
         my $out;
@@ -127,6 +133,7 @@ get '/calendar/bitmap' => sub {
                 my $grayscale = $rgb[0];
                 my $bit       = ($grayscale > 0x80) ? 1 : 0;
                 $byte = $byte << 1 | $bit;
+
                 # $byte = $byte | ($bit << $bitcnt);
                 $bitcnt++;
                 if ($bitcnt == 8) {
