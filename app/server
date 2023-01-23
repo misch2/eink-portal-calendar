@@ -88,7 +88,7 @@ get '/calendar/bitmap' => sub {
         $img->write(data => \$out, type => 'png') or die;
         return $self->render(data => $out, format => 'png');
 
-    } elsif ($format eq 'rawgrayscale8') {
+    } elsif ($format eq 'rawgrayscale8' || $format eq 'raw8bpp') {
 
         # output format:
         #    "MM"
@@ -103,6 +103,16 @@ get '/calendar/bitmap' => sub {
             }
         }
         return $self->render(data => $out);
+    } elsif ($format eq 'raw1bpp') {
+
+        my $out;
+        $img->write(data => \$out, type => 'bmp', bmp_compression => 0, bmp_bit_count => 1) or die;
+
+        # output format:
+        #    "MM"
+        #    <sequence of 1-byte grayscale values>
+        $out = 'MM' . substr($out, 0x36);
+        return $self->render(data => $out, format => 'bmp');
     } else {
         die "Unknown format requested: " . $format;
     }
