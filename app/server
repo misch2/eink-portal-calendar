@@ -102,17 +102,41 @@ get '/calendar/bitmap' => sub {
                 $out .= chr($grayscale);
             }
         }
+        warn length($out);
         return $self->render(data => $out);
     } elsif ($format eq 'raw1bpp') {
 
-        my $out;
-        $img->write(data => \$out, type => 'bmp', bmp_compression => 0, bmp_bit_count => 1) or die;
+        # my $out;
+        # $img->write(data => \$out, type => 'bmp', bmp_compression => 0, bmp_bit_count => , bmp_important_colors => 2) or die;
 
         # output format:
         #    "MM"
         #    <sequence of 1-byte grayscale values>
-        $out = 'MM' . substr($out, 0x36);
-        return $self->render(data => $out, format => 'bmp');
+        #$out = 'MM' . substr($out, 0x36);
+
+        # warn length($out);
+        # return $self->render(data => $out, format => 'bmp');
+
+        my $out = 'MM';
+        foreach my $y (0 .. $img->getheight - 1) {
+            my $byte   = 0;
+            my $bitcnt = 0;
+            foreach my $x (0 .. $img->getwidth - 1) {
+                my $color     = $img->getpixel(x => $x, y => $y);
+                my @rgb       = $color->rgba;
+                my $grayscale = $rgb[0];
+                my $bit       = ($grayscale > 0x80) ? 1 : 0;
+                $byte = $byte << 1 | $bit;
+                $bitcnt++;
+                if ($bitcnt == 8) {
+                    $out .= chr($grayscale);
+                    $byte   = 0;
+                    $bitcnt = 0;
+                }
+            }
+        }
+        warn length($out);
+        return $self->render(data => $out);
     } else {
         die "Unknown format requested: " . $format;
     }
