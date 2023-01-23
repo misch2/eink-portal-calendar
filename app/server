@@ -40,6 +40,7 @@ get '/calendar/png' => sub {
     ) || $self->render(json => { status => "No calendar available" });
 };
 
+# returns landscape image (rotated), 800 x 480, for physical display compatibility
 get '/calendar/bitmap/:firstrow/:maxnumrows' => sub {
     my $self = shift;
 
@@ -47,7 +48,6 @@ get '/calendar/bitmap/:firstrow/:maxnumrows' => sub {
     my $maxnumrows = $self->stash('maxnumrows');
 
     my $img = Imager->new(file => "$Bin/generated_images/current_calendar.png") or die Imager->errstr;
-
 
     $firstrow = 0 if $firstrow < 0;
     my $lastrow = $firstrow + $maxnumrows - 1;
@@ -58,9 +58,9 @@ get '/calendar/bitmap/:firstrow/:maxnumrows' => sub {
     #    "MM"
     #    <sequence of 1-byte grayscale values>
     my $out = 'MM';    # signature
-    foreach my $y ($firstrow .. $lastrow) {
-        foreach my $x (0 .. $img->getwidth - 1) {
-            my $color = $img->getpixel(x => $x, y => $y);
+    foreach my $x (0 .. $img->getwidth - 1) {   # first x, then y
+        foreach my $y ($firstrow .. $lastrow) {
+            my $color = $img->getpixel(x => $y, y => $x);   # swap y and y
             my @rgb   = $color->rgba;
 
             my $grayscale = $rgb[0];
