@@ -41,15 +41,20 @@ get '/calendar/png' => sub {
     ) || $self->render(json => { status => "No calendar available" });
 };
 
-# /calendar/bitmap
-# /calendar/bitmap?rotate=1&format=png
-# /calendar/bitmap?rotate=2&flip=x
-# /calendar/bitmap?rotate=3&flip=xy&format=rawgrayscale8
 get '/calendar/bitmap/epapermono' => sub {
     my $self = shift;
     return generate_bitmap($self, 3, '', 160, 'raw1bpp');
 };
 
+get '/calendar/bitmap/epapergray' => sub {
+    my $self = shift;
+    return generate_bitmap($self, 3, '', undef, 'raw8bpp');
+};
+
+# /calendar/bitmap
+# /calendar/bitmap?rotate=1&format=png
+# /calendar/bitmap?rotate=2&flip=x
+# /calendar/bitmap?rotate=3&flip=xy&format=rawgrayscale8
 get '/calendar/bitmap' => sub {
     my $self = shift;
 
