@@ -65,9 +65,9 @@ body {
 div#spacer {
     position: absolute;
     top: 50px;
-    left: 80px;
+    left: 70px;
     height: 700px;
-    width: 390px;
+    width: 370px;
     /* background-color: gainsboro; */
 }
 
