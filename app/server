@@ -56,7 +56,7 @@ get '/calendar/bitmap/:rotate/:firstrow/:maxnumrows' => sub {
         foreach my $y (0 .. $h - 1) {
             my @row = ();
             foreach my $x (0 .. $w - 1) {
-                my $color = $img->getpixel(x => $y, y => $x);
+                my $color = $img->getpixel(x => ($h - $y), y => $x);
                 push @row, $color;
             }
             push @bitmap, \@row;
