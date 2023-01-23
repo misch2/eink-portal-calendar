@@ -57,10 +57,10 @@ get '/calendar/bitmap/:firstrow/:maxnumrows' => sub {
     # output format:
     #    "MM"
     #    <sequence of 1-byte grayscale values>
-    my $out = 'MM';    # signature
-    foreach my $x (0 .. $img->getwidth - 1) {   # first x, then y
+    my $out = 'MM';                              # signature
+    foreach my $x (0 .. $img->getwidth - 1) {    # first x, then y
         foreach my $y ($firstrow .. $lastrow) {
-            my $color = $img->getpixel(x => $y, y => $x);   # swap y and y
+            my $color = $img->getpixel(x => $y, y => $x);    # swap y and y
             my @rgb   = $color->rgba;
 
             my $grayscale = $rgb[0];
