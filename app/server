@@ -40,25 +40,49 @@ get '/calendar/png' => sub {
     ) || $self->render(json => { status => "No calendar available" });
 };
 
-# returns landscape image (rotated), 800 x 480, for physical display compatibility
-get '/calendar/bitmap/:firstrow/:maxnumrows' => sub {
+get '/calendar/bitmap/:rotate/:firstrow/:maxnumrows' => sub {
     my $self = shift;
 
+    my $rotate     = $self->stash('rotate');
     my $firstrow   = $self->stash('firstrow');
     my $maxnumrows = $self->stash('maxnumrows');
 
     my $img = Imager->new(file => "$Bin/generated_images/current_calendar.png") or die Imager->errstr;
 
+    my @bitmap = ();
+    my ($w, $h) = ($img->getwidth, $img->getheight);
+    if ($rotate) {
+        ($w, $h) = ($h, $w);
+        foreach my $y (0 .. $h - 1) {
+            my @row = ();
+            foreach my $x (0 .. $w - 1) {
+                my $color = $img->getpixel(x => $y, y => $x);
+                push @row, $color;
+            }
+            push @bitmap, \@row;
+        }
+    } else {
+        foreach my $y (0 .. $h - 1) {
+            my @row = ();
+            foreach my $x (0 .. $w - 1) {
+                my $color = $img->getpixel(x => $x, y => $y);
+                push @row, $color;
+            }
+            push @bitmap, \@row;
+        }
+    }
+    # use DDP;
+    # p @bitmap;
+
     my $lastrow = $firstrow + $maxnumrows - 1;
-    warn "rows = <$firstrow; $lastrow>";
 
     # output format:
     #    "MM"
     #    <sequence of 1-byte grayscale values>
-    my $out = 'MM';                              # signature
-    foreach my $x (0 .. $img->getwidth - 1) {    # first x, then y
-        foreach my $y ($firstrow .. $lastrow) {
-            my $color = $img->getpixel(x => $y, y => $x);    # swap y and y
+    my $out = 'MM';    # signature
+    foreach my $y ($firstrow .. $lastrow) {
+        foreach my $x (0 .. $w - 1) {
+            my $color = $bitmap[$y][$x];
             my @rgb   = $color->rgba;
 
             my $grayscale = $rgb[0];
