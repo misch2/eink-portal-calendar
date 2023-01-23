@@ -45,13 +45,75 @@ get '/calendar/png' => sub {
 # /calendar/bitmap?rotate=1&format=png
 # /calendar/bitmap?rotate=2&flip=x
 # /calendar/bitmap?rotate=3&flip=xy&format=rawgrayscale8
+get '/calendar/bitmap/epapermono' => sub {
+    my $self = shift;
+    return generate_bitmap($self, 3, '', 160, 'raw1bpp');
+};
+
 get '/calendar/bitmap' => sub {
     my $self = shift;
 
     my $rotate    = $self->req->param('rotate')    // 0;
     my $flip      = $self->req->param('flip')      // '';
-    my $format    = $self->req->param('format')    // 'png';
     my $threshold = $self->req->param('threshold') // undef;
+    my $format    = $self->req->param('format')    // 'png';
+
+    return generate_bitmap($self, $rotate, $flip, $threshold, $format);
+};
+
+get '/' => sub {
+    my $self = shift;
+    return $self->render(template => 'test', format => 'html');
+};
+
+plugin 'TagHelpers';
+plugin 'RenderFile';
+plugin 'Config';
+
+my $cfg = app->plugin('Config');
+
+app->log->info("Test");
+app->log->path($cfg->{log_file}) if $cfg->{log_file};
+app->log->info("Log file: " . app->log->path);
+app->log->level($ENV{MOJO_LOG_LEVEL} || 'debug');
+app->log->info("Log level: " . app->log->level);
+
+# redirect warnings
+$SIG{__WARN__} = sub {
+    my $message = shift;
+    $message =~ s/\n$//;
+    @_ = (app->log, $message);
+    goto &Mojo::Log::warn;
+};
+
+# michals: logging to STDERR (for morbo command line usage):
+app->log->handle(\*STDERR);
+
+app->secrets([ $ENV{MOJO_SECRET_PASSPHRASE} ]);
+app->start;
+
+########################################################################
+
+sub html_calendar {
+    my $self = shift;
+    my $dt   = shift;
+
+    $dt->set_locale('en-US');
+    return $self->render(
+        template => 'calendar',
+        format   => 'html',
+
+        # other variables
+        date => $dt
+    );
+}
+
+sub generate_bitmap {
+    my $self      = shift;
+    my $rotate    = shift;
+    my $flip      = shift;
+    my $threshold = shift;
+    my $format    = shift;
 
     my $img = Imager->new(file => "$Bin/generated_images/current_calendar.png") or die Imager->errstr;
     my $tmp;
@@ -148,52 +210,4 @@ get '/calendar/bitmap' => sub {
     } else {
         die "Unknown format requested: " . $format;
     }
-};
-
-get '/' => sub {
-    my $self = shift;
-    return $self->render(template => 'test', format => 'html');
-};
-
-plugin 'TagHelpers';
-plugin 'RenderFile';
-plugin 'Config';
-
-my $cfg = app->plugin('Config');
-
-app->log->info("Test");
-app->log->path($cfg->{log_file}) if $cfg->{log_file};
-app->log->info("Log file: " . app->log->path);
-app->log->level($ENV{MOJO_LOG_LEVEL} || 'debug');
-app->log->info("Log level: " . app->log->level);
-
-# redirect warnings
-$SIG{__WARN__} = sub {
-    my $message = shift;
-    $message =~ s/\n$//;
-    @_ = (app->log, $message);
-    goto &Mojo::Log::warn;
-};
-
-# michals: logging to STDERR (for morbo command line usage):
-app->log->handle(\*STDERR);
-
-app->secrets([ $ENV{MOJO_SECRET_PASSPHRASE} ]);
-app->start;
-
-########################################################################
-
-sub html_calendar {
-    my $self = shift;
-    my $dt   = shift;
-
-    $dt->set_locale('en-US');
-    return $self->render(
-        template => 'calendar',
-        format   => 'html',
-
-        # other variables
-        date => $dt
-    );
-
 }
