@@ -49,9 +49,7 @@ get '/calendar/bitmap/:firstrow/:maxnumrows' => sub {
 
     my $img = Imager->new(file => "$Bin/generated_images/current_calendar.png") or die Imager->errstr;
 
-    $firstrow = 0 if $firstrow < 0;
     my $lastrow = $firstrow + $maxnumrows - 1;
-    $lastrow = $img->getheight - 1 if $lastrow > $img->getheight - 1;
     warn "rows = <$firstrow; $lastrow>";
 
     # output format:
