@@ -6,8 +6,6 @@ requires 'DDP';
 requires 'DateTime';
 requires 'DateTime::Format::Strptime';
 requires 'File::Slurp';
-# requires 'Image::PNG::Libpng';
-# requires 'Image::Imlib2';
 requires 'Imager';
 
 

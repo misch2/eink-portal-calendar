@@ -11,6 +11,7 @@ use DateTime;
 use DateTime::Format::Strptime;
 use File::Slurp;
 use Imager;
+use Imager::Transform;
 
 # Static files are automatically served from the /public subfolder.
 
@@ -40,56 +41,71 @@ get '/calendar/png' => sub {
     ) || $self->render(json => { status => "No calendar available" });
 };
 
-get '/calendar/bitmap/:rotate/:firstrow/:maxnumrows' => sub {
+# /calendar/bitmap
+# /calendar/bitmap?rotate=1&format=png
+# /calendar/bitmap?rotate=2&flip=x
+# /calendar/bitmap?rotate=3&flip=xy&format=rawgrayscale8
+get '/calendar/bitmap' => sub {
     my $self = shift;
 
-    my $rotate     = $self->stash('rotate');
-    my $firstrow   = $self->stash('firstrow');
-    my $maxnumrows = $self->stash('maxnumrows');
+    my $rotate = $self->req->param('rotate') // 0;
+    my $flip   = $self->req->param('flip')   // '';
+    my $format = $self->req->param('format') // 'png';
 
     my $img = Imager->new(file => "$Bin/generated_images/current_calendar.png") or die Imager->errstr;
+    my $tmp;
 
-    my @bitmap = ();
-    my ($w, $h) = ($img->getwidth, $img->getheight);
-    if ($rotate) {
-        ($w, $h) = ($h, $w);
-        foreach my $y (0 .. $h - 1) {
-            my @row = ();
-            foreach my $x (0 .. $w - 1) {
-                my $color = $img->getpixel(x => ($h - $y - 1), y => $x);
-                push @row, $color;
-            }
-            push @bitmap, \@row;
-        }
+    if ($rotate == 0) {
+        $tmp = $img->copy();
+    } elsif ($rotate == 1) {
+        $tmp = $img->rotate(right => 90);
+    } elsif ($rotate == 2) {
+        $tmp = $img->rotate(right => 180);
+    } elsif ($rotate == 3) {
+        $tmp = $img->rotate(right => 270);
     } else {
-        foreach my $y (0 .. $h - 1) {
-            my @row = ();
-            foreach my $x (0 .. $w - 1) {
-                my $color = $img->getpixel(x => $x, y => $y);
-                push @row, $color;
+        die "unknown 'rotate' value: $rotate";
+    }
+    die $img->errstr unless $tmp;
+    $img = $tmp;
+
+    if ($flip eq '') {
+        $tmp = $img->copy();
+    } elsif ($flip eq 'x') {
+        $tmp = $img->flip(dir => 'h');
+    } elsif ($flip eq 'y') {
+        $tmp = $img->flip(dir => 'v');
+    } elsif ($flip eq 'xy') {
+        $tmp = $img->flip(dir => 'vh');
+    } else {
+        die "unknown 'flip' value: $flip";
+    }
+    die $img->errstr unless $tmp;
+    $img = $tmp;
+
+    if ($format eq 'png') {
+        my $out;
+        $img->write(data => \$out, type => 'png') or die;
+        return $self->render(data => $out, format => 'png');
+
+    } elsif ($format eq 'rawgrayscale8') {
+
+        # output format:
+        #    "MM"
+        #    <sequence of 1-byte grayscale values>
+        my $out = 'MM';    # signature
+        foreach my $y (0 .. $img->getheight - 1) {
+            foreach my $x (0 .. $img->getwidth - 1) {
+                my $color     = $img->getpixel(x => $x, y => $y);
+                my @rgb       = $color->rgba;
+                my $grayscale = $rgb[0];                            # 0 - 255
+                $out .= chr($grayscale);
             }
-            push @bitmap, \@row;
         }
+        return $self->render(data => $out);
+    } else {
+        die "Unknown format requested: " . $format;
     }
-    # use DDP;
-    # p @bitmap;
-
-    my $lastrow = $firstrow + $maxnumrows - 1;
-
-    # output format:
-    #    "MM"
-    #    <sequence of 1-byte grayscale values>
-    my $out = 'MM';    # signature
-    foreach my $y ($firstrow .. $lastrow) {
-        foreach my $x (0 .. $w - 1) {
-            my $color = $bitmap[$y][$x];
-            my @rgb   = $color->rgba;
-
-            my $grayscale = $rgb[0];
-            $out .= chr($grayscale);
-        }
-    }
-    return $self->render(data => $out);
 };
 
 get '/' => sub {
