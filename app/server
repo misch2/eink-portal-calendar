@@ -130,7 +130,7 @@ get '/calendar/bitmap' => sub {
                 $byte = $byte | ($bit << $bitcnt);
                 $bitcnt++;
                 if ($bitcnt == 8) {
-                    $out .= chr($grayscale);
+                    $out .= chr($byte);
                     $byte   = 0;
                     $bitcnt = 0;
                 }
