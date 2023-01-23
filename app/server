@@ -40,26 +40,34 @@ get '/calendar/png' => sub {
     ) || $self->render(json => { status => "No calendar available" });
 };
 
-get '/calendar/bitmap/:firstrow/:lastrow' => sub {
+get '/calendar/bitmap/:firstrow/:maxnumrows' => sub {
     my $self = shift;
 
-    my $firstrow = $self->stash('firstrow');
-    my $lastrow  = $self->stash('lastrow');
+    my $firstrow   = $self->stash('firstrow');
+    my $maxnumrows = $self->stash('maxnumrows');
 
     my $img = Imager->new(file => "$Bin/generated_images/current_calendar.png") or die Imager->errstr;
 
-    my $out = '';
-    # foreach my $y (0 .. $img->getheight - 1) {
+
+    $firstrow = 0 if $firstrow < 0;
+    my $lastrow = $firstrow + $maxnumrows - 1;
+    $lastrow = $img->getheight - 1 if $lastrow > $img->getheight - 1;
+    warn "rows = <$firstrow; $lastrow>";
+
+    # output format:
+    #    "MM"
+    #    <sequence of 1-byte grayscale values>
+    my $out = 'MM';    # signature
     foreach my $y ($firstrow .. $lastrow) {
         foreach my $x (0 .. $img->getwidth - 1) {
             my $color = $img->getpixel(x => $x, y => $y);
             my @rgb   = $color->rgba;
-            #printf("%d\t%d\t%d\t%d\t%d\n", $x, $y, @rgb[ 0, 1, 2 ]);
-            my $grayscale2bit = $rgb[0] >> 6;
-            $out .= $grayscale2bit;
+
+            my $grayscale = $rgb[0];
+            $out .= chr($grayscale);
         }
     }
-    return $self->render(text => $out);
+    return $self->render(data => $out);
 };
 
 get '/' => sub {
