@@ -8,6 +8,10 @@ use lib "$Bin/../lib";
 use Mojolicious::Lite;
 use DDP;
 use DateTime;
+use DateTime::Format::Strptime;
+use File::Slurp;
+use Imager;
+use Imager::Transform;
 
 # Static files are automatically served from the /public subfolder.
 
@@ -19,20 +23,17 @@ get '/ping' => sub {
 
 get '/calendar/html' => sub {
     my $self = shift;
+    return html_calendar($self, DateTime->now());
+};
 
-    my $dt = DateTime->now();
-
-    #$dt = DateTime->new(year => '2023', month => 7, day => 31);  # mock
-
-    $dt->set_locale('en-US');
-    $self->stash(date => $dt);
-
-    return $self->render(template => 'calendar', format => 'html');
+get '/calendar/html/:date' => sub {
+    my $self = shift;
+    my $dt   = DateTime::Format::Strptime->new(pattern => '%Y-%m-%d')->parse_datetime($self->stash('date'));
+    return html_calendar($self, $dt);
 };
 
 get '/calendar/png' => sub {
     my $self = shift;
-
     return $self->render_file(
         'filepath'            => "$Bin/generated_images/current_calendar.png",
         'format'              => 'png',
@@ -40,14 +41,178 @@ get '/calendar/png' => sub {
     ) || $self->render(json => { status => "No calendar available" });
 };
 
-get '/' => sub {
+get '/calendar/bitmap/epapermono' => sub {
+    my $self = shift;
+    return generate_bitmap($self, 3, '', 160, 'raw1bpp');
+};
+
+get '/calendar/bitmap/epapergray' => sub {
+    my $self = shift;
+    return generate_bitmap($self, 3, '', undef, 'raw8bpp');
+};
+
+# /calendar/bitmap
+# /calendar/bitmap?rotate=1&format=png
+# /calendar/bitmap?rotate=2&flip=x
+# /calendar/bitmap?rotate=3&flip=xy&format=rawgrayscale8
+get '/calendar/bitmap' => sub {
     my $self = shift;
 
+    my $rotate    = $self->req->param('rotate')    // 0;
+    my $flip      = $self->req->param('flip')      // '';
+    my $threshold = $self->req->param('threshold') // undef;
+    my $format    = $self->req->param('format')    // 'png';
+
+    return generate_bitmap($self, $rotate, $flip, $threshold, $format);
+};
+
+get '/' => sub {
+    my $self = shift;
     return $self->render(template => 'test', format => 'html');
 };
 
 plugin 'TagHelpers';
 plugin 'RenderFile';
+plugin 'Config';
+
+my $cfg = app->plugin('Config');
+
+app->log->info("Test");
+app->log->path($cfg->{log_file}) if $cfg->{log_file};
+app->log->info("Log file: " . app->log->path);
+app->log->level($ENV{MOJO_LOG_LEVEL} || 'debug');
+app->log->info("Log level: " . app->log->level);
+
+# redirect warnings
+$SIG{__WARN__} = sub {
+    my $message = shift;
+    $message =~ s/\n$//;
+    @_ = (app->log, $message);
+    goto &Mojo::Log::warn;
+};
+
+# michals: logging to STDERR (for morbo command line usage):
+app->log->handle(\*STDERR);
 
 app->secrets([ $ENV{MOJO_SECRET_PASSPHRASE} ]);
 app->start;
+
+########################################################################
+
+sub html_calendar {
+    my $self = shift;
+    my $dt   = shift;
+
+    $dt->set_locale('en-US');
+    return $self->render(
+        template => 'calendar',
+        format   => 'html',
+
+        # other variables
+        date => $dt
+    );
+}
+
+sub generate_bitmap {
+    my $self      = shift;
+    my $rotate    = shift;
+    my $flip      = shift;
+    my $threshold = shift;
+    my $format    = shift;
+
+    my $img = Imager->new(file => "$Bin/generated_images/current_calendar.png") or die Imager->errstr;
+    my $tmp;
+
+    if ($rotate == 0) {
+        $tmp = $img->copy();
+    } elsif ($rotate == 1) {
+        $tmp = $img->rotate(right => 90);
+    } elsif ($rotate == 2) {
+        $tmp = $img->rotate(right => 180);
+    } elsif ($rotate == 3) {
+        $tmp = $img->rotate(right => 270);
+    } else {
+        die "unknown 'rotate' value: $rotate";
+    }
+    die $img->errstr unless $tmp;
+    $img = $tmp;
+
+    if ($flip eq '') {
+        $tmp = $img->copy();
+    } elsif ($flip eq 'x') {
+        $tmp = $img->flip(dir => 'h');
+    } elsif ($flip eq 'y') {
+        $tmp = $img->flip(dir => 'v');
+    } elsif ($flip eq 'xy') {
+        $tmp = $img->flip(dir => 'vh');
+    } else {
+        die "unknown 'flip' value: $flip";
+    }
+    die $img->errstr unless $tmp;
+    $img = $tmp;
+
+    if (defined $threshold) {
+        my @map = map { $_ >= $threshold ? 255 : 0 } 0 .. 255;
+        $img->map(all => \@map);    # inplace conversion
+    }
+
+    if ($format eq 'png') {
+        my $out;
+        $img->write(data => \$out, type => 'png') or die;
+        return $self->render(data => $out, format => 'png');
+
+    } elsif ($format eq 'rawgrayscale8' || $format eq 'raw8bpp') {
+
+        # output format:
+        #    "MM"
+        #    <sequence of 1-byte grayscale values>
+        my $out = 'MM';    # signature
+        foreach my $y (0 .. $img->getheight - 1) {
+            foreach my $x (0 .. $img->getwidth - 1) {
+                my $color     = $img->getpixel(x => $x, y => $y);
+                my @rgb       = $color->rgba;
+                my $grayscale = $rgb[0];                            # 0 - 255
+                $out .= chr($grayscale);
+            }
+        }
+        warn length($out);
+        return $self->render(data => $out);
+    } elsif ($format eq 'raw1bpp') {
+
+        # my $out;
+        # $img->write(data => \$out, type => 'bmp', bmp_compression => 0, bmp_bit_count => , bmp_important_colors => 2) or die;
+
+        # output format:
+        #    "MM"
+        #    <sequence of 1-byte grayscale values>
+        #$out = 'MM' . substr($out, 0x36);
+
+        # warn length($out);
+        # return $self->render(data => $out, format => 'bmp');
+
+        my $out = 'MM';
+        foreach my $y (0 .. $img->getheight - 1) {
+            my $byte   = 0;
+            my $bitcnt = 0;
+            foreach my $x (0 .. $img->getwidth - 1) {
+                my $color     = $img->getpixel(x => $x, y => $y);
+                my @rgb       = $color->rgba;
+                my $grayscale = $rgb[0];
+                my $bit       = ($grayscale > 0x80) ? 1 : 0;
+                $byte = $byte << 1 | $bit;
+
+                # $byte = $byte | ($bit << $bitcnt);
+                $bitcnt++;
+                if ($bitcnt == 8) {
+                    $out .= chr($byte);
+                    $byte   = 0;
+                    $bitcnt = 0;
+                }
+            }
+        }
+        warn length($out);
+        return $self->render(data => $out);
+    } else {
+        die "Unknown format requested: " . $format;
+    }
+}

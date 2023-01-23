@@ -122,6 +122,31 @@ DISTRIBUTIONS
       strict 0
       warnings 0
       warnings::register 0
+  DateTime-Format-Strptime-1.79
+    pathname: D/DR/DROLSKY/DateTime-Format-Strptime-1.79.tar.gz
+    provides:
+      DateTime::Format::Strptime 1.79
+      DateTime::Format::Strptime::Types 1.79
+    requirements:
+      Carp 0
+      DateTime 1.00
+      DateTime::Locale 1.30
+      DateTime::Locale::Base 0
+      DateTime::Locale::FromData 0
+      DateTime::TimeZone 2.09
+      Exporter 0
+      ExtUtils::MakeMaker 0
+      Params::ValidationCompiler 0
+      Specio 0.33
+      Specio::Declare 0
+      Specio::Exporter 0
+      Specio::Library::Builtins 0
+      Specio::Library::String 0
+      Try::Tiny 0
+      constant 0
+      parent 0
+      strict 0
+      warnings 0
   DateTime-Locale-1.37
     pathname: D/DR/DROLSKY/DateTime-Locale-1.37.tar.gz
     provides:
@@ -587,6 +612,69 @@ DISTRIBUTIONS
       perl 5.006
       strict 0
       warnings 0
+  File-Slurp-9999.32
+    pathname: C/CA/CAPOEIRAB/File-Slurp-9999.32.tar.gz
+    provides:
+      File::Slurp 9999.32
+    requirements:
+      B 0
+      Carp 0
+      Errno 0
+      Exporter 5.57
+      ExtUtils::MakeMaker 0
+      Fcntl 0
+      File::Basename 0
+      File::Spec 3.01
+      File::Temp 0
+      IO::Handle 0
+      POSIX 0
+      strict 0
+      warnings 0
+  Imager-1.019
+    pathname: T/TO/TONYC/Imager-1.019.tar.gz
+    provides:
+      Imager 1.019
+      Imager::Color 1.015
+      Imager::Color::Float 1.008
+      Imager::Color::Table 1.004
+      Imager::CountColor 0.03
+      Imager::Expr 1.008
+      Imager::Expr::Assem 1.004
+      Imager::Expr::Infix 1.008
+      Imager::Expr::Postfix 1.008
+      Imager::ExtUtils 1.003
+      Imager::FORMATS 1.019
+      Imager::File::CUR 1.000
+      Imager::File::ICO 0.08
+      Imager::File::SGI 0.05
+      Imager::Fill 1.013
+      Imager::Filter::DynTest 0.03
+      Imager::Filter::Flines 0.04
+      Imager::Filter::Mandelbrot 0.05
+      Imager::Font 1.039
+      Imager::Font::BBox 1.007
+      Imager::Font::FreeType2 1.021
+      Imager::Font::Image 1.000
+      Imager::Font::Test 1.002
+      Imager::Font::Truetype 1.013
+      Imager::Font::Type1 1.013
+      Imager::Font::Wrap 1.005
+      Imager::Fountain 1.009
+      Imager::IO 1.019
+      Imager::Matrix2d 1.013
+      Imager::Preprocess 1.003
+      Imager::Probe 1.008
+      Imager::Regops 1.000
+      Imager::Test 1.007
+      Imager::Test::OverUtf8 1.007
+      Imager::Transform 1.007
+      Imager::TrimColorList 1.000
+    requirements:
+      Exporter 5.57
+      ExtUtils::MakeMaker 0
+      Scalar::Util 1.00
+      Test::More 0.99
+      XSLoader 0
   MRO-Compat-0.15
     pathname: H/HA/HAARG/MRO-Compat-0.15.tar.gz
     provides:

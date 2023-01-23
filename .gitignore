@@ -1,8 +1,9 @@
 local/
-config/
 node_modules/
 vendor/cache/
 .env
+app/*.conf
+app/log/*.log
 app/hypnotoad.pid
 app/generated_images/*.png
 

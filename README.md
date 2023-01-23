@@ -23,7 +23,12 @@ I choose this approach because it's easier (and more fun) for me to implement th
 
 ## Prerequisities:
 
-Installation: `make install_modules`
+
+Installation: 
+```
+sudo apt install libimlib2-dev libimlib2
+make install_modules
+```
 
 The `custom-portal-sign-icons.png` and `custom-portal-sign-full.png` were downloaded from https://decalrobot.com/. The `D-DIN` font set was downloaded from https://www.fontsquirrel.com/fonts/d-din
 
