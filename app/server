@@ -126,7 +126,8 @@ get '/calendar/bitmap' => sub {
                 my @rgb       = $color->rgba;
                 my $grayscale = $rgb[0];
                 my $bit       = ($grayscale > 0x80) ? 1 : 0;
-                $byte = $byte << 1 | $bit;
+                # $byte = $byte << 1 | $bit;
+                $byte = $byte | ($bit << $bitcnt);
                 $bitcnt++;
                 if ($bitcnt == 8) {
                     $out .= chr($grayscale);
