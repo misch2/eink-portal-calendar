@@ -115,11 +115,32 @@ get '/' => sub {
 
 plugin 'TagHelpers';
 plugin 'RenderFile';
+plugin 'Config';
+
+my $cfg = app->plugin('Config');
+
+app->log->info("Test");
+app->log->path($cfg->{log_file}) if $cfg->{log_file};
+app->log->info("Log file: " . app->log->path);
+app->log->level($ENV{MOJO_LOG_LEVEL} || 'debug');
+app->log->info("Log level: " . app->log->level);
+
+# redirect warnings
+$SIG{__WARN__} = sub {
+    my $message = shift;
+    $message =~ s/\n$//;
+    @_ = (app->log, $message);
+    goto &Mojo::Log::warn;
+};
+
+# michals: logging to STDERR (for morbo command line usage):
+app->log->handle(\*STDERR);
 
 app->secrets([ $ENV{MOJO_SECRET_PASSPHRASE} ]);
 app->start;
 
 ########################################################################
+
 sub html_calendar {
     my $self = shift;
     my $dt   = shift;
