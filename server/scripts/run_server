@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # load ENV settings
-. ./.env
+dir=$(dirname $0)
+. $dir/../.env
 export MOJO_MODE MOJO_LOG_LEVEL MOJO_SECRET_PASSPHRASE
 
 # run the webserver

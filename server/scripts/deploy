@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # load ENV settings
-. ./.env
+dir=$(dirname $0)
+. $dir/../.env
 
 carton bundle
 rsync -az vendor/ ${DEPLOY_TARGET}/vendor/
