@@ -46,9 +46,10 @@ Sources for fonts are listed in the `server/public/fonts/README.txt`.
 Half-finished:
 ![image](https://user-images.githubusercontent.com/16558674/214158618-31573f8c-0cd9-4471-a230-aabc3bd393cd.png)
 
-How the grayscale rendered image (`/calendar/bitmap?rotate=0&flip=`) looks like:
-![image](https://user-images.githubusercontent.com/16558674/214158921-2f32e729-0c1f-4a88-ba1f-8cc30d49ce02.png)
+How the grayscale rendered image (`/calendar/bitmap?rotate=0&flip=`) looks like, here in Czech localization:
+![image](https://user-images.githubusercontent.com/16558674/214332528-8c96e01c-c7d5-4c95-8720-1074089cf5d4.png)
 
 And how the B&W bitmap looks like with custom threshold (`/calendar/bitmap?rotate=0&flip=&threshold=165`):
-![image](https://user-images.githubusercontent.com/16558674/214159074-c412f859-92c3-431f-9361-c70cbd15db3c.png)
+![image](https://user-images.githubusercontent.com/16558674/214332690-1f8cfc23-6e10-4f63-b5b9-e4cc32968010.png)
+
 
