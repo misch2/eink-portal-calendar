@@ -39,6 +39,23 @@ $ make modules
 $ make run
 ```
 
+Once the server is running you can test it by pointing your browser at it's address (http://...:<PORT>), it should produce HTML page with source calendar on the left side and (empty yet) image on the right side.
+
+Now you can test if the image rendering works:
+
+```
+$ server/scripts/generate_img_from_web
+```
+it should respond with:
+```
+✔ Generated 1 screenshot from 1 url and 1 size
+```
+Now there should be a file named `current_calendar.png` in the `server/generated_images/` folder. You don't have to do anything with it, it will get processed/converted by the server automatically on demand.
+
+If you refresh the page now, a grayscale PNG version of the calendar screen should be visible on the right side.
+
+Done ✅
+
 ## Disclaimer
 
 I don't expect anyone to use this project directly, mainly because it's written in Perl. But the HTML, CSS and ESP code might serve as an inspiration maybe.
