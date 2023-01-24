@@ -12,7 +12,7 @@
         <div class="top-month-header">
             <div class="month-name">
                 %# LLLL = standalone month name
-                <%= $decorator->($date->format_cldr('LLLL')) %>  
+                <%= $decorator->($date->format_cldr('LLLL')) %>
             </div>
         </div>
 
