@@ -121,11 +121,11 @@ div.dow-number-and-name {
 
 div.bunch-of-bars {
     display: flex;
-    gap: 3px;
+    gap: 5px;
 }
 
 div.bunch-of-bars div.bar {
-    width: 5px;
+    width: 7px;
     height: 30px;
     background-color: black;
 }
