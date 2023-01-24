@@ -1,12 +1,20 @@
 # "Portal" calendar for e-ink display
 
-Heavily inspired by https://github.com/wuspy/portal_calendar.
+Heavily inspired by https://github.com/wuspy/portal_calendar. Only the software part is different here.
 
 The main difference is that this calendar is split into two parts:
  1. Simple ESP32 or ESP8266 web client which handles the eInk display
  2. PC/Raspberry webserver which produces the images and (in the future) handles integration with web calendars etc.
  
 I choose this approach because it's easier (and more fun) for me to implement the server part in my favourite environments (Perl, NodeJS, HTML+CSS) than to try to do this directly on ESP32.
+
+## TODO
+1. ~~Support for Czech localization and characters~~
+1. Refresh the display only if image has changed (=check image checksum against the previous value). This should allow the portal calendar to ask server periodically more often but still sleep a lot and preserve energy.
+1. Fix the icons at the bottom, make available more of them, make them more random.
+1. Add support for a weather forecast.
+1. Add support for iCal.
+1. Indicate possible WiFi outage or server unavailability on the display.
 
 
 ## Principles
