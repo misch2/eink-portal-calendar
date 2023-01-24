@@ -10,5 +10,5 @@ echo "starting server in $MOJO_MODE mode"
 if [ $MOJO_MODE == "development" ]; then
     cd $dir/.. && morbo -v -l 'http://*:8081' -w templates app
 else
-    cd $dir/.. && carton exec app daemon -m $MOJO_MODE -l "http://[::]:${PORT}"
+    cd $dir/.. && carton exec ./app daemon -m $MOJO_MODE -l "http://[::]:${PORT}"
 fi
