@@ -1034,6 +1034,13 @@ DISTRIBUTIONS
       Try::Tiny 0.07
       strict 0
       warnings 0
+  Text-Unidecode-1.30
+    pathname: S/SB/SBURKE/Text-Unidecode-1.30.tar.gz
+    provides:
+      Text::Unidecode 1.30
+    requirements:
+      ExtUtils::MakeMaker 0
+      perl 5.008
   Try-Tiny-0.31
     pathname: E/ET/ETHER/Try-Tiny-0.31.tar.gz
     provides:

@@ -11,7 +11,7 @@ use DateTime;
 use DateTime::Format::Strptime;
 use File::Slurp;
 use Imager;
-use Imager::Transform;
+use Text::Unidecode;
 
 # Static files are automatically served from the /public subfolder.
 
@@ -96,7 +96,7 @@ sub html_calendar {
     my $self = shift;
     my $dt   = shift;
 
-    $dt->set_locale('en-US');
+    $dt->set_locale($ENV{DATETIME_LOCALE} || 'en-US');
     return $self->render(
         template => 'calendar',
         format   => 'html',
