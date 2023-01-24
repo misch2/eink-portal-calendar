@@ -17,7 +17,7 @@
         <div>
             Calendar page as IMG with fixed size:
             <br>
-            <img src="/calendar/png" style="border: 1px solid black">
+            <img src="/calendar/bitmap?format=png" style="border: 1px solid black">
         </div>
     </div>
 </body>
