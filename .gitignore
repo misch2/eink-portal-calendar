@@ -1,16 +1,17 @@
 local/
 node_modules/
-vendor/cache/
+vendor/
 .env
-app/*.conf
-app/log/*.log
-app/hypnotoad.pid
-app/generated_images/*.png
+
+server/hypnotoad.pid
+server/*.conf
+server/log/*.log
+server/generated_images/*.png
 
 # ESP8266 side:
-esp/Calendar/.pio
-esp/Calendar/.vscode/.browse.c_cpp.db*
-esp/Calendar/.vscode/c_cpp_properties.json
-esp/Calendar/.vscode/launch.json
-esp/Calendar/.vscode/ipch
-esp/Calendar/.vscode/extensions.json
+client/.pio
+client/.vscode/.browse.c_cpp.db*
+client/.vscode/c_cpp_properties.json
+client/.vscode/launch.json
+client/.vscode/ipch
+client/.vscode/extensions.json

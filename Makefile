@@ -8,7 +8,7 @@ modules:
 	npm ci
 
 run:
-	scripts/run_server
+	server/scripts/run_server
 
 deploy: modules
-	scripts/deploy
+	server/scripts/deploy
