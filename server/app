@@ -42,7 +42,7 @@ get '/calendar/html/:date' => sub {
 # shortcuts so that we can finetune the parameters here and not constantly reupload them into ESP
 get '/calendar/bitmap/epapermono' => sub {
     my $self = shift;
-    return generate_bitmap($self, 3, '', 160, 'raw1bpp');
+    return generate_bitmap($self, 3, '', 170, 'raw1bpp');
 };
 
 get '/calendar/bitmap/epapergray' => sub {
