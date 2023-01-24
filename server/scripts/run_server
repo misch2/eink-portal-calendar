@@ -8,7 +8,7 @@ export MOJO_MODE MOJO_LOG_LEVEL MOJO_SECRET_PASSPHRASE
 # run the webserver
 echo "starting server in $MOJO_MODE mode"
 if [ $MOJO_MODE == "development" ]; then
-    morbo -v -l 'http://*:8081' -w server/templates server/app
+    morbo -v -l 'http://*:8081' -w templates app
 else
-    carton exec server/app daemon -m $MOJO_MODE -l "http://[::]:${PORT}"
+    carton exec app daemon -m $MOJO_MODE -l "http://[::]:${PORT}"
 fi

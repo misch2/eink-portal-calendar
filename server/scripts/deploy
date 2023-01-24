@@ -4,7 +4,7 @@
 dir=$(dirname $0)
 . $dir/../.env
 
-carton bundle
-rsync -az vendor/ ${DEPLOY_TARGET}/vendor/
+cd $dir/.. && carton bundle
+rsync -az $dir/../vendor/ ${DEPLOY_TARGET}/server/vendor/
 git push
 git push production

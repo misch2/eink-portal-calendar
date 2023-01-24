@@ -2,13 +2,13 @@ all: modules run
 
 modules:
 	# Perl modules from cpanfile.snapshot
-	cpanm --installdeps .
-	carton install
+	cd server && cpanm --installdeps .
+	cd server && carton install
 	# NPM modules from the package-lock.json file
-	npm ci
+	cd server && npm ci
 
 run:
-	server/scripts/run_server
+	cd server && scripts/run_server
 
 deploy: modules
-	server/scripts/deploy
+	cd server && scripts/deploy

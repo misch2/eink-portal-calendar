@@ -1,8 +1,7 @@
-local/
-node_modules/
-vendor/
-.env
-
+server/local/
+server/node_modules/
+server/vendor/
+server/.env
 server/hypnotoad.pid
 server/*.conf
 server/log/*.log
