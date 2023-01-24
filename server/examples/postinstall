@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# To be run after the deploy
+
+cd server
+. ./.env
+
+carton install --deployment --cached
+npm ci
+sudo systemctl restart $SYSTEMD_UNIT_NAME

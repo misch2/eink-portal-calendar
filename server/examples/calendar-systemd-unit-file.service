@@ -1,0 +1,17 @@
+[Unit]
+Description=Portal calendar server
+After=network-online.target
+
+[Service]
+WorkingDirectory=/<PATH>/portal_calendar
+ExecStart=/<PATH>/portal_calendar/server/scripts/run_server
+Type=simple
+Restart=always
+TimeoutStartSec=infinity
+TimeoutStopSec=600
+
+User=<USERNAME>
+Group=<GROUPNAME>
+
+[Install]
+WantedBy=multi-user.target
