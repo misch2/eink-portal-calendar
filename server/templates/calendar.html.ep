@@ -1,10 +1,9 @@
 <html>
 %= stylesheet '/css/calendar.css'
-
-% my $decorator = sub { shift };    # returns input as-is
-% $decorator = sub { uc(shift) };   # UPPERCASE
-%# $decorator = sub { ucfirst(shift) };   # Uppercase
-%# $decorator = sub { Text::Unidecode::unidecode(uc(shift)) };   # UPPERCASE with accents removed
+% my $decorator = sub { shift };        # returns input as-is
+% $decorator = sub { uc(shift) };       # UPPERCASE
+%# $decorator = sub { ucfirst(shift) }; # Uppercase
+%# $decorator = sub { Text::Unidecode::unidecode(uc(shift)) }; # UPPERCASE with accents removed
 
 
 <body>
@@ -26,7 +25,7 @@
                     <%= $date->day .'/'. $date->month_length %>
                 </div>
                 <div>
-                    <%= $decorator->($date->day_name) %> 
+                    <%= $decorator->($date->day_name) %>
                 </div>
             </div>
             <div class="separator"></div>
@@ -39,12 +38,26 @@
 
         <div class="icons-container">
             <div class="icon icon-a1"></div>
+            <div class="icon icon-a3"></div>
+            <div class="icon icon-a5"></div>
+            <div class="icon icon-a6"></div>
+            <div class="icon icon-a10"></div>
+            <div class="icon icon-a11"></div>
+
+            <!-- available icons:
+            <div class="icon icon-a1"></div>
             <div class="icon icon-a2"></div>
             <div class="icon icon-a3"></div>
             <div class="icon icon-a4"></div>
-            <div class="icon icon-a3"></div>
-            <div class="icon icon-a2"></div>
-            <div class="icon icon-a1"></div>
+            <div class="icon icon-a5"></div>
+            <div class="icon icon-a6"></div>
+            <div class="icon icon-a7"></div>
+            <div class="icon icon-a8"></div>
+            <div class="icon icon-a9"></div>
+            <div class="icon icon-a10"></div>
+            <div class="icon icon-a11"></div>
+            <div class="icon icon-a12"></div>
+            -->
         </div>
 
         <img src="/images/Aperture_Laboratories_Logo.png" class="aperture-logo">

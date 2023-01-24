@@ -138,6 +138,7 @@ div.icons-container {
     height: 145px;
     display: flex;
     flex-flow: row wrap;
+    gap: 10px;
     /* background-color: brown; */
 }
 
@@ -147,11 +148,16 @@ div.icons-container {
     background-image: url("/images/custom-portal-sign-icons-cropped.png");
     background-size: 1150px;
     border: 1px solid black;
-    margin: 0 10px 10px 0;
+    margin: 0;
 }
 
+
+/*
+ x = 3 + n*72 (approximately)
+*/
+
 .icon-a1 {
-    background-position: -4px -4px;
+    background-position: -3px -4px;
 }
 
 .icon-a2 {
@@ -159,11 +165,43 @@ div.icons-container {
 }
 
 .icon-a3 {
-    background-position: -147px -4px;
+    background-position: -146px -4px;
 }
 
 .icon-a4 {
     background-position: -218px -4px;
+}
+
+.icon-a5 {
+    background-position: -290px -4px;
+}
+
+.icon-a6 {
+    background-position: -361px -4px;
+}
+
+.icon-a7 {
+    background-position: -433px -4px;
+}
+
+.icon-a8 {
+    background-position: -506px -4px;
+}
+
+.icon-a9 {
+    background-position: -578px -4px;
+}
+
+.icon-a10 {
+    background-position: -650px -4px;
+}
+
+.icon-a11 {
+    background-position: -722px -4px;
+}
+
+.icon-a12 {
+    background-position: -794px -4px;
 }
 
 img.aperture-logo {
