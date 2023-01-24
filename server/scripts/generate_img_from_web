@@ -4,4 +4,4 @@
 . ./.env
 
 # convert the page
-node_modules/.bin/pageres http://localhost:${PORT}/calendar/html 480x800 --filename='app/generated_images/current_calendar' --overwrite --format=png
+node_modules/.bin/pageres http://localhost:${PORT}/calendar/html 480x800 --filename='server/generated_images/current_calendar' --overwrite --format=png
