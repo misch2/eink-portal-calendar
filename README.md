@@ -24,10 +24,10 @@ I choose this approach because it's easier (and more fun) for me to implement th
 
 
 ## Installation 
-Edit the `.env` file and set `PORT` for HTTP server.
+Edit the `server/.env` file and set `PORT` for HTTP server and possibly the `DATETIME_LOCALE` for localization of month and day names.
 ```
 $ sudo apt install perl libimlib2-dev libimlib2
-$ make install_modules
+$ make modules
 $ make run
 ```
 
@@ -37,8 +37,7 @@ I don't expect anyone to use this project directly, mainly because it's written 
 
 The `custom-portal-sign-icons.png` and `custom-portal-sign-full.png` were downloaded from https://decalrobot.com/. 
 
-The `D-DIN` font set was downloaded from https://www.fontsquirrel.com/fonts/d-din.
-
+Sources for fonts are listed in the `server/public/fonts/README.txt`.
 
 ---
 
