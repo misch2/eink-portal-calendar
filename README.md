@@ -10,6 +10,7 @@ I choose this approach because it's easier (and more fun) for me to implement th
 
 ## TODO
 1. ~~Support for Czech localization and characters~~
+1. ~~Greyed out icons~~
 1. Refresh the display only if image has changed (=check image checksum against the previous value). This should allow the portal calendar to ask server periodically more often but still sleep a lot and preserve energy.
 1. Fix the icons at the bottom, make available more of them, make them more random.
 1. Add support for a weather forecast.

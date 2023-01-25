@@ -151,6 +151,11 @@ div.icons-container {
     margin: 0;
 }
 
+.greyed {
+    -webkit-mask-image: url("/images/checkered_mask_black.png");
+    mask-image: url("/images/checkered_mask_black.png");
+}
+
 
 /*
  x = 3 + n*72 (approximately)
