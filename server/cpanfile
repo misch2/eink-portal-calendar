@@ -9,5 +9,7 @@ requires 'DateTime::Format::Strptime';
 requires 'File::Slurp';
 requires 'Imager';
 requires 'Text::Unidecode';
+requires 'List::Util';
+requires 'Readonly';
 
 

@@ -9,12 +9,14 @@ use Mojolicious::Lite;
 use DDP;
 use DateTime;
 use DateTime::Format::Strptime;
-use File::Slurp;
 use Imager;
 use Text::Unidecode;
+use Readonly;
+use List::Util;
 
-use constant WIDTH  => 480;
-use constant HEIGHT => 800;
+Readonly my $WIDTH        => 480;
+Readonly my $HEIGHT       => 800;
+Readonly my @PORTAL_ICONS => qw(a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 b11 b14 c3 c7 d5 e4);
 
 # Static files are automatically served from the /public subfolder.
 
@@ -100,12 +102,26 @@ sub html_calendar {
     my $dt   = shift;
 
     $dt->set_locale($ENV{DATETIME_LOCALE} || 'en-US');
+
+    my $icons_count      = 1 + int(rand(8));    # 1 to 8 icons
+    my $gray_probability = 0.25;
+
+    my @icons;
+    foreach my $name (List::Util::sample $icons_count, @PORTAL_ICONS) {
+        push @icons,
+            {
+            name   => $name,
+            grayed => (rand() < $gray_probability ? 1 : 0)
+            };
+    }
+
     return $self->render(
         template => 'calendar',
         format   => 'html',
 
         # other variables
-        date => $dt
+        icons => \@icons,
+        date  => $dt,
     );
 }
 
@@ -121,7 +137,7 @@ sub generate_bitmap {
     my $tmp;
 
     # If the generated image is larger (probably due to invalid CSS), crop it so that it display at least something:
-    $tmp = $img->crop(left => 0, top => 0, width => WIDTH, height => HEIGHT);
+    $tmp = $img->crop(left => 0, top => 0, width => $WIDTH, height => $HEIGHT);
     die $img->errstr unless $tmp;
     $img = $tmp;
 

@@ -145,68 +145,14 @@ div.icons-container {
 .icon {
     height: 65px;
     width: 65px;
-    background-image: url("/images/custom-portal-sign-icons-cropped.png");
-    background-size: 1150px;
     border: 2px solid black;
+    padding: 2px;
     margin: 0;
 }
 
-.greyed {
+.grayed {
     -webkit-mask-image: url("/images/checkered_mask_black.png");
     mask-image: url("/images/checkered_mask_black.png");
-}
-
-
-/*
- x = 3 + n*72 (approximately)
-*/
-
-.icon-a1 {
-    background-position: -3px -4px;
-}
-
-.icon-a2 {
-    background-position: -75px -4px;
-}
-
-.icon-a3 {
-    background-position: -146px -4px;
-}
-
-.icon-a4 {
-    background-position: -218px -4px;
-}
-
-.icon-a5 {
-    background-position: -290px -4px;
-}
-
-.icon-a6 {
-    background-position: -361px -4px;
-}
-
-.icon-a7 {
-    background-position: -433px -4px;
-}
-
-.icon-a8 {
-    background-position: -506px -4px;
-}
-
-.icon-a9 {
-    background-position: -578px -4px;
-}
-
-.icon-a10 {
-    background-position: -650px -4px;
-}
-
-.icon-a11 {
-    background-position: -722px -4px;
-}
-
-.icon-a12 {
-    background-position: -794px -4px;
 }
 
 img.aperture-logo {
