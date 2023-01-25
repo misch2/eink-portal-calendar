@@ -76,6 +76,7 @@ How the grayscale rendered image (`/calendar/bitmap?rotate=0&flip=`) looks like,
 ![image](https://user-images.githubusercontent.com/16558674/214332528-8c96e01c-c7d5-4c95-8720-1074089cf5d4.png)
 
 And how the B&W bitmap looks like with custom threshold (`/calendar/bitmap?rotate=0&flip=&threshold=165`):
-![image](https://user-images.githubusercontent.com/16558674/214332690-1f8cfc23-6e10-4f63-b5b9-e4cc32968010.png)
+![image](https://user-images.githubusercontent.com/16558674/214617604-5f2b534c-2f68-4d9c-8866-10e8eeeff591.png)
+
 
 
