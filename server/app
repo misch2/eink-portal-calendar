@@ -3,7 +3,7 @@
 use strict;
 
 use FindBin qw($Bin);
-use lib "$Bin/../lib";
+use lib "$Bin/lib";
 
 use Mojolicious::Lite;
 use DDP;
@@ -13,6 +13,9 @@ use Imager;
 use Text::Unidecode;
 use Readonly;
 use List::Util;
+use Try::Tiny;
+
+use PortalCalendar::Integration::iCal;
 
 Readonly my $WIDTH        => 480;
 Readonly my $HEIGHT       => 800;
@@ -103,7 +106,24 @@ sub html_calendar {
 
     $dt->set_locale($ENV{DATETIME_LOCALE} || 'en-US');
 
-    my $icons_count      = 1 + int(rand(8));    # 1 to 8 icons
+    my $min_icons_count = 1;
+    my $max_icons_count = 8;
+
+    my @today_events;
+    if ($ENV{CALENDAR_ICS_URL}) {
+        my $calendar = PortalCalendar::Integration::iCal->new(ics_url => $ENV{CALENDAR_ICS_URL}, cache_dir => "$Bin/cache/lwp");
+        try {
+            @today_events = $calendar->get_today_events;
+            if (scalar @today_events) {
+                $min_icons_count = 2;
+                $max_icons_count = 4;
+            }
+        } catch {
+            warn "Error: $_";
+        };
+    }
+
+    my $icons_count      = $min_icons_count + int(rand($max_icons_count - $min_icons_count + 1));
     my $gray_probability = 0.25;
 
     my @icons;
@@ -120,8 +140,10 @@ sub html_calendar {
         format   => 'html',
 
         # other variables
-        icons => \@icons,
-        date  => $dt,
+        date                 => $dt,
+        icons                => \@icons,
+        calendar_events      => \@today_events,
+        has_calendar_entries => (scalar @today_events ? 1 : 0),
     );
 }
 

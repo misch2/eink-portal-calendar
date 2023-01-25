@@ -31,13 +31,25 @@
             <div class="separator"></div>
             <div class="bunch-of-bars">
                 % for (1 .. $date->day) {
-                <div class="bar"></div>
+                    <div class="bar"></div>
                 % }
             </div>
+
+            % if ($has_calendar_entries) {
+                <div class="calendar-events">
+                    % foreach my $event (@{ $calendar_events }) {
+                        <div>
+                            <%= $event->{DTSTART}->format_cldr('k:mm') %>
+                            %# - <%= $event->{DTEND}->format_cldr('k:mm') %>
+                            <%= $event->{SUMMARY} %>
+                            (~<%= int($event->{hours} + 0.5) %> hod.)
+                        </div>
+                    % }
+                </div>
+            % }
         </div>
 
-
-        <div class="icons-container">
+        <div class="icons-container<%= $has_calendar_entries ? ' with-calendar-entries' : '' %>">
             % for my $icon (@{ $icons }) {
                 <img src="/images/portal_icons/<%= $icon->{name} %>.png" class="icon<%= $icon->{grayed} ? ' grayed' : '' %>">
             % }

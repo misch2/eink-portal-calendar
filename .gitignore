@@ -1,6 +1,7 @@
 server/local/
 server/node_modules/
 server/vendor/
+server/cache/lwp/
 server/.env
 server/hypnotoad.pid
 server/*.conf
