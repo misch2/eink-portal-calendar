@@ -3,7 +3,9 @@
 # To be run after the deploy
 
 cd server
+set -a
 . ./.env
+set +a
 
 carton install --deployment --cached
 npm ci

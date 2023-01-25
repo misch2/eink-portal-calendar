@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# load ENV settings
+dir=$(dirname $0)
+set -a
+. $dir/../.env
+set +a
+
+echo "Generating image locally from http://localhost:${PORT}"
+cd $dir/.. && scripts/generate_img_from_web
+file $dir/../generated_images/current_calendar.png
+
+echo "Uploading image to production"
+rsync -avz $dir/../generated_images/current_calendar.png ${DEPLOY_TARGET}/server/generated_images/
+
+echo "Done"

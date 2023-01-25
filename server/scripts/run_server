@@ -2,7 +2,9 @@
 
 # load ENV settings
 dir=$(dirname $0)
+set -a
 . $dir/../.env
+set +a
 
 # run the webserver
 echo "starting server in $MOJO_MODE mode"

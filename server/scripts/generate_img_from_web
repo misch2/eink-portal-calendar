@@ -2,7 +2,9 @@
 
 # load ENV settings
 dir=$(dirname $0)
+set -a
 . $dir/../.env
+set +a
 
 # convert the page
 cd $dir/.. && node_modules/.bin/pageres http://localhost:${PORT}/calendar/html 480x800 --filename='generated_images/current_calendar' --overwrite --format=png
