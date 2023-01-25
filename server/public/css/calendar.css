@@ -71,7 +71,7 @@ div#spacer {
     top: 50px;
     left: 70px;
     height: 700px;
-    width: 370px;
+    width: 380px;
     /* background-color: gainsboro; */
 }
 
@@ -147,7 +147,7 @@ div.icons-container {
     width: 65px;
     background-image: url("/images/custom-portal-sign-icons-cropped.png");
     background-size: 1150px;
-    border: 1px solid black;
+    border: 2px solid black;
     margin: 0;
 }
 
@@ -206,7 +206,7 @@ div.icons-container {
 
 img.aperture-logo {
     position: absolute;
-    top: 700px;
+    top: 710px;
     left: 0px;
     height: 30px;
 }

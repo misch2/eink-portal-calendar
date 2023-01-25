@@ -6,5 +6,5 @@ dir=$(dirname $0)
 
 cd $dir/.. && carton bundle
 rsync -az $dir/../vendor/ ${DEPLOY_TARGET}/server/vendor/
-git push
+#git push
 git push production
