@@ -16,6 +16,9 @@ I choose this approach because it's easier (and more fun) for me to implement th
 1. Add support for a weather forecast.
 1. Add support for iCal.
 1. Indicate possible WiFi outage or server unavailability on the display.
+1. Replace the ESP8266 ePaper module with what [original project](https://github.com/wuspy/portal_calendar) uses, i.e. specific low power ESP32 board + separate e-Paper hat [^1].
+
+[^1]: I didn't consider the need for very low power consumption of ESP board itself. And while the one I bought -- with ESP8266 and integrated e-Paper driver -- was available immediately, it's usable for USB but not for batteries.
 
 
 ## Principles
@@ -27,7 +30,7 @@ I choose this approach because it's easier (and more fun) for me to implement th
 
 ## Bill of materials
 - [Waveshare 7.5" 800x480 ePaper B/W display](https://www.laskakit.cz/waveshare-7-5--640x384-epaper-raw-displej-bw/)
-- [ESP8266 ePaper driver board](https://www.laskakit.cz/waveshare-esp8266-e-paper-raw-panel-driver-board/)
+- ~~[ESP8266 ePaper driver board](https://www.laskakit.cz/waveshare-esp8266-e-paper-raw-panel-driver-board/)~~ better use the ESP32 board + extra hat as in the original project.
 - [FFC FPC cable](https://www.laskakit.cz/ffc-fpc-nestineny-flexibilni-kabel-awm-20624-80c-60v-0-5mm-24pin--20cm/)
 - [FFC FPC connector](https://www.laskakit.cz/laskakit-e-paper-ffc-fpc-24pin-atapter/)
 
@@ -77,6 +80,3 @@ How the grayscale rendered image (`/calendar/bitmap?rotate=0&flip=`) looks like,
 
 And how the B&W bitmap looks like with custom threshold (`/calendar/bitmap?rotate=0&flip=&threshold=165`):
 ![image](https://user-images.githubusercontent.com/16558674/214617604-5f2b534c-2f68-4d9c-8866-10e8eeeff591.png)
-
-
-
