@@ -18,6 +18,23 @@ DISTRIBUTIONS
       perl 5.006001
       strict 0
       warnings 0
+  Class-Accessor-0.51
+    pathname: K/KA/KASEI/Class-Accessor-0.51.tar.gz
+    provides:
+      Class::Accessor 0.51
+      Class::Accessor::Fast 0.51
+      Class::Accessor::Faster 0.51
+    requirements:
+      ExtUtils::MakeMaker 0
+      base 1.01
+  Class-Accessor-Chained-0.01
+    pathname: R/RC/RCLAMP/Class-Accessor-Chained-0.01.tar.gz
+    provides:
+      Class::Accessor::Chained 0.01
+      Class::Accessor::Chained::Fast undef
+    requirements:
+      Class::Accessor 0
+      Test::More 0
   Class-Data-Inheritable-0.09
     pathname: R/RS/RSHERER/Class-Data-Inheritable-0.09.tar.gz
     provides:
@@ -141,6 +158,34 @@ DISTRIBUTIONS
       strict 0
       warnings 0
       warnings::register 0
+  DateTime-Event-ICal-0.13
+    pathname: F/FG/FGLOCK/DateTime-Event-ICal-0.13.tar.gz
+    provides:
+      DateTime::Event::ICal 0.13
+    requirements:
+      DateTime 0
+      DateTime::Event::Recurrence 0.11
+      ExtUtils::MakeMaker 0
+  DateTime-Event-Recurrence-0.19
+    pathname: F/FG/FGLOCK/DateTime-Event-Recurrence-0.19.tar.gz
+    provides:
+      DateTime::Event::Recurrence 0.19
+      DateTime::Set::ICal 0.19
+    requirements:
+      DateTime 0.27
+      DateTime::Set 0.3600
+      ExtUtils::MakeMaker 0
+  DateTime-Format-ICal-0.09
+    pathname: D/DR/DROLSKY/DateTime-Format-ICal-0.09.tar.gz
+    provides:
+      DateTime::Format::ICal 0.09
+    requirements:
+      DateTime 0.17
+      DateTime::Event::ICal 0.03
+      DateTime::Set 0.1
+      DateTime::TimeZone 0.22
+      Module::Build 0
+      Params::Validate 0.59
   DateTime-Format-Strptime-1.79
     pathname: D/DR/DROLSKY/DateTime-Format-Strptime-1.79.tar.gz
     provides:
@@ -192,6 +237,18 @@ DISTRIBUTIONS
       perl 5.008004
       strict 0
       warnings 0
+  DateTime-Set-0.3900
+    pathname: F/FG/FGLOCK/DateTime-Set-0.3900.tar.gz
+    provides:
+      DateTime::Set 0.3900
+      DateTime::Span undef
+      DateTime::SpanSet undef
+      Set::Infinite::_recurrence undef
+    requirements:
+      DateTime 0.12
+      Params::Validate 0
+      Set::Infinite 0.59
+      Test::More 0
   DateTime-TimeZone-2.57
     pathname: D/DR/DROLSKY/DateTime-TimeZone-2.57.tar.gz
     provides:
@@ -711,6 +768,12 @@ DISTRIBUTIONS
       POSIX 0
       strict 0
       warnings 0
+  FreezeThaw-0.5001
+    pathname: I/IL/ILYAZ/modules/FreezeThaw-0.5001.tar.gz
+    provides:
+      FreezeThaw 0.5001
+    requirements:
+      ExtUtils::MakeMaker 0
   HTML-Tagset-3.20
     pathname: P/PE/PETDANCE/HTML-Tagset-3.20.tar.gz
     provides:
@@ -799,6 +862,12 @@ DISTRIBUTIONS
       Exporter 5.57
       ExtUtils::MakeMaker 0
       perl 5.008
+  IO-String-1.08
+    pathname: G/GA/GAAS/IO-String-1.08.tar.gz
+    provides:
+      IO::String 1.08
+    requirements:
+      ExtUtils::MakeMaker 0
   Imager-1.019
     pathname: T/TO/TONYC/Imager-1.019.tar.gz
     provides:
@@ -1164,6 +1233,25 @@ DISTRIBUTIONS
       perl 5.008001
       strict 0
       warnings 0
+  Params-Validate-1.31
+    pathname: D/DR/DROLSKY/Params-Validate-1.31.tar.gz
+    provides:
+      Params::Validate 1.31
+      Params::Validate::Constants 1.31
+      Params::Validate::PP 1.31
+      Params::Validate::XS 1.31
+    requirements:
+      Carp 0
+      Exporter 0
+      ExtUtils::CBuilder 0
+      Module::Build 0.4227
+      Module::Implementation 0
+      Scalar::Util 1.10
+      XSLoader 0
+      perl 5.008001
+      strict 0
+      vars 0
+      warnings 0
   Params-ValidationCompiler-0.31
     pathname: D/DR/DROLSKY/Params-ValidationCompiler-0.31.tar.gz
     provides:
@@ -1200,6 +1288,16 @@ DISTRIBUTIONS
     requirements:
       Exporter 5.57
       perl 5.006
+  Set-Infinite-0.65
+    pathname: F/FG/FGLOCK/Set-Infinite-0.65.tar.gz
+    provides:
+      Set::Infinite 0.65
+      Set::Infinite::Arithmetic undef
+      Set::Infinite::Basic undef
+    requirements:
+      ExtUtils::MakeMaker 0
+      Test::More 0
+      Time::Local 0
   Specio-0.48
     pathname: D/DR/DROLSKY/Specio-0.48.tar.gz
     provides:
@@ -1311,6 +1409,14 @@ DISTRIBUTIONS
     requirements:
       ExtUtils::MakeMaker 0
       perl 5.008
+  Text-vFile-asData-0.08
+    pathname: R/RC/RCLAMP/Text-vFile-asData-0.08.tar.gz
+    provides:
+      Text::vFile::asData 0.08
+    requirements:
+      Class::Accessor::Chained 0
+      ExtUtils::MakeMaker 0
+      Test::More 0.88
   TimeDate-2.33
     pathname: A/AT/ATOOMIC/TimeDate-2.33.tar.gz
     provides:
@@ -1471,6 +1577,19 @@ DISTRIBUTIONS
     requirements:
       ExtUtils::MakeMaker 0
       perl 5.008
+  iCal-Parser-1.21
+    pathname: R/RI/RIXED/iCal-Parser-1.21.tar.gz
+    provides:
+      iCal::Parser 1.21
+    requirements:
+      DateTime::Format::ICal 0.08
+      ExtUtils::MakeMaker 0
+      File::Basename 0
+      FreezeThaw 0.43
+      IO::File 1.1
+      IO::String 0
+      Test::More 0.54
+      Text::vFile::asData 0.02
   libwww-perl-6.67
     pathname: O/OA/OALDERS/libwww-perl-6.67.tar.gz
     provides:
