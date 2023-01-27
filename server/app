@@ -14,6 +14,7 @@ use Text::Unidecode;
 use Readonly;
 use List::Util;
 use Try::Tiny;
+use Digest::SHA1 qw(sha1_hex);
 
 use PortalCalendar::Integration::iCal;
 
@@ -203,17 +204,14 @@ sub generate_bitmap {
         return $self->render(data => $out, format => 'png');
     } elsif ($format =~ /^raw/) {
 
-        # output format:
-        #    "MM"
-        #    <sequence of raw values directly usable for uploading into eink display>
-        my $out = 'MM';
+        my $bitmap = '';
         if ($format eq 'raw8bpp') {
             foreach my $y (0 .. $img->getheight - 1) {
                 foreach my $x (0 .. $img->getwidth - 1) {
                     my $color     = $img->getpixel(x => $x, y => $y);
                     my @rgb       = $color->rgba;
                     my $grayscale = $rgb[0];                            # 0 - 255
-                    $out .= chr($grayscale);
+                    $bitmap .= chr($grayscale);
                 }
             }
         } elsif ($format eq 'raw1bpp') {
@@ -229,7 +227,7 @@ sub generate_bitmap {
                     $byte = $byte << 1 | $bit;
                     $bitcnt++;
                     if ($bitcnt == 8) {
-                        $out .= chr($byte);
+                        $bitmap .= chr($byte);
                         $byte   = 0;
                         $bitcnt = 0;
                     }
@@ -238,6 +236,16 @@ sub generate_bitmap {
         } else {
             die "Unknown format requested: " . $format;
         }
+
+        # output format:
+        #    "MM"
+        #   checksum
+        #    <sequence of raw values directly usable for uploading into eink display>
+
+        my $out = "MM\n";
+        $out .= sha1_hex($bitmap) . "\n";
+        $out .= $bitmap;
+
         return $self->render(data => $out);
     } else {
         die "Unknown format requested: " . $format;
