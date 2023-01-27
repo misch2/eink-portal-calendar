@@ -107,7 +107,7 @@ sub html_calendar {
 
     $dt->set_locale($ENV{DATETIME_LOCALE} || 'en-US');
 
-    my $min_icons_count = 1;
+    my $min_icons_count = 3;
     my $max_icons_count = 8;
 
     my @today_events;
