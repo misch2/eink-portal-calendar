@@ -9,34 +9,35 @@ The main difference is that this calendar is split into two parts:
 I choose this approach because it's easier (and more fun) for me to implement the server part in my favourite environments (Perl, NodeJS, HTML+CSS) than to try to do this directly on ESP32.
 
 ## TODO
+
 1. ~~Support for Czech localization and characters~~
 1. ~~Greyed out icons~~
 1. ~~Add support for iCal.~~
+1. ~~Fix the icons at the bottom, make more of them available, make them more random.~~
+1. ~~Indicate possible WiFi outage or server unavailability on the display.~~
 1. Refresh the display only if image has changed (=check image checksum against the previous value). This should allow the portal calendar to ask server periodically more often but still sleep a lot and preserve energy.
-1. Fix the icons at the bottom, make available more of them, make them more random.
-1. Add support for a weather forecast.
-1. Indicate possible WiFi outage or server unavailability on the display.
+1. Maybe add support for a weather forecast (but I'll probably create a different project just for this purpose).
 1. Replace the ESP8266 ePaper module with what [original project](https://github.com/wuspy/portal_calendar) uses, i.e. specific low power ESP32 board + separate e-Paper hat [^1].
 
-[^1]: I didn't consider the need for very low power consumption of ESP board itself. And while the one I bought -- with ESP8266 and integrated e-Paper driver -- was available immediately, it's usable for USB but not for batteries.
-
+[^1]: I didn't consider the need for ESP board with very low power consumption. I therefore bought one that was available immediately (ESP8266 with integrated e-Paper driver), but while it's perfectly usable when powered through USB, is wouldn't go well with AA batteries.
 
 ## Principles
 
-- Everything is designed for a specific e-Paper size of 480x800 pixels. 
-- The display content is served as raw bitmap. ESP is expected to just fetch this image from a specific location and display it.
-- ESP8266 (which my driver board uses) has very limited amount of RAM. It definitely can't read PNG into memory and then transform it and sent to display. The application therefore reads uncompressed bitmap from server and sends each line to the display as it reads the data stream from http. This means that only a small buffer for 1 image line is needed in RAM.
-
+* Everything is designed for a specific e-Paper size of 480x800 pixels. 
+* The display content is served as raw bitmap. The only task for ESP is to fetch this image from a specific location and display it.
+* ESP8266 (which my driver board uses) has very limited amount of RAM. It definitely can't read PNG into memory, then decode it and sent it to display. This is why the application reads uncompressed bitmap from server and sends each line to the display immediately as it reads the stream from http. This means that only a small buffer for 1 image line is needed in RAM.
 
 ## Bill of materials
-- [Waveshare 7.5" 800x480 ePaper B/W display](https://www.laskakit.cz/waveshare-7-5--640x384-epaper-raw-displej-bw/)
-- ~~[ESP8266 ePaper driver board](https://www.laskakit.cz/waveshare-esp8266-e-paper-raw-panel-driver-board/)~~ better use the ESP32 board + extra hat as in the original project.
-- [FFC FPC cable](https://www.laskakit.cz/ffc-fpc-nestineny-flexibilni-kabel-awm-20624-80c-60v-0-5mm-24pin--20cm/)
-- [FFC FPC connector](https://www.laskakit.cz/laskakit-e-paper-ffc-fpc-24pin-atapter/)
 
+* [Waveshare 7.5" 800x480 ePaper B/W display](https://www.laskakit.cz/waveshare-7-5--640x384-epaper-raw-displej-bw/)
+* ~~[ESP8266 ePaper driver board](https://www.laskakit.cz/waveshare-esp8266-e-paper-raw-panel-driver-board/)~~ better use the ESP32 board + extra hat as in the original project.
+* [FFC FPC cable](https://www.laskakit.cz/ffc-fpc-nestineny-flexibilni-kabel-awm-20624-80c-60v-0-5mm-24pin--20cm/)
+* [FFC FPC connector](https://www.laskakit.cz/laskakit-e-paper-ffc-fpc-24pin-atapter/)
 
 ## Installation 
+
 Edit the `server/.env` file and set `PORT` for HTTP server and possibly the `DATETIME_LOCALE` for localization of month and day names.
+
 ```
 $ sudo apt install perl libimlib2-dev libimlib2
 $ make modules
@@ -50,10 +51,13 @@ Now you can test if the image rendering works:
 ```
 $ server/scripts/generate_img_from_web
 ```
+
 it should respond with:
+
 ```
 ✔ Generated 1 screenshot from 1 url and 1 size
 ```
+
 Now there should be a file named `current_calendar.png` in the `server/generated_images/` folder. You don't have to do anything with it, it will get processed/converted by the server automatically on demand.
 
 If you refresh the page now, a grayscale PNG version of the calendar screen should be visible on the right side.
@@ -66,17 +70,20 @@ I don't expect anyone to use this project directly, mainly because it's written 
 
 The `custom-portal-sign-icons.png` and `custom-portal-sign-full.png` were downloaded from https://decalrobot.com/. 
 
-Sources for fonts are listed in the `server/public/fonts/README.txt`.
+Sources for fonts are listed in the `server/public/fonts/README.txt` .
 
 ---
 
 ## Examples:
 
 Half-finished:
+
 ![image](https://user-images.githubusercontent.com/16558674/214158618-31573f8c-0cd9-4471-a230-aabc3bd393cd.png)
 
-How the grayscale rendered image (`/calendar/bitmap?rotate=0&flip=`) looks like, here in Czech localization:
+How the grayscale rendered image ( `/calendar/bitmap?rotate=0&flip=` ) looks like, here in Czech localization:
+
 ![image](https://user-images.githubusercontent.com/16558674/214332528-8c96e01c-c7d5-4c95-8720-1074089cf5d4.png)
 
-And how the B&W bitmap looks like with custom threshold (`/calendar/bitmap?rotate=0&flip=&threshold=165`):
+And how the B&W bitmap looks like with custom threshold ( `/calendar/bitmap?rotate=0&flip=&threshold=165` ):
+
 ![image](https://user-images.githubusercontent.com/16558674/214617604-5f2b534c-2f68-4d9c-8866-10e8eeeff591.png)
