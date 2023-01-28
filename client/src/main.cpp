@@ -59,6 +59,7 @@ GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(
 
 WiFiManager wifiManager;
 WiFiClient wifiClient;  // for HTTP requests
+String lastChecksum = "";
 
 void setup() {
   Serial.begin(115200);
@@ -116,7 +117,6 @@ void showRawBitmapFrom_HTTP(const char* host,
                             int16_t bytes_per_row,
                             int16_t rows_at_once) {
   bool connection_ok = false;
-  bool valid = false;  // valid format to be handled
   uint32_t startTime = millis();
   if ((x >= display.epd2.WIDTH) || (y >= display.epd2.HEIGHT))
     return;
@@ -158,54 +158,61 @@ void showRawBitmapFrom_HTTP(const char* host,
   }
 
   DEBUG_PRINT("Parsing bitmap header");
-  if (read16(wifiClient) == 0x4D4D)  // "MM" signature
+  String line = wifiClient.readStringUntil('\n');
+  if (line != "MM")  // signature
   {
-    uint32_t bytes_read = 2;  // read so far
-    DEBUG_PRINT("w=%d, h=%d", w, h);
-
-    valid = true;
-    // display.clearScreen();
-
-    for (uint16_t row = 0; row < h; row += rows_at_once)  // for each line
-    {
-      if (!connection_ok || !(wifiClient.connected() || wifiClient.available()))
-        break;
-      delay(1);  // yield() to avoid WDT
-      yield();
-
-      uint32_t got = read8n(wifiClient, input_row_mono_buffer,
-                            bytes_per_row * rows_at_once);
-      bytes_read += got;
-
-      if (!connection_ok) {
-        Serial.print("Error: got no more after ");
-        Serial.print(bytes_read);
-        Serial.println(" bytes read!");
-        error("Read from HTTP server failed.");
-        break;
-      }
-
-#ifdef USE_GRAYSCALE_DISPLAY
-      // https://github.com/ZinggJM/GxEPD2_4G/blob/master/src/epd/GxEPD2_750_T7.cpp
-      display.writeImage_4G(input_row_mono_buffer, 8, x, y + row, w, 1, false,
-                            false, false);
-#else
-      display.writeImage(input_row_mono_buffer, x, y + row, w, rows_at_once);
-#endif
-    }  // end line
-    Serial.print("downloaded and displayed in ");
-    Serial.print(millis() - startTime);
-    Serial.println(" ms");
-    display.refresh();
-
-    Serial.print("bytes read ");
-    Serial.println(bytes_read);
-  }
-  wifiClient.stop();
-  if (!valid) {
     Serial.println("bitmap format not handled.");
     error("Invalid bitmap received.");
   }
+
+  line = wifiClient.readStringUntil('\n');  // checksum
+  DEBUG_PRINT("Last checksum was: %s", lastChecksum.c_str());
+  DEBUG_PRINT("New checksum is: %s", line.c_str());
+  if (line == lastChecksum) {
+    DEBUG_PRINT("Not refreshing, image is unchanged");
+    return;
+  };
+  lastChecksum = line;
+
+  // display.clearScreen();
+
+  uint32_t bytes_read = 0;                              // read so far
+  for (uint16_t row = 0; row < h; row += rows_at_once)  // for each line
+  {
+    if (!connection_ok || !(wifiClient.connected() || wifiClient.available()))
+      break;
+    delay(1);  // yield() to avoid WDT
+    yield();
+
+    uint32_t got =
+        read8n(wifiClient, input_row_mono_buffer, bytes_per_row * rows_at_once);
+    bytes_read += got;
+
+    if (!connection_ok) {
+      Serial.print("Error: got no more after ");
+      Serial.print(bytes_read);
+      Serial.println(" bytes read!");
+      error("Read from HTTP server failed.");
+      break;
+    }
+
+#ifdef USE_GRAYSCALE_DISPLAY
+    // https://github.com/ZinggJM/GxEPD2_4G/blob/master/src/epd/GxEPD2_750_T7.cpp
+    display.writeImage_4G(input_row_mono_buffer, 8, x, y + row, w, 1, false,
+                          false, false);
+#else
+    display.writeImage(input_row_mono_buffer, x, y + row, w, rows_at_once);
+#endif
+  }  // end line
+  Serial.print("downloaded and displayed in ");
+  Serial.print(millis() - startTime);
+  Serial.println(" ms");
+  display.refresh();
+
+  Serial.print("bytes read ");
+  Serial.println(bytes_read);
+
+  wifiClient.stop();
 }
 
 void stopWiFi() {
