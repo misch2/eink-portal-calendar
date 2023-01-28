@@ -39,10 +39,14 @@
                 <div class="calendar-events">
                     % foreach my $event (@{ $calendar_events }) {
                         <div>
-                            <%= $event->{DTSTART}->format_cldr('H:mm') %>
-                            %# - <%= $event->{DTEND}->format_cldr('k:mm') %>
-                            <%= $event->{SUMMARY} %>
-                            (~<%= int($event->{hours} + 0.5) %> hod.)
+                            % if ($event->{allday}) {
+                                <%= $event->{SUMMARY} %>
+                                <!-- (celý den) -->
+                            % } else {
+                                <%= $event->{DTSTART}->format_cldr('H:mm') %>
+                                <%= $event->{SUMMARY} %>
+                                (~<%= int($event->{hours} + 0.5) %> hod.)
+                            % }
                         </div>
                     % }
                 </div>
