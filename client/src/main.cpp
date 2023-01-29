@@ -1,21 +1,12 @@
 #include <Arduino.h>
 
-// #define DEBUG
+#define DEBUG
 
 // #define USE_GxEPD2_4G
 // #define USE_GRAYSCALE_DISPLAY
 
-// core libraries from ESP8266 Arduino
 #include <ESP8266WiFi.h>
-// #include <ESP8266HTTPClient.h>
-// #include <DNSServer.h>
-// #include <ESP8266mDNS.h>
-// #include <ESP8266WebServer.h>
-
-// other libraries
-#include <GFX.h>
 #include <WiFiManager.h>
-#include <time.h>
 
 #ifdef USE_GxEPD2_4G
 #ifdef USE_GRAYSCALE_DISPLAY
@@ -27,9 +18,14 @@
 #include <GxEPD2_BW.h>
 #endif
 
+// local settings
 #include "display_settings.h"
 #include "main.h"
 #include "secrets_config.h"
+
+// fonts
+#include "Open_Sans_Regular_16.h"
+#include "Open_Sans_Regular_24.h"
 
 #ifdef DEBUG
 #define DEBUG_PRINT(...)      \
@@ -54,9 +50,6 @@ GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(
     GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN));
 #endif
 
-#include "Open_Sans_Regular_16.h"
-#include "Open_Sans_Regular_24.h"
-
 WiFiManager wifiManager;
 WiFiClient wifiClient;  // for HTTP requests
 String lastChecksum = "";
@@ -68,11 +61,8 @@ void setup() {
   DEBUG_PRINT("setup display");
   delay(100);
   display.init(115200);
-  // display.clearScreen();
-  display_text_fast("Starting...");
 
-  DEBUG_PRINT("hasFastPartialUpdate=%d", display.epd2.hasFastPartialUpdate);
-  DEBUG_PRINT("hasPartialUpdate=%d", display.epd2.hasPartialUpdate);
+  display_text_fast("Starting...");
   DEBUG_PRINT("setup done");
 }
 
@@ -80,15 +70,14 @@ void loop() {
   DEBUG_PRINT("----------------------------------------");
   DEBUG_PRINT("loop start");
 
+#ifdef DEBUG
+  display_text_fast("Starting WiFi...");
+#endif
   if (!startWiFi()) {
     errorNoWifi();
   }
   drawImageFromServer();
-  display.powerOff();
-  stopWiFi();
-
-  DEBUG_PRINT("sleeping for 1 hour");
-  deepSleep(SECONDS_PER_HOUR);
+  hibernateAll(SECONDS_PER_HOUR);
 }
 
 void drawImageFromServer() {
@@ -121,19 +110,28 @@ void showRawBitmapFrom_HTTP(const char* host,
   if ((x >= display.epd2.WIDTH) || (y >= display.epd2.HEIGHT))
     return;
   DEBUG_PRINT("-");
+
   DEBUG_PRINT("connecting to %s", host);
+#ifdef DEBUG
+  display_text_fast("Connecting...");
+#endif
   if (!wifiClient.connect(host, port)) {
     DEBUG_PRINT("HTTP connection failed");
     error("Connection to HTTP server failed.");
     return;
   }
+
+#ifdef DEBUG
+  display_text_fast("Downloading...");
+#endif
   DEBUG_PRINT("Downloading http://%s:%d%s", host, port, path);
   wifiClient.print(String("GET ") + path + " HTTP/1.1\r\n" + "Host: " + host +
                    "\r\n" + "User-Agent: Portal_Calendar_on_ESP\r\n" +
                    "Connection: close\r\n\r\n");
   DEBUG_PRINT("request sent");
+  String line = "<not read anything yet>";
   while (wifiClient.connected()) {
-    String line = wifiClient.readStringUntil('\n');
+    line = wifiClient.readStringUntil('\n');
     DEBUG_PRINT("read line:\n[%s]\n", line.c_str());
     if (!connection_ok) {
       DEBUG_PRINT("Waiting for OK response from server. Current line: %s",
@@ -146,6 +144,7 @@ void showRawBitmapFrom_HTTP(const char* host,
     if (!connection_ok) {
       Serial.println("Unexpected first line: ");
       Serial.print(line.c_str());
+      break;
     }
     if ((line == "\r") || (line == "")) {
       DEBUG_PRINT("all headers received");
@@ -153,12 +152,12 @@ void showRawBitmapFrom_HTTP(const char* host,
     }
   };
   if (!connection_ok) {
-    error("Unexpected HTTP response.");
+    error("Unexpected HTTP response.\nLast line:\n" + line);
     return;
   }
 
   DEBUG_PRINT("Parsing bitmap header");
-  String line = wifiClient.readStringUntil('\n');
+  line = wifiClient.readStringUntil('\n');
   if (line != "MM")  // signature
   {
     Serial.println("bitmap format not handled.");
@@ -207,7 +206,8 @@ void showRawBitmapFrom_HTTP(const char* host,
   Serial.print("downloaded and displayed in ");
   Serial.print(millis() - startTime);
   Serial.println(" ms");
-  display.refresh();
+
+  display.refresh();  // FULL REFRESH NOW FIXME
 
   Serial.print("bytes read ");
   Serial.println(bytes_read);
@@ -304,14 +304,19 @@ void display_text_fast(String message) {
   int16_t tbx, tby;
   uint16_t tbw, tbh;
   display.getTextBounds(message, 0, 0, &tbx, &tby, &tbw, &tbh);
-  DEBUG_PRINT("Text bounds for \"%s\" are: [%d, %d][+%d,+%d]",
-              (String("\n") + message).c_str(), tbx, tby, tbw, tbx);
   // center bounding box by transposition of origin:
   uint16_t x = ((display.width() - tbw) / 2) - tbx;
-  uint16_t y = ((display.height() - tbh) / 2) - tby;
+  uint16_t y = ((display.height() - tbh) / 2) - tby;  // y is base line!
+  DEBUG_PRINT("Text bounds for:\n\"%s\"\n are: [x=%d, y=%d][w=+%d,h=+%d]",
+              message.c_str(), x, y, tbw, tbh);
 
-  // display.clearScreen();
-  // display.setFullWindow();
+  // rectangle make the window big enough to cover (overwrite) previous text
+  // uint16_t wh = Open_Sans_Regular_24.yAdvance;
+  // uint16_t wy = (display.height() / 2) - wh / 2;
+  uint16_t wy = (display.height() / 4);
+  uint16_t wh = (display.height() / 2);
+  display.setPartialWindow(0, wy, display.width(), wh);
+
   display.firstPage();
   do {
     display.fillScreen(GxEPD_WHITE);
@@ -320,31 +325,40 @@ void display_text_fast(String message) {
   } while (display.nextPage());
 }
 
+void testDisplayMessage() {
+  DEBUG_PRINT("testDisplayMessage() start");
+  display_text_fast("foo");
+  delay(1000);
+  display_text_fast("bar");
+  delay(1000);
+  display_text_fast("foobar");
+  DEBUG_PRINT("testDisplayMessage() done");
+  delay(15000);
+}
+
 void error(String message) {
   DEBUG_PRINT("Displaying error: %s", message.c_str());
-  stopWiFi();  // Power down wifi before updating display to limit current draw
-               // from battery
-  display.setFullWindow();
   display_text_fast(message);
-  display.powerOff();
-
-  DEBUG_PRINT("sleeping...");
-  deepSleep(SECONDS_PER_HOUR);
+  hibernateAll(SECONDS_PER_HOUR);
 }
 
 void errorNoWifi() {
   error("WiFi connect/login unsuccessful.");
 }
 
-void deepSleep(uint64_t seconds) {
+void espDeepSleep(uint64_t seconds) {
   DEBUG_PRINT("Sleeping for %llus", seconds);
-  unsigned long start = millis();  // Stopping wifi can take time
-  stopWiFi();
-  uint64_t duration = millis() - start;
 #ifdef ESP8266
-  ESP.deepSleep(seconds * uS_PER_S - duration * 1000);
+  ESP.deepSleep(seconds * uS_PER_S);
 #else
-  esp_sleep_enable_timer_wakeup(seconds * uS_PER_S - duration * 1000);
+  esp_sleep_enable_timer_wakeup(seconds * uS_PER_S);
   esp_deep_sleep_start();
 #endif
+}
+
+void hibernateAll(uint64_t seconds) {
+  DEBUG_PRINT("hibernating for %llu seconds", seconds);
+  display.powerOff();
+  stopWiFi();
+  espDeepSleep(seconds);
 }
