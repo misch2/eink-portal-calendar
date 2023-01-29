@@ -56,6 +56,7 @@ sub get_today_events {
 
     my @events = values %{$events};
     @events = sort { $a->{DTSTART}->hms cmp $b->{DTSTART}->hms } @events;
+    map { $_->{SUMMARY} =~ s/\\,/,/g } @events;    # fix "AA\,BB" situation
 
     return @events;
 }

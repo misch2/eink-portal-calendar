@@ -116,8 +116,7 @@ sub html_calendar {
         try {
             @today_events = $calendar->get_today_events($dt);
 
-            # use DDP;
-            # p @today_events;
+            #p @today_events;
         } catch {
             warn "Error: $_";
         };
@@ -131,6 +130,9 @@ sub html_calendar {
             name   => $name,
             grayed => (rand() < $gray_probability ? 1 : 0)
             };
+    }
+    while (scalar @icons < 16) {    # produce enough icons even with small number of source images
+        push @icons, @icons;
     }
 
     return $self->render(
