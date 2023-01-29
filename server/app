@@ -26,7 +26,6 @@ Readonly my @PORTAL_ICONS => qw(a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a
 
 get '/ping' => sub {
     my $self   = shift;
-    my $result = {};
     return $self->render(json => { status => 'ok' });
 };
 
@@ -77,24 +76,17 @@ get '/calendar/bitmap' => sub {
 plugin 'TagHelpers';
 plugin 'RenderFile';
 
-#plugin 'Config';
-# my $cfg = app->plugin('Config');
-# app->log->info("Test");
-# app->log->path($cfg->{log_file}) if $cfg->{log_file};
-# app->log->info("Log file: " . app->log->path);
-# app->log->level($ENV{MOJO_LOG_LEVEL} || 'debug');
-# app->log->info("Log level: " . app->log->level);
-#
 # # redirect warnings
-# $SIG{__WARN__} = sub {
-#     my $message = shift;
-#     $message =~ s/\n$//;
-#     @_ = (app->log, $message);
-#     goto &Mojo::Log::warn;
-# };
-#
+$SIG{__WARN__} = sub {
+    my $message = shift;
+    $message =~ s/\n$//;
+    @_ = (app->log, $message);
+    goto &Mojo::Log::warn;
+};
+
 # # logging to STDERR (for morbo command line usage):
 # app->log->handle(\*STDERR);
+app->log->path("$Bin/log/$ENV{MOJO_MODE}.log");
 
 app->secrets([ $ENV{MOJO_SECRET_PASSPHRASE} ]);
 app->start;
