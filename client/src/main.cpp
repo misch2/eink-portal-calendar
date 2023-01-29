@@ -1,21 +1,12 @@
 #include <Arduino.h>
 
-// #define DEBUG
+#define DEBUG
 
 // #define USE_GxEPD2_4G
 // #define USE_GRAYSCALE_DISPLAY
 
-// core libraries from ESP8266 Arduino
 #include <ESP8266WiFi.h>
-// #include <ESP8266HTTPClient.h>
-// #include <DNSServer.h>
-// #include <ESP8266mDNS.h>
-// #include <ESP8266WebServer.h>
-
-// other libraries
-#include <GFX.h>
 #include <WiFiManager.h>
-#include <time.h>
 
 #ifdef USE_GxEPD2_4G
 #ifdef USE_GRAYSCALE_DISPLAY
@@ -27,9 +18,14 @@
 #include <GxEPD2_BW.h>
 #endif
 
+// local settings
 #include "display_settings.h"
 #include "main.h"
 #include "secrets_config.h"
+
+// fonts
+#include "Open_Sans_Regular_16.h"
+#include "Open_Sans_Regular_24.h"
 
 #ifdef DEBUG
 #define DEBUG_PRINT(...)      \
@@ -54,9 +50,6 @@ GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(
     GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN));
 #endif
 
-#include "Open_Sans_Regular_16.h"
-#include "Open_Sans_Regular_24.h"
-
 WiFiManager wifiManager;
 WiFiClient wifiClient;  // for HTTP requests
 String lastChecksum = "";
@@ -68,11 +61,8 @@ void setup() {
   DEBUG_PRINT("setup display");
   delay(100);
   display.init(115200);
-  // display.clearScreen();
-  display_text_fast("Starting...");
 
-  DEBUG_PRINT("hasFastPartialUpdate=%d", display.epd2.hasFastPartialUpdate);
-  DEBUG_PRINT("hasPartialUpdate=%d", display.epd2.hasPartialUpdate);
+  display_text_fast("Starting...");
   DEBUG_PRINT("setup done");
 }
 
@@ -132,8 +122,9 @@ void showRawBitmapFrom_HTTP(const char* host,
                    "\r\n" + "User-Agent: GxEPD2_WiFi_Example\r\n" +
                    "Connection: close\r\n\r\n");
   DEBUG_PRINT("request sent");
+  String line = "<not read anything yet>";
   while (wifiClient.connected()) {
-    String line = wifiClient.readStringUntil('\n');
+    line = wifiClient.readStringUntil('\n');
     DEBUG_PRINT("read line:\n[%s]\n", line.c_str());
     if (!connection_ok) {
       DEBUG_PRINT("Waiting for OK response from server. Current line: %s",
@@ -146,6 +137,7 @@ void showRawBitmapFrom_HTTP(const char* host,
     if (!connection_ok) {
       Serial.println("Unexpected first line: ");
       Serial.print(line.c_str());
+      break;
     }
     if ((line == "\r") || (line == "")) {
       DEBUG_PRINT("all headers received");
@@ -153,12 +145,12 @@ void showRawBitmapFrom_HTTP(const char* host,
     }
   };
   if (!connection_ok) {
-    error("Unexpected HTTP response.");
+    error("Unexpected HTTP response.\nLast line:\n" + line);
     return;
   }
 
   DEBUG_PRINT("Parsing bitmap header");
-  String line = wifiClient.readStringUntil('\n');
+  line = wifiClient.readStringUntil('\n');
   if (line != "MM")  // signature
   {
     Serial.println("bitmap format not handled.");
@@ -207,7 +199,8 @@ void showRawBitmapFrom_HTTP(const char* host,
   Serial.print("downloaded and displayed in ");
   Serial.print(millis() - startTime);
   Serial.println(" ms");
-  display.refresh();
+
+  display.refresh();  // FULL REFRESH NOW FIXME
 
   Serial.print("bytes read ");
   Serial.println(bytes_read);
@@ -298,20 +291,29 @@ uint32_t read8n(WiFiClient& client, uint8_t* buffer, int32_t bytes) {
 }
 
 void display_text_fast(String message) {
+  display.setFullWindow();
   display.setRotation(3);
   display.setFont(&Open_Sans_Regular_24);
   display.setTextColor(GxEPD_BLACK);
   int16_t tbx, tby;
   uint16_t tbw, tbh;
   display.getTextBounds(message, 0, 0, &tbx, &tby, &tbw, &tbh);
-  DEBUG_PRINT("Text bounds for \"%s\" are: [%d, %d][+%d,+%d]",
-              (String("\n") + message).c_str(), tbx, tby, tbw, tbx);
   // center bounding box by transposition of origin:
   uint16_t x = ((display.width() - tbw) / 2) - tbx;
   uint16_t y = ((display.height() - tbh) / 2) - tby;
 
-  // display.clearScreen();
-  // display.setFullWindow();
+  // // partial update fix:
+  // x /= 8;
+  // x *= 8;  // round to multiple of 8
+  // tbw /= 8;
+  // tbw++;
+  // tbw *= 8;  // round up to multiple of 8
+
+  DEBUG_PRINT("Text bounds for:\n\"%s\"\n are: [x=%d, y=%d][w=+%d,h=+%d]",
+              message.c_str(), x, y, tbw, tbh);
+
+  // FULL REFRESH NOW FIXME
+
   display.firstPage();
   do {
     display.fillScreen(GxEPD_WHITE);
