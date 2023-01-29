@@ -9,7 +9,7 @@ set +a
 # run the webserver
 echo "starting server in $MOJO_MODE mode"
 if [ $MOJO_MODE == "development" ]; then
-    cd $dir/.. && morbo -v -l "http://*:${PORT}" -w templates -w lib app
+    cd $dir/.. && morbo -v -l "http://*:${LISTEN_PORT}" -w templates -w lib app
 else
-    cd $dir/.. && carton exec ./app daemon -m $MOJO_MODE -l "http://[::]:${PORT}"
+    cd $dir/.. && carton exec ./app daemon -m $MOJO_MODE -l "http://[::]:${LISTEN_PORT}"
 fi

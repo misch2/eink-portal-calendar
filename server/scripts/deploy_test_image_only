@@ -6,7 +6,7 @@ set -a
 . $dir/../.env
 set +a
 
-echo "Generating image locally from http://localhost:${PORT}"
+echo "Generating image locally from ${URL_START}"
 cd $dir/.. && scripts/generate_img_from_web
 file $dir/../generated_images/current_calendar.png
 
