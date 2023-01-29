@@ -129,7 +129,7 @@ void showRawBitmapFrom_HTTP(const char* host,
   }
   DEBUG_PRINT("Downloading http://%s:%d%s", host, port, path);
   wifiClient.print(String("GET ") + path + " HTTP/1.1\r\n" + "Host: " + host +
-                   "\r\n" + "User-Agent: GxEPD2_WiFi_Example\r\n" +
+                   "\r\n" + "User-Agent: Portal_Calendar_on_ESP\r\n" +
                    "Connection: close\r\n\r\n");
   DEBUG_PRINT("request sent");
   while (wifiClient.connected()) {
