@@ -34,32 +34,32 @@
                     <div class="bar"></div>
                 % }
             </div>
-
-            % if ($has_calendar_entries) {
-                <div class="calendar-events">
-                    % foreach my $event (@{ $calendar_events }) {
-                        <div>
-                            % if ($event->{allday}) {
-                                <%= $event->{SUMMARY} %>
-                                <!-- (celý den) -->
-                            % } else {
-                                <%= $event->{DTSTART}->format_cldr('H:mm') %>
-                                <%= $event->{SUMMARY} %>
-                                (~<%= int($event->{hours} + 0.5) %> hod.)
-                            % }
-                        </div>
-                    % }
-                </div>
-            % }
         </div>
 
-        <div class="icons-container<%= $has_calendar_entries ? ' with-calendar-entries' : '' %>">
+        <div class="icons-container">
             % for my $icon (@{ $icons }) {
                 <img src="/images/portal_icons/<%= $icon->{name} %>.png" class="icon<%= $icon->{grayed} ? ' grayed' : '' %>">
             % }
         </div>
 
-        <img src="/images/Aperture_Laboratories_Logo.png" class="aperture-logo">
+        % if ($has_calendar_entries) {
+            <div class="calendar-container">
+                % foreach my $event (@{ $calendar_events }) {
+                    <div>
+                        % if ($event->{allday}) {
+                            <%= $event->{SUMMARY} %>
+                            <!-- (celý den) -->
+                        % } else {
+                            <%= $event->{DTSTART}->format_cldr('H:mm') %>
+                            <%= $event->{SUMMARY} %>
+                            (~<%= int($event->{hours} + 0.5) %> hod.)
+                        % }
+                    </div>
+                % }
+            </div>
+        % }
+
+        <img id="aperture-logo" src="/images/Aperture_Laboratories_Logo.png">
     </div>
 </body>
 

@@ -129,34 +129,17 @@ div.bunch-of-bars div.bar {
     background-color: black;
 }
 
-div.calendar-events {
-    font-size: 1rem;
-    margin-top: 1rem;
-}
-
-div.calendar-events div {
-    text-overflow: ellipsis;
-    /* Needed to make it work */
-    overflow: hidden;
-    white-space: nowrap;
-}
-
 div.icons-container {
     position: absolute;
     top: 525px;
     left: 0px;
     width: 100%;
-    height: 145px;
+    /* height: 145px; */
     display: flex;
     flex-flow: row wrap;
     gap: 10px;
     padding-top: 10px;
     border-top: 2px solid black;
-}
-
-div.icons-container.with-calendar-entries {
-    top: 585px;
-    height: 85px;
 }
 
 .icon {
@@ -172,7 +155,24 @@ div.icons-container.with-calendar-entries {
     mask-image: url("/images/checkered_mask_black.png");
 }
 
-img.aperture-logo {
+div.calendar-container {
+    position: absolute;
+    top: 600px;
+    left: 0px;
+    width: 100%;
+    height: 80px;
+    font-size: 1rem;
+    margin-top: 1rem;
+}
+
+div.calendar-container div {
+    text-overflow: ellipsis;
+    /* Needed to make it work */
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+img#aperture-logo {
     position: absolute;
     top: 710px;
     left: 0px;
