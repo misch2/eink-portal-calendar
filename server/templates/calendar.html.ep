@@ -5,6 +5,9 @@
 %# $decorator = sub { ucfirst(shift) }; # Uppercase
 %# $decorator = sub { Text::Unidecode::unidecode(uc(shift)) }; # UPPERCASE with accents removed
 
+% my $min_icons_count = $has_calendar_entries ? 2 : 3;
+% my $max_icons_count = $has_calendar_entries ? 4 : 8;
+% my $icons_count     = $min_icons_count + int(rand($max_icons_count - $min_icons_count + 1));
 
 <body>
     <div id="spacer">
@@ -37,8 +40,8 @@
         </div>
 
         <div class="icons-container">
-            % for my $icon (@{ $icons }) {
-                <img src="/images/portal_icons/<%= $icon->{name} %>.png" class="icon<%= $icon->{grayed} ? ' grayed' : '' %>">
+            % foreach my $i (0 .. $icons_count-1) {
+                <img src="/images/portal_icons/<%= $icons->[$i]->{name} %>.png" class="icon<%= $icons->[$i]->{grayed} ? ' grayed' : '' %>">
             % }
         </div>
 
