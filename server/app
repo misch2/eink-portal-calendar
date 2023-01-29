@@ -114,7 +114,7 @@ sub html_calendar {
     if ($ENV{CALENDAR_ICS_URL}) {
         my $calendar = PortalCalendar::Integration::iCal->new(ics_url => $ENV{CALENDAR_ICS_URL}, cache_dir => "$Bin/cache/lwp");
         try {
-            @today_events = $calendar->get_today_events;
+            @today_events = $calendar->get_today_events($dt);
 
             # use DDP;
             # p @today_events;

@@ -50,9 +50,9 @@ sub get_events {
 
 sub get_today_events {
     my $self = shift;
+    my $date = shift // DateTime->now();
 
-    my $now    = DateTime->now();
-    my $events = $self->get_events()->{ $now->year }->{ $now->month }->{ $now->day } || {};
+    my $events = $self->get_events()->{ $date->year }->{ $date->month }->{ $date->day } || {};
 
     my @events = values %{$events};
     @events = sort { $a->{DTSTART}->hms cmp $b->{DTSTART}->hms } @events;
