@@ -115,10 +115,6 @@ sub html_calendar {
         };
     }
 
-my @tmp = @today_events;
-push @today_events, @tmp;
-push @today_events, @tmp;
-
     my $gray_probability = 0.25;
     my @icons;
     foreach my $name (List::Util::shuffle @PORTAL_ICONS) {
