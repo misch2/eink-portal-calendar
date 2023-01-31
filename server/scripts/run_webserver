@@ -7,7 +7,7 @@ set -a
 set +a
 
 # run the webserver
-echo "starting server in $MOJO_MODE mode"
+echo "Starting webserver in $MOJO_MODE mode"
 if [ $MOJO_MODE == "development" ]; then
     cd $dir/.. && morbo -v -l "http://*:${LISTEN_PORT}" -w templates -w lib app
 else

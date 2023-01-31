@@ -1,5 +1,14 @@
 # carton snapshot format: version 1.0
 DISTRIBUTIONS
+  Algorithm-Cron-0.10
+    pathname: P/PE/PEVANS/Algorithm-Cron-0.10.tar.gz
+    provides:
+      Algorithm::Cron 0.10
+    requirements:
+      Test::Fatal 0
+      Test::More 0.88
+      Time::timegm 0
+      perl 5.008
   B-Hooks-EndOfScope-0.26
     pathname: E/ET/ETHER/B-Hooks-EndOfScope-0.26.tar.gz
     provides:
@@ -79,6 +88,135 @@ DISTRIBUTIONS
       Clone 0.46
     requirements:
       ExtUtils::MakeMaker 0
+  Clone-Choose-0.010
+    pathname: H/HE/HERMES/Clone-Choose-0.010.tar.gz
+    provides:
+      Clone::Choose 0.010
+    requirements:
+      ExtUtils::MakeMaker 0
+      Storable 0
+      perl 5.008001
+  DBD-SQLite-1.72
+    pathname: I/IS/ISHIGAKI/DBD-SQLite-1.72.tar.gz
+    provides:
+      DBD::SQLite 1.72
+      DBD::SQLite::Constants undef
+      DBD::SQLite::GetInfo undef
+      DBD::SQLite::VirtualTable 1.72
+      DBD::SQLite::VirtualTable::Cursor 1.72
+      DBD::SQLite::VirtualTable::FileContent undef
+      DBD::SQLite::VirtualTable::FileContent::Cursor undef
+      DBD::SQLite::VirtualTable::PerlData undef
+      DBD::SQLite::VirtualTable::PerlData::Cursor undef
+    requirements:
+      DBI 1.57
+      ExtUtils::MakeMaker 0
+      File::Spec 0.82
+      Test::More 0.88
+      Tie::Hash 0
+      perl 5.006
+  DBI-1.643
+    pathname: T/TI/TIMB/DBI-1.643.tar.gz
+    provides:
+      Bundle::DBI 12.008696
+      DBD::DBM 0.08
+      DBD::DBM::Statement 0.08
+      DBD::DBM::Table 0.08
+      DBD::DBM::db 0.08
+      DBD::DBM::dr 0.08
+      DBD::DBM::st 0.08
+      DBD::ExampleP 12.014311
+      DBD::ExampleP::db 12.014311
+      DBD::ExampleP::dr 12.014311
+      DBD::ExampleP::st 12.014311
+      DBD::File 0.44
+      DBD::File::DataSource::File 0.44
+      DBD::File::DataSource::Stream 0.44
+      DBD::File::Statement 0.44
+      DBD::File::Table 0.44
+      DBD::File::TableSource::FileSystem 0.44
+      DBD::File::db 0.44
+      DBD::File::dr 0.44
+      DBD::File::st 0.44
+      DBD::Gofer 0.015327
+      DBD::Gofer::Policy::Base 0.010088
+      DBD::Gofer::Policy::classic 0.010088
+      DBD::Gofer::Policy::pedantic 0.010088
+      DBD::Gofer::Policy::rush 0.010088
+      DBD::Gofer::Transport::Base 0.014121
+      DBD::Gofer::Transport::corostream undef
+      DBD::Gofer::Transport::null 0.010088
+      DBD::Gofer::Transport::pipeone 0.010088
+      DBD::Gofer::Transport::stream 0.014599
+      DBD::Gofer::db 0.015327
+      DBD::Gofer::dr 0.015327
+      DBD::Gofer::st 0.015327
+      DBD::Mem 0.001
+      DBD::Mem::DataSource 0.001
+      DBD::Mem::Statement 0.001
+      DBD::Mem::Table 0.001
+      DBD::Mem::db 0.001
+      DBD::Mem::dr 0.001
+      DBD::Mem::st 0.001
+      DBD::NullP 12.014715
+      DBD::NullP::db 12.014715
+      DBD::NullP::dr 12.014715
+      DBD::NullP::st 12.014715
+      DBD::Proxy 0.2004
+      DBD::Proxy::RPC::PlClient 0.2004
+      DBD::Proxy::db 0.2004
+      DBD::Proxy::dr 0.2004
+      DBD::Proxy::st 0.2004
+      DBD::Sponge 12.010003
+      DBD::Sponge::db 12.010003
+      DBD::Sponge::dr 12.010003
+      DBD::Sponge::st 12.010003
+      DBDI 12.015129
+      DBI 1.643
+      DBI::Const::GetInfo::ANSI 2.008697
+      DBI::Const::GetInfo::ODBC 2.011374
+      DBI::Const::GetInfoReturn 2.008697
+      DBI::Const::GetInfoType 2.008697
+      DBI::DBD 12.015129
+      DBI::DBD::Metadata 2.014214
+      DBI::DBD::SqlEngine 0.06
+      DBI::DBD::SqlEngine::DataSource 0.06
+      DBI::DBD::SqlEngine::Statement 0.06
+      DBI::DBD::SqlEngine::Table 0.06
+      DBI::DBD::SqlEngine::TableSource 0.06
+      DBI::DBD::SqlEngine::TieMeta 0.06
+      DBI::DBD::SqlEngine::TieTables 0.06
+      DBI::DBD::SqlEngine::db 0.06
+      DBI::DBD::SqlEngine::dr 0.06
+      DBI::DBD::SqlEngine::st 0.06
+      DBI::Gofer::Execute 0.014283
+      DBI::Gofer::Request 0.012537
+      DBI::Gofer::Response 0.011566
+      DBI::Gofer::Serializer::Base 0.009950
+      DBI::Gofer::Serializer::DataDumper 0.009950
+      DBI::Gofer::Serializer::Storable 0.015586
+      DBI::Gofer::Transport::Base 0.012537
+      DBI::Gofer::Transport::pipeone 0.012537
+      DBI::Gofer::Transport::stream 0.012537
+      DBI::Profile 2.015065
+      DBI::ProfileData 2.010008
+      DBI::ProfileDumper 2.015325
+      DBI::ProfileDumper::Apache 2.014121
+      DBI::ProfileSubs 0.009396
+      DBI::ProxyServer 0.3005
+      DBI::ProxyServer::db 0.3005
+      DBI::ProxyServer::dr 0.3005
+      DBI::ProxyServer::st 0.3005
+      DBI::SQL::Nano 1.015544
+      DBI::SQL::Nano::Statement_ 1.015544
+      DBI::SQL::Nano::Table_ 1.015544
+      DBI::Util::CacheMemory 0.010315
+      DBI::Util::_accessor 0.009479
+      DBI::common 1.643
+    requirements:
+      ExtUtils::MakeMaker 6.48
+      Test::Simple 0.90
+      perl 5.008001
   Data-Printer-1.001000
     pathname: G/GA/GARU/Data-Printer-1.001000.tar.gz
     provides:
@@ -680,6 +818,13 @@ DISTRIBUTIONS
       perl 5.008001
       strict 0
       warnings 0
+  ExtUtils-CChecker-0.11
+    pathname: P/PE/PEVANS/ExtUtils-CChecker-0.11.tar.gz
+    provides:
+      ExtUtils::CChecker 0.11
+    requirements:
+      ExtUtils::CBuilder 0
+      Module::Build 0.4004
   ExtUtils-Config-0.008
     pathname: L/LE/LEONT/ExtUtils-Config-0.008.tar.gz
     provides:
@@ -860,6 +1005,15 @@ DISTRIBUTIONS
       ExtUtils::MakeMaker 0
       HTTP::Headers 6
       perl 5.008001
+  Hash-Merge-0.302
+    pathname: H/HE/HERMES/Hash-Merge-0.302.tar.gz
+    provides:
+      Hash::Merge 0.302
+    requirements:
+      Clone::Choose 0.008
+      ExtUtils::MakeMaker 6.64
+      Scalar::Util 0
+      perl 5.008001
   IO-HTML-1.004
     pathname: C/CJ/CJM/IO-HTML-1.004.tar.gz
     provides:
@@ -949,6 +1103,41 @@ DISTRIBUTIONS
     requirements:
       ExtUtils::MakeMaker 0
       perl 5.006
+  Minion-10.25
+    pathname: S/SR/SRI/Minion-10.25.tar.gz
+    provides:
+      LinkCheck undef
+      LinkCheck::Controller::Links undef
+      LinkCheck::Task::CheckLinks undef
+      Minion 10.25
+      Minion::Backend undef
+      Minion::Backend::Pg undef
+      Minion::Command::minion undef
+      Minion::Command::minion::job undef
+      Minion::Command::minion::worker undef
+      Minion::Iterator undef
+      Minion::Job undef
+      Minion::Worker undef
+      Mojolicious::Plugin::Minion undef
+      Mojolicious::Plugin::Minion::Admin undef
+    requirements:
+      ExtUtils::MakeMaker 0
+      Mojolicious 9.0
+      YAML::XS 0.67
+      perl 5.016
+  Minion-Backend-SQLite-v5.0.7
+    pathname: D/DB/DBOOK/Minion-Backend-SQLite-v5.0.7.tar.gz
+    provides:
+      Minion::Backend::SQLite v5.0.7
+    requirements:
+      List::Util 0
+      Minion 10.13
+      Module::Build::Tiny 0.034
+      Mojo::SQLite 3.000
+      Mojolicious 7.49
+      Sys::Hostname 0
+      Time::HiRes 0
+      perl 5.010001
   Module-Build-0.4232
     pathname: L/LE/LEONT/Module-Build-0.4232.tar.gz
     provides:
@@ -1040,6 +1229,29 @@ DISTRIBUTIONS
       perl 5.006
       strict 0
       warnings 0
+  Mojo-SQLite-3.009
+    pathname: D/DB/DBOOK/Mojo-SQLite-3.009.tar.gz
+    provides:
+      Mojo::SQLite 3.009
+      Mojo::SQLite::Database 3.009
+      Mojo::SQLite::Migrations 3.009
+      Mojo::SQLite::PubSub 3.009
+      Mojo::SQLite::Results 3.009
+      Mojo::SQLite::Transaction 3.009
+    requirements:
+      Carp 0
+      DBD::SQLite 1.68
+      DBI 1.627
+      File::Spec::Functions 0
+      File::Temp 0
+      Module::Build::Tiny 0.034
+      Mojolicious 8.03
+      SQL::Abstract::Pg 1.0
+      Scalar::Util 0
+      URI 1.69
+      URI::db 0.15
+      URI::file 4.21
+      perl 5.010001
   Mojolicious-9.31
     pathname: S/SR/SRI/Mojolicious-9.31.tar.gz
     provides:
@@ -1158,6 +1370,15 @@ DISTRIBUTIONS
       IO::Socket::IP 0.37
       Sub::Util 1.41
       perl 5.016
+  Mojolicious-Plugin-Cron-0.033
+    pathname: D/DM/DMANTO/Mojolicious-Plugin-Cron-0.033.tar.gz
+    provides:
+      Mojolicious::Plugin::Cron 0.033
+    requirements:
+      Algorithm::Cron 0.10
+      Module::Build::Tiny 0.035
+      Mojolicious 7.82
+      perl 5.020001
   Mojolicious-Plugin-RenderFile-0.12
     pathname: K/KO/KOORCHIK/Mojolicious-Plugin-RenderFile-0.12.tar.gz
     provides:
@@ -1296,6 +1517,41 @@ DISTRIBUTIONS
     requirements:
       Exporter 5.57
       perl 5.006
+  SQL-Abstract-2.000001
+    pathname: M/MS/MSTROUT/SQL-Abstract-2.000001.tar.gz
+    provides:
+      Chunkstrumenter undef
+      DBIx::Class::SQLMaker::Role::SQLA2Passthrough undef
+      SQL::Abstract 2.000001
+      SQL::Abstract::Formatter undef
+      SQL::Abstract::Parts undef
+      SQL::Abstract::Plugin::BangOverrides undef
+      SQL::Abstract::Plugin::ExtraClauses undef
+      SQL::Abstract::Reference undef
+      SQL::Abstract::Role::Plugin undef
+      SQL::Abstract::Test undef
+      SQL::Abstract::Tree undef
+    requirements:
+      Exporter 5.57
+      ExtUtils::MakeMaker 0
+      Hash::Merge 0.12
+      List::Util 0
+      MRO::Compat 0.12
+      Moo 2.000001
+      Scalar::Util 0
+      Sub::Quote 2.000001
+      Test::Builder::Module 0.84
+      Test::Deep 0.101
+      Text::Balanced 2.00
+      perl 5.006
+  SQL-Abstract-Pg-1.0
+    pathname: S/SR/SRI/SQL-Abstract-Pg-1.0.tar.gz
+    provides:
+      SQL::Abstract::Pg 1.0
+    requirements:
+      ExtUtils::MakeMaker 0
+      SQL::Abstract 2.0
+      perl 5.016
   Set-Infinite-0.65
     pathname: F/FG/FGLOCK/Set-Infinite-0.65.tar.gz
     provides:
@@ -1398,6 +1654,67 @@ DISTRIBUTIONS
       ExtUtils::MakeMaker 0
       Scalar::Util 0
       perl 5.006
+  Test-Deep-1.204
+    pathname: R/RJ/RJBS/Test-Deep-1.204.tar.gz
+    provides:
+      Test::Deep 1.204
+      Test::Deep::All 1.204
+      Test::Deep::Any 1.204
+      Test::Deep::Array 1.204
+      Test::Deep::ArrayEach 1.204
+      Test::Deep::ArrayElementsOnly 1.204
+      Test::Deep::ArrayLength 1.204
+      Test::Deep::ArrayLengthOnly 1.204
+      Test::Deep::Blessed 1.204
+      Test::Deep::Boolean 1.204
+      Test::Deep::Cache 1.204
+      Test::Deep::Cache::Simple 1.204
+      Test::Deep::Class 1.204
+      Test::Deep::Cmp 1.204
+      Test::Deep::Code 1.204
+      Test::Deep::Hash 1.204
+      Test::Deep::HashEach 1.204
+      Test::Deep::HashElements 1.204
+      Test::Deep::HashKeys 1.204
+      Test::Deep::HashKeysOnly 1.204
+      Test::Deep::Ignore 1.204
+      Test::Deep::Isa 1.204
+      Test::Deep::ListMethods 1.204
+      Test::Deep::MM 1.204
+      Test::Deep::Methods 1.204
+      Test::Deep::NoTest 1.204
+      Test::Deep::None 1.204
+      Test::Deep::Number 1.204
+      Test::Deep::Obj 1.204
+      Test::Deep::Ref 1.204
+      Test::Deep::RefType 1.204
+      Test::Deep::Regexp 1.204
+      Test::Deep::RegexpMatches 1.204
+      Test::Deep::RegexpOnly 1.204
+      Test::Deep::RegexpRef 1.204
+      Test::Deep::RegexpRefOnly 1.204
+      Test::Deep::RegexpVersion 1.204
+      Test::Deep::ScalarRef 1.204
+      Test::Deep::ScalarRefOnly 1.204
+      Test::Deep::Set 1.204
+      Test::Deep::Shallow 1.204
+      Test::Deep::Stack 1.204
+      Test::Deep::String 1.204
+      Test::Deep::SubHash 1.204
+      Test::Deep::SubHashElements 1.204
+      Test::Deep::SubHashKeys 1.204
+      Test::Deep::SubHashKeysOnly 1.204
+      Test::Deep::SuperHash 1.204
+      Test::Deep::SuperHashElements 1.204
+      Test::Deep::SuperHashKeys 1.204
+      Test::Deep::SuperHashKeysOnly 1.204
+    requirements:
+      ExtUtils::MakeMaker 6.78
+      List::Util 1.09
+      Scalar::Util 1.09
+      Test::Builder 0
+      Test::More 0.96
+      perl 5.012
   Test-Fatal-0.017
     pathname: R/RJ/RJBS/Test-Fatal-0.017.tar.gz
     provides:
@@ -1425,6 +1742,15 @@ DISTRIBUTIONS
       Class::Accessor::Chained 0
       ExtUtils::MakeMaker 0
       Test::More 0.88
+  Time-timegm-0.01
+    pathname: P/PE/PEVANS/Time-timegm-0.01.tar.gz
+    provides:
+      Time::timegm 0.01
+    requirements:
+      ExtUtils::CBuilder 0
+      ExtUtils::CChecker 0
+      POSIX 0
+      Test::More 0
   TimeDate-2.33
     pathname: A/AT/ATOOMIC/TimeDate-2.33.tar.gz
     provides:
@@ -1547,6 +1873,69 @@ DISTRIBUTIONS
       strict 0
       utf8 0
       warnings 0
+  URI-Nested-0.10
+    pathname: D/DW/DWHEELER/URI-Nested-0.10.tar.gz
+    provides:
+      URI::Nested 0.10
+    requirements:
+      Module::Build 0.30
+      Test::More 0.88
+      URI 1.40
+      perl 5.008001
+  URI-db-0.20
+    pathname: D/DW/DWHEELER/URI-db-0.20.tar.gz
+    provides:
+      URI::cassandra 0.20
+      URI::cockroach 0.20
+      URI::cockroachdb 0.20
+      URI::couch 0.20
+      URI::couchdb 0.20
+      URI::cubrid 0.20
+      URI::db 0.20
+      URI::db2 0.20
+      URI::derby 0.20
+      URI::exasol 0.20
+      URI::firebird 0.20
+      URI::hive 0.20
+      URI::impala 0.20
+      URI::informix 0.20
+      URI::ingres 0.20
+      URI::interbase 0.20
+      URI::ldapdb 0.20
+      URI::maria 0.20
+      URI::mariadb 0.20
+      URI::max 0.20
+      URI::maxdb 0.20
+      URI::monet 0.20
+      URI::monetdb 0.20
+      URI::mongo 0.20
+      URI::mongodb 0.20
+      URI::mssql 0.20
+      URI::mysql 0.20
+      URI::oracle 0.20
+      URI::pg 0.20
+      URI::pgsql 0.20
+      URI::pgxc 0.20
+      URI::postgres 0.20
+      URI::postgresql 0.20
+      URI::postgresxc 0.20
+      URI::redshift 0.20
+      URI::snowflake 0.20
+      URI::sqlite 0.20
+      URI::sqlite3 0.20
+      URI::sqlserver 0.20
+      URI::sybase 0.20
+      URI::teradata 0.20
+      URI::unify 0.20
+      URI::vertica 0.20
+      URI::yugabyte 0.20
+      URI::yugabytedb 0.20
+    requirements:
+      Module::Build 0.30
+      Test::More 0.88
+      URI 1.40
+      URI::Nested 0.10
+      perl 5.008001
   Variable-Magic-0.63
     pathname: V/VP/VPIT/Variable-Magic-0.63.tar.gz
     provides:
@@ -1585,6 +1974,15 @@ DISTRIBUTIONS
     requirements:
       ExtUtils::MakeMaker 0
       perl 5.008
+  YAML-LibYAML-0.86
+    pathname: I/IN/INGY/YAML-LibYAML-0.86.tar.gz
+    provides:
+      YAML::LibYAML 0.86
+      YAML::XS 0.86
+      YAML::XS::LibYAML undef
+    requirements:
+      ExtUtils::MakeMaker 0
+      perl 5.008001
   iCal-Parser-1.21
     pathname: R/RI/RIXED/iCal-Parser-1.21.tar.gz
     provides:
