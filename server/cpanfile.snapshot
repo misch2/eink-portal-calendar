@@ -921,6 +921,22 @@ DISTRIBUTIONS
       POSIX 0
       strict 0
       warnings 0
+  File-pushd-1.016
+    pathname: D/DA/DAGOLDEN/File-pushd-1.016.tar.gz
+    provides:
+      File::pushd 1.016
+    requirements:
+      Carp 0
+      Cwd 0
+      Exporter 0
+      ExtUtils::MakeMaker 6.17
+      File::Path 0
+      File::Spec 0
+      File::Temp 0
+      overload 0
+      perl 5.006
+      strict 0
+      warnings 0
   FreezeThaw-0.5001
     pathname: I/IL/ILYAZ/modules/FreezeThaw-0.5001.tar.gz
     provides:
