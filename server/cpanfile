@@ -3,6 +3,10 @@ requires 'Mojolicious::Lite';
 requires 'Mojolicious::Plugin::RenderFile';
 requires 'Mojolicious::Plugin::TagHelpers';
 requires 'Mojolicious::Plugin::Config';
+requires 'Mojolicious::Plugin::Minion';
+requires 'Mojolicious::Plugin::Minion::Admin';
+requires 'Mojolicious::Plugin::Cron';
+requires 'Minion::Backend::SQLite';
 requires 'DDP';
 requires 'DateTime';
 requires 'DateTime::Format::Strptime';
@@ -16,5 +20,7 @@ requires 'LWP::UserAgent::Cached';
 requires 'Try::Tiny';
 requires 'Digest::SHA1';
 requires 'iCal::Parser';
-
-
+requires 'Time::HiRes';
+requires 'File::pushd';
+requires 'File::Copy';
+requires 'File::Temp';

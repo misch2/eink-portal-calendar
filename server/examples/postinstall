@@ -8,5 +8,5 @@ set -a
 set +a
 
 carton install --deployment --cached
-npm ci
+npm install
 sudo systemctl restart $SYSTEMD_UNIT_NAME

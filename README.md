@@ -41,7 +41,8 @@ Edit the `server/.env` file and set `PORT` for HTTP server and possibly the `DAT
 ```
 $ sudo apt install perl libimlib2-dev libimlib2
 $ make modules
-$ make run
+$ server/scripts/run_minion &
+$ server/scripts/run_webserver &
 ```
 
 Once the server is running you can test it by pointing your browser at it's address (http://...:<PORT>), it should produce HTML page with source calendar on the left side and (empty yet) image on the right side.
@@ -52,13 +53,14 @@ Now you can test if the image rendering works:
 $ server/scripts/generate_img_from_web
 ```
 
-it should respond with:
+it should respond with something like:
 
 ```
-✔ Generated 1 screenshot from 1 url and 1 size
+1
+Job enqueued
 ```
 
-Now there should be a file named `current_calendar.png` in the `server/generated_images/` folder. You don't have to do anything with it, it will get processed/converted by the server automatically on demand.
+After a short while there should be a file named `current_calendar.png` in the `server/generated_images/` folder. If there isn't any, check the minion output (either in console, or via http://...:<PORT>/admin URL).
 
 If you refresh the page now, a grayscale PNG version of the calendar screen should be visible on the right side.
 
