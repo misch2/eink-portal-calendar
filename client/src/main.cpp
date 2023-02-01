@@ -1,6 +1,26 @@
 #include <Arduino.h>
 
-#define DEBUG
+/*
+
+Timing on ESP8266:
+
+with DEBUG on:
+ 0:00 boot
+ 1:77 try to display 'starting...'
+ 5:15  - fully displayed
+ 6:92 fully displayed 'connecting to wifi...'
+11:50 fully displayed 'connecting to webserver...'
+13:27 fully displayed 'downloading...'
+19:82 refreshing display
+23:64  - finished
+
+with DEBUG off:
+ 0:00 boot
+10:40 refreshing display
+13:60  - finished
+*/
+
+// #define DEBUG
 
 // #define USE_GxEPD2_4G
 // #define USE_GRAYSCALE_DISPLAY
@@ -63,7 +83,7 @@ void setup() {
   delay(100);
   display.init(115200);
 
-  display_text_fast("Starting...");
+  // display_text_fast("Starting...");
   DEBUG_PRINT("setup done");
 }
 
