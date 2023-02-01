@@ -5,7 +5,6 @@
 // #define USE_GxEPD2_4G
 // #define USE_GRAYSCALE_DISPLAY
 
-#include <ESP8266WiFi.h>
 #include <WiFiManager.h>
 
 #ifdef USE_GxEPD2_4G
@@ -59,6 +58,8 @@ void setup() {
   Serial.println();
 
   DEBUG_PRINT("setup display");
+  DEBUG_PRINT("CS=%d, DC=%d, RST=%d, BUSY=%d", CS_PIN, DC_PIN, RST_PIN,
+              BUSY_PIN);
   delay(100);
   display.init(115200);
 
@@ -71,7 +72,7 @@ void loop() {
   DEBUG_PRINT("loop start");
 
 #ifdef DEBUG
-  display_text_fast("Starting WiFi...");
+  display_text_fast("Connecting to WiFi...");
 #endif
   if (!startWiFi()) {
     errorNoWifi();
@@ -113,7 +114,7 @@ void showRawBitmapFrom_HTTP(const char* host,
 
   DEBUG_PRINT("connecting to %s", host);
 #ifdef DEBUG
-  display_text_fast("Connecting...");
+  display_text_fast("Connecting to webserver...");
 #endif
   if (!wifiClient.connect(host, port)) {
     DEBUG_PRINT("HTTP connection failed");
@@ -122,7 +123,7 @@ void showRawBitmapFrom_HTTP(const char* host,
   }
 
 #ifdef DEBUG
-  display_text_fast("Downloading...");
+  display_text_fast("Downloading calendar data...");
 #endif
   DEBUG_PRINT("Downloading http://%s:%d%s", host, port, path);
   wifiClient.print(String("GET ") + path + " HTTP/1.1\r\n" + "Host: " + host +
@@ -173,8 +174,6 @@ void showRawBitmapFrom_HTTP(const char* host,
   };
   lastChecksum = line;
 
-  // display.clearScreen();
-
   uint32_t bytes_read = 0;                              // read so far
   for (uint16_t row = 0; row < h; row += rows_at_once)  // for each line
   {
@@ -207,7 +206,7 @@ void showRawBitmapFrom_HTTP(const char* host,
   Serial.print(millis() - startTime);
   Serial.println(" ms");
 
-  display.refresh();  // FULL REFRESH NOW FIXME
+  display.refresh();  // full refresh
 
   Serial.print("bytes read ");
   Serial.println(bytes_read);
