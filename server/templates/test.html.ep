@@ -6,7 +6,7 @@
     <h1>Portal calendar test page</h1>
 
     <div>
-        [ <a href="/admin/jobs">Minion jobs</a> ]
+        [ <a href="/admin">Minion jobs</a> ]
     </div>
 
     <!-- https://css-tricks.com/snippets/css/a-guide-to-flexbox/ -->
