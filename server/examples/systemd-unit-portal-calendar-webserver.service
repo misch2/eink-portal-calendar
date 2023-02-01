@@ -1,10 +1,10 @@
 [Unit]
-Description=Portal calendar server
+Description=Portal calendar web server
 After=network-online.target
 
 [Service]
 WorkingDirectory=/<PATH>/portal_calendar
-ExecStart=/<PATH>/portal_calendar/server/scripts/run_server
+ExecStart=/<PATH>/portal_calendar/server/scripts/run_webserver
 Type=simple
 Restart=always
 TimeoutStartSec=infinity

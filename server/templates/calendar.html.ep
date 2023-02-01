@@ -19,7 +19,7 @@
         </div>
 
         <div class="day-number-big">
-            <%= $date->day %>
+            <%= sprintf("%02d", $date->day) %>
         </div>
 
         <div class="day-of-week-block">

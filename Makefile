@@ -7,9 +7,6 @@ modules:
 	# NPM modules from the package-lock.json file
 	cd server && npm ci
 
-run:
-	cd server && scripts/run_server
-
 deploy: modules
 	cd server && scripts/deploy
 

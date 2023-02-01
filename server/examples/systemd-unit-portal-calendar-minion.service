@@ -1,0 +1,17 @@
+[Unit]
+Description=Portal calendar minion worker
+After=network-online.target
+
+[Service]
+WorkingDirectory=/<PATH>/portal_calendar
+ExecStart=/<PATH>/portal_calendar/server/scripts/run_minion
+Type=simple
+Restart=always
+TimeoutStartSec=infinity
+TimeoutStopSec=600
+
+User=<USERNAME>
+Group=<GROUPNAME>
+
+[Install]
+WantedBy=multi-user.target

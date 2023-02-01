@@ -3,7 +3,11 @@
 
 <body>
 
-    <h1>test</h1>
+    <h1>Portal calendar test page</h1>
+
+    <div>
+        [ <a href="/admin/jobs">Minion jobs</a> ]
+    </div>
 
     <!-- https://css-tricks.com/snippets/css/a-guide-to-flexbox/ -->
     <div style="display: flex; flex-flow: row wrap; justify-content: space-around;">

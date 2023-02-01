@@ -6,5 +6,6 @@ set -a
 . $dir/../.env
 set +a
 
-# convert the page
-cd $dir/.. && node_modules/.bin/pageres ${URL_START}/calendar/html 480x800 --filename='generated_images/current_calendar' --overwrite --format=png
+cd $dir/.. && carton exec -- ./app minion job --enqueue regenerate_image
+echo "Job enqueued"
+
