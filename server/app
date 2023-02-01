@@ -242,12 +242,8 @@ sub generate_bitmap {
             foreach my $y (0 .. $img->getheight - 1) {
                 my $byte   = 0;
                 my $bitcnt = 0;
-                my @colors = $img->getscanline(y => $y);
-                foreach my $color (@colors) {
-                    my @rgb       = $color->rgba;
-                    my $grayscale = $rgb[0];
-
-                    my $bit = ($grayscale > 0x80) ? 1 : 0;
+                foreach my $gray ($img->getsamples(y => $y, format => '8bit', channels => [0])) {
+                    my $bit = $gray ? 1 : 0;
                     $byte = $byte << 1 | $bit;
                     $bitcnt++;
                     if ($bitcnt == 8) {
