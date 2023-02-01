@@ -15,7 +15,6 @@ requires 'Imager';
 requires 'Text::Unidecode';
 requires 'List::Util';
 requires 'Readonly';
-requires 'Moo';
 requires 'LWP::UserAgent::Cached';
 requires 'Try::Tiny';
 requires 'Digest::SHA1';

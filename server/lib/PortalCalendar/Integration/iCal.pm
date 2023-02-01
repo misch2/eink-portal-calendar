@@ -1,19 +1,17 @@
 package PortalCalendar::Integration::iCal;
 
-use Moo;
+use Mojo::Base -base;
+
 use LWP::UserAgent::Cached;
 use iCal::Parser;
 use DDP;
 use DateTime;
 
-has ics_url   => (is => 'ro', required => 1);
-has cache_dir => (is => 'ro', required => 1);
+has 'ics_url';
+has 'cache_dir';
 
-has ua => (is => 'lazy');
-
-sub _build_ua {
+has 'ua' => sub {
     my $self = shift;
-
     return LWP::UserAgent::Cached->new(
         cache_dir => $self->cache_dir,
 
@@ -26,8 +24,7 @@ sub _build_ua {
             return -M $path > 0.5;    # recache any response older than 0.5 day
         },
     );
-
-}
+};
 
 sub fetch_from_web {
     my $self = shift;

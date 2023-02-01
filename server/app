@@ -219,7 +219,6 @@ sub generate_bitmap {
         $img->write(data => \$out, type => 'png') or die;
         return $self->render(data => $out, format => 'png');
     } elsif ($format =~ /^raw/) {
-
         my $bitmap = '';
         if ($format eq 'raw8bpp') {
             foreach my $y (0 .. $img->getheight - 1) {
@@ -231,11 +230,20 @@ sub generate_bitmap {
                 }
             }
         } elsif ($format eq 'raw1bpp') {
+            my $bw = $img->to_paletted(
+                {
+                    make_colors => 'mono',                              # mono, gray4, gray16, gray
+                    translate   => 'closest',                           # closest, errdiff
+
+                    # errdiff     => 'jarvis',      # floyd, jarvis, stucki, ...
+                }
+            );
+
             foreach my $y (0 .. $img->getheight - 1) {
                 my $byte   = 0;
                 my $bitcnt = 0;
-                foreach my $x (0 .. $img->getwidth - 1) {
-                    my $color     = $img->getpixel(x => $x, y => $y);
+                my @colors = $img->getscanline(y => $y);
+                foreach my $color (@colors) {
                     my @rgb       = $color->rgba;
                     my $grayscale = $rgb[0];
 
