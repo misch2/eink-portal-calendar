@@ -11,7 +11,7 @@ I choose this approach because it's easier (and more fun) for me to implement th
 ## TODO
 
 1. ~~Support for Czech localization and characters~~
-1. ~~Greyed out icons~~
+1. ~~Grayed out icons~~
 1. ~~Add support for iCal.~~
 1. ~~Fix the icons at the bottom, make more of them available, make them more random.~~
 1. ~~Indicate possible WiFi outage or server unavailability on the display.~~
