@@ -27,7 +27,7 @@ WaveShare ePaper Driver HAT connector (from top to bottom):
 
 BUSY - violet #808 - to GPIO 14                   or to GPIO 25
 RST  - white  #fff - to GPIO 26
-DC   - green  #070 - to GPIO 27                 
+DC   - green  #070 - to GPIO 27
 CS   - orange #f80 - to VSPI CS (GPIO 5)          or to GPIO 15
 CLK  - yellow #ff0 - to VSPI SCLK (GPIO 18)       or to GPIO 14
 DIN  - blue   #008 - to VSP MOSI (GPIO 23)        or to GPIO 13
@@ -35,10 +35,11 @@ GND  - brown  #844 - to GND
 VCC  - gray   #888 - to +3.3V
 */
 
-// generic esp32 board
-#define CS_PIN 12
-#define DC_PIN 14
-#define RST_PIN 27
-#define BUSY_PIN 26
+// EzSBC ESP32 breakout board
+#define SPI_BUS HSPI
+#define CS_PIN 15
+#define DC_PIN 23
+#define RST_PIN 33
+#define BUSY_PIN 27
 
 #endif

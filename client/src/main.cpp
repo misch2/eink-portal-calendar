@@ -4,7 +4,7 @@
 
 Timing on ESP8266:
 
-with DEBUG on:
+with DEBUG_VISIBLE on:
  0:00 boot
  1:77 try to display 'starting...'
  5:15  - fully displayed
@@ -14,17 +14,24 @@ with DEBUG on:
 19:82 refreshing display
 23:64  - finished
 
-with DEBUG off:
+with DEBUG_VISIBLE off:
  0:00 boot
 10:40 refreshing display
 13:60  - finished
+
+dtto but optimized backend
+ 0:00 boot
+ 9:42  - finished
+
 */
 
-// #define DEBUG
+#define DEBUG
+// #define DEBUG_VISIBLE
 
 // #define USE_GxEPD2_4G
 // #define USE_GRAYSCALE_DISPLAY
 
+#include <SPI.h>
 #include <WiFiManager.h>
 
 #ifdef USE_GxEPD2_4G
@@ -81,9 +88,18 @@ void setup() {
   DEBUG_PRINT("CS=%d, DC=%d, RST=%d, BUSY=%d", CS_PIN, DC_PIN, RST_PIN,
               BUSY_PIN);
   delay(100);
-  display.init(115200);
 
-  // display_text_fast("Starting...");
+  DEBUG_PRINT("setup SPI");
+  SPIClass* spi = new SPIClass(SPI_BUS);
+
+  DEBUG_PRINT("init display");
+  /* 2ms reset for waveshare board */
+  display.init(115200, false, 2, false, *spi,
+               SPISettings(7000000, MSBFIRST, SPI_MODE0));
+
+#ifdef DEBUG_VISIBLE
+  display_text_fast("Starting...");
+#endif
   DEBUG_PRINT("setup done");
 }
 
@@ -91,7 +107,7 @@ void loop() {
   DEBUG_PRINT("----------------------------------------");
   DEBUG_PRINT("loop start");
 
-#ifdef DEBUG
+#ifdef DEBUG_VISIBLE
   display_text_fast("Connecting to WiFi...");
 #endif
   if (!startWiFi()) {
@@ -133,7 +149,7 @@ void showRawBitmapFrom_HTTP(const char* host,
   DEBUG_PRINT("-");
 
   DEBUG_PRINT("connecting to %s", host);
-#ifdef DEBUG
+#ifdef DEBUG_VISIBLE
   display_text_fast("Connecting to webserver...");
 #endif
   if (!wifiClient.connect(host, port)) {
@@ -142,7 +158,7 @@ void showRawBitmapFrom_HTTP(const char* host,
     return;
   }
 
-#ifdef DEBUG
+#ifdef DEBUG_VISIBLE
   display_text_fast("Downloading calendar data...");
 #endif
   DEBUG_PRINT("Downloading http://%s:%d%s", host, port, path);
@@ -153,7 +169,7 @@ void showRawBitmapFrom_HTTP(const char* host,
   String line = "<not read anything yet>";
   while (wifiClient.connected()) {
     line = wifiClient.readStringUntil('\n');
-    DEBUG_PRINT("read line:\n[%s]\n", line.c_str());
+    DEBUG_PRINT("read line: [\n%s\n]\n", line.c_str());
     if (!connection_ok) {
       DEBUG_PRINT("Waiting for OK response from server. Current line: %s",
                   line.c_str());
@@ -165,7 +181,7 @@ void showRawBitmapFrom_HTTP(const char* host,
     if (!connection_ok) {
       Serial.println("Unexpected first line: ");
       Serial.print(line.c_str());
-      break;
+      // break; FIXME
     }
     if ((line == "\r") || (line == "")) {
       DEBUG_PRINT("all headers received");
@@ -173,7 +189,8 @@ void showRawBitmapFrom_HTTP(const char* host,
     }
   };
   if (!connection_ok) {
-    error("Unexpected HTTP response.\nLast line:\n" + line);
+    error("Unexpected HTTP response, didn't found '200 OK'.\nLast line was:\n" +
+          line);
     return;
   }
 
@@ -222,14 +239,13 @@ void showRawBitmapFrom_HTTP(const char* host,
     display.writeImage(input_row_mono_buffer, x, y + row, w, rows_at_once);
 #endif
   }  // end line
+  Serial.print("bytes read ");
+  Serial.println(bytes_read);
+
+  display.refresh();  // full refresh
   Serial.print("downloaded and displayed in ");
   Serial.print(millis() - startTime);
   Serial.println(" ms");
-
-  display.refresh();  // full refresh
-
-  Serial.print("bytes read ");
-  Serial.println(bytes_read);
 
   wifiClient.stop();
 }
@@ -254,6 +270,8 @@ bool startWiFi() {
 
   DEBUG_PRINT("Connecting to WiFi");
   unsigned long start = millis();
+
+  // wifiManager.setFastConnectMode(true); // no difference
   res = wifiManager.autoConnect();
 
   if (!res) {
