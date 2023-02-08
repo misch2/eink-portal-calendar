@@ -1,6 +1,6 @@
 package PortalCalendar::Web2Png;
 
-use Moo;
+use Mojo::Base -base;
 
 use DDP;
 use File::pushd;
@@ -8,7 +8,7 @@ use File::Copy;
 
 #use File::Temp;
 
-has pageres_command => (is => 'ro', required => 1);
+has 'pageres_command';
 
 sub convert_url {
     my $self    = shift;
