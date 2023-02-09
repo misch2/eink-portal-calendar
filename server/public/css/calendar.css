@@ -101,11 +101,11 @@ div.dow-number-and-name {
 
 div.bunch-of-bars {
     display: flex;
-    gap: 5px;
+    gap: 6px;
 }
 
 div.bunch-of-bars div.bar {
-    width: 7px;
+    width: 6px;
     height: 35px;
     background-color: black;
 }
@@ -121,8 +121,8 @@ div.icons-container {
 
 .icon {
     /* sizes must be in 'px', otherwise the 'grayed' overlay gets slightly stretched and doesn't translate well into the black&white */
-    height: 65px;
-    width: 65px;
+    height: 60px;
+    width: 60px;
     border: 2px solid black;
     padding: 2px;
     margin: 0;
@@ -135,7 +135,7 @@ div.icons-container {
 
 div.calendar-container {
     font-size: 1rem;
-    margin-top: 0.3rem;
+    margin-top: 0.8rem;
 }
 
 div.calendar-container div {
