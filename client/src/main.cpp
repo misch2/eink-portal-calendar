@@ -24,6 +24,10 @@
 #include <GxEPD2_BW.h>
 #endif
 
+#include <esp_task_wdt.h>
+// 10 seconds WDT
+#define WDT_TIMEOUT 15
+
 #include "debug.h"
 #include "display_settings.h"
 #include "main.h"
@@ -73,6 +77,10 @@ void wakeupAndConnect() {
 
   Serial.begin(115200);
   Serial.println();
+
+  DEBUG_PRINT("WDT setup: %d seconds", WDT_TIMEOUT);
+  esp_task_wdt_init(WDT_TIMEOUT, true);  // enable panic so ESP32 restarts
+  esp_task_wdt_add(NULL);                // add current thread to WDT watch
 
   DEBUG_PRINT("display setup start");
   DEBUG_PRINT("CS=%d, DC=%d, RST=%d, BUSY=%d", CS_PIN, DC_PIN, RST_PIN,
@@ -183,15 +191,15 @@ void showRawBitmapFrom_HTTP(const char* host,
       //   // if (!connection_ok) Serial.println(line);
     }
     if (!connection_ok) {
-      Serial.println("Unexpected first line: ");
-      Serial.print(line.c_str());
-      // break; FIXME
+      DEBUG_PRINT("Unexpected first line: %s", line.c_str());
+      // break;
     }
     if ((line == "\r") || (line == "")) {
-      DEBUG_PRINT("Headers received");
+      DEBUG_PRINT("All headers received");
       break;
     }
   };
+
   if (!connection_ok) {
     error("Unexpected HTTP response, didn't found '200 OK'.\nLast line was:\n" +
           line);
@@ -202,7 +210,6 @@ void showRawBitmapFrom_HTTP(const char* host,
   line = wifiClient.readStringUntil('\n');
   if (line != "MM")  // signature
   {
-    Serial.println("bitmap format not handled.");
     error("Invalid bitmap received.");
   }
 
@@ -225,17 +232,14 @@ void showRawBitmapFrom_HTTP(const char* host,
   {
     if (!connection_ok || !(wifiClient.connected() || wifiClient.available()))
       break;
-    delay(1);  // yield() to avoid WDT
-    yield();
+    yield();  // prevent WDT
 
     uint32_t got =
         read8n(wifiClient, input_row_mono_buffer, bytes_per_row * rows_at_once);
     bytes_read += got;
 
     if (!connection_ok) {
-      Serial.print("Error: got no more after ");
-      Serial.print(bytes_read);
-      Serial.println(" bytes read!");
+      DEBUG_PRINT("Bytes read so far: %d", bytes_read);
       error("Read from HTTP server failed.");
       break;
     }
@@ -248,13 +252,10 @@ void showRawBitmapFrom_HTTP(const char* host,
     display.writeImage(input_row_mono_buffer, x, y + row, w, rows_at_once);
 #endif
   }  // end line
-  Serial.print("bytes read ");
-  Serial.println(bytes_read);
+  DEBUG_PRINT("Bytes read: %d", bytes_read);
 
   display.refresh();  // full refresh
-  Serial.print("downloaded and displayed in ");
-  Serial.print(millis() - startTime);
-  Serial.println(" ms");
+  DEBUG_PRINT("downloaded and displayed in %lu ms", millis() - startTime);
 
   wifiClient.stop();
 }
