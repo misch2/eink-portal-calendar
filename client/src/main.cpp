@@ -1,31 +1,18 @@
-#include <Arduino.h>
-
-/*
-
-Timing on ESP8266:
-
-with DEBUG on:
- 0:00 boot
- 1:77 try to display 'starting...'
- 5:15  - fully displayed
- 6:92 fully displayed 'connecting to wifi...'
-11:50 fully displayed 'connecting to webserver...'
-13:27 fully displayed 'downloading...'
-19:82 refreshing display
-23:64  - finished
-
-with DEBUG off:
- 0:00 boot
-10:40 refreshing display
-13:60  - finished
-*/
-
-// #define DEBUG
-
+#define DEBUG
 // #define USE_GxEPD2_4G
 // #define USE_GRAYSCALE_DISPLAY
 
+#include "secrets_config.h"
+
+// generic libraries
+#include <Arduino.h>
+#include <SPI.h>
 #include <WiFiManager.h>
+
+#ifdef SYSLOG_SERVER
+#include <Syslog.h>
+#include <WiFiUdp.h>
+#endif
 
 #ifdef USE_GxEPD2_4G
 #ifdef USE_GRAYSCALE_DISPLAY
@@ -37,25 +24,15 @@ with DEBUG off:
 #include <GxEPD2_BW.h>
 #endif
 
-// local settings
+#include "debug.h"
 #include "display_settings.h"
 #include "main.h"
-#include "secrets_config.h"
 
 // fonts
 #include "Open_Sans_Regular_16.h"
 #include "Open_Sans_Regular_24.h"
 
-#ifdef DEBUG
-#define DEBUG_PRINT(...)      \
-  Serial.printf(__VA_ARGS__); \
-  Serial.print('\n')
-#else
-#define DEBUG_PRINT(...)
-#endif
-
-// Template needs page_height as 2nd parameter, it's set to half of the display
-// height
+/* local vars */
 #ifdef USE_GxEPD2_4G
 #ifdef USE_GRAYSCALE_DISPLAY
 GxEPD2_4G_4G<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(
@@ -71,34 +48,58 @@ GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(
 
 WiFiManager wifiManager;
 WiFiClient wifiClient;  // for HTTP requests
-String lastChecksum = "";
+
+/* RTC vars (survives deep sleep) */
+RTC_DATA_ATTR int bootCount = 0;
+RTC_DATA_ATTR char lastChecksum[64 + 1] =
+    "";  // TODO check the length in read loop to prevent overflow
 
 void setup() {
+  uint32_t fullStartTime = millis();
+  ++bootCount;
+
   Serial.begin(115200);
   Serial.println();
 
-  DEBUG_PRINT("setup display");
+  DEBUG_PRINT("display setup start");
   DEBUG_PRINT("CS=%d, DC=%d, RST=%d, BUSY=%d", CS_PIN, DC_PIN, RST_PIN,
               BUSY_PIN);
   delay(100);
-  display.init(115200);
+  SPIClass* spi = new SPIClass(SPI_BUS);
+  /* 2ms reset for waveshare board */
+  display.init(115200, false, 2, false, *spi,
+               SPISettings(7000000, MSBFIRST, SPI_MODE0));
+  DEBUG_PRINT("setup finished");
 
-  // display_text_fast("Starting...");
-  DEBUG_PRINT("setup done");
-}
-
-void loop() {
-  DEBUG_PRINT("----------------------------------------");
-  DEBUG_PRINT("loop start");
-
-#ifdef DEBUG
-  display_text_fast("Connecting to WiFi...");
-#endif
+  // DEBUG_PRINT("Wifi status1: %d", WiFi.status()); //  [
+  // 1113][E][WiFiUdp.cpp:183] endPacket(): could not send data: 12
   if (!startWiFi()) {
     errorNoWifi();
   }
+  // WiFi is connected now => all messages go to syslog too.
+  // But FIXME, first few UDP packets are not sent:  //  [
+  // 1113][E][WiFiUdp.cpp:183] endPacket(): could not send data: 12
+
+  esp_sleep_wakeup_cause_t wakeup_reason;
+  wakeup_reason = esp_sleep_get_wakeup_cause();
+  if (wakeup_reason == ESP_SLEEP_WAKEUP_TIMER) {
+    DEBUG_PRINT("Wakeup caused by timer");
+  } else {
+    DEBUG_PRINT("Wakeup cause: %d", wakeup_reason);
+  }
+  DEBUG_PRINT("Boot count: %d", bootCount);
+
   drawImageFromServer();
+
+  DEBUG_PRINT(
+      "Total execution time: %lums",
+      millis() -
+          fullStartTime);  // last syslog message before the WiFi disconnects
   hibernateAll(SECONDS_PER_HOUR);
+}
+
+void loop() {
+  // Shouldn't get here at all due to the hibernateAll() call in setup.
 }
 
 void drawImageFromServer() {
@@ -130,30 +131,21 @@ void showRawBitmapFrom_HTTP(const char* host,
   uint32_t startTime = millis();
   if ((x >= display.epd2.WIDTH) || (y >= display.epd2.HEIGHT))
     return;
-  DEBUG_PRINT("-");
 
-  DEBUG_PRINT("connecting to %s", host);
-#ifdef DEBUG
-  display_text_fast("Connecting to webserver...");
-#endif
+  DEBUG_PRINT("Downloading http://%s:%d%s", host, port, path);
   if (!wifiClient.connect(host, port)) {
     DEBUG_PRINT("HTTP connection failed");
     error("Connection to HTTP server failed.");
     return;
   }
 
-#ifdef DEBUG
-  display_text_fast("Downloading calendar data...");
-#endif
-  DEBUG_PRINT("Downloading http://%s:%d%s", host, port, path);
   wifiClient.print(String("GET ") + path + " HTTP/1.1\r\n" + "Host: " + host +
                    "\r\n" + "User-Agent: Portal_Calendar_on_ESP\r\n" +
                    "Connection: close\r\n\r\n");
-  DEBUG_PRINT("request sent");
   String line = "<not read anything yet>";
   while (wifiClient.connected()) {
     line = wifiClient.readStringUntil('\n');
-    DEBUG_PRINT("read line:\n[%s]\n", line.c_str());
+    DEBUG_PRINT(" read line: [%s\n]\n", line.c_str());
     if (!connection_ok) {
       DEBUG_PRINT("Waiting for OK response from server. Current line: %s",
                   line.c_str());
@@ -165,19 +157,20 @@ void showRawBitmapFrom_HTTP(const char* host,
     if (!connection_ok) {
       Serial.println("Unexpected first line: ");
       Serial.print(line.c_str());
-      break;
+      // break; FIXME
     }
     if ((line == "\r") || (line == "")) {
-      DEBUG_PRINT("all headers received");
+      DEBUG_PRINT("Headers received");
       break;
     }
   };
   if (!connection_ok) {
-    error("Unexpected HTTP response.\nLast line:\n" + line);
+    error("Unexpected HTTP response, didn't found '200 OK'.\nLast line was:\n" +
+          line);
     return;
   }
 
-  DEBUG_PRINT("Parsing bitmap header");
+  DEBUG_PRINT("Reading bitmap header");
   line = wifiClient.readStringUntil('\n');
   if (line != "MM")  // signature
   {
@@ -185,15 +178,20 @@ void showRawBitmapFrom_HTTP(const char* host,
     error("Invalid bitmap received.");
   }
 
+  DEBUG_PRINT("Reading checksum");
   line = wifiClient.readStringUntil('\n');  // checksum
-  DEBUG_PRINT("Last checksum was: %s", lastChecksum.c_str());
+  DEBUG_PRINT("Last checksum was: %s", lastChecksum);
   DEBUG_PRINT("New checksum is: %s", line.c_str());
-  if (line == lastChecksum) {
+  if (line == String(lastChecksum)) {
     DEBUG_PRINT("Not refreshing, image is unchanged");
     return;
+  } else {
+    DEBUG_PRINT(
+        "Checksum has changed, reading image and refreshing the display");
   };
-  lastChecksum = line;
+  strcpy(lastChecksum, line.c_str());  // to survive a reboot
 
+  DEBUG_PRINT("Reading image data");
   uint32_t bytes_read = 0;                              // read so far
   for (uint16_t row = 0; row < h; row += rows_at_once)  // for each line
   {
@@ -222,20 +220,18 @@ void showRawBitmapFrom_HTTP(const char* host,
     display.writeImage(input_row_mono_buffer, x, y + row, w, rows_at_once);
 #endif
   }  // end line
+  Serial.print("bytes read ");
+  Serial.println(bytes_read);
+
+  display.refresh();  // full refresh
   Serial.print("downloaded and displayed in ");
   Serial.print(millis() - startTime);
   Serial.println(" ms");
-
-  display.refresh();  // full refresh
-
-  Serial.print("bytes read ");
-  Serial.println(bytes_read);
 
   wifiClient.stop();
 }
 
 void stopWiFi() {
-  DEBUG_PRINT("Stopping WiFi");
   unsigned long start = millis();
 
   WiFi.persistent(
@@ -254,6 +250,8 @@ bool startWiFi() {
 
   DEBUG_PRINT("Connecting to WiFi");
   unsigned long start = millis();
+
+  // wifiManager.setFastConnectMode(true); // no difference
   res = wifiManager.autoConnect();
 
   if (!res) {
@@ -261,9 +259,9 @@ bool startWiFi() {
     stopWiFi();
     return false;
   }
-  DEBUG_PRINT("Connected.");
+  DEBUG_PRINT("---");
+  DEBUG_PRINT("Connected to WiFi in %lums", millis() - start);
   DEBUG_PRINT("IP address: %s", WiFi.localIP().toString().c_str());
-  DEBUG_PRINT("WiFi connection took %lums", millis() - start);
   return true;
 }
 
@@ -356,6 +354,7 @@ void testDisplayMessage() {
 }
 
 void error(String message) {
+  strcpy(lastChecksum, "");  // to force reload of image next time
   DEBUG_PRINT("Displaying error: %s", message.c_str());
   display_text_fast(message);
   hibernateAll(SECONDS_PER_HOUR);
@@ -376,8 +375,33 @@ void espDeepSleep(uint64_t seconds) {
 }
 
 void hibernateAll(uint64_t seconds) {
-  DEBUG_PRINT("hibernating for %llu seconds", seconds);
+  DEBUG_PRINT("Going to hibernate for %llu seconds", seconds);
   display.powerOff();
   stopWiFi();
   espDeepSleep(seconds);
 }
+
+/*
+
+Timing on ESP8266:
+
+with DEBUG_VISIBLE on:
+ 0:00 boot
+ 1:77 try to display 'starting...'
+ 5:15  - fully displayed
+ 6:92 fully displayed 'connecting to wifi...'
+11:50 fully displayed 'connecting to webserver...'
+13:27 fully displayed 'downloading...'
+19:82 refreshing display
+23:64  - finished
+
+with DEBUG_VISIBLE off:
+ 0:00 boot
+10:40 refreshing display
+13:60  - finished
+
+dtto but optimized backend
+ 0:00 boot
+ 9:42  - finished
+
+*/
