@@ -31,8 +31,16 @@ dtto but optimized backend
 // #define USE_GxEPD2_4G
 // #define USE_GRAYSCALE_DISPLAY
 
+#include "secrets_config.h"
+
+// generic libraries
 #include <SPI.h>
 #include <WiFiManager.h>
+
+#ifdef SYSLOG_SERVER
+#include <Syslog.h>
+#include <WiFiUdp.h>
+#endif
 
 #ifdef USE_GxEPD2_4G
 #ifdef USE_GRAYSCALE_DISPLAY
@@ -44,22 +52,42 @@ dtto but optimized backend
 #include <GxEPD2_BW.h>
 #endif
 
-// local settings
-#include "display_settings.h"
-#include "main.h"
-#include "secrets_config.h"
-
 // fonts
 #include "Open_Sans_Regular_16.h"
 #include "Open_Sans_Regular_24.h"
 
+#ifdef SYSLOG_SERVER
+// A UDP instance to let us send and receive packets over UDP
+WiFiUDP udpClient;
+// Create a new syslog instance with LOG_KERN facility
+Syslog syslog(udpClient,
+              SYSLOG_SERVER,
+              SYSLOG_PORT,
+              SYSLOG_MYHOSTNAME,
+              SYSLOG_MYAPPNAME,
+              LOG_KERN);
+#endif
+
 #ifdef DEBUG
+#ifdef SYSLOG_SERVER
+#define DEBUG_PRINT(...)                                \
+  Serial.printf(__VA_ARGS__);                           \
+  Serial.print('\n');                                   \
+  if (WiFi.status() == WL_CONNECTED) {                  \
+    syslog.logf(LOG_INFO, __VA_ARGS__);                 \
+  } else {                                              \
+    Serial.println(" (no syslog, WiFi not connected)"); \
+  }
+#else
 #define DEBUG_PRINT(...)      \
   Serial.printf(__VA_ARGS__); \
   Serial.print('\n')
+#endif
 #else
 #define DEBUG_PRINT(...)
 #endif
+
+#include "display_settings.h"
 
 // Template needs page_height as 2nd parameter, it's set to half of the display
 // height
@@ -78,11 +106,18 @@ GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(
 
 WiFiManager wifiManager;
 WiFiClient wifiClient;  // for HTTP requests
-String lastChecksum = "";
+
+#include "main.h"
+
+RTC_DATA_ATTR int bootCount = 0;
+RTC_DATA_ATTR char lastChecksum[64 + 1] = "";
 
 void setup() {
   Serial.begin(115200);
   Serial.println();
+
+  // Increment boot number and print it every reboot
+  ++bootCount;
 
   DEBUG_PRINT("setup display");
   DEBUG_PRINT("CS=%d, DC=%d, RST=%d, BUSY=%d", CS_PIN, DC_PIN, RST_PIN,
@@ -113,6 +148,32 @@ void loop() {
   if (!startWiFi()) {
     errorNoWifi();
   }
+
+  // FIXME
+  esp_sleep_wakeup_cause_t wakeup_reason;
+  wakeup_reason = esp_sleep_get_wakeup_cause();
+  switch (wakeup_reason) {
+    case ESP_SLEEP_WAKEUP_EXT0:
+      DEBUG_PRINT("Wakeup caused by external signal using RTC_IO");
+      break;
+    case ESP_SLEEP_WAKEUP_EXT1:
+      DEBUG_PRINT("Wakeup caused by external signal using RTC_CNTL");
+      break;
+    case ESP_SLEEP_WAKEUP_TIMER:
+      DEBUG_PRINT("Wakeup caused by timer");  // this is it!
+      break;
+    case ESP_SLEEP_WAKEUP_TOUCHPAD:
+      DEBUG_PRINT("Wakeup caused by touchpad");
+      break;
+    case ESP_SLEEP_WAKEUP_ULP:
+      DEBUG_PRINT("Wakeup caused by ULP program");
+      break;
+    default:
+      DEBUG_PRINT("Wakeup was not caused by deep sleep: %d\n", wakeup_reason);
+      break;
+  }
+  DEBUG_PRINT("Boot count: %d", bootCount);
+
   drawImageFromServer();
   hibernateAll(SECONDS_PER_HOUR);
 }
@@ -169,7 +230,7 @@ void showRawBitmapFrom_HTTP(const char* host,
   String line = "<not read anything yet>";
   while (wifiClient.connected()) {
     line = wifiClient.readStringUntil('\n');
-    DEBUG_PRINT("read line: [\n%s\n]\n", line.c_str());
+    DEBUG_PRINT("read line: [%s\n]\n", line.c_str());
     if (!connection_ok) {
       DEBUG_PRINT("Waiting for OK response from server. Current line: %s",
                   line.c_str());
@@ -203,13 +264,13 @@ void showRawBitmapFrom_HTTP(const char* host,
   }
 
   line = wifiClient.readStringUntil('\n');  // checksum
-  DEBUG_PRINT("Last checksum was: %s", lastChecksum.c_str());
+  DEBUG_PRINT("Last checksum was: %s", lastChecksum);
   DEBUG_PRINT("New checksum is: %s", line.c_str());
-  if (line == lastChecksum) {
+  if (line == String(lastChecksum)) {
     DEBUG_PRINT("Not refreshing, image is unchanged");
     return;
   };
-  lastChecksum = line;
+  strcpy(lastChecksum, line.c_str());  // to survive a reboot
 
   uint32_t bytes_read = 0;                              // read so far
   for (uint16_t row = 0; row < h; row += rows_at_once)  // for each line
@@ -374,6 +435,7 @@ void testDisplayMessage() {
 }
 
 void error(String message) {
+  strcpy(lastChecksum, "");  // to force reload of image next time
   DEBUG_PRINT("Displaying error: %s", message.c_str());
   display_text_fast(message);
   hibernateAll(SECONDS_PER_HOUR);
@@ -394,7 +456,7 @@ void espDeepSleep(uint64_t seconds) {
 }
 
 void hibernateAll(uint64_t seconds) {
-  DEBUG_PRINT("hibernating for %llu seconds", seconds);
+  DEBUG_PRINT("Going to hibernate for %llu seconds", seconds);
   display.powerOff();
   stopWiFi();
   espDeepSleep(seconds);
