@@ -54,8 +54,8 @@ uint8_t input_row_mono_buffer[input_buffer_pixels];  // at most 1 byte per pixel
 
 /* RTC vars (survives deep sleep) */
 RTC_DATA_ATTR int bootCount = 0;
-RTC_DATA_ATTR char lastChecksum[64 + 1] =
-    "";  // TODO check the length in read loop to prevent overflow
+// TODO check the length in read loop to prevent overflow
+RTC_DATA_ATTR char lastChecksum[64 + 1] = "";
 
 void setup() {
   wakeupAndConnect();
@@ -93,22 +93,37 @@ void wakeupAndConnect() {
   // But FIXME, first few UDP packets are not sent:  //  [
   // 1113][E][WiFiUdp.cpp:183] endPacket(): could not send data: 12
 
-  esp_sleep_wakeup_cause_t wakeup_reason;
-  wakeup_reason = esp_sleep_get_wakeup_cause();
-  if (wakeup_reason == ESP_SLEEP_WAKEUP_TIMER) {
-    DEBUG_PRINT("Wakeup caused by timer");
-  } else {
-    DEBUG_PRINT("Wakeup cause: %d", wakeup_reason);
-  }
+  esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
+  esp_reset_reason_t reset_reason = esp_reset_reason();
+
+  DEBUG_PRINT("Wakeup cause: %d, reset cause: %d", wakeup_reason, reset_reason);
   DEBUG_PRINT("Boot count: %d, last image checksum: %s", bootCount,
               lastChecksum);
+
+  if (reset_reason == ESP_RST_SW) {
+    DEBUG_PRINT("ESP_RST_SW");
+  } else if (reset_reason == ESP_RST_PANIC) {
+    DEBUG_PRINT("ESP_RST_PANIC");
+  } else if (reset_reason == ESP_RST_DEEPSLEEP) {
+    DEBUG_PRINT("ESP_RST_DEEPSLEEP");
+  } else if (reset_reason == ESP_RST_BROWNOUT) {
+    DEBUG_PRINT("ESP_RST_BROWNOUT");
+  } else if (reset_reason == ESP_RST_UNKNOWN) {
+    DEBUG_PRINT("ESP_RST_UNKNOWN");
+  } else if (reset_reason == ESP_RST_POWERON) {
+    DEBUG_PRINT("ESP_RST_POWERON");
+  }
+
+  if (wakeup_reason == ESP_SLEEP_WAKEUP_TIMER) {
+    DEBUG_PRINT("ESP_SLEEP_WAKEUP_TIMER");
+  } else if (wakeup_reason == ESP_SLEEP_WAKEUP_UNDEFINED) {
+    DEBUG_PRINT("ESP_SLEEP_WAKEUP_UNDEFINED");
+  }
 }
 
 void disconnectAndHibernate() {
-  DEBUG_PRINT(
-      "Total execution time: %lums",
-      millis() -
-          fullStartTime);  // last syslog message before the WiFi disconnects
+  // last syslog message before the WiFi disconnects
+  DEBUG_PRINT("Total execution time: %lums", millis() - fullStartTime);
 
   uint64_t seconds = SECONDS_PER_HOUR;
   DEBUG_PRINT("Going to hibernate for %llu seconds", seconds);
