@@ -13,7 +13,13 @@ Syslog syslog(udpClient,
   Serial.printf(__VA_ARGS__);                           \
   Serial.print('\n');                                   \
   if (WiFi.status() == WL_CONNECTED) {                  \
-    syslog.logf(LOG_INFO, __VA_ARGS__);                 \
+    for (int i = 0; i < 3; i++) {                       \
+      if (syslog.logf(LOG_INFO, __VA_ARGS__)) {         \
+        break;                                          \
+      } else {                                          \
+        delay(100);                                     \
+      }                                                 \
+    }                                                   \
   } else {                                              \
     Serial.println(" (no syslog, WiFi not connected)"); \
   }
