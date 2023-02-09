@@ -47,7 +47,10 @@ GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(
 #endif
 
 WiFiManager wifiManager;
-WiFiClient wifiClient;  // for HTTP requests
+WiFiClient wifiClient;
+uint32_t fullStartTime;
+static const uint16_t input_buffer_pixels = DISPLAY_HEIGHT;
+uint8_t input_row_mono_buffer[input_buffer_pixels];  // at most 1 byte per pixel
 
 /* RTC vars (survives deep sleep) */
 RTC_DATA_ATTR int bootCount = 0;
@@ -55,7 +58,17 @@ RTC_DATA_ATTR char lastChecksum[64 + 1] =
     "";  // TODO check the length in read loop to prevent overflow
 
 void setup() {
-  uint32_t fullStartTime = millis();
+  wakeupAndConnect();
+  fetchAndDrawImageIfNeeded();
+  disconnectAndHibernate();
+}
+
+void loop() {
+  // Shouldn't get here at all due to the deep sleep called in setup
+}
+
+void wakeupAndConnect() {
+  fullStartTime = millis();
   ++bootCount;
 
   Serial.begin(115200);
@@ -87,22 +100,24 @@ void setup() {
   } else {
     DEBUG_PRINT("Wakeup cause: %d", wakeup_reason);
   }
-  DEBUG_PRINT("Boot count: %d", bootCount);
+  DEBUG_PRINT("Boot count: %d, last image checksum: %s", bootCount,
+              lastChecksum);
+}
 
-  drawImageFromServer();
-
+void disconnectAndHibernate() {
   DEBUG_PRINT(
       "Total execution time: %lums",
       millis() -
           fullStartTime);  // last syslog message before the WiFi disconnects
-  hibernateAll(SECONDS_PER_HOUR);
+
+  uint64_t seconds = SECONDS_PER_HOUR;
+  DEBUG_PRINT("Going to hibernate for %llu seconds", seconds);
+  display.powerOff();
+  stopWiFi();
+  espDeepSleep(seconds);
 }
 
-void loop() {
-  // Shouldn't get here at all due to the hibernateAll() call in setup.
-}
-
-void drawImageFromServer() {
+void fetchAndDrawImageIfNeeded() {
 #ifdef USE_GRAYSCALE_DISPLAY
   showRawBitmapFrom_HTTP(CALENDAR_URL_HOST, CALENDAR_URL_PORT,
                          "/calendar/bitmap/epapergray", 0, 0, DISPLAY_HEIGHT,
@@ -114,9 +129,6 @@ void drawImageFromServer() {
                          /* bpp */ DISPLAY_HEIGHT / 8, /* rows at once */ 8);
 #endif
 }
-
-static const uint16_t input_buffer_pixels = DISPLAY_HEIGHT;
-uint8_t input_row_mono_buffer[input_buffer_pixels];  // at most 1 byte per pixel
 
 void showRawBitmapFrom_HTTP(const char* host,
                             int port,
@@ -234,11 +246,14 @@ void showRawBitmapFrom_HTTP(const char* host,
 void stopWiFi() {
   unsigned long start = millis();
 
-  WiFi.persistent(
-      false);  // do not reset settings (SSID/password) when disconnecting
+  // do not reset settings (SSID/password) when disconnecting
+  WiFi.persistent(false);
+
   // WiFi.disconnect(true);   // no, this resets the password too (even when
   // only in current session, it's enough to prevent WiFiManager to reconnect)
-  WiFi.mode(WIFI_OFF);  // this is sufficient
+
+  WiFi.mode(WIFI_OFF);  // this is sufficient to disconnect
+
   WiFi.persistent(true);
 
   DEBUG_PRINT("WiFi shutdown took %lums", millis() - start);
@@ -265,39 +280,6 @@ bool startWiFi() {
   return true;
 }
 
-uint16_t read16(WiFiClient& client) {
-  // BMP data is stored little-endian, same as Arduino.
-  uint16_t result;
-  ((uint8_t*)&result)[0] = client.read();  // LSB
-  ((uint8_t*)&result)[1] = client.read();  // MSB
-  return result;
-}
-
-uint32_t read32(WiFiClient& client) {
-  // BMP data is stored little-endian, same as Arduino.
-  uint32_t result;
-  ((uint8_t*)&result)[0] = client.read();  // LSB
-  ((uint8_t*)&result)[1] = client.read();
-  ((uint8_t*)&result)[2] = client.read();
-  ((uint8_t*)&result)[3] = client.read();  // MSB
-  return result;
-}
-
-uint32_t skip(WiFiClient& client, int32_t bytes) {
-  int32_t remain = bytes;
-  uint32_t start = millis();
-  while ((client.connected() || client.available()) && (remain > 0)) {
-    if (client.available()) {
-      client.read();
-      remain--;
-    } else
-      delay(1);
-    if (millis() - start > 2000)
-      break;  // don't hang forever
-  }
-  return bytes - remain;
-}
-
 uint32_t read8n(WiFiClient& client, uint8_t* buffer, int32_t bytes) {
   int32_t remain = bytes;
   uint32_t start = millis();
@@ -314,7 +296,7 @@ uint32_t read8n(WiFiClient& client, uint8_t* buffer, int32_t bytes) {
   return bytes - remain;
 }
 
-void display_text_fast(String message) {
+void displayText(String message) {
   display.setRotation(3);
   display.setFont(&Open_Sans_Regular_24);
   display.setTextColor(GxEPD_BLACK);
@@ -332,7 +314,7 @@ void display_text_fast(String message) {
   // uint16_t wy = (display.height() / 2) - wh / 2;
   uint16_t wy = (display.height() / 4);
   uint16_t wh = (display.height() / 2);
-  display.setPartialWindow(0, wy, display.width(), wh);
+  // display.setPartialWindow(0, wy, display.width(), wh);
 
   display.firstPage();
   do {
@@ -340,15 +322,16 @@ void display_text_fast(String message) {
     display.setCursor(x, y);
     display.print(message);
   } while (display.nextPage());
+  display.refresh();  // full refresh
 }
 
 void testDisplayMessage() {
   DEBUG_PRINT("testDisplayMessage() start");
-  display_text_fast("foo");
+  displayText("foo");
   delay(1000);
-  display_text_fast("bar");
+  displayText("bar");
   delay(1000);
-  display_text_fast("foobar");
+  displayText("foobar");
   DEBUG_PRINT("testDisplayMessage() done");
   delay(15000);
 }
@@ -356,8 +339,8 @@ void testDisplayMessage() {
 void error(String message) {
   strcpy(lastChecksum, "");  // to force reload of image next time
   DEBUG_PRINT("Displaying error: %s", message.c_str());
-  display_text_fast(message);
-  hibernateAll(SECONDS_PER_HOUR);
+  displayText(message);
+  disconnectAndHibernate();
 }
 
 void errorNoWifi() {
@@ -372,13 +355,6 @@ void espDeepSleep(uint64_t seconds) {
   esp_sleep_enable_timer_wakeup(seconds * uS_PER_S);
   esp_deep_sleep_start();
 #endif
-}
-
-void hibernateAll(uint64_t seconds) {
-  DEBUG_PRINT("Going to hibernate for %llu seconds", seconds);
-  display.powerOff();
-  stopWiFi();
-  espDeepSleep(seconds);
 }
 
 /*
