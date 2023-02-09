@@ -97,8 +97,6 @@ void wakeupAndConnect() {
   esp_reset_reason_t reset_reason = esp_reset_reason();
 
   DEBUG_PRINT("Wakeup cause: %d, reset cause: %d", wakeup_reason, reset_reason);
-  DEBUG_PRINT("Boot count: %d, last image checksum: %s", bootCount,
-              lastChecksum);
 
   if (reset_reason == ESP_RST_SW) {
     DEBUG_PRINT("ESP_RST_SW");
@@ -119,6 +117,9 @@ void wakeupAndConnect() {
   } else if (wakeup_reason == ESP_SLEEP_WAKEUP_UNDEFINED) {
     DEBUG_PRINT("ESP_SLEEP_WAKEUP_UNDEFINED");
   }
+
+  DEBUG_PRINT("Boot count: %d, last image checksum: %s", bootCount,
+              lastChecksum);
 }
 
 void disconnectAndHibernate() {
