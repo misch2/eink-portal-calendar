@@ -37,6 +37,18 @@ get '/' => sub {
     return $self->render(template => 'test', format => 'html');
 };
 
+get '/config' => sub {
+    my $self   = shift;
+    my $config = {
+        #
+        sleep => 3600,
+
+        #display     => "BW",                            # "bw", "grayscale",
+        bitmap_path => "/calendar/bitmap/epapermono",
+    };
+    $self->render(json => $config);
+};
+
 # main HTML page with calendar (either for current or for specific date)
 get '/calendar/html' => sub {
     my $self = shift;
