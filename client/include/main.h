@@ -3,9 +3,11 @@ bool startWiFi();
 
 void wakeupAndConnect();
 void checkResetReason();
+void loadConfigFromWeb();
 void fetchAndDrawImageIfNeeded();
 void disconnectAndHibernate();
 
+String httpGETRequestAsString(const char* url);
 void showRawBitmapFrom_HTTP(const char* host,
                             int port,
                             const char* path,
