@@ -121,9 +121,9 @@ div.icons-container {
 
 .icon {
     /* sizes must be in 'px', otherwise the 'grayed' overlay gets slightly stretched and doesn't translate well into the black&white */
-    height: 58px;
-    width: 58px;
-    border: 2px solid black;
+    height: 57px;
+    width: 57px;
+    border: 1px solid black;
     padding: 2px;
     margin: 0;
 }
