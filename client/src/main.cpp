@@ -7,12 +7,9 @@
 // generic libraries
 #include <Arduino.h>
 #include <SPI.h>
-#include <WiFiManager.h>
-
-#ifdef SYSLOG_SERVER
 #include <Syslog.h>
+#include <WiFiManager.h>
 #include <WiFiUdp.h>
-#endif
 
 #ifdef USE_GxEPD2_4G
 #ifdef USE_GRAYSCALE_DISPLAY
@@ -24,17 +21,9 @@
 #include <GxEPD2_BW.h>
 #endif
 
-#include <esp_task_wdt.h>
-// 10 seconds WDT
-#define WDT_TIMEOUT 15
-
 #include "debug.h"
 #include "display_settings.h"
 #include "main.h"
-
-// fonts
-#include "Open_Sans_Regular_16.h"
-#include "Open_Sans_Regular_24.h"
 
 /* local vars */
 #ifdef USE_GxEPD2_4G
@@ -55,6 +44,12 @@ WiFiClient wifiClient;
 uint32_t fullStartTime;
 static const uint16_t input_buffer_pixels = DISPLAY_HEIGHT;
 uint8_t input_row_mono_buffer[input_buffer_pixels];  // at most 1 byte per pixel
+String serverURLBase =
+    String("http://") + CALENDAR_URL_HOST + ":" + CALENDAR_URL_PORT;
+
+// configurable remotely
+uint64_t sleepTime = SECONDS_PER_HOUR;
+String bitmapUrlPath = "/calendar/bitmap/epapermono";
 
 /* RTC vars (survives deep sleep) */
 RTC_DATA_ATTR int bootCount = 0;
@@ -63,7 +58,10 @@ RTC_DATA_ATTR char lastChecksum[64 + 1] = "";
 
 void setup() {
   wakeupAndConnect();
+  checkResetReason();
+
   fetchAndDrawImageIfNeeded();
+
   disconnectAndHibernate();
 }
 
@@ -78,10 +76,6 @@ void wakeupAndConnect() {
   Serial.begin(115200);
   Serial.println();
 
-  DEBUG_PRINT("WDT setup: %d seconds", WDT_TIMEOUT);
-  esp_task_wdt_init(WDT_TIMEOUT, true);  // enable panic so ESP32 restarts
-  esp_task_wdt_add(NULL);                // add current thread to WDT watch
-
   DEBUG_PRINT("display setup start");
   DEBUG_PRINT("CS=%d, DC=%d, RST=%d, BUSY=%d", CS_PIN, DC_PIN, RST_PIN,
               BUSY_PIN);
@@ -92,32 +86,37 @@ void wakeupAndConnect() {
                SPISettings(7000000, MSBFIRST, SPI_MODE0));
   DEBUG_PRINT("setup finished");
 
-  // DEBUG_PRINT("Wifi status1: %d", WiFi.status()); //  [
-  // 1113][E][WiFiUdp.cpp:183] endPacket(): could not send data: 12
   if (!startWiFi()) {
     errorNoWifi();
   }
-  // WiFi is connected now => all messages go to syslog too.
-  // But FIXME, first few UDP packets are not sent:  //  [
-  // 1113][E][WiFiUdp.cpp:183] endPacket(): could not send data: 12
+}
 
+void checkResetReason() {
   esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
   esp_reset_reason_t reset_reason = esp_reset_reason();
 
   DEBUG_PRINT("Wakeup cause: %d, reset cause: %d", wakeup_reason, reset_reason);
 
-  if (reset_reason == ESP_RST_SW) {
+  if (reset_reason == ESP_RST_UNKNOWN) {
+    DEBUG_PRINT("ESP_RST_UNKNOWN");
+  } else if (reset_reason == ESP_RST_POWERON) {
+    DEBUG_PRINT("ESP_RST_POWERON");
+  } else if (reset_reason == ESP_RST_SW) {
     DEBUG_PRINT("ESP_RST_SW");
   } else if (reset_reason == ESP_RST_PANIC) {
     DEBUG_PRINT("ESP_RST_PANIC");
+  } else if (reset_reason == ESP_RST_INT_WDT) {
+    DEBUG_PRINT("ESP_RST_INT_WDT");
+  } else if (reset_reason == ESP_RST_TASK_WDT) {
+    DEBUG_PRINT("ESP_RST_TASK_WDT");
+  } else if (reset_reason == ESP_RST_WDT) {
+    DEBUG_PRINT("ESP_RST_WDT");
   } else if (reset_reason == ESP_RST_DEEPSLEEP) {
     DEBUG_PRINT("ESP_RST_DEEPSLEEP");
   } else if (reset_reason == ESP_RST_BROWNOUT) {
     DEBUG_PRINT("ESP_RST_BROWNOUT");
-  } else if (reset_reason == ESP_RST_UNKNOWN) {
-    DEBUG_PRINT("ESP_RST_UNKNOWN");
-  } else if (reset_reason == ESP_RST_POWERON) {
-    DEBUG_PRINT("ESP_RST_POWERON");
+  } else if (reset_reason == ESP_RST_SDIO) {
+    DEBUG_PRINT("ESP_RST_SDIO");
   }
 
   if (wakeup_reason == ESP_SLEEP_WAKEUP_TIMER) {
@@ -133,12 +132,10 @@ void wakeupAndConnect() {
 void disconnectAndHibernate() {
   // last syslog message before the WiFi disconnects
   DEBUG_PRINT("Total execution time: %lums", millis() - fullStartTime);
-
-  uint64_t seconds = SECONDS_PER_HOUR;
-  DEBUG_PRINT("Going to hibernate for %llu seconds", seconds);
+  DEBUG_PRINT("Going to hibernate for %llu seconds", sleepTime);
   display.powerOff();
   stopWiFi();
-  espDeepSleep(seconds);
+  espDeepSleep(sleepTime);
 }
 
 void fetchAndDrawImageIfNeeded() {
@@ -148,7 +145,7 @@ void fetchAndDrawImageIfNeeded() {
                          DISPLAY_WIDTH, /* bpp */ DISPLAY_HEIGHT, 1);
 #else
   showRawBitmapFrom_HTTP(CALENDAR_URL_HOST, CALENDAR_URL_PORT,
-                         "/calendar/bitmap/epapermono", 0, 0, DISPLAY_HEIGHT,
+                         bitmapUrlPath.c_str(), 0, 0, DISPLAY_HEIGHT,
                          DISPLAY_WIDTH,
                          /* bpp */ DISPLAY_HEIGHT / 8, /* rows at once */ 8);
 #endif
@@ -269,7 +266,8 @@ void stopWiFi() {
   // WiFi.disconnect(true);   // no, this resets the password too (even when
   // only in current session, it's enough to prevent WiFiManager to reconnect)
 
-  WiFi.mode(WIFI_OFF);  // this is sufficient to disconnect
+  // this is sufficient to disconnect
+  WiFi.mode(WIFI_OFF);  
 
   WiFi.persistent(true);
 
@@ -342,17 +340,6 @@ void displayText(String message) {
   display.refresh();  // full refresh
 }
 
-void testDisplayMessage() {
-  DEBUG_PRINT("testDisplayMessage() start");
-  displayText("foo");
-  delay(1000);
-  displayText("bar");
-  delay(1000);
-  displayText("foobar");
-  DEBUG_PRINT("testDisplayMessage() done");
-  delay(15000);
-}
-
 void error(String message) {
   strcpy(lastChecksum, "");  // to force reload of image next time
   DEBUG_PRINT("Displaying error: %s", message.c_str());
@@ -366,35 +353,6 @@ void errorNoWifi() {
 
 void espDeepSleep(uint64_t seconds) {
   DEBUG_PRINT("Sleeping for %llus", seconds);
-#ifdef ESP8266
-  ESP.deepSleep(seconds * uS_PER_S);
-#else
   esp_sleep_enable_timer_wakeup(seconds * uS_PER_S);
   esp_deep_sleep_start();
-#endif
 }
-
-/*
-
-Timing on ESP8266:
-
-with DEBUG_VISIBLE on:
- 0:00 boot
- 1:77 try to display 'starting...'
- 5:15  - fully displayed
- 6:92 fully displayed 'connecting to wifi...'
-11:50 fully displayed 'connecting to webserver...'
-13:27 fully displayed 'downloading...'
-19:82 refreshing display
-23:64  - finished
-
-with DEBUG_VISIBLE off:
- 0:00 boot
-10:40 refreshing display
-13:60  - finished
-
-dtto but optimized backend
- 0:00 boot
- 9:42  - finished
-
-*/
