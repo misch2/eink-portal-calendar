@@ -6,6 +6,8 @@
 
 // generic libraries
 #include <Arduino.h>
+#include <ArduinoJson.h>
+#include <HTTPClient.h>
 #include <SPI.h>
 #include <Syslog.h>
 #include <WiFiManager.h>
@@ -41,6 +43,7 @@ GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(
 
 WiFiManager wifiManager;
 WiFiClient wifiClient;
+HTTPClient http;
 uint32_t fullStartTime;
 static const uint16_t input_buffer_pixels = DISPLAY_HEIGHT;
 uint8_t input_row_mono_buffer[input_buffer_pixels];  // at most 1 byte per pixel
@@ -49,7 +52,6 @@ String serverURLBase =
 
 // configurable remotely
 uint64_t sleepTime = SECONDS_PER_HOUR;
-String bitmapUrlPath = "/calendar/bitmap/epapermono";
 
 /* RTC vars (survives deep sleep) */
 RTC_DATA_ATTR int bootCount = 0;
@@ -60,6 +62,7 @@ void setup() {
   wakeupAndConnect();
   checkResetReason();
 
+  loadConfigFromWeb();
   fetchAndDrawImageIfNeeded();
 
   disconnectAndHibernate();
@@ -67,6 +70,34 @@ void setup() {
 
 void loop() {
   // Shouldn't get here at all due to the deep sleep called in setup
+}
+
+void loadConfigFromWeb() {
+  String jsonURL = serverURLBase + "/config";
+  DEBUG_PRINT("Loading config from web");
+
+  String jsonText = httpGETRequestAsString(jsonURL.c_str());
+
+  DynamicJsonDocument response(1000);
+  DeserializationError errorStr = deserializeJson(response, jsonText);
+
+  if (errorStr) {
+    DEBUG_PRINT("error: %s", errorStr.c_str());
+    error("Can't parse response");
+  }
+
+  int tmp = response["sleep"];
+  if (tmp != 0) {
+    sleepTime = tmp;
+    DEBUG_PRINT("sleepTime set to %d", tmp);
+  }
+
+  // // char *tmp2 = response["bitmap_path"];
+  // String tmp2 = response["bitmap_path"];
+  // if (tmp2 != "") {
+  //   bitmapUrlPath = tmp2;
+  //   DEBUG_PRINT("bitmap URL path set to %s", tmp2.c_str());
+  // }
 }
 
 void wakeupAndConnect() {
@@ -145,7 +176,7 @@ void fetchAndDrawImageIfNeeded() {
                          DISPLAY_WIDTH, /* bpp */ DISPLAY_HEIGHT, 1);
 #else
   showRawBitmapFrom_HTTP(CALENDAR_URL_HOST, CALENDAR_URL_PORT,
-                         bitmapUrlPath.c_str(), 0, 0, DISPLAY_HEIGHT,
+                         "/calendar/bitmap/epapermono", 0, 0, DISPLAY_HEIGHT,
                          DISPLAY_WIDTH,
                          /* bpp */ DISPLAY_HEIGHT / 8, /* rows at once */ 8);
 #endif
@@ -257,6 +288,26 @@ void showRawBitmapFrom_HTTP(const char* host,
   wifiClient.stop();
 }
 
+String httpGETRequestAsString(const char* url) {
+  // Your IP address with path or Domain name with URL path
+  DEBUG_PRINT("connecting to %s", url);
+  http.setConnectTimeout(10000);
+  http.begin(wifiClient, url);
+
+  DEBUG_PRINT("calling GET");
+  int httpResponseCode = http.GET();
+
+  String payload = "";
+  if (httpResponseCode == 200) {
+    payload = http.getString();
+  }
+
+  DEBUG_PRINT("end, response=%d", httpResponseCode);
+  http.end();
+
+  return payload;
+}
+
 void stopWiFi() {
   unsigned long start = millis();
 
@@ -267,7 +318,7 @@ void stopWiFi() {
   // only in current session, it's enough to prevent WiFiManager to reconnect)
 
   // this is sufficient to disconnect
-  WiFi.mode(WIFI_OFF);  
+  WiFi.mode(WIFI_OFF);
 
   WiFi.persistent(true);
 
