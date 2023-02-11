@@ -81,9 +81,9 @@ get '/calendar/bitmap/epapergray' => sub {
         $self,
         {
             rotate    => 3,
-            numcolors => 256,
+            numcolors => 4,
             gamma     => 1.8,
-            format    => 'raw8bpp',
+            format    => 'raw2bpp',
         }
     );
 };
@@ -279,6 +279,21 @@ sub generate_bitmap {
             foreach my $y (0 .. $img->getheight - 1) {
                 foreach my $gray ($img->getsamples(y => $y, format => '8bit', channels => [0])) {
                     $bitmap .= chr($gray);
+                }
+            }
+        } elsif ($args->{format} eq 'raw2bpp') {
+            foreach my $y (0 .. $img->getheight - 1) {
+                my $byte   = 0;
+                my $bitcnt = 0;
+                foreach my $gray ($img->getsamples(y => $y, format => '8bit', channels => [0])) {
+                    my $bits = $gray >> 6;  # 0-3 range
+                    $byte = $byte << 2 | $bits;
+                    $bitcnt += 2;
+                    if ($bitcnt == 8) {
+                        $bitmap .= chr($byte);
+                        $byte   = 0;
+                        $bitcnt = 0;
+                    }
                 }
             }
         } elsif ($args->{format} eq 'raw1bpp') {
