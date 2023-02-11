@@ -89,3 +89,36 @@ How the grayscale rendered image ( `/calendar/bitmap?rotate=0&flip=` ) looks lik
 And how the B&W bitmap looks like with custom threshold ( `/calendar/bitmap?rotate=0&flip=&threshold=165` ):
 
 ![image](https://user-images.githubusercontent.com/16558674/214617604-5f2b534c-2f68-4d9c-8866-10e8eeeff591.png)
+
+
+## Timing
+
+### Timing on ESP8266:
+
+```
+with DEBUG_VISIBLE on:
+ 0:00 boot
+ 1:77 try to display 'starting...'
+ 5:15  - fully displayed
+ 6:92 fully displayed 'connecting to wifi...'
+11:50 fully displayed 'connecting to webserver...'
+13:27 fully displayed 'downloading...'
+19:82 refreshing display
+23:64  - finished
+
+with DEBUG_VISIBLE off:
+ 0:00 boot
+10:40 refreshing display
+13:60  - finished
+
+dtto but optimized backend
+ 0:00 boot
+ 9:42  - finished
+```
+
+### Timing on ESP32
+```
+ 0:00 boot
+ 2:30 finished reading image checksum data
+ 9:10 finished all
+```

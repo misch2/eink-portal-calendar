@@ -2,9 +2,12 @@ void stopWiFi();
 bool startWiFi();
 
 void wakeupAndConnect();
+void checkResetReason();
+void loadConfigFromWeb();
 void fetchAndDrawImageIfNeeded();
 void disconnectAndHibernate();
 
+String httpGETRequestAsString(const char* url);
 void showRawBitmapFrom_HTTP(const char* host,
                             int port,
                             const char* path,
@@ -25,3 +28,8 @@ void espDeepSleep(uint64_t seconds);
 
 #define uS_PER_S 1000000
 #define SECONDS_PER_HOUR 3600
+
+// fonts
+#include "Open_Sans_Regular_16.h"
+#include "Open_Sans_Regular_24.h"
+

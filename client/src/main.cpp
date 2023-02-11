@@ -6,13 +6,12 @@
 
 // generic libraries
 #include <Arduino.h>
+#include <ArduinoJson.h>
+#include <HTTPClient.h>
 #include <SPI.h>
-#include <WiFiManager.h>
-
-#ifdef SYSLOG_SERVER
 #include <Syslog.h>
+#include <WiFiManager.h>
 #include <WiFiUdp.h>
-#endif
 
 #ifdef USE_GxEPD2_4G
 #ifdef USE_GRAYSCALE_DISPLAY
@@ -27,10 +26,6 @@
 #include "debug.h"
 #include "display_settings.h"
 #include "main.h"
-
-// fonts
-#include "Open_Sans_Regular_16.h"
-#include "Open_Sans_Regular_24.h"
 
 /* local vars */
 #ifdef USE_GxEPD2_4G
@@ -48,9 +43,15 @@ GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(
 
 WiFiManager wifiManager;
 WiFiClient wifiClient;
+HTTPClient http;
 uint32_t fullStartTime;
 static const uint16_t input_buffer_pixels = DISPLAY_HEIGHT;
 uint8_t input_row_mono_buffer[input_buffer_pixels];  // at most 1 byte per pixel
+String serverURLBase =
+    String("http://") + CALENDAR_URL_HOST + ":" + CALENDAR_URL_PORT;
+
+// configurable remotely
+uint64_t sleepTime = SECONDS_PER_HOUR;
 
 /* RTC vars (survives deep sleep) */
 RTC_DATA_ATTR int bootCount = 0;
@@ -59,12 +60,44 @@ RTC_DATA_ATTR char lastChecksum[64 + 1] = "";
 
 void setup() {
   wakeupAndConnect();
+  checkResetReason();
+
+  loadConfigFromWeb();
   fetchAndDrawImageIfNeeded();
+
   disconnectAndHibernate();
 }
 
 void loop() {
   // Shouldn't get here at all due to the deep sleep called in setup
+}
+
+void loadConfigFromWeb() {
+  String jsonURL = serverURLBase + "/config";
+  DEBUG_PRINT("Loading config from web");
+
+  String jsonText = httpGETRequestAsString(jsonURL.c_str());
+
+  DynamicJsonDocument response(1000);
+  DeserializationError errorStr = deserializeJson(response, jsonText);
+
+  if (errorStr) {
+    DEBUG_PRINT("error: %s", errorStr.c_str());
+    error("Can't parse response");
+  }
+
+  int tmp = response["sleep"];
+  if (tmp != 0) {
+    sleepTime = tmp;
+    DEBUG_PRINT("sleepTime set to %d", tmp);
+  }
+
+  // // char *tmp2 = response["bitmap_path"];
+  // String tmp2 = response["bitmap_path"];
+  // if (tmp2 != "") {
+  //   bitmapUrlPath = tmp2;
+  //   DEBUG_PRINT("bitmap URL path set to %s", tmp2.c_str());
+  // }
 }
 
 void wakeupAndConnect() {
@@ -84,32 +117,37 @@ void wakeupAndConnect() {
                SPISettings(7000000, MSBFIRST, SPI_MODE0));
   DEBUG_PRINT("setup finished");
 
-  // DEBUG_PRINT("Wifi status1: %d", WiFi.status()); //  [
-  // 1113][E][WiFiUdp.cpp:183] endPacket(): could not send data: 12
   if (!startWiFi()) {
     errorNoWifi();
   }
-  // WiFi is connected now => all messages go to syslog too.
-  // But FIXME, first few UDP packets are not sent:  //  [
-  // 1113][E][WiFiUdp.cpp:183] endPacket(): could not send data: 12
+}
 
+void checkResetReason() {
   esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
   esp_reset_reason_t reset_reason = esp_reset_reason();
 
   DEBUG_PRINT("Wakeup cause: %d, reset cause: %d", wakeup_reason, reset_reason);
 
-  if (reset_reason == ESP_RST_SW) {
+  if (reset_reason == ESP_RST_UNKNOWN) {
+    DEBUG_PRINT("ESP_RST_UNKNOWN");
+  } else if (reset_reason == ESP_RST_POWERON) {
+    DEBUG_PRINT("ESP_RST_POWERON");
+  } else if (reset_reason == ESP_RST_SW) {
     DEBUG_PRINT("ESP_RST_SW");
   } else if (reset_reason == ESP_RST_PANIC) {
     DEBUG_PRINT("ESP_RST_PANIC");
+  } else if (reset_reason == ESP_RST_INT_WDT) {
+    DEBUG_PRINT("ESP_RST_INT_WDT");
+  } else if (reset_reason == ESP_RST_TASK_WDT) {
+    DEBUG_PRINT("ESP_RST_TASK_WDT");
+  } else if (reset_reason == ESP_RST_WDT) {
+    DEBUG_PRINT("ESP_RST_WDT");
   } else if (reset_reason == ESP_RST_DEEPSLEEP) {
     DEBUG_PRINT("ESP_RST_DEEPSLEEP");
   } else if (reset_reason == ESP_RST_BROWNOUT) {
     DEBUG_PRINT("ESP_RST_BROWNOUT");
-  } else if (reset_reason == ESP_RST_UNKNOWN) {
-    DEBUG_PRINT("ESP_RST_UNKNOWN");
-  } else if (reset_reason == ESP_RST_POWERON) {
-    DEBUG_PRINT("ESP_RST_POWERON");
+  } else if (reset_reason == ESP_RST_SDIO) {
+    DEBUG_PRINT("ESP_RST_SDIO");
   }
 
   if (wakeup_reason == ESP_SLEEP_WAKEUP_TIMER) {
@@ -125,12 +163,10 @@ void wakeupAndConnect() {
 void disconnectAndHibernate() {
   // last syslog message before the WiFi disconnects
   DEBUG_PRINT("Total execution time: %lums", millis() - fullStartTime);
-
-  uint64_t seconds = SECONDS_PER_HOUR;
-  DEBUG_PRINT("Going to hibernate for %llu seconds", seconds);
+  DEBUG_PRINT("Going to hibernate for %llu seconds", sleepTime);
   display.powerOff();
   stopWiFi();
-  espDeepSleep(seconds);
+  espDeepSleep(sleepTime);
 }
 
 void fetchAndDrawImageIfNeeded() {
@@ -183,15 +219,15 @@ void showRawBitmapFrom_HTTP(const char* host,
       //   // if (!connection_ok) Serial.println(line);
     }
     if (!connection_ok) {
-      Serial.println("Unexpected first line: ");
-      Serial.print(line.c_str());
-      // break; FIXME
+      DEBUG_PRINT("Unexpected first line: %s", line.c_str());
+      // break;
     }
     if ((line == "\r") || (line == "")) {
-      DEBUG_PRINT("Headers received");
+      DEBUG_PRINT("All headers received");
       break;
     }
   };
+
   if (!connection_ok) {
     error("Unexpected HTTP response, didn't found '200 OK'.\nLast line was:\n" +
           line);
@@ -202,7 +238,6 @@ void showRawBitmapFrom_HTTP(const char* host,
   line = wifiClient.readStringUntil('\n');
   if (line != "MM")  // signature
   {
-    Serial.println("bitmap format not handled.");
     error("Invalid bitmap received.");
   }
 
@@ -225,17 +260,14 @@ void showRawBitmapFrom_HTTP(const char* host,
   {
     if (!connection_ok || !(wifiClient.connected() || wifiClient.available()))
       break;
-    delay(1);  // yield() to avoid WDT
-    yield();
+    yield();  // prevent WDT
 
     uint32_t got =
         read8n(wifiClient, input_row_mono_buffer, bytes_per_row * rows_at_once);
     bytes_read += got;
 
     if (!connection_ok) {
-      Serial.print("Error: got no more after ");
-      Serial.print(bytes_read);
-      Serial.println(" bytes read!");
+      DEBUG_PRINT("Bytes read so far: %d", bytes_read);
       error("Read from HTTP server failed.");
       break;
     }
@@ -248,15 +280,32 @@ void showRawBitmapFrom_HTTP(const char* host,
     display.writeImage(input_row_mono_buffer, x, y + row, w, rows_at_once);
 #endif
   }  // end line
-  Serial.print("bytes read ");
-  Serial.println(bytes_read);
+  DEBUG_PRINT("Bytes read: %d", bytes_read);
 
   display.refresh();  // full refresh
-  Serial.print("downloaded and displayed in ");
-  Serial.print(millis() - startTime);
-  Serial.println(" ms");
+  DEBUG_PRINT("downloaded and displayed in %lu ms", millis() - startTime);
 
   wifiClient.stop();
+}
+
+String httpGETRequestAsString(const char* url) {
+  // Your IP address with path or Domain name with URL path
+  DEBUG_PRINT("connecting to %s", url);
+  http.setConnectTimeout(10000);
+  http.begin(wifiClient, url);
+
+  DEBUG_PRINT("calling GET");
+  int httpResponseCode = http.GET();
+
+  String payload = "";
+  if (httpResponseCode == 200) {
+    payload = http.getString();
+  }
+
+  DEBUG_PRINT("end, response=%d", httpResponseCode);
+  http.end();
+
+  return payload;
 }
 
 void stopWiFi() {
@@ -268,7 +317,8 @@ void stopWiFi() {
   // WiFi.disconnect(true);   // no, this resets the password too (even when
   // only in current session, it's enough to prevent WiFiManager to reconnect)
 
-  WiFi.mode(WIFI_OFF);  // this is sufficient to disconnect
+  // this is sufficient to disconnect
+  WiFi.mode(WIFI_OFF);
 
   WiFi.persistent(true);
 
@@ -341,17 +391,6 @@ void displayText(String message) {
   display.refresh();  // full refresh
 }
 
-void testDisplayMessage() {
-  DEBUG_PRINT("testDisplayMessage() start");
-  displayText("foo");
-  delay(1000);
-  displayText("bar");
-  delay(1000);
-  displayText("foobar");
-  DEBUG_PRINT("testDisplayMessage() done");
-  delay(15000);
-}
-
 void error(String message) {
   strcpy(lastChecksum, "");  // to force reload of image next time
   DEBUG_PRINT("Displaying error: %s", message.c_str());
@@ -365,35 +404,6 @@ void errorNoWifi() {
 
 void espDeepSleep(uint64_t seconds) {
   DEBUG_PRINT("Sleeping for %llus", seconds);
-#ifdef ESP8266
-  ESP.deepSleep(seconds * uS_PER_S);
-#else
   esp_sleep_enable_timer_wakeup(seconds * uS_PER_S);
   esp_deep_sleep_start();
-#endif
 }
-
-/*
-
-Timing on ESP8266:
-
-with DEBUG_VISIBLE on:
- 0:00 boot
- 1:77 try to display 'starting...'
- 5:15  - fully displayed
- 6:92 fully displayed 'connecting to wifi...'
-11:50 fully displayed 'connecting to webserver...'
-13:27 fully displayed 'downloading...'
-19:82 refreshing display
-23:64  - finished
-
-with DEBUG_VISIBLE off:
- 0:00 boot
-10:40 refreshing display
-13:60  - finished
-
-dtto but optimized backend
- 0:00 boot
- 9:42  - finished
-
-*/

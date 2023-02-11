@@ -31,3 +31,7 @@ Syslog syslog(udpClient,
 #else
 #define DEBUG_PRINT(...)
 #endif
+
+// WiFi is connected now => all messages go to syslog too.
+// But FIXME, first few UDP packets are not sent:  //  [
+// 1113][E][WiFiUdp.cpp:183] endPacket(): could not send data: 12
