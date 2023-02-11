@@ -44,7 +44,7 @@ get '/config' => sub {
         sleep => 3600,
 
         #display     => "BW",                            # "bw", "grayscale",
-        bitmap_path => "/calendar/bitmap/epapermono",
+        # bitmap_path => "/calendar/bitmap/epapermono",
     };
     $self->render(json => $config);
 };
@@ -71,6 +71,19 @@ get '/calendar/bitmap/epapermono' => sub {
             numcolors => 2,
             gamma     => 1.8,
             format    => 'raw1bpp',
+        }
+    );
+};
+
+get '/calendar/bitmap/epapergray' => sub {
+    my $self = shift;
+    return generate_bitmap(
+        $self,
+        {
+            rotate    => 3,
+            numcolors => 256,
+            gamma     => 1.8,
+            format    => 'raw8bpp',
         }
     );
 };
