@@ -17,9 +17,10 @@ I choose this approach because it's easier (and more fun) for me to implement th
 1. ~~Indicate possible WiFi outage or server unavailability on the display.~~
 1. ~~Refresh the display only if image has changed (=check image checksum against the previous value). This should allow the portal calendar to ask server periodically more often but still sleep a lot and preserve energy.~~
 1. Maybe add support for a weather forecast (but I'll probably create a different project just for this purpose).
-1. Replace the ESP8266 ePaper module with what [original project](https://github.com/wuspy/portal_calendar) uses, i.e. specific low power ESP32 board + separate e-Paper hat [^1].
+1. ~~Replace the ESP8266 ePaper module with what [original project](https://github.com/wuspy/portal_calendar) uses, i.e. specific low power ESP32 board + separate e-Paper hat [^1].~~
+1. Add a config page to the server, to allow changing calendar properties (e.g. weather on/off, icon sets, etc.) easily without having to redeploy updated server.
 
-[^1]: I didn't consider the need for ESP board with very low power consumption. I therefore bought one that was available immediately (ESP8266 with integrated e-Paper driver), but while it's perfectly usable when powered through USB, is wouldn't go well with AA batteries.
+[^1]: I didn't consider the need for ESP board with very low power consumption. I therefore bought one that was available immediately (ESP8266 with integrated e-Paper driver), but while it's perfectly usable when powered through USB, it wouldn't keep working sufficiently long with AA batteries.
 
 ## Principles
 
@@ -66,13 +67,19 @@ If you refresh the page now, a grayscale PNG version of the calendar screen shou
 
 Done ✅
 
-## Disclaimer
+## Sources:
+ - The `custom-portal-sign-icons.png` and `custom-portal-sign-full.png` were downloaded from https://decalrobot.com/. 
+   - Icons in the `server/public/images/portal_icons` were extracted manually from the image above
+ - Fonts in `server/public/fonts` were downloaded from:
+   - D-DIN-BOLD.otf, D-DIN.otf, D-DINCondensed.otf
+     https://www.fontsquirrel.com/fonts/d-din (ASCII and basic accents only)
+   - 651-font.otf
+     https://cs.fontsisland.com/font/din-pro (full Czech set of characters)
+ - Files in `client/wuspy_portal_calendar` are git-cloned from https://github.com/wuspy/portal_calendar.git (see `.gitmodules` file in the root folder)
 
-I don't expect anyone to use this project directly, mainly because it's written in Perl. But the HTML, CSS and ESP code might serve as an inspiration maybe.
+ ## Disclaimer
 
-The `custom-portal-sign-icons.png` and `custom-portal-sign-full.png` were downloaded from https://decalrobot.com/. 
-
-Sources for fonts are listed in the `server/public/fonts/README.txt` .
+I don't expect anyone to use this project directly, mainly because it's written in Perl. But on the other hand the HTML, CSS or ESP32 code might serve as an inspiration for someone.
 
 ---
 
@@ -127,34 +134,34 @@ dtto but optimized backend
 
 Approximately one second to wake up, download config and image info, and sleep again if nothing has changed:
 ```
-Feb 12 15:16:39 esp32 portal-calendar ﻿---
-Feb 12 15:16:39 esp32 portal-calendar ﻿Connected to WiFi in 655ms
-Feb 12 15:16:39 esp32 portal-calendar ﻿IP address: w.x.y.z
-Feb 12 15:16:39 esp32 portal-calendar ﻿Wakeup cause: 4, reset cause: 8
-Feb 12 15:16:39 esp32 portal-calendar ﻿ESP_RST_DEEPSLEEP
-Feb 12 15:16:39 esp32 portal-calendar ﻿ESP_SLEEP_WAKEUP_TIMER
-Feb 12 15:16:39 esp32 portal-calendar ﻿Boot count: 20, last image checksum: 22ed4f4309df31d396cd83214a40e77816367ab6
-Feb 12 15:16:39 esp32 portal-calendar ﻿Loading config from web
-Feb 12 15:16:39 esp32 portal-calendar ﻿connecting to http://u.v.w.x/config
-Feb 12 15:16:39 esp32 portal-calendar ﻿calling GET
-Feb 12 15:16:39 esp32 portal-calendar ﻿end, response=200
-Feb 12 15:16:39 esp32 portal-calendar ﻿sleepTime set to 3600
-Feb 12 15:16:39 esp32 portal-calendar ﻿Downloading http://u.v.w.x/calendar/bitmap/epapermono
-Feb 12 15:16:40 esp32 portal-calendar ﻿ read line: [HTTP/1.1 200 OK#015#012]
-Feb 12 15:16:40 esp32 portal-calendar ﻿Waiting for OK response from server. Current line: HTTP/1.1 200 OK#015
-Feb 12 15:16:40 esp32 portal-calendar ﻿ read line: [Server: nginx/1.18.0#015#012]
-Feb 12 15:16:40 esp32 portal-calendar ﻿ read line: [Date: Sun, 12 Feb 2023 14:16:40 GMT#015#012]
-Feb 12 15:16:40 esp32 portal-calendar ﻿ read line: [Content-Type: text/html;charset=UTF-8#015#012]
-Feb 12 15:16:40 esp32 portal-calendar ﻿ read line: [Content-Length: 48044#015#012]
-Feb 12 15:16:40 esp32 portal-calendar ﻿ read line: [Connection: close#015#012]
-Feb 12 15:16:40 esp32 portal-calendar ﻿ read line: [Vary: Accept-Encoding#015#012]
-Feb 12 15:16:40 esp32 portal-calendar ﻿ read line: [#015#012]
-Feb 12 15:16:40 esp32 portal-calendar ﻿All headers received
-Feb 12 15:16:40 esp32 portal-calendar ﻿Reading bitmap header
-Feb 12 15:16:40 esp32 portal-calendar ﻿Reading checksum
-Feb 12 15:16:40 esp32 portal-calendar ﻿Last checksum was: 22ed4f4309df31d396cd83214a40e77816367ab6
-Feb 12 15:16:40 esp32 portal-calendar ﻿New checksum is: 22ed4f4309df31d396cd83214a40e77816367ab6
-Feb 12 15:16:40 esp32 portal-calendar ﻿Not refreshing, image is unchanged
-Feb 12 15:16:40 esp32 portal-calendar ﻿Total execution time: 1253ms
-Feb 12 15:16:40 esp32 portal-calendar ﻿Going to hibernate for 3600 seconds
+Feb 12 15:16:39 esp32 portal-calendar ---
+Feb 12 15:16:39 esp32 portal-calendar Connected to WiFi in 655ms
+Feb 12 15:16:39 esp32 portal-calendar IP address: w.x.y.z
+Feb 12 15:16:39 esp32 portal-calendar Wakeup cause: 4, reset cause: 8
+Feb 12 15:16:39 esp32 portal-calendar ESP_RST_DEEPSLEEP
+Feb 12 15:16:39 esp32 portal-calendar ESP_SLEEP_WAKEUP_TIMER
+Feb 12 15:16:39 esp32 portal-calendar Boot count: 20, last image checksum: 22ed4f4309df31d396cd83214a40e77816367ab6
+Feb 12 15:16:39 esp32 portal-calendar Loading config from web
+Feb 12 15:16:39 esp32 portal-calendar connecting to http://u.v.w.x/config
+Feb 12 15:16:39 esp32 portal-calendar calling GET
+Feb 12 15:16:39 esp32 portal-calendar end, response=200
+Feb 12 15:16:39 esp32 portal-calendar sleepTime set to 3600
+Feb 12 15:16:39 esp32 portal-calendar Downloading http://u.v.w.x/calendar/bitmap/epapermono
+Feb 12 15:16:40 esp32 portal-calendar  read line: [HTTP/1.1 200 OK#015#012]
+Feb 12 15:16:40 esp32 portal-calendar Waiting for OK response from server. Current line: HTTP/1.1 200 OK#015
+Feb 12 15:16:40 esp32 portal-calendar  read line: [Server: nginx/1.18.0#015#012]
+Feb 12 15:16:40 esp32 portal-calendar  read line: [Date: Sun, 12 Feb 2023 14:16:40 GMT#015#012]
+Feb 12 15:16:40 esp32 portal-calendar  read line: [Content-Type: text/html;charset=UTF-8#015#012]
+Feb 12 15:16:40 esp32 portal-calendar  read line: [Content-Length: 48044#015#012]
+Feb 12 15:16:40 esp32 portal-calendar  read line: [Connection: close#015#012]
+Feb 12 15:16:40 esp32 portal-calendar  read line: [Vary: Accept-Encoding#015#012]
+Feb 12 15:16:40 esp32 portal-calendar  read line: [#015#012]
+Feb 12 15:16:40 esp32 portal-calendar All headers received
+Feb 12 15:16:40 esp32 portal-calendar Reading bitmap header
+Feb 12 15:16:40 esp32 portal-calendar Reading checksum
+Feb 12 15:16:40 esp32 portal-calendar Last checksum was: 22ed4f4309df31d396cd83214a40e77816367ab6
+Feb 12 15:16:40 esp32 portal-calendar New checksum is: 22ed4f4309df31d396cd83214a40e77816367ab6
+Feb 12 15:16:40 esp32 portal-calendar Not refreshing, image is unchanged
+Feb 12 15:16:40 esp32 portal-calendar Total execution time: 1253ms
+Feb 12 15:16:40 esp32 portal-calendar Going to hibernate for 3600 seconds
 ```
