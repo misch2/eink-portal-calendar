@@ -22,7 +22,186 @@ use PortalCalendar::Minion;
 
 Readonly my $WIDTH        => 480;
 Readonly my $HEIGHT       => 800;
-Readonly my @PORTAL_ICONS => qw(a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 b11 b14 c3 c7 d5 e4);
+Readonly my @PORTAL_ICONS => qw(a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 b11 b14 c3 c4 c7 d2 d3 d4 d5 e1 e2 e4);
+Readonly my %ICON_NAME_TO_FILENAME => (
+    CUBE_DISPENSER    => 'a1',
+    CUBE_HAZARD       => 'a2',
+    PELLET_HAZARD     => 'a3',
+    PELLET_CATCHER    => 'a4',
+    FLING_ENTER       => 'a5',
+    FLING_EXIT        => 'a6',
+    TURRET_HAZARD     => 'a7',
+    DIRTY_WATER       => 'a8',
+    WATER_HAZARD      => 'a9',
+    CAKE              => 'a10',
+    LASER_REDIRECTION => 'c3',
+    CUBE_BUTTON       => 'd5',
+    BLADES_HAZARD     => 'e4',
+    BRIDGE_SHIELD     => 'd2',
+    FAITH_PLATE       => 'e1',
+    LASER_HAZARD      => 'd3',
+    LASER_SENSOR      => 'c4',
+    LIGHT_BRIDGE      => 'e2',
+    PLAYER_BUTTON     => 'd4',
+);
+
+Readonly my @CHAMBER_ICONS_BY_DAY_NUMBER => (
+    [
+        # P1 Chamber 1
+        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_HAZARD' => 0 ], [ 'PELLET_HAZARD' => 0 ], [ 'PELLET_CATCHER' => 0 ], [ 'WATER_HAZARD' => 0 ],
+        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 0 ], [ 'CAKE'         => 0 ],
+    ],
+    [
+        # P1 Chamber 4
+        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_HAZARD' => 1 ], [ 'PELLET_HAZARD' => 0 ], [ 'PELLET_CATCHER' => 0 ], [ 'WATER_HAZARD' => 0 ],
+        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 0 ], [ 'CAKE'         => 0 ],
+    ],
+    [
+        # P1 Chamber 5
+        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_HAZARD' => 1 ], [ 'PELLET_HAZARD' => 0 ], [ 'PELLET_CATCHER' => 0 ], [ 'WATER_HAZARD' => 0 ],
+        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 0 ], [ 'CAKE'         => 0 ],
+    ],
+    [
+        # P1 Chamber 6
+        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_HAZARD' => 0 ], [ 'PELLET_HAZARD' => 1 ], [ 'PELLET_CATCHER' => 1 ], [ 'WATER_HAZARD' => 0 ],
+        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 0 ], [ 'CAKE'         => 0 ],
+    ],
+    [
+        # P1 Chamber 8
+        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_HAZARD' => 0 ], [ 'PELLET_HAZARD' => 1 ], [ 'PELLET_CATCHER' => 1 ], [ 'WATER_HAZARD' => 1 ],
+        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 1 ], [ 'CAKE'         => 0 ],
+    ],
+    [
+        # P1 Chamber 9
+        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_HAZARD' => 1 ], [ 'PELLET_HAZARD' => 0 ], [ 'PELLET_CATCHER' => 0 ], [ 'WATER_HAZARD' => 0 ],
+        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 0 ], [ 'CAKE'         => 0 ],
+    ],
+    [
+        # P1 Chamber 10
+        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_HAZARD' => 0 ], [ 'PELLET_HAZARD' => 0 ], [ 'PELLET_CATCHER' => 0 ], [ 'WATER_HAZARD' => 0 ],
+        [ 'FLING_ENTER'    => 1 ], [ 'FLING_EXIT'  => 1 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 0 ], [ 'CAKE'         => 0 ],
+    ],
+    [
+        # P1 Chamber 11
+        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_HAZARD' => 0 ], [ 'PELLET_HAZARD' => 1 ], [ 'PELLET_CATCHER' => 1 ], [ 'WATER_HAZARD' => 1 ],
+        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 1 ], [ 'CAKE'         => 0 ],
+    ],
+    [
+        # P1 Chamber 12
+        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_HAZARD' => 1 ], [ 'PELLET_HAZARD' => 0 ], [ 'PELLET_CATCHER' => 0 ], [ 'WATER_HAZARD' => 0 ],
+        [ 'FLING_ENTER'    => 1 ], [ 'FLING_EXIT'  => 1 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 0 ], [ 'CAKE'         => 0 ],
+    ],
+    [
+        # P1 Chamber 13
+        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_HAZARD' => 1 ], [ 'PELLET_HAZARD' => 1 ], [ 'PELLET_CATCHER' => 1 ], [ 'WATER_HAZARD' => 0 ],
+        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 0 ], [ 'CAKE'         => 0 ],
+    ],
+    [
+        # P1 Chamber 14
+        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_HAZARD' => 1 ], [ 'PELLET_HAZARD' => 1 ], [ 'PELLET_CATCHER' => 1 ], [ 'WATER_HAZARD' => 1 ],
+        [ 'FLING_ENTER'    => 1 ], [ 'FLING_EXIT'  => 1 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 1 ], [ 'CAKE'         => 0 ],
+    ],
+    [
+        # P1 Chamber 15
+        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_HAZARD' => 0 ], [ 'PELLET_HAZARD' => 1 ], [ 'PELLET_CATCHER' => 1 ], [ 'WATER_HAZARD' => 1 ],
+        [ 'FLING_ENTER'    => 1 ], [ 'FLING_EXIT'  => 1 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 1 ], [ 'CAKE'         => 0 ],
+    ],
+    [
+        # P1 Chamber 16
+        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_HAZARD' => 1 ], [ 'PELLET_HAZARD' => 0 ], [ 'PELLET_CATCHER' => 0 ], [ 'WATER_HAZARD' => 0 ],
+        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'TURRET_HAZARD' => 1 ], [ 'DIRTY_WATER'    => 0 ], [ 'CAKE'         => 0 ],
+    ],
+    [
+        # P1 Chamber 17
+        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_HAZARD' => 1 ], [ 'PELLET_HAZARD' => 1 ], [ 'PELLET_CATCHER' => 1 ], [ 'WATER_HAZARD' => 0 ],
+        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 0 ], [ 'CAKE'         => 0 ],
+    ],
+    [
+        # P1 Chamber 18
+        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_HAZARD' => 1 ], [ 'PELLET_HAZARD' => 1 ], [ 'PELLET_CATCHER' => 1 ], [ 'WATER_HAZARD' => 1 ],
+        [ 'FLING_ENTER'    => 1 ], [ 'FLING_EXIT'  => 1 ], [ 'TURRET_HAZARD' => 1 ], [ 'DIRTY_WATER'    => 1 ], [ 'CAKE'         => 0 ],
+    ],
+    [
+        # P1 Chamber 19
+        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_HAZARD' => 0 ], [ 'PELLET_HAZARD' => 1 ], [ 'PELLET_CATCHER' => 1 ], [ 'WATER_HAZARD' => 1 ],
+        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 1 ], [ 'CAKE'         => 1 ],
+    ],
+    [
+        # P2 The Cold Boot Chamber 1
+        [ 'LASER_SENSOR'  => 1 ], [ 'LASER_REDIRECTION' => 0 ], [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_BUTTON'  => 0 ], [ 'CUBE_HAZARD' => 0 ],
+        [ 'PLAYER_BUTTON' => 0 ], [ 'WATER_HAZARD'      => 0 ], [ 'TURRET_HAZARD'  => 0 ], [ 'LASER_HAZARD' => 0 ], [ 'DIRTY_WATER' => 0 ],
+    ],
+    [
+        # P2 The Cold Boot Chamber 2
+        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_BUTTON'       => 1 ], [ 'CUBE_HAZARD'   => 1 ], [ 'PLAYER_BUTTON' => 0 ], [ 'WATER_HAZARD' => 0 ],
+        [ 'LASER_SENSOR'   => 1 ], [ 'LASER_REDIRECTION' => 1 ], [ 'TURRET_HAZARD' => 0 ], [ 'LASER_HAZARD'  => 0 ], [ 'DIRTY_WATER'  => 0 ],
+    ],
+    [
+        # P2 The Cold Boot Chamber 3
+        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_BUTTON'       => 0 ], [ 'CUBE_HAZARD'   => 0 ], [ 'PLAYER_BUTTON' => 0 ], [ 'WATER_HAZARD' => 0 ],
+        [ 'LASER_SENSOR'   => 1 ], [ 'LASER_REDIRECTION' => 1 ], [ 'TURRET_HAZARD' => 0 ], [ 'LASER_HAZARD'  => 0 ], [ 'DIRTY_WATER'  => 0 ],
+    ],
+    [
+        # P2 The Cold Boot Chamber 4
+        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_BUTTON'       => 1 ], [ 'CUBE_HAZARD'   => 1 ], [ 'PLAYER_BUTTON' => 0 ], [ 'WATER_HAZARD' => 1 ],
+        [ 'LASER_SENSOR'   => 1 ], [ 'LASER_REDIRECTION' => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'LASER_HAZARD'  => 0 ], [ 'DIRTY_WATER'  => 0 ],
+    ],
+    [
+        # P2 The Cold Boot Chamber 5
+        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_BUTTON' => 1 ], [ 'CUBE_HAZARD' => 1 ], [ 'PLAYER_BUTTON' => 0 ], [ 'WATER_HAZARD' => 1 ],
+        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'FAITH_PLATE' => 1 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'  => 0 ],
+    ],
+    [
+        # P2 The Cold Boot Chamber 7
+        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_BUTTON'  => 1 ], [ 'CUBE_HAZARD'       => 1 ], [ 'WATER_HAZARD'  => 0 ], [ 'FLING_ENTER' => 1 ],
+        [ 'FLING_EXIT'     => 1 ], [ 'LASER_SENSOR' => 1 ], [ 'LASER_REDIRECTION' => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER' => 0 ],
+    ],
+    [
+        # P2 The Cold Boot Chamber 8
+        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_BUTTON'  => 1 ], [ 'CUBE_HAZARD'       => 1 ], [ 'WATER_HAZARD'  => 0 ], [ 'FLING_ENTER' => 0 ],
+        [ 'FLING_EXIT'     => 0 ], [ 'LASER_SENSOR' => 1 ], [ 'LASER_REDIRECTION' => 1 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER' => 0 ],
+    ],
+    [
+        # P2 The Return Chamber 9
+        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_BUTTON'       => 0 ], [ 'CUBE_HAZARD' => 1 ], [ 'PLAYER_BUTTON' => 0 ], [ 'WATER_HAZARD' => 0 ],
+        [ 'LASER_SENSOR'   => 1 ], [ 'LASER_REDIRECTION' => 1 ], [ 'FAITH_PLATE' => 1 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'  => 0 ],
+    ],
+    [
+        # P2 The Return Chamber 10
+        [ 'CUBE_DISPENSER'    => 1 ], [ 'CUBE_BUTTON' => 1 ], [ 'CUBE_HAZARD' => 1 ], [ 'WATER_HAZARD' => 0 ], [ 'LASER_SENSOR' => 1 ],
+        [ 'LASER_REDIRECTION' => 1 ], [ 'FAITH_PLATE' => 1 ], [ 'FLING_ENTER' => 1 ], [ 'FLING_EXIT'   => 1 ], [ 'DIRTY_WATER'  => 0 ],
+    ],
+    [
+        # P2 The Return Chamber 11
+        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_BUTTON'   => 1 ], [ 'CUBE_HAZARD'   => 1 ], [ 'PLAYER_BUTTON'     => 0 ], [ 'WATER_HAZARD' => 1 ],
+        [ 'LIGHT_BRIDGE'   => 1 ], [ 'TURRET_HAZARD' => 0 ], [ 'BRIDGE_SHIELD' => 0 ], [ 'LASER_REDIRECTION' => 0 ], [ 'DIRTY_WATER'  => 0 ],
+    ],
+    [
+        # P2 The Return Chamber 13
+        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_BUTTON'   => 1 ], [ 'CUBE_HAZARD'   => 1 ], [ 'PLAYER_BUTTON' => 0 ], [ 'WATER_HAZARD' => 0 ],
+        [ 'LIGHT_BRIDGE'   => 0 ], [ 'TURRET_HAZARD' => 1 ], [ 'BRIDGE_SHIELD' => 0 ], [ 'LASER_HAZARD'  => 0 ], [ 'DIRTY_WATER'  => 0 ],
+    ],
+    [
+        # P2 The Return Chamber 15
+        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_BUTTON'   => 1 ], [ 'CUBE_HAZARD'   => 0 ], [ 'PLAYER_BUTTON' => 0 ], [ 'WATER_HAZARD' => 0 ],
+        [ 'LIGHT_BRIDGE'   => 1 ], [ 'TURRET_HAZARD' => 1 ], [ 'BRIDGE_SHIELD' => 1 ], [ 'FAITH_PLATE'   => 1 ], [ 'DIRTY_WATER'  => 0 ],
+    ],
+    [
+        # P2 The Return Chamber 16
+        [ 'CUBE_DISPENSER'    => 0 ], [ 'CUBE_BUTTON'  => 1 ], [ 'CUBE_HAZARD'   => 0 ], [ 'PLAYER_BUTTON' => 1 ], [ 'WATER_HAZARD' => 0 ],
+        [ 'LASER_REDIRECTION' => 1 ], [ 'LASER_SENSOR' => 1 ], [ 'TURRET_HAZARD' => 1 ], [ 'LASER_HAZARD'  => 1 ], [ 'DIRTY_WATER'  => 0 ],
+    ],
+    [
+        # P2 The Surprise Chamber 18
+        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_BUTTON'       => 0 ], [ 'CUBE_HAZARD'   => 1 ], [ 'WATER_HAZARD'  => 1 ], [ 'LIGHT_BRIDGE' => 1 ],
+        [ 'LASER_SENSOR'   => 1 ], [ 'LASER_REDIRECTION' => 1 ], [ 'TURRET_HAZARD' => 1 ], [ 'BRIDGE_SHIELD' => 1 ], [ 'LASER_HAZARD' => 1 ],
+    ],
+    [
+        # P2 The Surprise Chamber 19
+        [ 'CUBE_DISPENSER'    => 0 ], [ 'CUBE_BUTTON' => 0 ], [ 'CUBE_HAZARD'   => 0 ], [ 'PLAYER_BUTTON' => 0 ], [ 'LASER_SENSOR' => 1 ],
+        [ 'LASER_REDIRECTION' => 1 ], [ 'FAITH_PLATE' => 1 ], [ 'TURRET_HAZARD' => 1 ], [ 'LASER_HAZARD'  => 1 ], [ 'DIRTY_WATER'  => 0 ],
+    ]
+);
 
 # Static files are automatically served from the /public subfolder.
 
@@ -35,6 +214,18 @@ get '/ping' => sub {
 get '/' => sub {
     my $self = shift;
     return $self->render(template => 'test', format => 'html');
+};
+
+get '/config' => sub {
+    my $self   = shift;
+    my $config = {
+        #
+        sleep => 3600,
+
+        #display     => "BW",                            # "bw", "grayscale",
+        # bitmap_path => "/calendar/bitmap/epapermono",
+    };
+    $self->render(json => $config);
 };
 
 # main HTML page with calendar (either for current or for specific date)
@@ -59,6 +250,19 @@ get '/calendar/bitmap/epapermono' => sub {
             numcolors => 2,
             gamma     => 1.8,
             format    => 'raw1bpp',
+        }
+    );
+};
+
+get '/calendar/bitmap/epapergray' => sub {
+    my $self = shift;
+    return generate_bitmap(
+        $self,
+        {
+            rotate    => 3,
+            numcolors => 4,
+            gamma     => 1.8,
+            format    => 'raw2bpp',
         }
     );
 };
@@ -152,17 +356,50 @@ sub html_calendar {
         };
     }
 
-    my $gray_probability = 0.25;
+    my $has_calendar_entries = (scalar @today_events ? 1 : 0);
+
     my @icons;
-    foreach my $name (List::Util::shuffle @PORTAL_ICONS) {
-        push @icons,
-            {
-            name   => $name,
-            grayed => (rand() < $gray_probability ? 1 : 0)
-            };
-    }
-    while (scalar @icons < 16) {    # produce enough icons even with small number of source images
-        push @icons, @icons;
+
+    if (1) {
+
+        # true icon sets like wuspy has it
+        my $set = $CHAMBER_ICONS_BY_DAY_NUMBER[ $dt->day - 1 ];
+        die "no icon set for " . $dt if !$set;
+
+        foreach (@{$set}) {
+            my $name    = $_->[0];
+            my $enabled = $_->[1];
+
+            push @icons,
+                {
+                name   => $ICON_NAME_TO_FILENAME{$name},
+                grayed => ($enabled ? 0 : 1)
+                };
+        }
+
+        if ($has_calendar_entries) {
+            pop @icons while (scalar @icons > 5);
+        }
+    } else {
+
+        # random icon set
+        my $gray_probability = 0.25;
+        foreach my $name (List::Util::shuffle @PORTAL_ICONS) {
+            push @icons,
+                {
+                name   => $name,
+                grayed => (rand() < $gray_probability ? 1 : 0)
+                };
+        }
+        while (scalar @icons < 16) {    # produce enough icons even with small number of source images
+            push @icons, @icons;
+        }
+
+        my $min_icons_count = $has_calendar_entries ? 2 : 3;
+        my $max_icons_count = $has_calendar_entries ? 5 : 10;
+        my $icons_count     = $min_icons_count + int(rand($max_icons_count - $min_icons_count + 1));
+        @icons = @icons[ 0 .. $icons_count - 1 ];
+
     }
 
     return $self->render(
@@ -173,7 +410,7 @@ sub html_calendar {
         date                 => $dt,
         icons                => \@icons,
         calendar_events      => \@today_events,
-        has_calendar_entries => (scalar @today_events ? 1 : 0),
+        has_calendar_entries => $has_calendar_entries,
     );
 }
 
@@ -256,6 +493,21 @@ sub generate_bitmap {
                     $bitmap .= chr($gray);
                 }
             }
+        } elsif ($args->{format} eq 'raw2bpp') {
+            foreach my $y (0 .. $img->getheight - 1) {
+                my $byte   = 0;
+                my $bitcnt = 0;
+                foreach my $gray ($img->getsamples(y => $y, format => '8bit', channels => [0])) {
+                    my $bits = $gray >> 6;    # 0-3 range
+                    $byte = $byte << 2 | $bits;
+                    $bitcnt += 2;
+                    if ($bitcnt == 8) {
+                        $bitmap .= chr($byte);
+                        $byte   = 0;
+                        $bitcnt = 0;
+                    }
+                }
+            }
         } elsif ($args->{format} eq 'raw1bpp') {
             foreach my $y (0 .. $img->getheight - 1) {
                 my $byte   = 0;
@@ -283,6 +535,8 @@ sub generate_bitmap {
         $out .= sha1_hex($bitmap) . "\n";
         $out .= $bitmap;
 
+        $self->res->headers->content_type('application/octet-stream');
+        $self->res->headers->header('Content-Transfer-Encoding' => 'binary');
         return $self->render(data => $out);
     } else {
         die "Unknown format requested: " . $args->{format};

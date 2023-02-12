@@ -114,15 +114,15 @@ div.icons-container {
     display: flex;
     flex-flow: row wrap;
     margin-top: 3rem;
-    gap: 10px;
-    padding-top: 10px;
+    gap: 9px;
+    padding-top: 9px;
     border-top: 2px solid black;
 }
 
 .icon {
     /* sizes must be in 'px', otherwise the 'grayed' overlay gets slightly stretched and doesn't translate well into the black&white */
-    height: 60px;
-    width: 60px;
+    height: 57px;
+    width: 57px;
     border: 2px solid black;
     padding: 2px;
     margin: 0;

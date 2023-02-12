@@ -122,3 +122,39 @@ dtto but optimized backend
  2:30 finished reading image checksum data
  9:10 finished all
 ```
+ 
+### Example of the client->server communication
+
+Approximately one second to wake up, download config and image info, and sleep again if nothing has changed:
+```
+Feb 12 15:16:39 esp32 portal-calendar ﻿---
+Feb 12 15:16:39 esp32 portal-calendar ﻿Connected to WiFi in 655ms
+Feb 12 15:16:39 esp32 portal-calendar ﻿IP address: w.x.y.z
+Feb 12 15:16:39 esp32 portal-calendar ﻿Wakeup cause: 4, reset cause: 8
+Feb 12 15:16:39 esp32 portal-calendar ﻿ESP_RST_DEEPSLEEP
+Feb 12 15:16:39 esp32 portal-calendar ﻿ESP_SLEEP_WAKEUP_TIMER
+Feb 12 15:16:39 esp32 portal-calendar ﻿Boot count: 20, last image checksum: 22ed4f4309df31d396cd83214a40e77816367ab6
+Feb 12 15:16:39 esp32 portal-calendar ﻿Loading config from web
+Feb 12 15:16:39 esp32 portal-calendar ﻿connecting to http://u.v.w.x/config
+Feb 12 15:16:39 esp32 portal-calendar ﻿calling GET
+Feb 12 15:16:39 esp32 portal-calendar ﻿end, response=200
+Feb 12 15:16:39 esp32 portal-calendar ﻿sleepTime set to 3600
+Feb 12 15:16:39 esp32 portal-calendar ﻿Downloading http://u.v.w.x/calendar/bitmap/epapermono
+Feb 12 15:16:40 esp32 portal-calendar ﻿ read line: [HTTP/1.1 200 OK#015#012]
+Feb 12 15:16:40 esp32 portal-calendar ﻿Waiting for OK response from server. Current line: HTTP/1.1 200 OK#015
+Feb 12 15:16:40 esp32 portal-calendar ﻿ read line: [Server: nginx/1.18.0#015#012]
+Feb 12 15:16:40 esp32 portal-calendar ﻿ read line: [Date: Sun, 12 Feb 2023 14:16:40 GMT#015#012]
+Feb 12 15:16:40 esp32 portal-calendar ﻿ read line: [Content-Type: text/html;charset=UTF-8#015#012]
+Feb 12 15:16:40 esp32 portal-calendar ﻿ read line: [Content-Length: 48044#015#012]
+Feb 12 15:16:40 esp32 portal-calendar ﻿ read line: [Connection: close#015#012]
+Feb 12 15:16:40 esp32 portal-calendar ﻿ read line: [Vary: Accept-Encoding#015#012]
+Feb 12 15:16:40 esp32 portal-calendar ﻿ read line: [#015#012]
+Feb 12 15:16:40 esp32 portal-calendar ﻿All headers received
+Feb 12 15:16:40 esp32 portal-calendar ﻿Reading bitmap header
+Feb 12 15:16:40 esp32 portal-calendar ﻿Reading checksum
+Feb 12 15:16:40 esp32 portal-calendar ﻿Last checksum was: 22ed4f4309df31d396cd83214a40e77816367ab6
+Feb 12 15:16:40 esp32 portal-calendar ﻿New checksum is: 22ed4f4309df31d396cd83214a40e77816367ab6
+Feb 12 15:16:40 esp32 portal-calendar ﻿Not refreshing, image is unchanged
+Feb 12 15:16:40 esp32 portal-calendar ﻿Total execution time: 1253ms
+Feb 12 15:16:40 esp32 portal-calendar ﻿Going to hibernate for 3600 seconds
+```
