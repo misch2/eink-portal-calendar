@@ -129,17 +129,17 @@ Approximately one second to wake up, download config and image info, and sleep a
 ```
 Feb 12 15:16:39 esp32 portal-calendar ﻿---
 Feb 12 15:16:39 esp32 portal-calendar ﻿Connected to WiFi in 655ms
-Feb 12 15:16:39 esp32 portal-calendar ﻿IP address: 10.52.6.140
+Feb 12 15:16:39 esp32 portal-calendar ﻿IP address: w.x.y.z
 Feb 12 15:16:39 esp32 portal-calendar ﻿Wakeup cause: 4, reset cause: 8
 Feb 12 15:16:39 esp32 portal-calendar ﻿ESP_RST_DEEPSLEEP
 Feb 12 15:16:39 esp32 portal-calendar ﻿ESP_SLEEP_WAKEUP_TIMER
 Feb 12 15:16:39 esp32 portal-calendar ﻿Boot count: 20, last image checksum: 22ed4f4309df31d396cd83214a40e77816367ab6
 Feb 12 15:16:39 esp32 portal-calendar ﻿Loading config from web
-Feb 12 15:16:39 esp32 portal-calendar ﻿connecting to http://10.52.6.20:8084/config
+Feb 12 15:16:39 esp32 portal-calendar ﻿connecting to http://u.v.w.x/config
 Feb 12 15:16:39 esp32 portal-calendar ﻿calling GET
 Feb 12 15:16:39 esp32 portal-calendar ﻿end, response=200
 Feb 12 15:16:39 esp32 portal-calendar ﻿sleepTime set to 3600
-Feb 12 15:16:39 esp32 portal-calendar ﻿Downloading http://10.52.6.20:8084/calendar/bitmap/epapermono
+Feb 12 15:16:39 esp32 portal-calendar ﻿Downloading http://u.v.w.x/calendar/bitmap/epapermono
 Feb 12 15:16:40 esp32 portal-calendar ﻿ read line: [HTTP/1.1 200 OK#015#012]
 Feb 12 15:16:40 esp32 portal-calendar ﻿Waiting for OK response from server. Current line: HTTP/1.1 200 OK#015
 Feb 12 15:16:40 esp32 portal-calendar ﻿ read line: [Server: nginx/1.18.0#015#012]
