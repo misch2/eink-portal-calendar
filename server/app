@@ -535,8 +535,9 @@ sub generate_bitmap {
         $out .= sha1_hex($bitmap) . "\n";
         $out .= $bitmap;
 
-        $self->res->headers->content_type('text/plain');    # no encoding
-        return $self->render(data => $out, format => 'txt');
+        $self->res->headers->content_type('application/octet-stream');
+        $self->res->headers->header('Content-Transfer-Encoding' => 'binary');
+        return $self->render(data => $out);
     } else {
         die "Unknown format requested: " . $args->{format};
     }
