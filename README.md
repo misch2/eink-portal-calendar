@@ -90,14 +90,17 @@ Half-finished:
 
 ![image](https://user-images.githubusercontent.com/16558674/214158618-31573f8c-0cd9-4471-a230-aabc3bd393cd.png)
 
-How the grayscale rendered image ( `/calendar/bitmap?rotate=0&flip=` ) looks like, here in Czech localization:
+Grayscale rendered image ( `/calendar/bitmap?rotate=0&flip=` ), in Czech localization:
 
 ![image](https://user-images.githubusercontent.com/16558674/214332528-8c96e01c-c7d5-4c95-8720-1074089cf5d4.png)
 
-And how the B&W bitmap looks like with custom threshold ( `/calendar/bitmap?rotate=0&flip=&threshold=165` ):
+B&W bitmap with modified gamma for more blacks ( `/calendar/bitmap?colors=2&gamma=1.8` ):
 
 ![image](https://user-images.githubusercontent.com/16558674/214617604-5f2b534c-2f68-4d9c-8866-10e8eeeff591.png)
 
+"Broken display" variant:
+ 
+![image](https://user-images.githubusercontent.com/16558674/218329554-1cf13b36-d0ab-4a0a-9ead-7b298c4bb202.png)
 
 ## Timing
 
