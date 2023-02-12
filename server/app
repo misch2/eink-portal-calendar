@@ -411,6 +411,7 @@ sub html_calendar {
         icons                => \@icons,
         calendar_events      => \@today_events,
         has_calendar_entries => $has_calendar_entries,
+        broken_glass         => ($ENV{BROKEN_GLASS} ? 1 : 0),
     );
 }
 

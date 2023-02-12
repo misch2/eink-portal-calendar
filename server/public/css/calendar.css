@@ -65,6 +65,17 @@ div#spacer {
     /* background-color: gainsboro; */
 }
 
+div#overlay-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 480px;
+    height: 800px;
+    background-image: url("/images/broken_screen1.png");
+    background-size: cover;
+    background-position: 25% 50%;
+}
+
 div.top-month-header {
     padding-bottom: 0.2em;
     margin-bottom: 0.2em;
@@ -131,6 +142,11 @@ div.icons-container {
 .grayed {
     -webkit-mask-image: url("/images/checkered_mask_black.png");
     mask-image: url("/images/checkered_mask_black.png");
+}
+
+.broken-screen {
+    -webkit-mask-image: url("/images/broken_screen1.png");
+    mask-image: url("/images/broken_screen1.png");
 }
 
 div.calendar-container {
