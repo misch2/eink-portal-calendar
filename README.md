@@ -76,6 +76,7 @@ Done ✅
    - 651-font.otf
      https://cs.fontsisland.com/font/din-pro (full Czech set of characters)
  - Files in `client/wuspy_portal_calendar` are git-cloned from https://github.com/wuspy/portal_calendar.git (see `.gitmodules` file in the root folder)
+ - "Broken display" overlay was downloaded from https://www.wallpaperflare.com/technology-cracked-screen-broken-screen-no-people-animal-wildlife-wallpaper-jpnv
 
  ## Disclaimer
 
