@@ -2,6 +2,7 @@ requires 'DateTime::Format::Strptime';
 requires 'DateTime';
 requires 'DDP';
 requires 'Digest::SHA1';
+requires 'DBIx::Class::Schema';
 requires 'File::Copy';
 requires 'File::pushd';
 requires 'File::Slurp';
