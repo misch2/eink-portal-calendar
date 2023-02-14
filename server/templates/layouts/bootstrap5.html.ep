@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <title>Portal calendar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Latest compiled and minified CSS -->
+    <link href="//cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Latest compiled JavaScript -->
+    <script src="//cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    %= stylesheet '/css/global.css'
+</head>
+
+<body>
+    <div class="container">
+        <h1>Portal calendar</h1>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link <%= $nav_link eq 'index' ? 'active' : '' %>" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <%= $nav_link eq 'compare' ? 'active' : '' %>" href="/test">Test page</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <%= $nav_link eq 'config_ui' ? 'active' : '' %>" href="/config_ui">Config</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin">Minion jobs monitor</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <hr>
+
+        <%= content %>
+    </div>
+</body>
+
+</html>

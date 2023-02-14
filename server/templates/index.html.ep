@@ -1,0 +1,7 @@
+% layout 'bootstrap5';
+
+<p>
+    This is the underlying image for the ePaper display.
+    It's used almost as-is by the display (it only gets rotated, posterized and gamma-corrected, but that's all).
+</p>
+<img src="/calendar/bitmap?format=png" style="border: 1px solid black">

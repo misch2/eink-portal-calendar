@@ -6,7 +6,7 @@
 %# $decorator = sub { Text::Unidecode::unidecode(uc(shift)) }; # UPPERCASE with accents removed
 
 <body>
-    %if ($broken_glass) {
+    %if (get_config('broken_glass')) {
         <div id="overlay-image"></div>
     %}
     <div id="spacer">

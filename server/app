@@ -18,7 +18,9 @@ use Digest::SHA1 qw(sha1_hex);
 use Time::HiRes;
 
 use PortalCalendar::Integration::iCal;
+use PortalCalendar::Config;
 use PortalCalendar::Minion;
+use PortalCalendar::Schema;
 
 Readonly my $WIDTH        => 480;
 Readonly my $HEIGHT       => 800;
@@ -203,6 +205,17 @@ Readonly my @CHAMBER_ICONS_BY_DAY_NUMBER => (
     ]
 );
 
+Readonly my $CONFIG_PARAMETERS => [
+    qw/sleep_time broken_glass
+        web_calendar1 web_calendar2 web_calendar3
+        web_calendar_ics_url1 web_calendar_ics_url2 web_calendar_ics_url3
+        totally_random_icon
+        min_random_icons
+        max_random_icons
+        max_icons_with_calendar
+        /
+];
+
 # Static files are automatically served from the /public subfolder.
 
 get '/ping' => sub {
@@ -213,10 +226,44 @@ get '/ping' => sub {
 # side by side comparison
 get '/' => sub {
     my $self = shift;
-    return $self->render(template => 'test', format => 'html');
+    return $self->render(
+        template => 'index',
+        format   => 'html',
+        nav_link => 'index',
+    );
 };
 
-get '/config' => sub {
+get '/config_ui' => sub {
+    my $self = shift;
+
+    my $values = {};
+    foreach my $name (@{$CONFIG_PARAMETERS}) {
+        my $value = $self->get_config($name);
+        $values->{$name} = $value;
+    }
+
+    return $self->render(
+        template => 'config_ui',
+        format   => 'html',
+        values   => $values,
+        nav_link => 'config_ui',
+    );
+};
+
+post '/config_ui' => sub {
+    my $self = shift;
+
+    foreach my $name (@{$CONFIG_PARAMETERS}) {
+        my $value = $self->req->param($name);
+        $value //= 0 if $name =~ /^(broken_glass|web_calendar1|web_calendar2|web_calendar3|totally_random_icon)$/;    # switch 0/1
+
+        $self->set_config($name, $value);
+    }
+
+    $self->redirect_to('/config_ui');
+};
+
+get '/config' => sub {    # FIXME rename
     my $self   = shift;
     my $config = {
         #
@@ -316,6 +363,28 @@ plugin 'Minion::Admin' => {                          # Host Admin UI
     route => app->routes->any('/admin'),
 };
 
+plugin 'Cron' => {
+    '0 * * * *' => sub {                             # every hour
+        app->log->info("enqueuing regenerate_image task");
+        app->minion->enqueue('regenerate_image', []);
+    }
+};
+
+helper get_config => sub {
+    my $self = shift;
+    my $name = shift;
+    return PortalCalendar::Config->new(app => $self)->get($name);
+};
+
+helper set_config => sub {
+    my $self  = shift;
+    my $name  = shift;
+    my $value = shift;
+    return PortalCalendar::Config->new(app => $self)->set($name, $value);
+};
+
+helper schema => sub { state $schema = PortalCalendar::Schema->connect('dbi:SQLite:local/calendar.db') };
+
 # define the minion tasks
 app->minion->add_task(
     #
@@ -324,12 +393,8 @@ app->minion->add_task(
     }
 );
 
-plugin 'Cron' => {
-    '0 * * * *' => sub {    # every hour
-        app->log->info("enqueuing regenerate_image task");
-        app->minion->enqueue('regenerate_image', []);
-    }
-};
+my $db = Mojo::SQLite->new('sqlite:local/calendar.db');
+$db->auto_migrate(1)->migrations->from_data();
 
 app->start;
 
@@ -345,22 +410,26 @@ sub html_calendar {
     $dt->set_locale($ENV{DATETIME_LOCALE} || 'en-US');
 
     my @today_events;
-    if ($ENV{CALENDAR_ICS_URL}) {
-        my $calendar = PortalCalendar::Integration::iCal->new(ics_url => $ENV{CALENDAR_ICS_URL}, cache_dir => "$Bin/cache/lwp");
+
+    foreach my $calendar_no (1 .. 3) {
+        next unless $self->get_config("web_calendar${calendar_no}");
+
+        my $url = $self->get_config("web_calendar_ics_url${calendar_no}");
+        next unless $url;
+
+        my $calendar = PortalCalendar::Integration::iCal->new(ics_url => $url, cache_dir => "$Bin/cache/lwp");
         try {
-            @today_events = $calendar->get_today_events($dt);
+            push @today_events, $calendar->get_today_events($dt);
 
             #p @today_events;
         } catch {
             warn "Error: $_";
         };
     }
-
     my $has_calendar_entries = (scalar @today_events ? 1 : 0);
 
     my @icons;
-
-    if (1) {
+    if (!$self->get_config('totally_random_icon')) {
 
         # true icon sets like wuspy has it
         my $set = $CHAMBER_ICONS_BY_DAY_NUMBER[ $dt->day - 1 ];
@@ -378,7 +447,7 @@ sub html_calendar {
         }
 
         if ($has_calendar_entries) {
-            pop @icons while (scalar @icons > 5);
+            pop @icons while (scalar @icons > $self->get_config('max_icons_with_calendar'));
         }
     } else {
 
@@ -395,9 +464,11 @@ sub html_calendar {
             push @icons, @icons;
         }
 
-        my $min_icons_count = $has_calendar_entries ? 2 : 3;
-        my $max_icons_count = $has_calendar_entries ? 5 : 10;
-        my $icons_count     = $min_icons_count + int(rand($max_icons_count - $min_icons_count + 1));
+        my $min_icons_count = $self->get_config('min_random_icons');
+        my $max_icons_count = $has_calendar_entries ? $self->get_config('max_icons_with_calendar') : $self->get_config('max_random_icons');
+        $min_icons_count = $max_icons_count if $min_icons_count > $max_icons_count;
+
+        my $icons_count = $min_icons_count + int(rand($max_icons_count - $min_icons_count + 1));
         @icons = @icons[ 0 .. $icons_count - 1 ];
 
     }
@@ -411,7 +482,6 @@ sub html_calendar {
         icons                => \@icons,
         calendar_events      => \@today_events,
         has_calendar_entries => $has_calendar_entries,
-        broken_glass         => ($ENV{BROKEN_GLASS} ? 1 : 0),
     );
 }
 
@@ -543,3 +613,32 @@ sub generate_bitmap {
         die "Unknown format requested: " . $args->{format};
     }
 }
+
+__DATA__
+@@ migrations
+-- 1 up
+CREATE TABLE config (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR NOT NULL UNIQUE,
+    value VARCHAR NOT NULL
+);
+
+-- 2 up
+INSERT INTO config (name, value) VALUES ('broken_glass', '0');
+
+-- 3 up
+INSERT INTO config (name, value) VALUES ('sleep_time', '3600');
+
+-- 4 up
+INSERT INTO config (name, value) VALUES ('web_calendar1', '0');
+INSERT INTO config (name, value) VALUES ('web_calendar_ics_url1', '');
+INSERT INTO config (name, value) VALUES ('web_calendar2', '0');
+INSERT INTO config (name, value) VALUES ('web_calendar_ics_url2', '');
+INSERT INTO config (name, value) VALUES ('web_calendar3', '0');
+INSERT INTO config (name, value) VALUES ('web_calendar_ics_url3', '');
+INSERT INTO config (name, value) VALUES ('max_icons_for_calendar', '5');
+
+INSERT INTO config (name, value) VALUES ('totally_random_icon', '0');
+INSERT INTO config (name, value) VALUES ('min_random_icons', '4');
+INSERT INTO config (name, value) VALUES ('max_random_icons', '10');
+INSERT INTO config (name, value) VALUES ('max_icons_with_calendar', '5');

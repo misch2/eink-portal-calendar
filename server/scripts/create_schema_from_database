@@ -1,0 +1,2 @@
+#!/bin/bash
+dbicdump  -o dump_directory=lib/ PortalCalendar::Schema dbi:SQLite:local/calendar.db
