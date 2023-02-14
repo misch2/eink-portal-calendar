@@ -1,4 +1,5 @@
 requires 'DateTime::Format::Strptime';
+requires 'DateTime::Format::ISO8601';
 requires 'DateTime';
 requires 'DDP';
 requires 'Digest::SHA1';
@@ -13,6 +14,7 @@ requires 'Imager';
 requires 'List::Util';
 requires 'LWP::UserAgent::Cached';
 requires 'Minion::Backend::SQLite';
+requires 'Mojo::SQLite';
 requires 'Mojolicious::Lite';
 requires 'Mojolicious::Plugin::Config';
 requires 'Mojolicious::Plugin::Cron';

@@ -6,16 +6,18 @@ use FindBin qw($Bin);
 use lib "$Bin/lib";
 
 use Mojolicious::Lite;
-use DDP;
+use Mojo::SQLite;
 use DateTime;
 use DateTime::Format::Strptime;
-use Imager;
-use Text::Unidecode;
-use Readonly;
-use List::Util;
-use Try::Tiny;
+use DateTime::Format::ISO8601;
+use DDP;
 use Digest::SHA1 qw(sha1_hex);
+use Imager;
+use List::Util;
+use Readonly;
+use Text::Unidecode;
 use Time::HiRes;
+use Try::Tiny;
 
 use PortalCalendar::Integration::iCal;
 use PortalCalendar::Config;
@@ -205,19 +207,6 @@ Readonly my @CHAMBER_ICONS_BY_DAY_NUMBER => (
     ]
 );
 
-Readonly my $CONFIG_PARAMETERS => [
-    qw/sleep_time broken_glass
-        web_calendar1 web_calendar2 web_calendar3
-        web_calendar_ics_url1 web_calendar_ics_url2 web_calendar_ics_url3
-        totally_random_icon
-        min_random_icons
-        max_random_icons
-        max_icons_with_calendar
-        /
-];
-
-# Static files are automatically served from the /public subfolder.
-
 get '/ping' => sub {
     my $self = shift;
     return $self->render(json => { status => 'ok' });
@@ -246,7 +235,7 @@ get '/config_ui' => sub {
     my $self = shift;
 
     my $values = {};
-    foreach my $name (@{$CONFIG_PARAMETERS}) {
+    foreach my $name (@{ $self->config_obj->parameters }) {
         my $value = $self->get_config($name);
         $values->{$name} = $value;
     }
@@ -262,7 +251,7 @@ get '/config_ui' => sub {
 post '/config_ui' => sub {
     my $self = shift;
 
-    foreach my $name (@{$CONFIG_PARAMETERS}) {
+    foreach my $name (@{ $self->config_obj->parameters }) {
         my $value = $self->req->param($name);
         $value //= 0 if $name =~ /^(broken_glass|web_calendar1|web_calendar2|web_calendar3|totally_random_icon)$/;    # switch 0/1
 
@@ -273,16 +262,21 @@ post '/config_ui' => sub {
     $self->redirect_to('/config_ui');
 };
 
-get '/config' => sub {    # FIXME rename
-    my $self   = shift;
-    my $config = {
+# Return configuration data to client (ePaper display):
+get '/config' => sub {
+    my $self = shift;
+
+    $self->set_config('_last_visit', DateTime->now()->iso8601);
+
+    my $ret = {
         #
         sleep => $self->get_config('sleep_time'),
 
         #display     => "BW",                            # "bw", "grayscale",
         # bitmap_path => "/calendar/bitmap/epapermono",
     };
-    $self->render(json => $config);
+
+    $self->render(json => $ret);
 };
 
 # main HTML page with calendar (either for current or for specific date)
@@ -349,20 +343,8 @@ get '/calendar/bitmap' => sub {
     );
 };
 
-# # redirect warnings
-$SIG{__WARN__} = sub {
-    my $message = shift;
-    $message =~ s/\n$//;
-    @_ = (app->log, $message);
-    goto &Mojo::Log::warn;
-};
-
-app->log->path("$Bin/log/$ENV{MOJO_MODE}.log");
-app->renderer->cache->max_keys(0) if $ENV{MOJO_MODE} eq 'development';    # do not cache CSS etc. in devel mode
-
-# # logging to STDERR (for morbo command line usage):
-app->log->handle(\*STDERR);
-app->secrets([ $ENV{MOJO_SECRET_PASSPHRASE} ]);
+setup_logger();
+run_migrations();
 
 plugin 'TagHelpers';
 plugin 'RenderFile';
@@ -380,17 +362,22 @@ plugin 'Cron' => {
     }
 };
 
+helper config_obj => sub {
+    my $self = shift;
+    state $obj = PortalCalendar::Config->new(app => $self);
+};
+
 helper get_config => sub {
     my $self = shift;
     my $name = shift;
-    return PortalCalendar::Config->new(app => $self)->get($name);
+    return $self->config_obj->get($name);
 };
 
 helper set_config => sub {
     my $self  = shift;
     my $name  = shift;
     my $value = shift;
-    return PortalCalendar::Config->new(app => $self)->set($name, $value);
+    return $self->config_obj->set($name, $value);
 };
 
 helper schema => sub { state $schema = PortalCalendar::Schema->connect('dbi:SQLite:local/calendar.db') };
@@ -403,13 +390,37 @@ app->minion->add_task(
     }
 );
 
-my $db = Mojo::SQLite->new('sqlite:local/calendar.db');
-$db->auto_migrate(1)->migrations->from_data();
-my $version = $db->db->query('select sqlite_version() as version');    # to run the migrations automatically
-
+app->renderer->cache->max_keys(0) if $ENV{MOJO_MODE} eq 'development';    # do not cache CSS etc. in devel mode
+app->secrets([ $ENV{MOJO_SECRET_PASSPHRASE} ]);
 app->start;
 
 ########################################################################
+
+sub setup_logger {
+
+    # # redirect warnings
+    $SIG{__WARN__} = sub {
+        my $message = shift;
+        $message =~ s/\n$//;
+        @_ = (app->log, $message);
+        goto &Mojo::Log::warn;
+    };
+
+    app->log->path("$Bin/log/$ENV{MOJO_MODE}.log");
+
+    # # logging to STDERR (for morbo command line usage):
+    app->log->handle(\*STDERR);
+    return;
+}
+
+sub run_migrations {
+    my $db = Mojo::SQLite->new('sqlite:local/calendar.db');
+    $db->auto_migrate(1)->migrations->from_data();
+
+    # execute any SQL via this handle to run the migrations automatically:
+    my $version = $db->db->query('select sqlite_version() as version');
+    return;
+}
 
 sub html_calendar {
     my $self = shift;
@@ -635,21 +646,21 @@ CREATE TABLE config (
 );
 
 -- 2 up
-INSERT INTO config (name, value) VALUES ('broken_glass', '0');
+-- INSERT INTO config (name, value) VALUES ('broken_glass', '0');
 
 -- 3 up
-INSERT INTO config (name, value) VALUES ('sleep_time', '3600');
+-- INSERT INTO config (name, value) VALUES ('sleep_time', '3600');
 
 -- 4 up
-INSERT INTO config (name, value) VALUES ('web_calendar1', '0');
-INSERT INTO config (name, value) VALUES ('web_calendar_ics_url1', '');
-INSERT INTO config (name, value) VALUES ('web_calendar2', '0');
-INSERT INTO config (name, value) VALUES ('web_calendar_ics_url2', '');
-INSERT INTO config (name, value) VALUES ('web_calendar3', '0');
-INSERT INTO config (name, value) VALUES ('web_calendar_ics_url3', '');
-INSERT INTO config (name, value) VALUES ('max_icons_for_calendar', '5');
-
-INSERT INTO config (name, value) VALUES ('totally_random_icon', '0');
-INSERT INTO config (name, value) VALUES ('min_random_icons', '4');
-INSERT INTO config (name, value) VALUES ('max_random_icons', '10');
-INSERT INTO config (name, value) VALUES ('max_icons_with_calendar', '5');
+-- INSERT INTO config (name, value) VALUES ('web_calendar1', '0');
+-- INSERT INTO config (name, value) VALUES ('web_calendar_ics_url1', '');
+-- INSERT INTO config (name, value) VALUES ('web_calendar2', '0');
+-- INSERT INTO config (name, value) VALUES ('web_calendar_ics_url2', '');
+-- INSERT INTO config (name, value) VALUES ('web_calendar3', '0');
+-- INSERT INTO config (name, value) VALUES ('web_calendar_ics_url3', '');
+-- INSERT INTO config (name, value) VALUES ('max_icons_for_calendar', '5');
+--
+-- INSERT INTO config (name, value) VALUES ('totally_random_icon', '0');
+-- INSERT INTO config (name, value) VALUES ('min_random_icons', '4');
+-- INSERT INTO config (name, value) VALUES ('max_random_icons', '10');
+-- INSERT INTO config (name, value) VALUES ('max_icons_with_calendar', '5');

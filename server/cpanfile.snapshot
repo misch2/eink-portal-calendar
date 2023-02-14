@@ -522,6 +522,26 @@ DISTRIBUTIONS
       DateTime 0.27
       DateTime::Set 0.3600
       ExtUtils::MakeMaker 0
+  DateTime-Format-Builder-0.83
+    pathname: D/DR/DROLSKY/DateTime-Format-Builder-0.83.tar.gz
+    provides:
+      DateTime::Format::Builder 0.83
+      DateTime::Format::Builder::Parser 0.83
+      DateTime::Format::Builder::Parser::Dispatch 0.83
+      DateTime::Format::Builder::Parser::Quick 0.83
+      DateTime::Format::Builder::Parser::Regex 0.83
+      DateTime::Format::Builder::Parser::Strptime 0.83
+      DateTime::Format::Builder::Parser::generic 0.83
+    requirements:
+      Carp 0
+      DateTime 1.00
+      DateTime::Format::Strptime 1.04
+      ExtUtils::MakeMaker 0
+      Params::Validate 0.72
+      Scalar::Util 0
+      parent 0
+      strict 0
+      warnings 0
   DateTime-Format-ICal-0.09
     pathname: D/DR/DROLSKY/DateTime-Format-ICal-0.09.tar.gz
     provides:
@@ -533,6 +553,25 @@ DISTRIBUTIONS
       DateTime::TimeZone 0.22
       Module::Build 0
       Params::Validate 0.59
+  DateTime-Format-ISO8601-0.16
+    pathname: D/DR/DROLSKY/DateTime-Format-ISO8601-0.16.tar.gz
+    provides:
+      DateTime::Format::ISO8601 0.16
+      DateTime::Format::ISO8601::Types 0.16
+    requirements:
+      Carp 0
+      DateTime 1.45
+      DateTime::Format::Builder 0.77
+      ExtUtils::MakeMaker 0
+      Params::ValidationCompiler 0.26
+      Specio 0.18
+      Specio::Declare 0
+      Specio::Exporter 0
+      Specio::Library::Builtins 0
+      namespace::autoclean 0
+      parent 0
+      strict 0
+      warnings 0
   DateTime-Format-Strptime-1.79
     pathname: D/DR/DROLSKY/DateTime-Format-Strptime-1.79.tar.gz
     provides:

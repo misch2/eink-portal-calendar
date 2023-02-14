@@ -1,7 +1,12 @@
 % layout 'bootstrap5';
 
-<p>
+<p class="row-fluid">
     This is the underlying image for the ePaper display.
     It's used almost as-is by the display (it only gets rotated, posterized and gamma-corrected, but that's all).
 </p>
+
+<p class="row-fluid">
+    Last contact from display: <%= get_config('_last_visit') %>
+</p>
+
 <img src="/calendar/bitmap?format=png" style="border: 1px solid black">
