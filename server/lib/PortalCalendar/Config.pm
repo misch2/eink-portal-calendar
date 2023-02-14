@@ -21,6 +21,7 @@ has 'defaults' => sub {
         min_random_icons        => 4,
         max_random_icons        => 10,
         max_icons_with_calendar => 5,
+        theme                   => 'portal_calendar',
     };
 };
 

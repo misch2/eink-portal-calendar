@@ -281,7 +281,7 @@ sub html_for_date {
     }
 
     return $self->app->render(
-        template => 'calendar',
+        template => $self->app->get_config('theme'),
         format   => 'html',
 
         # other variables
