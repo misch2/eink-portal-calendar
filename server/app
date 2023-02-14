@@ -405,6 +405,7 @@ app->minion->add_task(
 
 my $db = Mojo::SQLite->new('sqlite:local/calendar.db');
 $db->auto_migrate(1)->migrations->from_data();
+my $version = $sql->db->query('select sqlite_version() as version');    # to run the migrations automatically
 
 app->start;
 
