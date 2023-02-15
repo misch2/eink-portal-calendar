@@ -1,12 +1,20 @@
 % layout 'bootstrap5';
 
 <p class="row-fluid">
-    This is the underlying image for the ePaper display.
-    It's used almost as-is by the display (it only gets rotated, posterized and gamma-corrected, but that's all).
+    Last contact from display: 
+    % if ($last_contact_ago) {
+        <%= $last_contact_ago->in_units('hours') %> hours ago
+        (<%= $last_visit_dt ? $last_visit_dt->strftime('%c') : '' %>)
+    % } else {
+        never
+    % }
 </p>
 
 <p class="row-fluid">
-    Last contact from display: <%= get_config('_last_visit') %>
+    Underlying image for the ePaper display.
+    It's used almost as-is by the display (it only gets quantized and gamma-corrected).
 </p>
 
-<img src="/calendar/bitmap?format=png" style="border: 1px solid black">
+<p class="row-fluid">
+    <img src="/calendar/bitmap?format=png" style="border: 10px solid gray">
+</p>

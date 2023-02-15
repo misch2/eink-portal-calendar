@@ -25,10 +25,22 @@ get '/ping' => sub {
 
 get '/' => sub {
     my $self = shift;
+
+    my $last_contact_ago;
+    my $last_visit_dt;
+    if (my $last_visit_raw = $self->get_config('_last_visit')) {
+        $last_visit_dt = DateTime::Format::ISO8601->parse_datetime($last_visit_raw);
+        $last_visit_dt->set_locale($ENV{DATETIME_LOCALE} || 'en-US');
+
+        $last_contact_ago = DateTime->now()->subtract_datetime($last_visit_dt);
+    }
     return $self->render(
         template => 'index',
         format   => 'html',
         nav_link => 'index',
+
+        last_contact_ago => $last_contact_ago,
+        last_visit_dt    => $last_visit_dt,
     );
 };
 
@@ -68,6 +80,8 @@ post '/config_ui' => sub {
 
         $self->set_config($name, $value);
     }
+
+    $self->flash(message => "Parameters saved.");
     app->minion->enqueue('regenerate_image', []);
 
     $self->redirect_to('/config_ui');

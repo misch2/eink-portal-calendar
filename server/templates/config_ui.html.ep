@@ -1,5 +1,11 @@
 % layout 'bootstrap5';
 
+% if (my $message = flash 'message' ) {
+    <div class="alert alert-success">
+        <%= $message %>
+    </div>
+% }
+
 <h3 class="mb-3">Configuration</h3>
 
 <form action="/config_ui" method="post">
