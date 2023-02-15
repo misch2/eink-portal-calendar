@@ -16,9 +16,10 @@ I choose this approach because it's easier (and more fun) for me to implement th
 1. ~~Fix the icons at the bottom, make more of them available, make them more random.~~
 1. ~~Indicate possible WiFi outage or server unavailability on the display.~~
 1. ~~Refresh the display only if image has changed (=check image checksum against the previous value). This should allow the portal calendar to ask server periodically more often but still sleep a lot and preserve energy.~~
-1. Maybe add support for a weather forecast (but I'll probably create a different project just for this purpose).
 1. ~~Replace the ESP8266 ePaper module with what [original project](https://github.com/wuspy/portal_calendar) uses, i.e. specific low power ESP32 board + separate e-Paper hat [^1].~~
-1. Add a config page to the server, to allow changing calendar properties (e.g. weather on/off, icon sets, etc.) easily without having to redeploy updated server.
+2. ~~Configurable through the UI.~~
+3. Maybe add support for a weather forecast (but I'll probably create a different project just for this purpose).
+4. Add a config page to the server, to allow changing calendar properties (e.g. weather on/off, icon sets, etc.) easily without having to redeploy updated server.
 
 [^1]: I didn't consider the need for ESP board with very low power consumption. I therefore bought one that was available immediately (ESP8266 with integrated e-Paper driver), but while it's perfectly usable when powered through USB, it wouldn't keep working sufficiently long with AA batteries.
 
