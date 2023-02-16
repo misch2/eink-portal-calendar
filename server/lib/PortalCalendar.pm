@@ -214,8 +214,6 @@ sub html_for_date {
     # keep the calendar random, but consistent for any given day
     srand($dt->ymd(''));
 
-    $dt->set_locale($ENV{DATETIME_LOCALE} || 'en-US');
-
     my @today_events;
 
     foreach my $calendar_no (1 .. 3) {

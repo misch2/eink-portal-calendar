@@ -37,7 +37,11 @@
 <p class="row-fluid">
     Last contact from display: 
     % if ($last_contact_ago) {
-        <%= ($last_contact_ago->in_units('hours'))[0] %> hours ago
+        % my ($hours, $minutes) = $last_contact_ago->in_units('hours', 'minutes');
+        % if ($hours > 0) {
+            <%= $hours %> hours
+        % }
+        <%= $minutes %> minutes ago
         (<%= $last_visit_dt ? $last_visit_dt->strftime('%c') : '' %>)
     % } else {
         never

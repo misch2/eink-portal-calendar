@@ -30,7 +30,6 @@ get '/' => sub {
     my $last_visit_dt;
     if (my $last_visit_raw = $self->get_config('_last_visit')) {
         $last_visit_dt = DateTime::Format::ISO8601->parse_datetime($last_visit_raw);
-        $last_visit_dt->set_locale($ENV{DATETIME_LOCALE} || 'en-US');
 
         $last_contact_ago = DateTime->now()->subtract_datetime($last_visit_dt);
     }
@@ -218,6 +217,8 @@ app->minion->add_task(
 
 app->renderer->cache->max_keys(0) if $ENV{MOJO_MODE} eq 'development';    # do not cache CSS etc. in devel mode
 app->secrets([ $ENV{MOJO_SECRET_PASSPHRASE} ]);
+
+DateTime->DefaultLocale($ENV{DATETIME_LOCALE}) if $ENV{DATETIME_LOCALE};
 app->start;
 
 ########################################################################
