@@ -1,11 +1,20 @@
 % layout 'bootstrap5';
 
+% my $width = 480;
+% my $height = 800;
+
+% my $border_size           = 50;
+% my $border_overlay_top    = 5;
+% my $border_overlay_right  = 25;
+% my $border_overlay_bottom = 5;
+% my $border_overlay_left   = 5;
+
 %= stylesheet begin
 .preview-image {
-  width: 480px;
-  height: 800px;
-  margin-top: 45px;
-  margin-left: 45px;
+  width:       <%= $width %>px;
+  height:      <%= $height %>px;
+  margin-top:  <%= $border_size - $border_overlay_top %>px;
+  margin-left: <%= $border_size - $border_overlay_left %>px;
   position: relative;
 }
 
@@ -16,11 +25,11 @@
 .preview-image:before {
   content: "";
   position: absolute;
-  top: -45px;
-  left: -45px;
-  width: 555px;
-  height: 890px;
-  border: 50px solid rgba(0, 0, 0, 0.5);
+  top:   -<%= $border_size - $border_overlay_top %>px;
+  left:  -<%= $border_size - $border_overlay_left %>px;
+  width:  <%= $width + 2*$border_size - ($border_overlay_left + $border_overlay_right) %>px;
+  height: <%= $height + 2*$border_size - ($border_overlay_top + $border_overlay_bottom) %>px;
+  border: <%= $border_size %>px solid rgba(0, 0, 0, 0.5);
   box-sizing: border-box;
 }
 % end
