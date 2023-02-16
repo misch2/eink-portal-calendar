@@ -100,6 +100,9 @@ B&W bitmap with modified gamma for more blacks ( `/calendar/bitmap?colors=2&gamm
 
 ![image](https://user-images.githubusercontent.com/16558674/214617604-5f2b534c-2f68-4d9c-8866-10e8eeeff591.png)
 
+Configuration UI:
+![image](https://user-images.githubusercontent.com/16558674/219482420-b5643deb-5625-4562-82ca-60fa25804da6.png)
+
 "Broken display" variant:
  
 ![image](https://user-images.githubusercontent.com/16558674/218329554-1cf13b36-d0ab-4a0a-9ead-7b298c4bb202.png)
