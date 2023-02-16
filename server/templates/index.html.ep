@@ -4,10 +4,10 @@
 % my $height = 800;
 
 % my $border_size           = 50;
-% my $border_overlay_top    = 5;
-% my $border_overlay_right  = 25;
-% my $border_overlay_bottom = 5;
-% my $border_overlay_left   = 5;
+% my $border_overlay_top    = -3;
+% my $border_overlay_right  = 27;
+% my $border_overlay_bottom = -3;
+% my $border_overlay_left   = -3;
 
 %= stylesheet begin
 .preview-image {
@@ -19,7 +19,7 @@
 }
 
 .preview-image img {
-    border: 1px dotted black;
+    /* border: 1px dotted black; */
 }
 
 .preview-image:before {
@@ -29,7 +29,7 @@
   left:  -<%= $border_size - $border_overlay_left %>px;
   width:  <%= $width + 2*$border_size - ($border_overlay_left + $border_overlay_right) %>px;
   height: <%= $height + 2*$border_size - ($border_overlay_top + $border_overlay_bottom) %>px;
-  border: <%= $border_size %>px solid rgba(0, 0, 0, 0.5);
+  border: <%= $border_size %>px solid rgba(0, 0, 0, 0.75);
   box-sizing: border-box;
 }
 % end
