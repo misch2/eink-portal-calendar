@@ -1,5 +1,30 @@
 % layout 'bootstrap5';
 
+%= stylesheet begin
+.preview-image {
+  width: 480px;
+  height: 800px;
+  margin-top: 45px;
+  margin-left: 45px;
+  position: relative;
+}
+
+.preview-image img {
+    border: 1px dotted black;
+}
+
+.preview-image:before {
+  content: "";
+  position: absolute;
+  top: -45px;
+  left: -45px;
+  width: 555px;
+  height: 890px;
+  border: 50px solid rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+}
+% end
+
 <p class="row-fluid">
     Last contact from display: 
     % if ($last_contact_ago) {
@@ -10,11 +35,13 @@
     % }
 </p>
 
-<p class="row-fluid">
+<p class="row-fluid pb-3">
     Underlying image for the ePaper display.
     It's used almost as-is by the display (it only gets quantized and gamma-corrected).
 </p>
 
 <p class="row-fluid">
-    <img src="/calendar/bitmap?format=png" style="border: 10px solid gray">
+<div class="preview-image">
+    <img src="/calendar/bitmap?format=png">
+    </div>
 </p>
