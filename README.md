@@ -27,7 +27,7 @@ I choose this approach because it's easier (and more fun) for me to implement th
 
 * Everything is designed for a specific e-Paper size of 480x800 pixels. 
 * The display content is served as raw bitmap. The only task for ESP is to fetch this image from a specific location and display it.
-* ESP8266 (which my driver board uses) has very limited amount of RAM. It definitely can't read PNG into memory, then decode it and sent it to display. This is why the application reads uncompressed bitmap from server and sends each line to the display immediately as it reads the stream from http. This means that only a small buffer for 1 image line is needed in RAM.
+* All the rendering is performed on the server, using standard HTML + CSS. This allows me to use provide content without constantly re-flashing the ESP32. It's also much easier for me to debug CSS and try to pixel-perfect position everything or to integrace for example ICS calendar etc.
 
 ## Bill of materials
 
@@ -39,6 +39,7 @@ I choose this approach because it's easier (and more fun) for me to implement th
 ## Installation 
 
 Edit the `server/.env` file and set `PORT` for HTTP server and possibly the `DATETIME_LOCALE` for localization of month and day names.
+See the `server/examples/.env` for an example.
 
 ```
 $ sudo apt install perl libimlib2-dev libimlib2
