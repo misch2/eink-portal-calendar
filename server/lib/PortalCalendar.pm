@@ -7,7 +7,7 @@ use DateTime;
 use DateTime::Format::Strptime;
 use DateTime::Format::ISO8601;
 use DDP;
-use Digest::SHA1 qw(sha1_hex);
+use Digest;
 use Imager;
 use List::Util;
 use Readonly;
@@ -408,7 +408,10 @@ sub generate_bitmap {
         #   checksum
         #    <sequence of raw values directly usable for uploading into eink display>
         my $out = "MM\n";
-        $out .= sha1_hex($bitmap) . "\n";
+
+        # sha-1: 40 chars
+        # sha-256: 64 chars
+        $out .= Digest->new("SHA-1")->add($bitmap)->hexdigest . "\n";
         $out .= $bitmap;
 
         $self->app->res->headers->content_type('application/octet-stream');

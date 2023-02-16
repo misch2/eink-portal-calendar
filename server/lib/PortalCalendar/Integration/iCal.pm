@@ -6,6 +6,7 @@ use LWP::UserAgent::Cached;
 use iCal::Parser;
 use DDP;
 use DateTime;
+use Digest;
 
 has 'ics_url';
 has 'cache_dir';
@@ -36,13 +37,23 @@ sub fetch_from_web {
     return $response->decoded_content;
 }
 
+our %cache_by_contenthash = ();
+
 sub get_events {
     my $self = shift;
 
     my $ical = iCal::Parser->new(no_todos => 1);
-    my $data = $ical->parse_strings($self->fetch_from_web);
 
-    return $data->{events};
+    my $data = $self->fetch_from_web;
+    my $digest = Digest->new("SHA-256")->add(Encode::encode('utf-8', $data))->hexdigest;
+
+    if (!exists $cache_by_contenthash{$digest}) {
+        my $data = $ical->parse_strings($data);
+        $cache_by_contenthash{$digest} = $data->{events};
+    }
+
+    return $cache_by_contenthash{$digest};
+
 }
 
 sub get_today_events {
