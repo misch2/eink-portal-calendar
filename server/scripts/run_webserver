@@ -11,5 +11,5 @@ echo "Starting webserver in $MOJO_MODE mode"
 if [ $MOJO_MODE == "development" ]; then
     cd $dir/.. && morbo -v -l "http://*:${LISTEN_PORT}" -w templates -w lib app
 else
-    cd $dir/.. && carton exec ./app daemon -m $MOJO_MODE -l "http://[::]:${LISTEN_PORT}"
+    cd $dir/.. && carton exec -- hypnotoad ./app
 fi
