@@ -203,6 +203,7 @@ plugin 'Cron' => {
         app->minion->enqueue('regenerate_image', []);
     }
 };
+plugin 'Config';    # for hypnotoad, to load config from app.<mode>.conf
 
 setup_logger();
 run_migrations();

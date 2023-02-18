@@ -4,11 +4,14 @@ After=network-online.target
 
 [Service]
 WorkingDirectory=/<PATH>/portal_calendar
+PIDFile=/<PATH>/portal_calendar/server/hypnotoad.pid
 ExecStart=/<PATH>/portal_calendar/server/scripts/run_webserver
-Type=simple
+ExecReload=/<PATH>/portal_calendar/server/scripts/run_webserver
+Type=forking
 Restart=always
 TimeoutStartSec=infinity
 TimeoutStopSec=600
+KillMode=process
 
 User=<USERNAME>
 Group=<GROUPNAME>
