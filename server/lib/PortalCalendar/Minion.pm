@@ -18,7 +18,7 @@ sub regenerate_image {
     # }
 
     my $converter = PortalCalendar::Web2Png->new(pageres_command => app->home->child("node_modules/.bin/pageres"));
-    $converter->convert_url($job->app->config->url_start . '/calendar/html', 480, 800, app->home->child("generated_images/current_calendar.png"));
+    $converter->convert_url($job->app->config->{url_start} . '/calendar/html', 480, 800, app->home->child("generated_images/current_calendar.png"));
 
     my $elapsed = time - $start;
     return $job->finish($elapsed);
