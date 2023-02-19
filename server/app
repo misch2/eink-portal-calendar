@@ -81,6 +81,7 @@ post '/config_ui' => sub {
     }
 
     $self->flash(message => "Parameters saved.");
+    app->minion->enqueue('reload_calendars', []);
     app->minion->enqueue('regenerate_image', []);
 
     $self->redirect_to('/config_ui');
@@ -200,10 +201,15 @@ plugin 'Minion::Admin' => {                          # Host Admin UI
 };
 
 plugin 'Cron' => {
+    '0 */4 * * *' => sub {                             # every hour
+        app->log->info("enqueuing calendar refresh task");
+        app->minion->enqueue('reload_calendars', []);
+    },
+
     '0 * * * *' => sub {                             # every hour
         app->log->info("enqueuing regenerate_image task");
         app->minion->enqueue('regenerate_image', []);
-    }
+    },
 };
 
 setup_logger();
@@ -214,6 +220,11 @@ app->minion->add_task(
     #
     regenerate_image => sub {
         PortalCalendar::Minion::regenerate_image(@_);
+    }
+);
+app->minion->add_task(
+    reload_calendars => sub {
+        PortalCalendar::Minion::reload_calendars(@_);
     }
 );
 
@@ -288,3 +299,9 @@ CREATE TABLE config (
 -- INSERT INTO config (name, value) VALUES ('min_random_icons', '4');
 -- INSERT INTO config (name, value) VALUES ('max_random_icons', '10');
 -- INSERT INTO config (name, value) VALUES ('max_icons_with_calendar', '5');
+
+-- 5 up
+CREATE TABLE calendar_events_raw (
+    calendar_id INTEGER NOT NULL PRIMARY KEY,
+    events_raw BLOB
+);

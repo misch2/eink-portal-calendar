@@ -222,10 +222,9 @@ sub html_for_date {
         my $url = $self->app->get_config("web_calendar_ics_url${calendar_no}");
         next unless $url;
 
-        my $calendar = PortalCalendar::Integration::iCal->new(ics_url => $url, cache_dir => $self->app->app->home->child("cache/lwp"));
+        my $calendar = PortalCalendar::Integration::iCal->new(ics_url => $url, cache_dir => $self->app->app->home->child("cache/lwp"), db_cache_id => $calendar_no, app => $self->app);
         try {
-            push @today_events, $calendar->get_today_events($dt);
-
+            push @today_events, $calendar->get_today_events($dt);   # cached if possible
             #p @today_events;
         } catch {
             warn "Error: $_";

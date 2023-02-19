@@ -6,10 +6,13 @@ use LWP::UserAgent::Cached;
 use iCal::Parser;
 use DDP;
 use DateTime;
-use Digest;
+use Mojo::Util qw(b64_decode b64_encode);
+use Storable;
 
+has 'app';
 has 'ics_url';
 has 'cache_dir';
+has 'db_cache_id';
 
 has 'ua' => sub {
     my $self = shift;
@@ -37,23 +40,41 @@ sub fetch_from_web {
     return $response->decoded_content;
 }
 
-our %cache_by_contenthash = ();
-
 sub get_events {
-    my $self = shift;
+    my $self   = shift;
+    my $forced = shift;
+
+    if (!$forced && $self->db_cache_id) {
+
+        # try to load data from database
+        if (my $row = $self->app->schema->resultset('CalendarEventsRaw')->find($self->db_cache_id)) {
+            my $events = Storable::thaw(b64_decode($row->events_raw));
+            $self->app->log->debug("returning parsed calendar data from cache #" . $self->db_cache_id);
+            return $events;
+        }
+    }
 
     my $ical = iCal::Parser->new(no_todos => 1);
 
-    my $data = $self->fetch_from_web;
-    my $digest = Digest->new("SHA-256")->add(Encode::encode('utf-8', $data))->hexdigest;
+    my $data   = $self->fetch_from_web;
+    $self->app->log->debug("parsing calendar data...");
+    my $events = $ical->parse_strings($data);
 
-    if (!exists $cache_by_contenthash{$digest}) {
-        my $data = $ical->parse_strings($data);
-        $cache_by_contenthash{$digest} = $data->{events};
+    if ($self->db_cache_id) {
+        $self->app->log->debug("storing serialized data into the DB");
+        my $serialized = b64_encode(Storable::freeze $events);
+        $self->app->schema->resultset('CalendarEventsRaw')->update_or_create(
+            {
+                calendar_id => $self->db_cache_id,
+                events_raw  => $serialized,
+            },
+            {
+                key => 'primary',
+            }
+        );
     }
 
-    return $cache_by_contenthash{$digest};
-
+    return $events;
 }
 
 sub get_today_events {
