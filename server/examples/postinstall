@@ -3,10 +3,8 @@
 # To be run after the deploy
 
 cd server
-set -a
-. ./.env
-set +a
-
 carton install --deployment --cached
 npm install
-sudo systemctl restart $SYSTEMD_UNIT_NAME
+sudo systemctl reload portal_calendar-web.service
+sudo systemctl restart portal_calendar-minion.service
+scripts/generate_img_from_web

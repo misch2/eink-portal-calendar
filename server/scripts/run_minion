@@ -1,14 +1,7 @@
 #!/bin/bash
 
-# load ENV settings
 dir=$(dirname $0)
-set -a
-. $dir/../.env
-set +a
-
-# run the webserver
-echo "Starting minion worker in $MOJO_MODE mode"
-if [ $MOJO_MODE == "development" ]; then
+if [ "$1" == "--without-carton" ]; then
     cd $dir/.. && ./app minion worker -j 1
 else
     cd $dir/.. && carton exec -- ./app minion worker -j 1

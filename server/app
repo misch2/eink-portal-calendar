@@ -188,10 +188,12 @@ helper set_config => sub {
 
 helper schema => sub { state $schema = PortalCalendar::Schema->connect('dbi:SQLite:local/calendar.db') };
 
+plugin 'Config';    # loads config from app.<mode>.conf (production/development) or from app.conf as a fallback
 plugin 'TagHelpers';
 plugin 'RenderFile';
 plugin 'Minion' => {
     SQLite => 'sqlite:' . "$Bin/local/minion.db",    # app->home->child('minion.db'),
+
 };
 plugin 'Minion::Admin' => {                          # Host Admin UI
     route => app->routes->any('/admin'),
@@ -203,7 +205,6 @@ plugin 'Cron' => {
         app->minion->enqueue('regenerate_image', []);
     }
 };
-plugin 'Config';    # for hypnotoad, to load config from app.<mode>.conf
 
 setup_logger();
 run_migrations();
@@ -216,10 +217,12 @@ app->minion->add_task(
     }
 );
 
-app->renderer->cache->max_keys(0) if $ENV{MOJO_MODE} eq 'development';    # do not cache CSS etc. in devel mode
-app->secrets([ $ENV{MOJO_SECRET_PASSPHRASE} ]);
+app->renderer->cache->max_keys(0) if app->config->{disable_renderer_cache};    # do not cache CSS etc. in devel mode
+app->secrets([ app->config->{mojo_passphrase} ]);
 
-DateTime->DefaultLocale($ENV{DATETIME_LOCALE}) if $ENV{DATETIME_LOCALE};
+DateTime->DefaultLocale(app->config->{datetime_locale});
+
+app->log->info("Application started");
 app->start;
 
 ########################################################################
@@ -234,10 +237,17 @@ sub setup_logger {
         goto &Mojo::Log::warn;
     };
 
-    app->log->path("$Bin/log/$ENV{MOJO_MODE}.log");
+    app->log->level(app->config->{logging}->{level});
 
-    # logging to STDERR (for morbo command line usage):
-    app->log->handle(\*STDERR);
+    if (app->config->{logging}->{file} eq 'STDERR') {
+
+        # logging to STDERR (for morbo command line usage):
+        app->log->handle(\*STDERR);
+    } else {
+        app->log->path(app->config->{logging}->{file});
+    }
+
+    app->log->info("Starting app...");
     return;
 }
 

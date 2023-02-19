@@ -9,7 +9,3 @@ modules:
 
 deploy: modules
 	cd server && scripts/deploy
-
-deploy_test_image_only:
-	cd server && scripts/deploy_test_image_only
-

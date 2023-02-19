@@ -38,8 +38,7 @@ I choose this approach because it's easier (and more fun) for me to implement th
 
 ## Installation 
 
-Edit the `server/.env` file and set `PORT` for HTTP server and possibly the `DATETIME_LOCALE` for localization of month and day names.
-See the `server/examples/.env` for an example.
+Edit the `server/app.production.conf` and update settings there. See the `server/examples/app.conf` for an example.
 
 ```
 $ sudo apt install perl libimlib2-dev libimlib2

@@ -1,15 +1,8 @@
 #!/bin/bash
 
-# load ENV settings
 dir=$(dirname $0)
-set -a
-. $dir/../.env
-set +a
-
-# run the webserver
-echo "Starting webserver in $MOJO_MODE mode"
-if [ $MOJO_MODE == "development" ]; then
-    cd $dir/.. && morbo -v -l "http://*:${LISTEN_PORT}" -w templates -w lib app
+if [ "$1" == "--without-carton" ]; then
+    cd $dir/.. && morbo -v -l "http://*:8081" -w templates -w lib app
 else
     cd $dir/.. && carton exec -- hypnotoad ./app
 fi

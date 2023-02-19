@@ -2,10 +2,6 @@
 
 # load ENV settings
 dir=$(dirname $0)
-set -a
-. $dir/../.env
-set +a
-
 cd $dir/.. && carton exec -- ./app minion job --enqueue regenerate_image
 echo "Job enqueued"
 
