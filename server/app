@@ -75,8 +75,6 @@ post '/config_ui' => sub {
 
     foreach my $name (@{ $self->config_obj->parameters }) {
         my $value = $self->req->param($name);
-        $value //= 0 if $name =~ /^(broken_glass|web_calendar1|web_calendar2|web_calendar3|totally_random_icon)$/;    # switch 0/1
-
         $self->set_config($name, $value);
     }
 
