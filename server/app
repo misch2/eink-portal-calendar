@@ -81,8 +81,8 @@ post '/config_ui' => sub {
     }
 
     $self->flash(message => "Parameters saved.");
-    app->minion->enqueue('reload_calendars', []);
-    app->minion->enqueue('regenerate_image', []);
+    app->minion->enqueue('parse_calendars', []);
+    app->minion->enqueue('generate_image',  []);
 
     $self->redirect_to('/config_ui');
 };
@@ -201,14 +201,15 @@ plugin 'Minion::Admin' => {                          # Host Admin UI
 };
 
 plugin 'Cron' => {
-    '0 */4 * * *' => sub {                             # every hour
-        app->log->info("enqueuing calendar refresh task");
-        app->minion->enqueue('reload_calendars', []);
+
+    # *:01
+    '1 * * * *' => sub {    # every hour
+        app->minion->enqueue('parse_calendars', []);
     },
 
-    '0 * * * *' => sub {                             # every hour
-        app->log->info("enqueuing regenerate_image task");
-        app->minion->enqueue('regenerate_image', []);
+    # *:03
+    '3 * * * *' => sub {    # every hour
+        app->minion->enqueue('generate_image', []);
     },
 };
 
@@ -218,12 +219,12 @@ run_migrations();
 # define minion tasks
 app->minion->add_task(
     #
-    regenerate_image => sub {
+    generate_image => sub {
         PortalCalendar::Minion::regenerate_image(@_);
     }
 );
 app->minion->add_task(
-    reload_calendars => sub {
+    parse_calendars => sub {
         PortalCalendar::Minion::reload_calendars(@_);
     }
 );
