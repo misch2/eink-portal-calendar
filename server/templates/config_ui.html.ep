@@ -113,6 +113,16 @@
                 </label>
             </div>
         </div>
+
+        <div class="col-md-6">
+            <label for="lat">Latitude (+N/-S)</label>
+            <input id="lat" name="lat" type="text" placeholder="49.000000" class="form-control" value="<%= $values->{lat} %>">
+        </div>
+        <div class="col-md-6">
+            <label for="lon">Longitude (+E/-W)</label>
+            <input id="lon" name="lon" type="text" placeholder="16.000000" class="form-control" value="<%= $values->{lon} %>">
+        </div>
+
     </fieldset>
 
     <div class="col-12">

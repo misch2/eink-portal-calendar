@@ -79,8 +79,9 @@ post '/config_ui' => sub {
     }
 
     $self->flash(message => "Parameters saved.");
-    app->minion->enqueue('parse_calendars', []);
-    app->minion->enqueue('generate_image',  []);
+
+    $self->enqueue_task_only_once('parse_calendars');
+    $self->enqueue_task_only_once('generate_image');
 
     $self->redirect_to('/config_ui');
 };
@@ -183,6 +184,20 @@ helper set_config => sub {
     my $name  = shift;
     my $value = shift;
     return $self->config_obj->set($name, $value);
+};
+
+helper enqueue_task_only_once => sub {
+    my $self = shift;
+    my $name = shift;
+
+    my $new_id;
+    if (my $total = app->minion->jobs({ states => ['inactive'], tasks => [$name] })->total) {
+        $self->log->warn("Task '$name' already enqueued, skipping it");
+    } else {
+        $self->log->info("Enqueuing task '$name'");
+        $new_id = app->minion->enqueue($name, []);
+    }
+    return $new_id;
 };
 
 helper schema => sub { state $schema = PortalCalendar::Schema->connect('dbi:SQLite:local/calendar.db') };

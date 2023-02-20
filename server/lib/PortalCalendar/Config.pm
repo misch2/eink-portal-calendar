@@ -25,6 +25,8 @@ has 'defaults' => sub {
         theme                   => 'portal_calendar',
         openweather             => 0,
         openweather_api_key     => '',
+        lat                     => '',
+        lon                     => '',
     };
 };
 
