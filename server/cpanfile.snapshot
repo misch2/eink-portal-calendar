@@ -1527,6 +1527,17 @@ DISTRIBUTIONS
       perl 5.006
       strict 0
       warnings 0
+  Mojo-RoleTiny-0.022
+    pathname: D/DV/DVINCI/Mojo-RoleTiny-0.022.tar.gz
+    provides:
+      Mojo::RoleTiny 0.022
+    requirements:
+      ExtUtils::MakeMaker 0
+      Mojo::Base 0
+      Mojo::Util 0
+      Role::Tiny 0
+      Role::Tiny::With 0
+      perl 5.010000
   Mojo-SQLite-3.009
     pathname: D/DB/DBOOK/Mojo-SQLite-3.009.tar.gz
     provides:

@@ -3,6 +3,7 @@ package PortalCalendar::Minion;
 use Mojolicious::Lite;
 use PortalCalendar::Web2Png;
 use PortalCalendar::Integration::iCal;
+use PortalCalendar::Integration::OpenWeather;
 use DDP;
 
 sub regenerate_image {
@@ -37,10 +38,25 @@ sub reload_calendars {
         next unless $url;
 
         my $calendar = PortalCalendar::Integration::iCal->new(ics_url => $url, cache_dir => $job->app->app->home->child("cache/lwp"), db_cache_id => $calendar_no, app => $job->app);
-        $calendar->get_events(1);   # forced parse, then store to database
+        $calendar->get_events(1);    # forced parse, then store to database
     }
 
     return;
+}
+
+sub reload_weather {
+    my $job  = shift;
+    my @args = @_;
+
+    $job->app->log->info("Refreshing weather data");
+
+    return unless $job->app->get_config("openweather");
+
+    my $api = PortalCalendar::Integration::OpenWeather->new(app => $job->app, cache_dir => $job->app->app->home->child("cache/lwp"));
+
+    # forced parse, then store to database
+    $api->fetch_current_from_web(1);
+    $api->fetch_forecast_from_web(1);
 }
 
 1;

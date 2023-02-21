@@ -2,12 +2,12 @@ package PortalCalendar::Integration::iCal;
 
 use Mojo::Base -base;
 
+use PortalCalendar::DatabaseCache;
+
 use LWP::UserAgent::Cached;
 use iCal::Parser;
 use DDP;
 use DateTime;
-use Mojo::Util qw(b64_decode b64_encode);
-use Storable;
 
 has 'app';
 has 'ics_url';
@@ -44,37 +44,20 @@ sub get_events {
     my $self   = shift;
     my $forced = shift;
 
-    if (!$forced && $self->db_cache_id) {
+    my $cache = PortalCalendar::DatabaseCache->new(app => $self->app);
+    return $cache->get_or_set(
+        sub {
+            my $ical = iCal::Parser->new(no_todos => 1);
 
-        # try to load data from database
-        if (my $row = $self->app->schema->resultset('CalendarEventsRaw')->find($self->db_cache_id)) {
-            my $events = Storable::thaw(b64_decode($row->events_raw));
-            $self->app->log->debug("returning parsed calendar data from cache #" . $self->db_cache_id);
+            my $data = $self->fetch_from_web;
+            $self->app->log->debug("parsing calendar data...");
+            my $events = $ical->parse_strings($data);
             return $events;
-        }
-    }
 
-    my $ical = iCal::Parser->new(no_todos => 1);
-
-    my $data   = $self->fetch_from_web;
-    $self->app->log->debug("parsing calendar data...");
-    my $events = $ical->parse_strings($data);
-
-    if ($self->db_cache_id) {
-        $self->app->log->debug("storing serialized data into the DB");
-        my $serialized = b64_encode(Storable::freeze $events);
-        $self->app->schema->resultset('CalendarEventsRaw')->update_or_create(
-            {
-                calendar_id => $self->db_cache_id,
-                events_raw  => $serialized,
-            },
-            {
-                key => 'primary',
-            }
-        );
-    }
-
-    return $events;
+        },
+        $self->db_cache_id,
+        $forced
+    );
 }
 
 sub get_today_events {

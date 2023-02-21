@@ -81,6 +81,7 @@ post '/config_ui' => sub {
     $self->flash(message => "Parameters saved.");
 
     $self->enqueue_task_only_once('parse_calendars');
+    $self->enqueue_task_only_once('parse_weather');
     $self->enqueue_task_only_once('generate_image');
 
     $self->redirect_to('/config_ui');
@@ -214,15 +215,10 @@ plugin 'Minion::Admin' => {                          # Host Admin UI
 };
 
 plugin 'Cron' => {
-
-    # *:01
-    '1 * * * *' => sub {    # every hour
-        app->minion->enqueue('parse_calendars', []);
-    },
-
-    # *:03
-    '3 * * * *' => sub {    # every hour
-        app->minion->enqueue('generate_image', []);
+    '0 * * * *' => sub {    # every hour
+        my $id1 = app->minion->enqueue('parse_calendars', []);
+        my $id2 = app->minion->enqueue('parse_weather',   []);
+        app->minion->enqueue('generate_image', [], { parents => [ $id1, $id2 ] });
     },
 };
 
@@ -239,6 +235,11 @@ app->minion->add_task(
 app->minion->add_task(
     parse_calendars => sub {
         PortalCalendar::Minion::reload_calendars(@_);
+    }
+);
+app->minion->add_task(
+    parse_weather => sub {
+        PortalCalendar::Minion::reload_weather(@_);
     }
 );
 
@@ -318,4 +319,16 @@ CREATE TABLE config (
 CREATE TABLE calendar_events_raw (
     calendar_id INTEGER NOT NULL PRIMARY KEY,
     events_raw BLOB
+);
+
+-- 6 up
+ALTER TABLE calendar_events_raw RENAME TO cache;
+ALTER TABLE cache RENAME COLUMN calendar_id TO id;
+ALTER TABLE cache RENAME COLUMN events_raw TO data;
+
+-- 7 up
+DROP TABLE cache;
+CREATE TABLE cache (
+    id VARCHAR(255) NOT NULL PRIMARY KEY,
+    data BLOB
 );

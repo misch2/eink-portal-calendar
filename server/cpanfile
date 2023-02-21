@@ -15,6 +15,7 @@ requires 'List::Util';
 requires 'LWP::UserAgent::Cached';
 requires 'Minion::Backend::SQLite';
 requires 'Mojo::SQLite';
+requires 'Mojo::RoleTiny';
 requires 'Mojolicious::Lite';
 requires 'Mojolicious::Plugin::Config';
 requires 'Mojolicious::Plugin::Cron';
