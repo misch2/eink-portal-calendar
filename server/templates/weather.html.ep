@@ -1,0 +1,89 @@
+<html>
+%= stylesheet '/css/calendar.css'
+%= stylesheet '/css/weather-icons.min.css'
+% my $decorator = sub { shift };        # returns input as-is
+% $decorator = sub { uc(shift) };       # UPPERCASE
+%# $decorator = sub { ucfirst(shift) }; # Uppercase
+%# $decorator = sub { Text::Unidecode::unidecode(uc(shift)) }; # UPPERCASE with accents removed
+
+<body>
+
+    %if (get_config('broken_glass')) {
+        <div id="overlay-image"></div>
+    %}
+    <div id="spacer">
+        <div class="top-month-header">
+            <div class="month-name">
+                %# LLLL = standalone month name
+                <%= $decorator->($date->format_cldr('LLLL')) %>
+            </div>
+        </div>
+
+        <div class="day-number-big">
+            <%= sprintf("%02d", $date->day) %>
+        </div>
+
+        <div class="day-of-week-block">
+            <div class="dow-number-and-name">
+                <div>
+                    <%= $date->day .'/'. $date->month_length %>
+                </div>
+                <div>
+                    <%= $decorator->($date->day_name) %>
+                </div>
+            </div>
+            <div class="separator"></div>
+            <div class="bunch-of-bars">
+                % for (1 .. $date->day) {
+                    <div class="bar"></div>
+                % }
+            </div>
+        </div>
+
+        <div class="weather-container">
+            % my $temp = int($current_weather->{main}->{temp} + 0.5);
+            % my $feel_temp = int($current_weather->{main}->{feels_like} + 0.5);
+            % my $wind = int($current_weather->{wind}->{speed} + 0.5);
+            % my $rain = $current_weather->{rain}->{'1h'};
+            % my $snow = $current_weather->{snow}->{'1h'};
+            % my $day_or_night = ($current_weather->{dt} < $current_weather->{sys}->{sunrise} || $current_weather->{dt} > $current_weather->{sys}->{sunset}) ? 'night' : 'day';
+
+            <p>
+                % foreach my $condition (@{ $current_weather->{weather} }) {
+                    %# https://erikflowers.github.io/weather-icons/api-list.html
+                    <i class="wi wi-owm-<%= $day_or_night %>-<%= $condition->{id} %>" style="font-size: 3rem"></i>
+                % }
+            </p>
+            <p style="font-size: 1.5rem; font-weight: bold">
+                <%= ucfirst($current_weather->{weather}->[0]->{description}) %>
+            </p>
+            <p>
+                <i class="wi wi-thermometer" style="font-size: 1rem"></i>
+                <%= $temp %> °C 
+                % if (abs($temp - $feel_temp) > 1) {
+                    <br>
+                    (feels like <%= $feel_temp %> °C)
+                % }
+            </p>
+            <p>
+                <i class="wi wi-strong-wind" style="font-size: 1rem"></i>
+                <%= $wind %> m/s
+            </p>
+            <p>
+                <i class="wi wi-cloud" style="font-size: 1rem"></i> <%= $current_weather->{clouds}->{all} %> %
+                % if ($rain > 0) {
+                    <br>
+                    <i class="wi wi-rain" style="font-size: 1rem"></i> <%= $rain %> mm
+                % }
+                % if ($snow > 0) {
+                    <i class="wi wi-snow" style="font-size: 1rem"></i> <%= $snow %> mm
+                % }
+            </p>
+        </div>
+
+
+        <img id="aperture-logo" src="/images/Aperture_Laboratories_Logo.png">
+    </div>
+</body>
+
+</html>

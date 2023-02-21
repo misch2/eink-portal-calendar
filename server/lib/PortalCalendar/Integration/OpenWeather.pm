@@ -46,6 +46,7 @@ sub fetch_current_from_web {
                 lon   => $self->app->get_config('lon'),
                 units => 'metric',
                 appid => $self->api_key,
+                lang  => $self->app->get_config('openweather_lang'),
             )->to_unsafe_string;
 
             $self->app->log->debug($url);
@@ -73,6 +74,7 @@ sub fetch_forecast_from_web {
                 lon   => $self->app->get_config('lon'),
                 units => 'metric',
                 appid => $self->api_key,
+                lang  => $self->app->get_config('openweather_lang'),
             )->to_unsafe_string;
 
             $self->app->log->debug($url);

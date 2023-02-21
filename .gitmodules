@@ -1,3 +1,6 @@
 [submodule "wuspy_portal_calendar"]
 	path = client/wuspy_portal_calendar
 	url = https://github.com/wuspy/portal_calendar.git
+[submodule "weather-icons"]
+	path = weather-icons
+	url = https://github.com/erikflowers/weather-icons

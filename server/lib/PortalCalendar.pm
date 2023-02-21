@@ -20,6 +20,7 @@ use PortalCalendar::Config;
 use PortalCalendar::Minion;
 use PortalCalendar::Schema;
 use PortalCalendar::Integration::iCal;
+use PortalCalendar::Integration::OpenWeather;
 
 has 'app';
 
@@ -224,8 +225,8 @@ sub html_for_date {
 
         my $calendar = PortalCalendar::Integration::iCal->new(ics_url => $url, cache_dir => $self->app->app->home->child("cache/lwp"), db_cache_id => $calendar_no, app => $self->app);
         try {
-            push @today_events, $calendar->get_today_events($dt);   # cached if possible
-            #p @today_events;
+            push @today_events, $calendar->get_today_events($dt);    # cached if possible
+                                                                     #p @today_events;
         } catch {
             warn "Error: $_";
         };
@@ -277,6 +278,17 @@ sub html_for_date {
 
     }
 
+    my $current_weather;
+    my $forecast;
+    if ($self->app->get_config("openweather")) {
+        my $api = PortalCalendar::Integration::OpenWeather->new(app => $self->app, cache_dir => $self->app->app->home->child("cache/lwp"));
+        $current_weather = $api->fetch_current_from_web;
+        $forecast        = $api->fetch_forecast_from_web;
+        # p $forecast, as => 'forecast';
+        # p $current_weather, as => 'current';
+    }
+
+
     return $self->app->render(
         template => $self->app->get_config('theme'),
         format   => 'html',
@@ -286,6 +298,8 @@ sub html_for_date {
         icons                => \@icons,
         calendar_events      => \@today_events,
         has_calendar_entries => $has_calendar_entries,
+        current_weather => $current_weather,
+        forecast => $forecast,
     );
 }
 

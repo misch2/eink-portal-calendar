@@ -160,6 +160,15 @@ div.calendar-container div {
     white-space: nowrap;
 }
 
+div.weather-container {
+    display: flex;
+    flex-flow: row wrap;
+    margin-top: 3rem;
+    gap: 1rem;
+    /* padding-top: 9px; */
+    border-top: 2px solid black;
+}
+
 img#aperture-logo {
     position: absolute;
     top: 705px;
