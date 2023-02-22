@@ -40,7 +40,7 @@
             </div>
         </div>
 
-        <div class="weather-container">
+        <div class="weather-container" style="justify-content: space-between; align-items: flex-start">
             % my $temp = int($current_weather->{main}->{temp} + 0.5);
             % my $feel_temp = int($current_weather->{main}->{feels_like} + 0.5);
             % my $wind = int($current_weather->{wind}->{speed} + 0.5);
@@ -52,12 +52,9 @@
                 % foreach my $condition (@{ $current_weather->{weather} }) {
                     %# https://erikflowers.github.io/weather-icons/api-list.html
                     <i class="wi wi-owm-<%= $day_or_night %>-<%= $condition->{id} %>" style="font-size: 3rem"></i>
+                    <span style="font-weight: bold"><%= ucfirst($condition->{description}) %></span>
                 % }
             </p>
-            <p style="font-size: 1.5rem; font-weight: bold">
-                <%= ucfirst($current_weather->{weather}->[0]->{description}) %>
-            </p>
-
 <!--             <div class="flex-break"></div> -->
 
             <div style="display: grid; grid-template-columns: 0fr 1fr; column-gap: 0.5rem; row-gap: 0.25rem; justify-items: start; align-items: start">
@@ -65,7 +62,7 @@
                 <p>
                     <%= $temp %>
                     % if (abs($temp - $feel_temp) > 1) {
-                        (🐾<%= $feel_temp %>)
+                        (<%= $feel_temp %>)
                     % }
                     °C
                 </p>
