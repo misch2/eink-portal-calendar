@@ -11,6 +11,7 @@ has 'defaults' => sub {
     my $self = shift;
     return {
         sleep_time              => 3600,
+        timezone                => 'UTC',
         broken_glass            => 0,
         web_calendar1           => 0,
         web_calendar2           => 0,

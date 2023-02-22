@@ -57,30 +57,38 @@
             <p style="font-size: 1.5rem; font-weight: bold">
                 <%= ucfirst($current_weather->{weather}->[0]->{description}) %>
             </p>
-            <p>
-                <i class="wi wi-thermometer" style="font-size: 1rem"></i>
-                <%= $temp %> °C 
-                % if (abs($temp - $feel_temp) > 1) {
-                    <br>
-                    (feels like <%= $feel_temp %> °C)
-                % }
-            </p>
-            <p>
-                <i class="wi wi-strong-wind" style="font-size: 1rem"></i>
-                <%= $wind %> m/s
-            </p>
-            <p>
-                <i class="wi wi-cloud" style="font-size: 1rem"></i> <%= $current_weather->{clouds}->{all} %> %
-                % if ($rain > 0) {
-                    <br>
-                    <i class="wi wi-rain" style="font-size: 1rem"></i> <%= $rain %> mm
-                % }
-                % if ($snow > 0) {
-                    <i class="wi wi-snow" style="font-size: 1rem"></i> <%= $snow %> mm
-                % }
-            </p>
-        </div>
 
+<!--             <div class="flex-break"></div> -->
+
+            <div style="display: grid; grid-template-columns: 0fr 1fr; column-gap: 0.5rem; row-gap: 0.25rem; justify-items: start; align-items: start">
+                <i class="wi wi-thermometer-exterior" style="font-size: 1rem; margin-top: 0.4rem"></i>
+                <p>
+                    <%= $temp %>
+                    % if (abs($temp - $feel_temp) > 1) {
+                        (🐾<%= $feel_temp %>)
+                    % }
+                    °C
+                </p>
+                <i class="wi wi-strong-wind" style="font-size: 1rem; margin-top: 0.2rem"></i>
+                <p>
+                    <%= $wind %> m/s
+                </p>
+                <i class="wi wi-cloud" style="font-size: 1rem; margin-top: 0.15rem"></i> 
+                <p>
+                    <%= $current_weather->{clouds}->{all} %> %
+                    % if ($rain > 0) {
+                        <br>
+                        <i class="wi wi-rain" style="font-size: 1rem"></i> <%= $rain %> mm
+                    % }
+                    % if ($snow > 0) {
+                        <i class="wi wi-snow" style="font-size: 1rem"></i> <%= $snow %> mm
+                    % }
+                </p>
+            </div>
+            <div style="font-size: 0.7rem">
+                Data from: <%= DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone(get_config('timezone'))->strftime('%c') %>
+            </div>
+        </div>
 
         <img id="aperture-logo" src="/images/Aperture_Laboratories_Logo.png">
     </div>

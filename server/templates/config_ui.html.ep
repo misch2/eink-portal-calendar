@@ -114,17 +114,21 @@
             </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label for="lat">Latitude (+N/-S)</label>
             <input id="lat" name="lat" type="text" placeholder="49.000000" class="form-control" value="<%= $values->{lat} %>">
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label for="lon">Longitude (+E/-W)</label>
             <input id="lon" name="lon" type="text" placeholder="16.000000" class="form-control" value="<%= $values->{lon} %>">
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label for="openweather_lang">Lang</label>
             <input id="openweather_lang" name="openweather_lang" type="text" placeholder="en, cz, ..." class="form-control" value="<%= $values->{openweather_lang} %>">
+        </div>
+        <div class="col-md-3">
+            <label for="timezone">Time zone</label>
+            <input id="timezone" name="timezone" type="text" placeholder="UTC" class="form-control" value="<%= $values->{timezone} %>">
         </div>
 
     </fieldset>

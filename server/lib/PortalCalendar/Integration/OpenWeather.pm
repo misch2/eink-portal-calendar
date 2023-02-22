@@ -28,7 +28,7 @@ has 'ua' => sub {
         # },
         recache_if => sub {
             my ($response, $path, $request) = @_;
-            return -M $path > (1 / 24);    #  recache any response older than 1 hour (1/24 of day)
+            return -M $path > (1 / (24 * 5));    #  recache any response older than 5 minutes (1/24/5 of day)
         },
     );
 };
