@@ -1,7 +1,7 @@
 package PortalCalendar::Integration::iCal;
 
 use Mojo::Base -base;
-
+use Mojo::File;
 use PortalCalendar::DatabaseCache;
 
 use LWP::UserAgent::Cached;
@@ -25,7 +25,12 @@ has 'ua' => sub {
         # },
         recache_if => sub {
             my ($response, $path, $request) = @_;
-            return -M $path > 0.5;    # recache any response older than 0.5 day
+            my $stat    = Mojo::File->new($path)->lstat;
+            my $age     = time - $stat->mtime;
+            my $recache = ($age > 60 * 60 * 4) ? 1 : 0;         # recache anything older than 4 hours
+            $self->app->log->debug("Age($path)=$age secs => recache=$recache");
+            return $recache;
+
         },
     );
 };

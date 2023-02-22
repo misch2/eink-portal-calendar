@@ -3,6 +3,8 @@ package PortalCalendar::Integration::OpenWeather;
 use Mojo::Base -base;
 use Mojo::JSON qw(decode_json encode_json);
 use Mojo::URL;
+use Mojo::File;
+use PortalCalendar::DatabaseCache;
 
 use LWP::UserAgent::Cached;
 use iCal::Parser;
@@ -28,7 +30,12 @@ has 'ua' => sub {
         # },
         recache_if => sub {
             my ($response, $path, $request) = @_;
-            return -M $path > (1 / (24 * 5));    #  recache any response older than 5 minutes (1/24/5 of day)
+
+            my $stat    = Mojo::File->new($path)->lstat;
+            my $age     = time - $stat->mtime;
+            my $recache = ($age > 60 * 5) ? 1 : 0;         # recache anything older than 5 minutes
+            $self->app->log->debug("Age($path)=$age secs => recache=$recache");
+            return $recache;
         },
     );
 };
