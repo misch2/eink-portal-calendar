@@ -16,8 +16,8 @@
         <div class="col-md-12">
             <!-- <label for="theme">Theme</label> -->
             <select id="theme" name="theme" class="form-select">
-                <option value="portal_calendar" <%= 'selected' if $values->{theme} eq 'portal_calendar' %>>Portal calendar (default)</option>
-                <option value="weather" <%= 'selected' if $values->{theme} eq 'weather' %>>Weather forecast</option>
+                <option value="portal_with_icons" <%= 'selected' if $values->{theme} eq 'portal_with_icons' %>>Portal calendar (default)</option>
+                <option value="portal_with_weather" <%= 'selected' if $values->{theme} eq 'portal_with_weather' %>>Weather forecast</option>
             </select>
         </div>
     </fieldset>
