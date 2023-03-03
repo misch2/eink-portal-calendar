@@ -27,7 +27,7 @@ has 'ua' => sub {
             my ($response, $path, $request) = @_;
             my $stat    = Mojo::File->new($path)->lstat;
             my $age     = time - $stat->mtime;
-            my $recache = ($age > 60 * 60 * 4) ? 1 : 0;         # recache anything older than 4 hours
+            my $recache = ($age > 60 * 60 * 4) ? 1 : 0;    # recache anything older than 4 hours
             $self->app->log->debug("Age($path)=$age secs => recache=$recache");
             return $recache;
 
@@ -49,8 +49,8 @@ sub get_events {
     my $self   = shift;
     my $forced = shift;
 
-    my $cache = PortalCalendar::DatabaseCache->new(app => $self->app);
-    return $cache->get_or_set(
+    my $cache    = PortalCalendar::DatabaseCache->new(app => $self->app);
+    my $cal_data = $cache->get_or_set(
         sub {
             my $ical = iCal::Parser->new(no_todos => 1);
 
@@ -63,13 +63,15 @@ sub get_events {
         $self->db_cache_id,
         $forced
     );
+    return $cal_data->{events};
 }
 
 sub get_today_events {
     my $self = shift;
     my $date = shift // DateTime->now();
 
-    my $events = $self->get_events()->{ $date->year }->{ $date->month }->{ $date->day } || {};
+    my $all_events = $self->get_events();
+    my $events     = $all_events->{ $date->year }->{ $date->month }->{ $date->day } || {};
 
     my @events = values %{$events};
     @events = sort { $a->{DTSTART}->hms cmp $b->{DTSTART}->hms } @events;
