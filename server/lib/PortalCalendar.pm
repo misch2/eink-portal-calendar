@@ -216,7 +216,6 @@ sub html_for_date {
     srand($dt->ymd(''));
 
     my @today_events;
-
     foreach my $calendar_no (1 .. 3) {
         next unless $self->app->get_config("web_calendar${calendar_no}");
 
@@ -231,6 +230,8 @@ sub html_for_date {
             warn "Error: $_";
         };
     }
+    @today_events = sort { $a->{DTSTART} cmp $b->{DTSTART} } @today_events;
+
     my $has_calendar_entries = (scalar @today_events ? 1 : 0);
 
     my @icons;
