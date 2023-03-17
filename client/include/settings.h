@@ -33,3 +33,6 @@ VCC  - gray   #888 - to +3.3V
 #define DC_PIN 23
 #define RST_PIN 33
 #define BUSY_PIN 27
+
+#define SINGLE_AAA_VOLTAGE_PIN 32
+

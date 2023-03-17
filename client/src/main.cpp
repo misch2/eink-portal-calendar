@@ -24,8 +24,8 @@
 #endif
 
 #include "debug.h"
-#include "display_settings.h"
 #include "main.h"
+#include "settings.h"
 
 /* local vars */
 #ifdef USE_GxEPD2_4G
@@ -52,6 +52,7 @@ String serverURLBase =
 
 // configurable remotely
 uint64_t sleepTime = SECONDS_PER_HOUR;
+float criticalVoltage = 1.1;
 
 /* RTC vars (survives deep sleep) */
 RTC_DATA_ATTR int bootCount = 0;
@@ -61,6 +62,7 @@ RTC_DATA_ATTR char lastChecksum[64 + 1] = "";
 void setup() {
   wakeupAndConnect();
   checkResetReason();
+  checkVoltage();
 
   loadConfigFromWeb();
   fetchAndDrawImageIfNeeded();
@@ -72,8 +74,23 @@ void loop() {
   // Shouldn't get here at all due to the deep sleep called in setup
 }
 
+float getVoltage() {
+  int value = analogRead(SINGLE_AAA_VOLTAGE_PIN);
+  float volts = value * 3.3 / 4095.0;
+  DEBUG_PRINT("Voltage raw read (pin %d): %d", SINGLE_AAA_VOLTAGE_PIN, value);
+  DEBUG_PRINT("Voltage: %f", volts);
+  return volts;
+};
+
+void checkVoltage() {
+  float voltage = getVoltage();
+  if (voltage < criticalVoltage) {
+    error(String("Voltage ") + voltage + " critical, below " + criticalVoltage);
+  };
+};
+
 void loadConfigFromWeb() {
-  String jsonURL = serverURLBase + "/config";
+  String jsonURL = serverURLBase + "/config?voltage=" + getVoltage();
   DEBUG_PRINT("Loading config from web");
 
   String jsonText = httpGETRequestAsString(jsonURL.c_str());
@@ -86,10 +103,15 @@ void loadConfigFromWeb() {
     error("Can't parse response");
   }
 
-  int tmp = response["sleep"];
-  if (tmp != 0) {
-    sleepTime = tmp;
-    DEBUG_PRINT("sleepTime set to %d", tmp);
+  int tmpi = response["sleep"];
+  if (tmpi != 0) {
+    sleepTime = tmpi;
+    DEBUG_PRINT("sleepTime set to %d", tmpi);
+  }
+  float tmpf = response["critical_voltage"];
+  if (tmpf != 0) {
+    criticalVoltage = tmpf;
+    DEBUG_PRINT("criticalVoltage set to %f", tmpf);
   }
 
   // // char *tmp2 = response["bitmap_path"];
