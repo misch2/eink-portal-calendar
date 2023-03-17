@@ -1,8 +1,10 @@
 void stopWiFi();
 bool startWiFi();
+float getVoltage();
 
 void wakeupAndConnect();
 void checkResetReason();
+void checkVoltage();
 void loadConfigFromWeb();
 void fetchAndDrawImageIfNeeded();
 void disconnectAndHibernate();
