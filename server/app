@@ -40,6 +40,7 @@ get '/' => sub {
 
         last_contact_ago => $last_contact_ago,
         last_visit_dt    => $last_visit_dt,
+        last_voltage     => ($self->get_config('_last_voltage') // '(unknown)'),
     );
 };
 
@@ -127,7 +128,8 @@ get '/calendar/bitmap' => sub {
 get '/config' => sub {
     my $self = shift;
 
-    $self->set_config('_last_visit', DateTime->now()->iso8601);
+    $self->set_config('_last_visit',   DateTime->now()->iso8601);
+    $self->set_config('_last_voltage', $self->req->param('voltage'));
 
     my $ret = {
         #

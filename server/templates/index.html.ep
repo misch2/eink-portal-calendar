@@ -42,10 +42,13 @@
             <%= $hours %> hours
         % }
         <%= $minutes %> minutes ago
-        (<%= $last_visit_dt ? $last_visit_dt->strftime('%c') : '' %>)
+        (<%= $last_visit_dt ? $last_visit_dt->strftime('%c') : '' %>).
     % } else {
-        never
+        never.
     % }
+</p>
+<p class="row-fluid">
+    Last voltage: <%= $last_voltage %> V.
 </p>
 
 <p class="row-fluid pb-3">
