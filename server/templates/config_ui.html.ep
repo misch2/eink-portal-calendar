@@ -23,11 +23,15 @@
     </fieldset>
 
     <fieldset class="mb-4 row">
-        <legend class="w-auto">ePaper client</legend>
+        <legend class="col-md-12">ePaper client</legend>
 
-        <div class="col-md-12">
+        <div class="col-md-6">
             <label for="sleep_time">Sleep time (seconds)</label>
             <input id="sleep_time" name="sleep_time" type="number" class="form-control" value="<%= $values->{sleep_time} %>">
+        </div>
+        <div class="col-md-6">
+            <label for="critical_voltage">Critical voltage for a single AAA cell</label>
+            <input id="critical_voltage" name="critical_voltage" type="number" step="0.01" class="form-control" value="<%= $values->{critical_voltage} %>">
         </div>
     </fieldset>
 
