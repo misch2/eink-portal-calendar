@@ -135,6 +135,17 @@
             <input id="timezone" name="timezone" type="text" placeholder="UTC" class="form-control" value="<%= $values->{timezone} %>">
         </div>
 
+
+        <div class="form-group col-12 mt-3">
+            <label for="homeassistant_api_key">HomeAssistant API key</label>
+            <input id="homeassistant_api_key" name="homeassistant_api_key" type="text" class="form-control" value="<%= $values->{homeassistant_api_key} %>">
+        </div>
+        <div class="col-md-12">
+            <label for="homeassistant_api_url">HomeAssistant API entity URL</label>
+            <input id="homeassistant_api_url" name="homeassistant_api_url" type="text" class="form-control" value="<%= $values->{homeassistant_api_url} %>">
+        </div>
+
+
     </fieldset>
 
     <div class="col-12">

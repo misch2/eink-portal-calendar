@@ -28,6 +28,8 @@ has 'defaults' => sub {
         openweather             => 0,
         openweather_api_key     => '',
         openweather_lang        => 'en',
+        homeassistant_api_key   => '',
+        homeassistant_api_url   => '',
         lat                     => '',
         lon                     => '',
     };
