@@ -10,7 +10,7 @@
 
 <form action="/config_ui" method="post">
 
-    <fieldset class="mb-4 row">
+    <fieldset class="mt-4 row">
         <legend class="w-auto">Main theme</legend>
 
         <div class="col-md-12">
@@ -22,7 +22,7 @@
         </div>
     </fieldset>
 
-    <fieldset class="mb-4 row">
+    <fieldset class="mt-4 row">
         <legend class="col-md-12">ePaper client</legend>
 
         <div class="col-md-6">
@@ -35,7 +35,7 @@
         </div>
     </fieldset>
 
-    <fieldset class="mb-4 row">
+    <fieldset class="mt-4 row">
         <legend class="w-auto">Other customizations</legend>
 
         <div class="col-12">
@@ -71,9 +71,9 @@
         </div>
     </fieldset>
 
-    <fieldset class="mb-4 row">
-        <legend class="w-auto">Integrations</legend>
-        <div class="form-group col-12 mb-3">
+    <fieldset class="mt-4 row">
+        <legend class="w-auto">Calendar integration</legend>
+        <div class="form-group col-12">
             <label for="web_calendar_ics_url1">ICS calendar URL #1</label>
             <input id="web_calendar_ics_url1" name="web_calendar_ics_url1" type="text" class="form-control" value="<%= $values->{web_calendar_ics_url1} %>">
 
@@ -85,7 +85,7 @@
             </div>
         </div>
 
-        <div class="form-group col-12 mb-3">
+        <div class="form-group col-12 mt-3">
             <label for="web_calendar_ics_url2">ICS calendar URL #2</label>
             <input id="web_calendar_ics_url2" name="web_calendar_ics_url2" type="text" class="form-control" value="<%= $values->{web_calendar_ics_url2} %>">
             <div class="form-check form-switch">
@@ -96,7 +96,7 @@
             </div>
         </div>
 
-        <div class="form-group col-12 mb-3">
+        <div class="form-group col-12 mt-3">
             <label for="web_calendar_ics_url3">ICS calendar URL #3</label>
             <input id="web_calendar_ics_url3" name="web_calendar_ics_url3" type="text" class="form-control" value="<%= $values->{web_calendar_ics_url3} %>">
             <div class="form-check form-switch">
@@ -106,9 +106,13 @@
                 </label>
             </div>
         </div>
+    </fieldset>
+
+    <fieldset class="mt-4 row">
+        <legend class="w-auto">OpenWeather integration</legend>
 
         <div class="form-group col-12">
-            <label for="openweather_api_key">OpenWeather API key</label>
+            <label for="openweather_api_key">API key</label>
             <input id="openweather_api_key" name="openweather_api_key" type="text" class="form-control" value="<%= $values->{openweather_api_key} %>">
             <div class="form-check form-switch">
                 <label class="form-check-label">
@@ -118,6 +122,7 @@
             </div>
         </div>
 
+        <div class="form-group row mt-3">
         <div class="col-md-3">
             <label for="lat">Latitude (+N/-S)</label>
             <input id="lat" name="lat" type="text" placeholder="49.000000" class="form-control" value="<%= $values->{lat} %>">
@@ -134,21 +139,42 @@
             <label for="timezone">Time zone</label>
             <input id="timezone" name="timezone" type="text" placeholder="UTC" class="form-control" value="<%= $values->{timezone} %>">
         </div>
-
-
-        <div class="form-group col-12 mt-3">
-            <label for="homeassistant_api_key">HomeAssistant API key</label>
-            <input id="homeassistant_api_key" name="homeassistant_api_key" type="text" class="form-control" value="<%= $values->{homeassistant_api_key} %>">
         </div>
-        <div class="col-md-12">
-            <label for="homeassistant_api_url">HomeAssistant API entity URL</label>
-            <input id="homeassistant_api_url" name="homeassistant_api_url" type="text" class="form-control" value="<%= $values->{homeassistant_api_url} %>">
-        </div>
+    </fieldset>
 
+    <fieldset class="mt-4 row">
+        <legend class="w-auto">MQTT integration</legend>
+
+        <div class="form-group row">
+            <div class="form-group col-3">
+                <label for="mqtt_server">Server</label>
+                <input id="mqtt_server" name="mqtt_server" type="text" class="form-control" value="<%= $values->{mqtt_server} %>">
+            </div>
+            <div class="form-group col-3">
+                <label for="mqtt_username">Username</label>
+                <input id="mqtt_username" name="mqtt_username" type="text" class="form-control" value="<%= $values->{mqtt_username} %>">
+            </div>
+            <div class="form-group col-3">
+                <label for="mqtt_password">Password</label>
+                <input id="mqtt_password" name="mqtt_password" type="text" class="form-control" value="<%= $values->{mqtt_password} %>">
+            </div>
+            <div class="form-group col-3">
+                <label for="mqtt_topic">Device topic</label>
+                <input id="mqtt_topic" name="mqtt_topic" type="text" class="form-control" value="<%= $values->{mqtt_topic} %>">
+            </div>
+        </div>
+        <div class="form-group col-12">
+            <div class="form-check form-switch">
+                <label class="form-check-label">
+                    <input class="form-check-input" type="checkbox" id="mqtt" name="mqtt" value="1" <%=$ values->{mqtt} ? "checked" : "" %>>
+                    enabled
+                </label>
+            </div>
+        </div>
 
     </fieldset>
 
-    <div class="col-12">
+    <div class="col-12 mt-3">
         <input type="submit" class="btn btn-primary" value="Submit">
     </div>
 

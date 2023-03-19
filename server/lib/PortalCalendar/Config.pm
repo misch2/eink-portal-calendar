@@ -28,8 +28,11 @@ has 'defaults' => sub {
         openweather             => 0,
         openweather_api_key     => '',
         openweather_lang        => 'en',
-        homeassistant_api_key   => '',
-        homeassistant_api_url   => '',
+        mqtt                    => 0,
+        mqtt_server             => 'localhost',
+        mqtt_username           => '',
+        mqtt_password           => '',
+        mqtt_topic              => 'portal_calendar01',
         lat                     => '',
         lon                     => '',
     };

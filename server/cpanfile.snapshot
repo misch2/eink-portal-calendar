@@ -1741,6 +1741,13 @@ DISTRIBUTIONS
       perl 5.006002
       strict 0
       warnings 0
+  Net-MQTT-Simple-1.28
+    pathname: J/JU/JUERD/Net-MQTT-Simple-1.28.tar.gz
+    provides:
+      Net::MQTT::Simple 1.28
+      Net::MQTT::Simple::SSL undef
+    requirements:
+      ExtUtils::MakeMaker 0
   Package-Stash-0.40
     pathname: E/ET/ETHER/Package-Stash-0.40.tar.gz
     provides:

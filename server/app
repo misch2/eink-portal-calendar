@@ -129,7 +129,12 @@ get '/config' => sub {
     my $self = shift;
 
     $self->set_config('_last_visit',   DateTime->now()->iso8601);
-    $self->set_config('_last_voltage', $self->req->param('voltage'));
+    $self->set_config('_last_voltage', $self->req->param('voltage') // '');    # value has NOT NULL restriction
+
+    PortalCalendar->new(app => $self)->update_mqtt('voltage',          $self->req->param('voltage'));
+    PortalCalendar->new(app => $self)->update_mqtt('critical_voltage', $self->get_config('critical_voltage'));
+    PortalCalendar->new(app => $self)->update_mqtt('last_visit',       DateTime->now()->rfc3339);
+    PortalCalendar->new(app => $self)->update_mqtt('sleep_time',       $self->get_config('sleep_time'));
 
     my $ret = {
         #

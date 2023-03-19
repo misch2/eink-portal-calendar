@@ -21,6 +21,7 @@ use PortalCalendar::Minion;
 use PortalCalendar::Schema;
 use PortalCalendar::Integration::iCal;
 use PortalCalendar::Integration::OpenWeather;
+use PortalCalendar::Integration::MQTT;
 
 has 'app';
 
@@ -281,14 +282,42 @@ sub html_for_date {
 
     my $current_weather;
     my $forecast;
+    my @forecast_5_days = ();
     if ($self->app->get_config("openweather")) {
         my $api = PortalCalendar::Integration::OpenWeather->new(app => $self->app, cache_dir => $self->app->app->home->child("cache/lwp"));
         $current_weather = $api->fetch_current_from_web;
         $forecast        = $api->fetch_forecast_from_web;
+
         # p $forecast, as => 'forecast';
         # p $current_weather, as => 'current';
-    }
 
+        foreach my $days_add (0 .. 4) {
+            my $dt = DateTime->now->truncate(to => 'day')->add(days => $days_add);
+
+            my %daily_details = ();
+            foreach my $hours_add (8, 12, 16) {
+                my $dt2         = $dt->clone->add(hours => $hours_add);
+                my $time_of_day = 'morning';
+                $time_of_day = 'noon'      if $hours_add == 12;
+                $time_of_day = 'afternoon' if $hours_add == 16;
+
+                if (my $f = $self->find_nearest_forecast($forecast->{list}, $dt2)) {
+                    $daily_details{$time_of_day} = {
+                        required_dt => $dt2,
+                        forecast    => $f
+                    };
+                }
+            }
+
+            push @forecast_5_days,
+                {
+                date    => $dt,
+                details => \%daily_details,
+                };
+        }
+
+        # p @forecast_5_days;
+    }
 
     return $self->app->render(
         template => 'calendar_themes/' . $self->app->get_config('theme'),
@@ -299,9 +328,64 @@ sub html_for_date {
         icons                => \@icons,
         calendar_events      => \@today_events,
         has_calendar_entries => $has_calendar_entries,
+
+        # raw weather values:
         current_weather => $current_weather,
-        forecast => $forecast,
+        forecast        => $forecast,
+
+        # processed weather values:
+        forecast_5_days => \@forecast_5_days,
     );
+}
+
+# Finds a forecast with datetime nearest to the required one.
+# Returns nothing when there is no match.
+sub find_nearest_forecast {
+    my $self        = shift;
+    my $list        = shift;
+    my $dt_required = shift;
+
+    my $ret;
+    my $prev_weather;
+    my $dt_prev;
+
+    # individual forecasts
+    foreach my $current_weather (@{$list}) {
+        my $dt_current = DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone($self->app->get_config('timezone'));
+
+        if (DateTime->compare($dt_current, $dt_required) == 0) {
+
+            # lucky guess, exact match
+            $ret = $current_weather;
+            last;
+        } elsif (DateTime->compare($dt_current, $dt_required) < 0) {
+
+            # still searching
+            $prev_weather = $current_weather;
+            $dt_prev      = $dt_current->clone;
+            next;
+        } else {
+
+            # what was closer?
+            if ($prev_weather) {
+                my $prev_diff = $dt_required->clone->subtract_datetime($dt_prev);
+                my $next_diff = $dt_current->clone->subtract_datetime($dt_required);
+                if (DateTime::Duration->compare($prev_diff, $next_diff) > 0) {
+
+                    # first interval is longer
+                    $ret = $current_weather;
+                    last;
+                } else {
+
+                    # 2nd interval is longer
+                    $ret = $prev_weather;
+                    last;
+                }
+            }
+        }
+    }
+
+    return $ret;
 }
 
 sub generate_bitmap {
@@ -434,6 +518,52 @@ sub generate_bitmap {
     } else {
         die "Unknown format requested: " . $args->{format};
     }
+}
+
+sub update_mqtt {
+    my $self = shift;
+
+    my $key   = shift;
+    my $value = shift;
+
+    return unless $self->app->get_config('mqtt');
+
+    my $api        = PortalCalendar::Integration::MQTT->new(app => $self->app);
+    my %ha_details = (
+        voltage => {
+            component           => 'sensor',
+            entity_category     => "diagnostic",
+            device_class        => "voltage",       # see https://www.home-assistant.io/integrations/sensor/#device-class
+            unit_of_measurement => 'V',
+            icon                => 'mdi:battery',
+        },
+        critical_voltage => {
+            component           => 'sensor',
+            entity_category     => "diagnostic",
+            device_class        => "voltage",             # see https://www.home-assistant.io/integrations/sensor/#device-class
+            unit_of_measurement => 'V',
+            icon                => 'mdi:battery-alert',
+        },
+        sleep_time => {
+            component           => 'sensor',
+            entity_category     => "diagnostic",
+            device_class        => "duration",            # see https://www.home-assistant.io/integrations/sensor/#device-class
+            unit_of_measurement => 's',
+            icon                => 'mdi:sleep',
+        },
+        last_visit => {
+            component           => 'sensor',
+            entity_category     => "diagnostic",
+            device_class        => "timestamp",             # see https://www.home-assistant.io/integrations/sensor/#device-class
+            unit_of_measurement => '',
+            icon                => 'mdi:clock-time-four',
+        }
+    );
+
+    my $ha_detail = $ha_details{$key};
+    $api->publish_retained($key, $value, $ha_detail);
+
+    return;
 }
 
 1;

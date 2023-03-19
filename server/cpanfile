@@ -23,6 +23,7 @@ requires 'Mojolicious::Plugin::Minion::Admin';
 requires 'Mojolicious::Plugin::Minion';
 requires 'Mojolicious::Plugin::RenderFile';
 requires 'Mojolicious::Plugin::TagHelpers';
+requires 'Net::MQTT::Simple';
 requires 'Readonly';
 requires 'Text::Unidecode';
 requires 'Time::HiRes';
