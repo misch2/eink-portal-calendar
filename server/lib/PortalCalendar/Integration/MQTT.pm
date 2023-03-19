@@ -39,7 +39,7 @@ sub publish_retained {
             unit_of_measurement => $ha_detail->{unit_of_measurement},
             icon                => $ha_detail->{icon},
 
-            name => "${topic}_${key}",
+            name => "${topic} ${key}",  # space is useful for HA, it produces nice names ($topic is removed automatically before displaying)
 
             state_class => 'measurement',
             state_topic => "${topic}/state/$key",
