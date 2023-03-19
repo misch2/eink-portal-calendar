@@ -81,6 +81,11 @@ post '/config_ui' => sub {
 
     $self->flash(message => "Parameters saved.");
 
+    PortalCalendar->new(app => $self)->update_mqtt('min_voltage',   $self->get_config('min_voltage'));
+    PortalCalendar->new(app => $self)->update_mqtt('max_voltage',   $self->get_config('max_voltage'));
+    PortalCalendar->new(app => $self)->update_mqtt('alert_voltage', $self->get_config('alert_voltage'));
+    PortalCalendar->new(app => $self)->update_mqtt('sleep_time',    $self->get_config('sleep_time'));
+
     $self->enqueue_task_only_once('parse_calendars');
     $self->enqueue_task_only_once('parse_weather');
     $self->enqueue_task_only_once('generate_image');
@@ -131,15 +136,15 @@ get '/config' => sub {
     $self->set_config('_last_visit',   DateTime->now()->iso8601);
     $self->set_config('_last_voltage', $self->req->param('voltage') // '');    # value has NOT NULL restriction
 
-    PortalCalendar->new(app => $self)->update_mqtt('voltage',          $self->req->param('voltage'));
-    PortalCalendar->new(app => $self)->update_mqtt('critical_voltage', $self->get_config('critical_voltage'));
-    PortalCalendar->new(app => $self)->update_mqtt('last_visit',       DateTime->now()->rfc3339);
-    PortalCalendar->new(app => $self)->update_mqtt('sleep_time',       $self->get_config('sleep_time'));
+    PortalCalendar->new(app => $self)->update_mqtt('voltage',         $self->req->param('voltage'));
+    PortalCalendar->new(app => $self)->update_mqtt('battery_percent', $self->calculate_battery_percent());
+    PortalCalendar->new(app => $self)->update_mqtt('last_visit',      DateTime->now()->rfc3339);
 
     my $ret = {
         #
         sleep            => $self->get_config('sleep_time'),
-        critical_voltage => $self->get_config('critical_voltage'),
+        critical_voltage => $self->get_config('alert_voltage'),
+        battery_percent  => $self->calculate_battery_percent(),
 
         #display     => "BW",                            # "bw", "grayscale",
         # bitmap_path => "/calendar/bitmap/epapermono",
@@ -193,6 +198,15 @@ helper set_config => sub {
     my $name  = shift;
     my $value = shift;
     return $self->config_obj->set($name, $value);
+};
+
+helper calculate_battery_percent => sub {
+    my $self = shift;
+    my $min  = $self->get_config('min_voltage');
+    my $max  = $self->get_config('max_voltage');
+    my $cur  = $self->get_config('_last_voltage');
+    return unless $min && $max && $cur;
+    return 100 * ($cur - $min) / ($max - $min);
 };
 
 helper enqueue_task_only_once => sub {

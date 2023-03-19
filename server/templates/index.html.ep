@@ -48,7 +48,7 @@
     % }
 </p>
 <p class="row-fluid">
-    Last voltage: <%= $last_voltage %> V.
+    Last voltage: <%= $last_voltage %> V (<%= calculate_battery_percent() %> %).
 </p>
 
 <p class="row-fluid pb-3">

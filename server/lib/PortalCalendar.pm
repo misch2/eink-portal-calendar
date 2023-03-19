@@ -537,12 +537,26 @@ sub update_mqtt {
             unit_of_measurement => 'V',
             icon                => 'mdi:battery',
         },
-        critical_voltage => {
+        alert_voltage => {
             component           => 'sensor',
             entity_category     => "diagnostic",
             device_class        => "voltage",             # see https://www.home-assistant.io/integrations/sensor/#device-class
             unit_of_measurement => 'V',
             icon                => 'mdi:battery-alert',
+        },
+        min_voltage => {
+            component           => 'sensor',
+            entity_category     => "diagnostic",
+            device_class        => "voltage",             # see https://www.home-assistant.io/integrations/sensor/#device-class
+            unit_of_measurement => 'V',
+            icon                => 'mdi:battery-outline',
+        },
+        max_voltage => {
+            component           => 'sensor',
+            entity_category     => "diagnostic",
+            device_class        => "voltage",             # see https://www.home-assistant.io/integrations/sensor/#device-class
+            unit_of_measurement => 'V',
+            icon                => 'mdi:battery',
         },
         sleep_time => {
             component           => 'sensor',

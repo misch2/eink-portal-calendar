@@ -24,14 +24,21 @@
 
     <fieldset class="mt-4 row">
         <legend class="col-md-12">ePaper client</legend>
-
-        <div class="col-md-6">
+        <div class="col-md-12">
             <label for="sleep_time">Sleep time (seconds)</label>
             <input id="sleep_time" name="sleep_time" type="number" class="form-control" value="<%= $values->{sleep_time} %>">
         </div>
-        <div class="col-md-6">
-            <label for="critical_voltage">Critical voltage for a single AAA cell</label>
-            <input id="critical_voltage" name="critical_voltage" type="number" step="0.01" class="form-control" value="<%= $values->{critical_voltage} %>">
+        <div class="col-md-4">
+            <label for="min_voltage">Min voltage for a single AAA cell</label>
+            <input id="min_voltage" name="min_voltage" type="number" step="0.01" class="form-control" value="<%= $values->{min_voltage} %>">
+        </div>
+        <div class="col-md-4">
+            <label for="alert_voltage">Critical (alert) voltage for a single AAA cell</label>
+            <input id="alert_voltage" name="alert_voltage" type="number" step="0.01" class="form-control" value="<%= $values->{alert_voltage} %>">
+        </div>
+        <div class="col-md-4">
+            <label for="max_voltage">Max voltage for a single AAA cell</label>
+            <input id="max_voltage" name="max_voltage" type="number" step="0.01" class="form-control" value="<%= $values->{max_voltage} %>">
         </div>
     </fieldset>
 
