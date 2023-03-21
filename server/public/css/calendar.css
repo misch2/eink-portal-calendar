@@ -89,7 +89,19 @@ div.top-month-header {
     margin-bottom: 0.2em;
     font-family: 'DIN';
     font-size: 1rem;
+    padding-bottom: 0.3rem;
     border-bottom: 2px solid black;
+}
+
+div.month-and-battery {
+    display: flex;
+    justify-content: space-between;
+    height: 1rem;
+}
+
+div.month-and-battery .battery-icon {
+    font-size: 1.5rem;
+    margin-top: 0rem;
 }
 
 div.day-number-big {

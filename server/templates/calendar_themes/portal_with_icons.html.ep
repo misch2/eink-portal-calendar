@@ -1,4 +1,6 @@
 <html>
+%# see https://icon-sets.iconify.design/material-symbols
+%= javascript 'https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js'
 %= stylesheet '/css/calendar.css'
 % my $decorator = sub { shift };        # returns input as-is
 % $decorator = sub { uc(shift) };       # UPPERCASE
@@ -11,9 +13,25 @@
     %}
     <div id="spacer">
         <div class="top-month-header">
-            <div class="month-name">
+            <div class="month-and-battery">
                 %# LLLL = standalone month name
-                <%= $decorator->($date->format_cldr('LLLL')) %>
+                <div>
+                    <%= $decorator->($date->format_cldr('LLLL')) %>
+                </div>
+                <div>
+                    % my $pct = calculate_battery_percent();
+                    % if ($pct >= 90) {
+                        <iconify-icon icon="material-symbols:battery-20-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
+                    % } elsif ($pct >= 70) {
+                        <iconify-icon icon="material-symbols:battery-6-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
+                    % } elsif ($pct >= 40) {
+                        <iconify-icon icon="material-symbols:battery-4-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
+                    % } elsif ($pct >= 10) {
+                        <iconify-icon icon="material-symbols:battery-2-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
+                    % } else {
+                        <iconify-icon icon="material-symbols:battery-0-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
+                    % }
+                </div>
             </div>
         </div>
 
