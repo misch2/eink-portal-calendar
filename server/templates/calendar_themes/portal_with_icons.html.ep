@@ -13,25 +13,9 @@
     %}
     <div id="spacer">
         <div class="top-month-header">
-            <div class="month-and-battery">
-                %# LLLL = standalone month name
-                <div>
-                    <%= $decorator->($date->format_cldr('LLLL')) %>
-                </div>
-                <div>
-                    % my $pct = calculate_battery_percent();
-                    % if ($pct >= 90) {
-                        <iconify-icon icon="material-symbols:battery-20-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
-                    % } elsif ($pct >= 70) {
-                        <iconify-icon icon="material-symbols:battery-6-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
-                    % } elsif ($pct >= 40) {
-                        <iconify-icon icon="material-symbols:battery-4-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
-                    % } elsif ($pct >= 10) {
-                        <iconify-icon icon="material-symbols:battery-2-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
-                    % } else {
-                        <iconify-icon icon="material-symbols:battery-0-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
-                    % }
-                </div>
+            %# LLLL = standalone month name
+            <div>
+                <%= $decorator->($date->format_cldr('LLLL')) %>
             </div>
         </div>
 
@@ -80,6 +64,21 @@
         % }
 
         <img id="aperture-logo" src="/images/Aperture_Laboratories_Logo.png">
+
+        <div id="battery-status">
+            % my $pct = calculate_battery_percent();
+            % if ($pct >= 90) {
+                <iconify-icon icon="material-symbols:battery-20-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
+            % } elsif ($pct >= 70) {
+                <iconify-icon icon="material-symbols:battery-6-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
+            % } elsif ($pct >= 40) {
+                <iconify-icon icon="material-symbols:battery-4-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
+            % } elsif ($pct >= 10) {
+                <iconify-icon icon="material-symbols:battery-2-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
+            % } else {
+                <iconify-icon icon="material-symbols:battery-0-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
+            % }
+        </div>
     </div>
 </body>
 

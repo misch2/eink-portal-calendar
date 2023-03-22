@@ -89,19 +89,8 @@ div.top-month-header {
     margin-bottom: 0.2em;
     font-family: 'DIN';
     font-size: 1rem;
-    padding-bottom: 0.3rem;
+    padding-bottom: 0.1rem;
     border-bottom: 2px solid black;
-}
-
-div.month-and-battery {
-    display: flex;
-    justify-content: space-between;
-    height: 1rem;
-}
-
-div.month-and-battery .battery-icon {
-    font-size: 1.5rem;
-    margin-top: 0rem;
 }
 
 div.day-number-big {
@@ -182,12 +171,23 @@ div.calendar-container div {
 
 div.weather-container {
     display: flex;
-    flex-flow: row wrap;
+    flex-flow: row nowrap;
+    justify-content: flex-start;
     margin-top: 3rem;
     padding-top: 0.5rem;
     gap: 1rem;
     /* padding-top: 9px; */
     border-top: 2px solid black;
+    background-color: azure;
+}
+
+div.weather-daily-data {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-between;
+    align-content: space-between;
+    align-items: flex-start;
+    background-color: cadetblue;
 }
 
 img#aperture-logo {
@@ -195,4 +195,11 @@ img#aperture-logo {
     top: 705px;
     left: 0px;
     height: 30px;
+}
+
+div#battery-status {
+    position: absolute;
+    top: 705px;
+    left: 325px;
+    font-size: 1.3rem;
 }
