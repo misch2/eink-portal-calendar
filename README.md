@@ -37,6 +37,8 @@ I choose this approach because it's easier (and more fun) for me to implement th
 * The display content is served as raw bitmap. The only task for ESP is to fetch this image from a specific location and display it.
 * All the rendering is performed on the server, using standard HTML + CSS. This allows me to use provide content without constantly re-flashing the ESP32. It's also much easier for me to debug CSS and try to pixel-perfect position everything or to integrace for example ICS calendar etc.
 
+I also added a voltage monitorig because with ePaper it's not easily detactable when the battery goes low -- the old image just keeps being on the display.
+
 ## Bill of materials
 
 * [Waveshare 7.5" 800x480 ePaper B/W display](https://www.laskakit.cz/waveshare-7-5--640x384-epaper-raw-displej-bw/)
