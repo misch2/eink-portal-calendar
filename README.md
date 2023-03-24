@@ -3,8 +3,12 @@
 Heavily inspired by https://github.com/wuspy/portal_calendar. Only the software part is different here.
 
 The main difference is that this calendar is split into two parts:
- 1. Simple ESP32 or ESP8266 web client which handles the e-Paper display
- 2. PC/Raspberry webserver which produces the images and (in the future) handles integration with web calendars etc.
+ 1. Simple ESP32 web client which handles the e-Paper display
+ 2. PC/Raspberry webserver which produces the images and takes care of everything else, e.g.:
+    - integration with web calendars
+    - integration with weather provider
+    - integration with HomeAssistant (battery & status monitor), 
+    - UI for configuration
  
 I choose this approach because it's easier (and more fun) for me to implement the server part in my favourite environments (Perl, NodeJS, HTML+CSS) than to try to do this directly on ESP32.
 
@@ -25,7 +29,7 @@ I choose this approach because it's easier (and more fun) for me to implement th
 1. ~~Add MQTT support (to see status in HomeAssistant)~~
 1. ~~Add battery level indicator~~
 
-[^1]: I didn't consider the need for ESP board with very low power consumption. I therefore bought one that was available immediately (ESP8266 with integrated e-Paper driver), but while it's perfectly usable when powered through USB, it wouldn't keep working sufficiently long with AA batteries.
+[^1]: I didn't consider the need for ESP board with very low power consumption. I therefore bought one that was available immediately (ESP8266 with integrated e-Paper driver). But while it's perfectly usable when powered through USB, it wouldn't keep working sufficiently long with AAA batteries. I therefore switched to low power ESP32 board.
 
 ## Principles
 
