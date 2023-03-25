@@ -136,9 +136,12 @@ get '/config' => sub {
     $self->set_config('_last_visit',   DateTime->now()->iso8601);
     $self->set_config('_last_voltage', $self->req->param('voltage') // '');    # value has NOT NULL restriction
 
+    PortalCalendar->new(app => $self)->update_mqtt('voltage',         $self->req->param('voltage') + 0.001);          # to force grafana to store changed values
+    PortalCalendar->new(app => $self)->update_mqtt('battery_percent', $self->calculate_battery_percent() + 0.001);    # to force grafana to store changed values
+    PortalCalendar->new(app => $self)->update_mqtt('last_visit',      DateTime->now()->rfc3339);
+
     PortalCalendar->new(app => $self)->update_mqtt('voltage',         $self->req->param('voltage'));
     PortalCalendar->new(app => $self)->update_mqtt('battery_percent', $self->calculate_battery_percent());
-    PortalCalendar->new(app => $self)->update_mqtt('last_visit',      DateTime->now()->rfc3339);
 
     my $ret = {
         #
