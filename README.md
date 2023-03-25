@@ -3,8 +3,12 @@
 Heavily inspired by https://github.com/wuspy/portal_calendar. Only the software part is different here.
 
 The main difference is that this calendar is split into two parts:
- 1. Simple ESP32 or ESP8266 web client which handles the e-Paper display
- 2. PC/Raspberry webserver which produces the images and (in the future) handles integration with web calendars etc.
+ 1. Simple ESP32 web client which handles the e-Paper display
+ 2. PC/Raspberry webserver which produces the images and takes care of everything else, e.g.:
+    - integration with web calendars
+    - integration with weather provider
+    - integration with HomeAssistant (battery & status monitor), 
+    - UI for configuration
  
 I choose this approach because it's easier (and more fun) for me to implement the server part in my favourite environments (Perl, NodeJS, HTML+CSS) than to try to do this directly on ESP32.
 
@@ -17,18 +21,23 @@ I choose this approach because it's easier (and more fun) for me to implement th
 1. ~~Indicate possible WiFi outage or server unavailability on the display.~~
 1. ~~Refresh the display only if image has changed (=check image checksum against the previous value). This should allow the portal calendar to ask server periodically more often but still sleep a lot and preserve energy.~~
 1. ~~Replace the ESP8266 ePaper module with what [original project](https://github.com/wuspy/portal_calendar) uses, i.e. specific low power ESP32 board + separate e-Paper hat [^1].~~
-2. ~~Configurable through the UI.~~
+1. ~~Configurable through the UI.~~
 1. ~~Offload calendar parsing to minion worker.~~
 1. Maybe add support for a weather forecast (but I'll probably create a different project just for this purpose).
-1. Add a config page to the server, to allow changing calendar properties (e.g. weather on/off, icon sets, etc.) easily without having to redeploy updated server.
+1. ~~Add a config page to the server, to allow changing calendar properties (e.g. weather on/off, icon sets, etc.) easily without having to redeploy updated server.~~
+1. ~~Add battery voltage measurement~~
+1. ~~Add MQTT support (to see status in HomeAssistant)~~
+1. ~~Add battery level indicator~~
 
-[^1]: I didn't consider the need for ESP board with very low power consumption. I therefore bought one that was available immediately (ESP8266 with integrated e-Paper driver), but while it's perfectly usable when powered through USB, it wouldn't keep working sufficiently long with AA batteries.
+[^1]: I didn't consider the need for ESP board with very low power consumption. I therefore bought one that was available immediately (ESP8266 with integrated e-Paper driver). But while it's perfectly usable when powered through USB, it wouldn't keep working sufficiently long with AAA batteries. I therefore switched to low power ESP32 board.
 
 ## Principles
 
 * Everything is designed for a specific e-Paper size of 480x800 pixels. 
 * The display content is served as raw bitmap. The only task for ESP is to fetch this image from a specific location and display it.
 * All the rendering is performed on the server, using standard HTML + CSS. This allows me to use provide content without constantly re-flashing the ESP32. It's also much easier for me to debug CSS and try to pixel-perfect position everything or to integrace for example ICS calendar etc.
+
+I also added a voltage monitorig because with ePaper it's not easily detactable when the battery goes low -- the old image just keeps being on the display.
 
 ## Bill of materials
 
