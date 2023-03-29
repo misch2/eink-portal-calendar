@@ -534,6 +534,7 @@ sub update_mqtt {
             component           => 'sensor',
             entity_category     => "diagnostic",
             device_class        => "voltage",       # see https://www.home-assistant.io/integrations/sensor/#device-class
+            state_class         => 'measurement',
             unit_of_measurement => 'V',
             icon                => 'mdi:battery',
         },
@@ -541,6 +542,7 @@ sub update_mqtt {
             component           => 'sensor',
             entity_category     => "diagnostic",
             device_class        => "voltage",             # see https://www.home-assistant.io/integrations/sensor/#device-class
+            state_class         => 'measurement',
             unit_of_measurement => 'V',
             icon                => 'mdi:battery-alert',
         },
@@ -548,6 +550,7 @@ sub update_mqtt {
             component           => 'sensor',
             entity_category     => "diagnostic",
             device_class        => "voltage",               # see https://www.home-assistant.io/integrations/sensor/#device-class
+            state_class         => 'measurement',
             unit_of_measurement => 'V',
             icon                => 'mdi:battery-outline',
         },
@@ -555,6 +558,7 @@ sub update_mqtt {
             component           => 'sensor',
             entity_category     => "diagnostic",
             device_class        => "voltage",               # see https://www.home-assistant.io/integrations/sensor/#device-class
+            state_class         => 'measurement',
             unit_of_measurement => 'V',
             icon                => 'mdi:battery',
         },
@@ -562,6 +566,7 @@ sub update_mqtt {
             component           => 'sensor',
             entity_category     => "diagnostic",
             device_class        => "battery",               # see https://www.home-assistant.io/integrations/sensor/#device-class
+            state_class         => 'measurement',
             unit_of_measurement => '%',
             icon                => 'mdi:battery-unknown',
         },
@@ -569,6 +574,7 @@ sub update_mqtt {
             component           => 'sensor',
             entity_category     => "diagnostic",
             device_class        => "duration",              # see https://www.home-assistant.io/integrations/sensor/#device-class
+            state_class         => 'measurement',
             unit_of_measurement => 's',
             icon                => 'mdi:sleep',
         },
@@ -576,6 +582,7 @@ sub update_mqtt {
             component           => 'sensor',
             entity_category     => "diagnostic",
             device_class        => "timestamp",             # see https://www.home-assistant.io/integrations/sensor/#device-class
+            state_class         => '',
             unit_of_measurement => '',
             icon                => 'mdi:clock-time-four',
         }

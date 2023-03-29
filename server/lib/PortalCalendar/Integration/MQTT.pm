@@ -36,12 +36,12 @@ sub publish_retained {
 
             entity_category     => $ha_detail->{entity_category},
             device_class        => $ha_detail->{device_class},
+            state_class         => $ha_detail->{state_class},
             unit_of_measurement => $ha_detail->{unit_of_measurement},
             icon                => $ha_detail->{icon},
 
-            name => "${topic} ${key}",  # space is useful for HA, it produces nice names ($topic is removed automatically before displaying)
+            name => "${topic} ${key}",    # space is useful for HA, it produces nice names ($topic is removed automatically before displaying)
 
-            state_class => 'measurement',
             state_topic => "${topic}/state/$key",
 
             unique_id => "${topic}_${key}",
