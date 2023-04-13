@@ -502,14 +502,22 @@ sub generate_bitmap {
         }
 
         # output format:
-        #    "MM"
-        #   checksum
-        #    <sequence of raw values directly usable for uploading into eink display>
-        my $out = "MM\n";
+        #   "MM2" "\n"
+        #   checksum (string) "\n"
+        #   x y w h (string) "\n"
+        #   (... possible further data)
+        #   RAWDATA "\n"
+        #   <sequence of raw values directly usable for uploading into eink display>
+        my $out = "MM2\n";
 
         # sha-1: 40 chars
         # sha-256: 64 chars
         $out .= Digest->new("SHA-1")->add($bitmap)->hexdigest . "\n";
+
+        $out .= "$x $y $w $h\n";
+
+        $out .= "RAWDATA\n";
+
         $out .= $bitmap;
 
         $self->app->res->headers->content_type('application/octet-stream');
