@@ -7,6 +7,7 @@
 // generic libraries
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include <ArduinoOTA.h>
 #include <HTTPClient.h>
 #include <SPI.h>
 #include <Syslog.h>
@@ -53,6 +54,7 @@ String serverURLBase =
 // configurable remotely
 uint64_t sleepTime = SECONDS_PER_HOUR;
 float criticalVoltage = 1.1;
+bool otaMode = false;
 
 /* RTC vars (survives deep sleep) */
 RTC_DATA_ATTR int bootCount = 0;
@@ -62,10 +64,14 @@ RTC_DATA_ATTR char lastChecksum[64 + 1] = "";
 void setup() {
   wakeupAndConnect();
   checkResetReason();
-  checkVoltage();
-
   loadConfigFromWeb();
-  fetchAndDrawImageIfNeeded();
+
+  if (otaMode) {
+    runOTALoopInsteadOfUsualFunctionality();
+  } else {
+    checkVoltage();
+    fetchAndDrawImageIfNeeded();
+  }
 
   disconnectAndHibernate();
 }
@@ -85,7 +91,8 @@ float getVoltage() {
 void checkVoltage() {
   float voltage = getVoltage();
   if (voltage < criticalVoltage) {
-    error(String("Voltage ") + voltage + " critical, below " + criticalVoltage);
+    error(String("Voltage ") + voltage + "V critical, below " +
+          criticalVoltage + "V");
   };
 };
 
@@ -108,18 +115,20 @@ void loadConfigFromWeb() {
     sleepTime = tmpi;
     DEBUG_PRINT("sleepTime set to %d", tmpi);
   }
+
   float tmpf = response["critical_voltage"];
   if (tmpf != 0) {
     criticalVoltage = tmpf;
     DEBUG_PRINT("criticalVoltage set to %f", tmpf);
   }
 
-  // // char *tmp2 = response["bitmap_path"];
-  // String tmp2 = response["bitmap_path"];
-  // if (tmp2 != "") {
-  //   bitmapUrlPath = tmp2;
-  //   DEBUG_PRINT("bitmap URL path set to %s", tmp2.c_str());
-  // }
+  bool tmpb = response["ota_mode"];
+  otaMode = tmpb;
+  if (otaMode) {
+    DEBUG_PRINT("OTA mode enabled");
+  } else {
+    DEBUG_PRINT("OTA mode disabled");
+  };
 }
 
 void wakeupAndConnect() {
@@ -411,6 +420,49 @@ void displayText(String message) {
     display.print(message);
   } while (display.nextPage());
   display.refresh();  // full refresh
+}
+
+void runOTALoopInsteadOfUsualFunctionality() {
+  DEBUG_PRINT("Running OTA loop");
+
+  // ArduinoOTA.handle();
+  ArduinoOTA
+      .onStart([]() {
+        String type;
+        if (ArduinoOTA.getCommand() == U_FLASH)
+          type = "sketch";
+        else  // U_SPIFFS
+          type = "filesystem";
+
+        // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS
+        // using SPIFFS.end()
+        DEBUG_PRINT("Start updating %s", type.c_str());
+      })
+      .onEnd([]() { Serial.println("\nEnd"); })
+      .onProgress([](unsigned int progress, unsigned int total) {
+        Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+      })
+      .onError([](ota_error_t error) {
+        Serial.printf("Error[%u]: ", error);
+        if (error == OTA_AUTH_ERROR)
+          Serial.println("Auth Failed");
+        else if (error == OTA_BEGIN_ERROR)
+          Serial.println("Begin Failed");
+        else if (error == OTA_CONNECT_ERROR)
+          Serial.println("Connect Failed");
+        else if (error == OTA_RECEIVE_ERROR)
+          Serial.println("Receive Failed");
+        else if (error == OTA_END_ERROR)
+          Serial.println("End Failed");
+      });
+
+  ArduinoOTA.begin();
+  while (true) {
+    ArduinoOTA.handle();
+    delay(100);
+  }
+
+  DEBUG_PRINT("OTA loop done");
 }
 
 void error(String message) {

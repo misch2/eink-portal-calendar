@@ -23,6 +23,7 @@ void displayText(String message);
 void error(String message);
 void errorNoWifi();
 void testDisplayMessage();
+void runOTALoopInsteadOfUsualFunctionality();
 
 uint32_t read8n(WiFiClient& client, uint8_t* buffer, int32_t bytes);
 
