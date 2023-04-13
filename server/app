@@ -144,10 +144,11 @@ get '/config' => sub {
     PortalCalendar->new(app => $self)->update_mqtt('battery_percent', $self->calculate_battery_percent());
 
     my $ret = {
-        #
-        sleep            => $self->get_config('sleep_time'),
-        critical_voltage => $self->get_config('alert_voltage'),
-        battery_percent  => $self->calculate_battery_percent(),
+        # {// undef} to force scalars
+        sleep            => $self->get_config('sleep_time') // undef,
+        critical_voltage => $self->get_config('alert_voltage') // undef,
+        battery_percent  => $self->calculate_battery_percent() // undef,
+        ota_mode         => ($self->get_config('ota_mode') ? \1 : \0),  # JSON true/false
 
         #display     => "BW",                            # "bw", "grayscale",
         # bitmap_path => "/calendar/bitmap/epapermono",
@@ -269,6 +270,8 @@ app->minion->add_task(
         PortalCalendar::Minion::reload_weather(@_);
     }
 );
+
+app->enqueue_task_only_once('generate_image');
 
 app->renderer->cache->max_keys(0) if app->config->{disable_renderer_cache};    # do not cache CSS etc. in devel mode
 app->secrets([ app->config->{mojo_passphrase} ]);

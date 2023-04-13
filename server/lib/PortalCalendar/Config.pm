@@ -37,6 +37,7 @@ has 'defaults' => sub {
         mqtt_topic              => 'portal_calendar01',
         lat                     => '',
         lon                     => '',
+        ota_mode                => 0,
     };
 };
 
@@ -49,6 +50,7 @@ has boolean_parameters => sub {
             web_calendar2
             web_calendar3
             openweather
+            ota_mode
             /
     ];
 };
