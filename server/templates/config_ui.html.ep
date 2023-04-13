@@ -11,6 +11,21 @@
 <form action="/config_ui" method="post">
 
     <fieldset class="mt-4 row">
+        <legend class="w-auto">OTA mode</legend>
+
+        <div class="col-md-12">
+            <div class="form-check form-switch">
+                <label class="form-check-label">
+                    <input class="form-check-input" type="checkbox" id="ota_mode" name="ota_mode" value="1" <%= $values->{ota_mode} ? "checked" : "" %>>
+                    OTA mode on
+                </label>
+            </div>
+            <div>
+                <i>(Required for firmware update. ⚠️ It disables standard functionality and waits for OTA update indefinitely!)</i>
+            </div>
+        </div>
+    </fieldset>
+    <fieldset class="mt-4 row">
         <legend class="w-auto">Main theme</legend>
 
         <div class="col-md-12">

@@ -48,7 +48,8 @@
     % }
 </p>
 <p class="row-fluid">
-    Last voltage: <%= $last_voltage %> V (<%= calculate_battery_percent() %> %).
+    Last voltage: <%= $last_voltage %> V (<%= calculate_battery_percent() %> %). 
+    OTA mode: <%= get_config('ota_mode') ? 'on' : 'off' %>.
 </p>
 
 <p class="row-fluid pb-3">
