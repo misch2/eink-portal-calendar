@@ -52,7 +52,16 @@ sub get_events {
     my $cache    = PortalCalendar::DatabaseCache->new(app => $self->app);
     my $cal_data = $cache->get_or_set(
         sub {
-            my $ical = iCal::Parser->new(no_todos => 1);
+            my $ical = iCal::Parser->new(
+                no_todos     => 1,
+                tz           => $self->app->get_config('timezone'),
+                timezone_map => {
+                    'Central Europe Standard Time' => 'Europe/Prague',
+                    'Central Europe Time'          => 'Europe/Prague',
+                    'GMT Standard Time'            => 'Europe/London',
+                    'GMT Time'                     => 'Europe/London',
+                }
+            );
 
             my $data = $self->fetch_from_web;
             $self->app->log->debug("parsing calendar data...");

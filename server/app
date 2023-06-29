@@ -3,6 +3,7 @@
 use strict;
 
 use FindBin qw($Bin);
+use lib "$Bin/mock";
 use lib "$Bin/lib";
 
 use Mojolicious::Lite;
