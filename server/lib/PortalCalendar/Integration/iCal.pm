@@ -8,6 +8,7 @@ use LWP::UserAgent::Cached;
 use iCal::Parser;
 use DDP;
 use DateTime;
+use Try::Tiny;
 
 has 'app';
 has 'ics_url';
@@ -54,19 +55,18 @@ sub get_events {
         sub {
             my $ical = iCal::Parser->new(
                 no_todos     => 1,
-                tz           => $self->app->get_config('timezone'),
-                timezone_map => {
-                    'Central Europe Standard Time' => 'Europe/Prague',
-                    'Central Europe Time'          => 'Europe/Prague',
-                    'W. Europe Standard Time'      => 'Europe/London',
-                    'GMT Standard Time'            => 'Europe/London',
-                    'GMT Time'                     => 'Europe/London',
-                }
+                tz           => $self->app->get_config('timezone'),    # database config, editable in UI
+                timezone_map => $self->app->config->{timezone_map},    # different type of config: .conf file
             );
 
             my $data = $self->fetch_from_web;
             $self->app->log->debug("parsing calendar data...");
-            my $events = $ical->parse_strings($data);
+            my $events = {};
+            try {
+                $events = $ical->parse_strings($data);
+            } catch {
+                $self->app->log->error("Error parsing calendar data: $_");
+            };
             return $events;
 
         },
