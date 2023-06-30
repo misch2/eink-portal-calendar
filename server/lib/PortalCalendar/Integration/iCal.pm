@@ -58,6 +58,7 @@ sub get_events {
                 timezone_map => {
                     'Central Europe Standard Time' => 'Europe/Prague',
                     'Central Europe Time'          => 'Europe/Prague',
+                    'W. Europe Standard Time'      => 'Europe/London',
                     'GMT Standard Time'            => 'Europe/London',
                     'GMT Time'                     => 'Europe/London',
                 }
@@ -79,14 +80,16 @@ sub get_today_events {
     my $self = shift;
     my $date = shift // DateTime->now();
 
-    my $all_events = $self->get_events();
+    my $all_events = $self->get_events(1);
     my $events     = $all_events->{ $date->year }->{ $date->month }->{ $date->day } || {};
 
     my @events = values %{$events};
 
-    #@events = sort { $a->{DTSTART}->hms cmp $b->{DTSTART}->hms } @events;  # not needed, has to be sorted for multiple calendars anyway
     $date   = $date->clone()->set_time_zone($self->app->get_config('timezone'));
     @events = grep { $_->{DTSTART} > $date || $_->{allday} } @events;
+
+    use DDP;
+    p @events;
 
     map { $_->{SUMMARY} =~ s/\\,/,/g } @events;    # fix "AA\,BB" situation
 
