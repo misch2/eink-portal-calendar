@@ -80,7 +80,7 @@ sub get_today_events {
     my $self = shift;
     my $date = shift // DateTime->now();
 
-    my $all_events = $self->get_events(1);
+    my $all_events = $self->get_events();
     my $events     = $all_events->{ $date->year }->{ $date->month }->{ $date->day } || {};
 
     my @events = values %{$events};
