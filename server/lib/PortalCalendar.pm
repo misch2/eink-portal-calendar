@@ -325,7 +325,9 @@ sub html_for_date {
     if ($self->app->get_config("googlefit_client_id")) {
         my $api = PortalCalendar::Integration::Google::Fit->new(app => $self->app, cache_dir => $self->app->app->home->child("cache/lwp"));
         $weight_series = $api->get_weight_series;
-        $last_weight = $weight_series->[-1]->{weight};
+        if ($weight_series) {
+            $last_weight = $weight_series->[-1]->{weight};
+        };
     }
 
     return $self->app->render(
