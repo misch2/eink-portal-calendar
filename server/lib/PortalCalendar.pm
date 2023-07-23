@@ -22,6 +22,7 @@ use PortalCalendar::Schema;
 use PortalCalendar::Integration::iCal;
 use PortalCalendar::Integration::OpenWeather;
 use PortalCalendar::Integration::MQTT;
+use PortalCalendar::Integration::Google::Fit;
 
 has 'app';
 
