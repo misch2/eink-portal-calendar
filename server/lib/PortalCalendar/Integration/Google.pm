@@ -17,7 +17,6 @@ sub get_new_access_token_from_refresh_token {
     my $self = shift;
     
     $self->app->log->info("Getting new access token");
-    my $token = decode_json($self->app->get_config('_googlefit_token_json'));
 
     #Get tokens from auth code
     my $res = $self->app->app->ua->post(
@@ -28,7 +27,7 @@ sub get_new_access_token_from_refresh_token {
             client_secret => $self->app->get_config('googlefit_client_secret'),
             redirect_uri  => $self->app->get_config('googlefit_auth_callback'),
             grant_type    => 'refresh_token',
-            refresh_token => $token->{refresh_token},
+            refresh_token => $self->app->get_config('_googlefit_refresh_token'),
         }
     )->res;
 

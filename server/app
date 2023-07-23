@@ -250,7 +250,7 @@ get '/auth/googlefit/cb' => sub {
     #$self->log->info(DDP::np($res->json));
     $self->set_config('_googlefit_access_token',  $res->json->{access_token}); 
     $self->set_config('_googlefit_refresh_token', $res->json->{refresh_token});
-    $self->set_config('_googlefit_token_json',    encode_json($res->json));
+    # $self->set_config('_googlefit_token_json',    encode_json($res->json));
 
     $self->redirect_to('/auth/googlefit/success');
 };
@@ -261,16 +261,16 @@ get '/auth/googlefit/success' => sub {
     # Read access token from session
     my $a_token = $self->get_config('_googlefit_access_token') or die "No access token!";
 
-    my $token_json = decode_json($self->get_config('_googlefit_token_json'));
+    # my $token_json = decode_json($self->get_config('_googlefit_token_json'));
     return $self->render(
         template => 'auth_success',
         format   => 'html',
         nav_link => 'config_ui',
 
         # page-specific variables
-        a_token    => $self->session->{access_token},
-        r_token    => $self->session->{refresh_token},
-        token_json => DDP::np($token_json),
+        a_token    => $self->app->get_config('_googlefit_access_token'),
+        r_token    => $self->app->get_config('_googlefit_refresh_token'),
+        token_json => '?',  # DDP::np($token_json),
     );
 };
 

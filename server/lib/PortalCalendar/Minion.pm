@@ -66,10 +66,6 @@ sub reload_googlefit {
 
     $job->app->log->info("Refreshing Google Fit data");
 
-    return unless $job->app->get_config("googlefit_client_id");
-    return unless $job->app->get_config("googlefit_client_secret");
-    return unless $job->app->get_config("_googlefit_access_token");
-
     my $api = PortalCalendar::Integration::Google::Fit->new(app => $job->app, cache_dir => $job->app->app->home->child("cache/lwp"));
 
     # forced parse, then store to database

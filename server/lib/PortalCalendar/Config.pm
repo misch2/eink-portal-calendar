@@ -41,7 +41,8 @@ has 'defaults' => sub {
         googlefit_client_id     => '',
         googlefit_client_secret => '',
         googlefit_auth_callback => 'https://local-server-name/auth/googlefit/cb',
-
+        _googlefit_access_token => '',
+        _googlefit_refresh_token => '',
     };
 };
 

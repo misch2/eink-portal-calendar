@@ -39,9 +39,16 @@ has 'ua' => sub {
     );
 };
 
+sub is_available {
+    my $self = shift;
+    return $self->app->get_config('_googlefit_access_token') && $self->app->get_config('_googlefit_refresh_token');
+};
+
 sub _perform_authenticated_request {
     my $self = shift;
     my $req  = shift;
+
+    return unless $self->is_available;
 
     my $response = $self->ua->request($req);
 
@@ -60,6 +67,8 @@ sub _perform_authenticated_request {
 sub fetch_from_web {
     my $self   = shift;
     my $forced = shift;
+
+    return unless $self->is_available;
 
     my $cache = PortalCalendar::DatabaseCache->new(app => $self->app);
     return $cache->get_or_set(
@@ -107,6 +116,8 @@ sub fetch_from_web {
 sub get_weight_series {
     my $self   = shift;
     my $forced = shift;
+
+    return unless $self->is_available;
 
     my $data = $self->fetch_from_web($forced);
     $self->app->log->debug("parsing Google Fit weight data...");
