@@ -274,6 +274,12 @@ get '/auth/googlefit/success' => sub {
     );
 };
 
+helper encode_json => sub {
+    my $self = shift;
+    my $data = shift;
+    return Mojo::JSON::encode_json($data);
+};
+
 helper config_obj => sub {
     my $self = shift;
     state $obj = PortalCalendar::Config->new(app => $self);

@@ -17,4 +17,11 @@ span.current-weight-small-kg {
 div.weight-chart {
     margin-top: 2rem;
     margin-bottom: 2rem;
+
+    /* background-color: antiquewhite; */
+    /* border: 1px solid #000000; */
+    /* margin-top: 1rem; */
+    margin-bottom: 0.5rem;
+    width: 100%;
+    height: 4rem;
 }

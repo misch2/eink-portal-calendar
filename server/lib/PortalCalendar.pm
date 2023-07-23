@@ -342,7 +342,8 @@ sub html_for_date {
         forecast        => $forecast,
 
         # googlefit data:
-        weight => $last_weight, # FIXME
+        weight => $last_weight,
+        weight_series => $weight_series,
 
         # processed weather values:
         forecast_5_days => \@forecast_5_days,
