@@ -1,0 +1,25 @@
+#!/usr/bin/env perl
+use strict;
+
+use Mojo::Base -base;
+use Mojo::File;
+use Mojo::JSON qw(decode_json);
+use DDP;
+use DateTime;
+
+my $json = Mojo::File->new('local/test_fit_weight.json')->slurp();
+
+my $data = decode_json($json);
+
+#p $data;
+
+foreach my $bucket (@{ $data->{bucket} }) {
+    my $start = DateTime->from_epoch(epoch => $bucket->{startTimeMillis} / 1000);
+    my $end   = DateTime->from_epoch(epoch => $bucket->{endTimeMillis} / 1000);
+
+    my $weight = $bucket->{dataset}->[0]->{point}->[0]->{value}->[0]->{fpVal};
+    next unless defined $weight;
+
+    #warn "$start - $end";
+    print sprintf("%s: %5.1f kg\n", $start->ymd('-'), $weight);
+}

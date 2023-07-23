@@ -33,6 +33,7 @@
             <select id="theme" name="theme" class="form-select">
                 <option value="portal_with_icons" <%= 'selected' if $values->{theme} eq 'portal_with_icons' %>>Portal calendar (default)</option>
                 <option value="portal_with_weather" <%= 'selected' if $values->{theme} eq 'portal_with_weather' %>>Weather forecast</option>
+                <option value="portal_with_googlefit" <%= 'selected' if $values->{theme} eq 'portal_with_googlefit' %>>Google Fit statistics</option>
             </select>
         </div>
     </fieldset>
@@ -193,7 +194,31 @@
                 </label>
             </div>
         </div>
+    </fieldset>
 
+    <fieldset class="mt-4 row">
+        <legend class="w-auto">Google Fit integration</legend>
+
+        <div class="form-group col-12">
+            <a href="/auth/googlefit">Authorize</a>
+        </div>
+
+        <div class="form-group col-12">
+            See <a href="https://console.cloud.google.com/apis/">https://console.cloud.google.com/apis/</a> to get client ID and secret values:
+        </div>
+        <div class="col-md-12">
+            <label for="googlefit_client_id">Client ID</label>
+            <input id="googlefit_client_id" name="googlefit_client_id" type="text" class="form-control" value="<%= $values->{googlefit_client_id} %>">
+        </div>
+        <div class="col-md-12">
+            <label for="googlefit_client_secret">Client secret</label>
+            <input id="googlefit_client_secret" name="googlefit_client_secret" type="text" class="form-control" value="<%= $values->{googlefit_client_secret} %>">
+        </div>
+        <div class="col-md-12">
+            <label for="">Callback URL</label>
+            <input id="googlefit_auth_callback" name="googlefit_auth_callback" type="text" class="form-control" value="<%= $values->{googlefit_auth_callback} %>">
+        </div>
+FIXME show keys and validity
     </fieldset>
 
     <div class="col-12 mt-3">

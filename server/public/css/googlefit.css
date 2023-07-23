@@ -1,0 +1,20 @@
+
+div.current-weight-big {
+    /* border: 1px solid #000000; */
+    font-family: 'DINCondensed';
+    font-size: 11rem;
+    transform: scale(0.8, 1);
+    /* translate(-0.12em, -0.19em); */
+    /* margin-bottom: -0.25em; */
+    margin: -0.15em -0.18em -0.10em -0.195em;
+}
+
+span.current-weight-small-kg {
+    font-size: 2rem;
+    transform: scale(1, 1);
+}
+
+div.weight-chart {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}

@@ -14,6 +14,10 @@ use DateTime::Format::ISO8601;
 use DDP;
 use Time::HiRes;
 
+# FIXME for oauth:
+use Mojo::Util qw(url_escape);
+use Mojo::JSON qw(decode_json encode_json);
+
 use PortalCalendar;
 use PortalCalendar::Config;
 use PortalCalendar::Minion;
@@ -145,11 +149,12 @@ get '/config' => sub {
     PortalCalendar->new(app => $self)->update_mqtt('battery_percent', $self->calculate_battery_percent());
 
     my $ret = {
+
         # {// undef} to force scalars
-        sleep            => $self->get_config('sleep_time') // undef,
+        sleep            => $self->get_config('sleep_time')    // undef,
         critical_voltage => $self->get_config('alert_voltage') // undef,
         battery_percent  => $self->calculate_battery_percent() // undef,
-        ota_mode         => ($self->get_config('ota_mode') ? \1 : \0),  # JSON true/false
+        ota_mode         => ($self->get_config('ota_mode') ? \1 : \0),    # JSON true/false
 
         #display     => "BW",                            # "bw", "grayscale",
         # bitmap_path => "/calendar/bitmap/epapermono",
@@ -184,6 +189,84 @@ get '/calendar/bitmap/epapergray' => sub {
             gamma     => 1.8,
             format    => 'raw2bpp',
         }
+    );
+};
+
+use constant googlefit_oauth2_auth_url  => 'https://accounts.google.com/o/oauth2/v2/auth';
+use constant googlefit_oauth2_token_url => 'https://oauth2.googleapis.com/token';
+use constant googlefit_oauth2_scope     => 'https://www.googleapis.com/auth/fitness.body.read';    # space separated scopes
+
+get '/auth/googlefit' => sub {
+    my $self = shift;
+
+    # see https://developers.google.com/identity/protocols/oauth2/web-server#httprest_1
+    my $url = googlefit_oauth2_auth_url . "?client_id=" . $self->get_config('googlefit_client_id') . "&access_type=offline&response_type=code&scope=" . googlefit_oauth2_scope . " &include_granted_scopes=true&redirect_uri=" . url_escape($self->get_config('googlefit_auth_callback'));
+
+    $self->log->info("Redirecting to [$url]");
+    $self->redirect_to($url);
+};
+
+# OAuth 2 callback from google
+get '/auth/googlefit/cb' => sub {
+    my ($self) = @_;
+
+    $self->log->info("in callback, received this:");
+    $self->log->info("code: " . $self->req->param('code'));
+    $self->log->info("scope: " . $self->req->param('scope'));
+
+    $self->log->info("converting code to a token");
+
+    #Get tokens from auth code
+    my $res = $self->app->ua->post(
+        googlefit_oauth2_token_url,
+        'form',
+        {
+            code          => $self->req->param('code'),
+            client_id     => $self->get_config('googlefit_client_id'),
+            client_secret => $self->get_config('googlefit_client_secret'),
+            redirect_uri  => $self->get_config('googlefit_auth_callback'),
+            grant_type    => 'authorization_code',
+
+            #scope         => googlefit_oauth2_scope,
+        }
+    )->res;
+
+    if (!$res->is_success) {
+        return $self->render(
+            template => 'auth_error',
+            format   => 'html',
+            nav_link => 'config_ui',
+
+            # page-specific variables
+            error => decode_json($res->body),
+        );
+    }
+
+    # Save both tokens
+    #$self->log->info(DDP::np($res->json));
+    $self->set_config('_googlefit_access_token',  $res->json->{access_token});     # FIXME not needed
+    $self->set_config('_googlefit_refresh_token', $res->json->{refresh_token});    # FIXME not needed
+    $self->set_config('_googlefit_token_json',    encode_json($res->json));
+
+    $self->redirect_to('/auth/googlefit/success');
+};
+
+get '/auth/googlefit/success' => sub {
+    my ($self) = @_;
+
+    # Read access token from session
+    my $a_token = $self->get_config('_googlefit_access_token') or die "No access token!";
+
+    my $token_json = decode_json($self->get_config('_googlefit_token_json'));
+    return $self->render(
+        template => 'auth_success',
+        format   => 'html',
+        nav_link => 'config_ui',
+
+        # page-specific variables
+        a_token    => $self->session->{access_token},
+        r_token    => $self->session->{refresh_token},
+        token_json => DDP::np($token_json),
     );
 };
 

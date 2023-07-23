@@ -38,6 +38,10 @@ has 'defaults' => sub {
         lat                     => '',
         lon                     => '',
         ota_mode                => 0,
+        googlefit_client_id     => '',
+        googlefit_client_secret => '',
+        googlefit_auth_callback => 'https://local-server-name/auth/googlefit/cb',
+
     };
 };
 

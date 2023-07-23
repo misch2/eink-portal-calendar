@@ -1,0 +1,11 @@
+% layout 'bootstrap5';
+
+<h3>Success</h3>
+
+Auth token: 
+<pre><%= $a_token %></pre>
+<br>
+Refresh token: 
+<pre><%= $r_token %></pre>
+<p>
+

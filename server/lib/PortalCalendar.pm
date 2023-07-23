@@ -333,6 +333,9 @@ sub html_for_date {
         current_weather => $current_weather,
         forecast        => $forecast,
 
+        # googlefit data:
+        weight => 94.8, # FIXME
+
         # processed weather values:
         forecast_5_days => \@forecast_5_days,
     );

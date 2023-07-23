@@ -1,0 +1,91 @@
+<html>
+%# see https://icon-sets.iconify.design/material-symbols
+%= javascript 'https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js'
+%= stylesheet '/css/calendar.css'
+%= stylesheet '/css/googlefit.css'
+% my $decorator = sub { shift };        # returns input as-is
+% $decorator = sub { uc(shift) };       # UPPERCASE
+%# $decorator = sub { ucfirst(shift) }; # Uppercase
+%# $decorator = sub { Text::Unidecode::unidecode(uc(shift)) }; # UPPERCASE with accents removed
+
+<body>
+    %if (get_config('broken_glass')) {
+        <div id="overlay-image"></div>
+    %}
+    <div id="spacer">
+        <div class="top-month-header">
+            %# LLLL = standalone month name
+            <div>
+                <%= $decorator->($date->format_cldr('LLLL')) %>
+            </div>
+        </div>
+
+        <div class="current-weight-big">
+            <span><%= sprintf("%.1f", $weight) %></span><span class="current-weight-small-kg"> kg</span>
+        </div>
+
+        <div class="weight-chart">
+            FIXME
+        </div>
+
+
+        <div class="day-of-week-block">
+            <div class="dow-number-and-name">
+                <div>
+                    <%= $date->day .'/'. $date->month_length %>
+                </div>
+                <div>
+                    <%= $decorator->($date->day_name) %>
+                </div>
+            </div>
+            <div class="separator"></div>
+            <div class="bunch-of-bars">
+                % for (1 .. $date->day) {
+                    <div class="bar"></div>
+                % }
+            </div>
+        </div>
+
+        <div class="icons-container">
+            % foreach my $icon (@{ $icons }) {
+                <img src="/images/portal_icons/<%= $icon->{name} %>.png" class="icon<%= $icon->{grayed} ? ' grayed' : '' %>">
+            % }
+        </div>
+
+        % if ($has_calendar_entries) {
+            <div class="calendar-container">
+                % foreach my $event (@{ $calendar_events }) {
+                    <div>
+                        % if ($event->{allday}) {
+                            <%= $event->{SUMMARY} %>
+                            <!-- (celý den) -->
+                        % } else {
+                            <%= $event->{DTSTART}->format_cldr('H:mm') %>
+                            <%= $event->{SUMMARY} %>
+                            (~<%= int($event->{hours} + 0.5) %> hod.)
+                        % }
+                    </div>
+                % }
+            </div>
+        % }
+
+        <img id="aperture-logo" src="/images/Aperture_Laboratories_Logo.png">
+
+        <div id="battery-status">
+            % my $pct = calculate_battery_percent();
+            % if ($pct >= 90) {
+                <iconify-icon icon="material-symbols:battery-20-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
+            % } elsif ($pct >= 70) {
+                <iconify-icon icon="material-symbols:battery-6-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
+            % } elsif ($pct >= 40) {
+                <iconify-icon icon="material-symbols:battery-4-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
+            % } elsif ($pct >= 10) {
+                <iconify-icon icon="material-symbols:battery-2-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
+            % } else {
+                <iconify-icon icon="material-symbols:battery-0-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
+            % }
+        </div>
+    </div>
+</body>
+
+</html>

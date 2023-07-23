@@ -1,0 +1,11 @@
+% layout 'bootstrap5';
+
+<h3>Success</h3>
+
+<p>
+Authorization token successfully received.
+</p>
+
+<pre><%= $token_json %></pre>
+<p>
+

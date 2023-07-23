@@ -21,6 +21,7 @@ requires 'Mojolicious::Plugin::Config';
 requires 'Mojolicious::Plugin::Cron';
 requires 'Mojolicious::Plugin::Minion::Admin';
 requires 'Mojolicious::Plugin::Minion';
+requires 'Mojolicious::Plugin::OAuth2';
 requires 'Mojolicious::Plugin::RenderFile';
 requires 'Mojolicious::Plugin::TagHelpers';
 requires 'Net::MQTT::Simple';
