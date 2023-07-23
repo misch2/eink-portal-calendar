@@ -218,7 +218,15 @@
             <label for="">Callback URL</label>
             <input id="googlefit_auth_callback" name="googlefit_auth_callback" type="text" class="form-control" value="<%= $values->{googlefit_auth_callback} %>">
         </div>
-FIXME show keys and validity
+        <hr>
+        <div class="col-md-12">
+            <label for="">Auth token</label>
+            <input id="_googlefit_access_token" name="_googlefit_access_token" type="text" class="form-control" value="<%= $values->{_googlefit_access_token} %>">
+        </div>
+        <div class="col-md-12">
+            <label for="">Refresh token</label>
+            <input id="_googlefit_refresh_token" name="_googlefit_refresh_token" type="text" class="form-control" value="<%= $values->{_googlefit_refresh_token} %>">
+        </div>
     </fieldset>
 
     <div class="col-12 mt-3">
