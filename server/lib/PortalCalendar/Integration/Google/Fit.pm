@@ -50,6 +50,7 @@ sub _perform_authenticated_request {
 
     return unless $self->is_available;
 
+    my $access_token = $self->app->get_config('_googlefit_access_token');
     $req->header('Authorization' => "Bearer " . $access_token);
     my $response = $self->ua->request($req);
 
