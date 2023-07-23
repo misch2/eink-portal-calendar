@@ -29,3 +29,5 @@ requires 'Readonly';
 requires 'Text::Unidecode';
 requires 'Time::HiRes';
 requires 'Try::Tiny';
+requires 'Test::Mojo';
+requires 'Test::More';

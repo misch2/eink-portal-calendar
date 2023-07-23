@@ -22,6 +22,7 @@ use PortalCalendar;
 use PortalCalendar::Config;
 use PortalCalendar::Minion;
 use PortalCalendar::Schema;
+use PortalCalendar::Integration::Google;
 
 get '/ping' => sub {
     my $self = shift;
@@ -93,6 +94,7 @@ post '/config_ui' => sub {
 
     $self->enqueue_task_only_once('parse_calendars');
     $self->enqueue_task_only_once('parse_weather');
+    $self->enqueue_task_only_once('parse_googlefit');
     $self->enqueue_task_only_once('generate_image');
 
     $self->redirect_to('/config_ui');
@@ -192,15 +194,17 @@ get '/calendar/bitmap/epapergray' => sub {
     );
 };
 
-use constant googlefit_oauth2_auth_url  => 'https://accounts.google.com/o/oauth2/v2/auth';
-use constant googlefit_oauth2_token_url => 'https://oauth2.googleapis.com/token';
-use constant googlefit_oauth2_scope     => 'https://www.googleapis.com/auth/fitness.body.read';    # space separated scopes
-
 get '/auth/googlefit' => sub {
     my $self = shift;
 
     # see https://developers.google.com/identity/protocols/oauth2/web-server#httprest_1
-    my $url = googlefit_oauth2_auth_url . "?client_id=" . $self->get_config('googlefit_client_id') . "&access_type=offline&response_type=code&scope=" . googlefit_oauth2_scope . " &include_granted_scopes=true&redirect_uri=" . url_escape($self->get_config('googlefit_auth_callback'));
+    my $url = PortalCalendar::Integration::Google->googlefit_oauth2_auth_url .
+        #
+        "?client_id=" . $self->get_config('googlefit_client_id') .
+        #
+        "&access_type=offline&response_type=code&scope=" . PortalCalendar::Integration::Google->googlefit_oauth2_scope .
+        #
+        "&include_granted_scopes=true&redirect_uri=" . url_escape($self->get_config('googlefit_auth_callback'));
 
     $self->log->info("Redirecting to [$url]");
     $self->redirect_to($url);
@@ -218,7 +222,7 @@ get '/auth/googlefit/cb' => sub {
 
     #Get tokens from auth code
     my $res = $self->app->ua->post(
-        googlefit_oauth2_token_url,
+        PortalCalendar::Integration::Google->googlefit_oauth2_token_url,
         'form',
         {
             code          => $self->req->param('code'),
@@ -244,8 +248,8 @@ get '/auth/googlefit/cb' => sub {
 
     # Save both tokens
     #$self->log->info(DDP::np($res->json));
-    $self->set_config('_googlefit_access_token',  $res->json->{access_token});     # FIXME not needed
-    $self->set_config('_googlefit_refresh_token', $res->json->{refresh_token});    # FIXME not needed
+    $self->set_config('_googlefit_access_token',  $res->json->{access_token}); 
+    $self->set_config('_googlefit_refresh_token', $res->json->{refresh_token});
     $self->set_config('_googlefit_token_json',    encode_json($res->json));
 
     $self->redirect_to('/auth/googlefit/success');
@@ -330,7 +334,8 @@ plugin 'Cron' => {
     '0 * * * *' => sub {
         my $id1 = app->minion->enqueue('parse_calendars', []);
         my $id2 = app->minion->enqueue('parse_weather',   []);
-        app->minion->enqueue('generate_image', [], { parents => [ $id1, $id2 ] });
+        my $id3 = app->minion->enqueue('parse_googlefit', []);
+        app->minion->enqueue('generate_image', [], { parents => [ $id1, $id2, $id3 ] });
     },
 };
 
@@ -352,6 +357,11 @@ app->minion->add_task(
 app->minion->add_task(
     parse_weather => sub {
         PortalCalendar::Minion::reload_weather(@_);
+    }
+);
+app->minion->add_task(
+    parse_googlefit => sub {
+        PortalCalendar::Minion::reload_googlefit(@_);
     }
 );
 

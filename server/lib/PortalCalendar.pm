@@ -319,6 +319,14 @@ sub html_for_date {
         # p @forecast_5_days;
     }
 
+    my $weight_series;
+    my $last_weight;
+    if ($self->app->get_config("googlefit_client_id")) {
+        my $api = PortalCalendar::Integration::Google::Fit->new(app => $self->app, cache_dir => $self->app->app->home->child("cache/lwp"));
+        $weight_series = $api->get_weight_series;
+        $last_weight = $weight_series->[-1]->{weight};
+    }
+
     return $self->app->render(
         template => 'calendar_themes/' . $self->app->get_config('theme'),
         format   => 'html',
@@ -334,7 +342,7 @@ sub html_for_date {
         forecast        => $forecast,
 
         # googlefit data:
-        weight => 94.8, # FIXME
+        weight => $last_weight, # FIXME
 
         # processed weather values:
         forecast_5_days => \@forecast_5_days,

@@ -4,6 +4,7 @@ use Mojolicious::Lite;
 use PortalCalendar::Web2Png;
 use PortalCalendar::Integration::iCal;
 use PortalCalendar::Integration::OpenWeather;
+use PortalCalendar::Integration::Google::Fit;
 use DDP;
 
 sub regenerate_image {
@@ -57,6 +58,22 @@ sub reload_weather {
     # forced parse, then store to database
     $api->fetch_current_from_web(1);
     $api->fetch_forecast_from_web(1);
+}
+
+sub reload_googlefit {
+    my $job  = shift;
+    my @args = @_;
+
+    $job->app->log->info("Refreshing Google Fit data");
+
+    return unless $job->app->get_config("googlefit_client_id");
+    return unless $job->app->get_config("googlefit_client_secret");
+    return unless $job->app->get_config("_googlefit_access_token");
+
+    my $api = PortalCalendar::Integration::Google::Fit->new(app => $job->app, cache_dir => $job->app->app->home->child("cache/lwp"));
+
+    # forced parse, then store to database
+    $api->fetch_from_web(1);
 }
 
 1;
