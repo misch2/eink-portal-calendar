@@ -33,7 +33,7 @@ sub get_new_access_token_from_refresh_token {
 
     if (!$res->is_success) {
         $self->logger->error(DDP::np($res));
-        return 0;
+        return;
     }
 
     # Save the new access token
@@ -41,7 +41,7 @@ sub get_new_access_token_from_refresh_token {
     $self->app->set_config('_googlefit_access_token',  $res->json->{access_token});
     $self->app->log->info("Access token refreshed: " . $self->app->get_config('_googlefit_access_token'));
 
-    return 1;
+    return $self->app->get_config('_googlefit_access_token');
 };
 
 1;

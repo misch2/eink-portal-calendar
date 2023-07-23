@@ -50,12 +50,15 @@ sub _perform_authenticated_request {
 
     return unless $self->is_available;
 
+    $req->header('Authorization' => "Bearer " . $access_token);
     my $response = $self->ua->request($req);
 
     # p $response;
 
     if (!$response->is_success) {
-        $self->get_new_access_token_from_refresh_token();
+        my $new_access_token = $self->get_new_access_token_from_refresh_token();
+        $req->header('Authorization' => "Bearer " . $new_access_token);
+
         $response = $self->ua->request($req);
 
         # p $response;
@@ -73,8 +76,6 @@ sub fetch_from_web {
     my $cache = PortalCalendar::DatabaseCache->new(app => $self->app);
     return $cache->get_or_set(
         sub {
-            my $access_token = $self->app->get_config('_googlefit_access_token');
-
             my $dt_start = DateTime->now()->subtract(days => 30)->truncate(to => 'day');
             my $dt_end   = DateTime->now();
 
@@ -96,7 +97,6 @@ sub fetch_from_web {
             };
 
             my $req = HTTP::Request->new('POST', $self->data_url);
-            $req->header('Authorization' => "Bearer " . $access_token);
             $req->header('Content-Type'  => 'application/json');
             $req->content(encode_json($json_body));
 
