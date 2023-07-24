@@ -197,12 +197,14 @@ get '/calendar/bitmap/epapergray' => sub {
 get '/auth/googlefit' => sub {
     my $self = shift;
 
+    my $goauth = PortalCalendar::Integration::Google->new;
+
     # see https://developers.google.com/identity/protocols/oauth2/web-server#httprest_1
-    my $url = PortalCalendar::Integration::Google->googlefit_oauth2_auth_url .
+    my $url = $goauth->googlefit_oauth2_auth_url .
         #
         "?client_id=" . $self->get_config('googlefit_client_id') .
         #
-        "&access_type=offline&response_type=code&scope=" . PortalCalendar::Integration::Google->googlefit_oauth2_scope .
+        "&access_type=offline&response_type=code&scope=" . $goauth->googlefit_oauth2_scope .
         #
         "&include_granted_scopes=true&redirect_uri=" . url_escape($self->get_config('googlefit_auth_callback'));
 
