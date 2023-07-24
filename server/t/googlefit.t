@@ -18,7 +18,7 @@ my $t = Test::Mojo->new($appfile);
 #     _googlefit_token_json => '{"a":"b"}',
 # });
 
-my $api = PortalCalendar::Integration::Google::Fit->new(app => $t->app, cache_dir => $t->app->app->home->child("cache/lwp"));
+my $api = PortalCalendar::Integration::Google::Fit->new(app => $t->app);
 my $x = $api->fetch_from_web(1);
 #p $x;
 

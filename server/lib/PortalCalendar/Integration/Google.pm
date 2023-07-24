@@ -1,5 +1,7 @@
 package PortalCalendar::Integration::Google;
 
+use base qw/PortalCalendar::Integration/;
+
 use Mojo::Base -base;
 use Mojo::JSON qw(decode_json encode_json);
 
@@ -10,8 +12,6 @@ use HTTP::Request;
 has 'googlefit_oauth2_auth_url'  => 'https://accounts.google.com/o/oauth2/v2/auth';
 has 'googlefit_oauth2_token_url' => 'https://oauth2.googleapis.com/token';
 has 'googlefit_oauth2_scope'     => 'https://www.googleapis.com/auth/fitness.body.read';    # space separated scopes
-
-has 'app';
 
 sub get_new_access_token_from_refresh_token {
     my $self = shift;

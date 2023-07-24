@@ -13,31 +13,7 @@ use Try::Tiny;
 use HTTP::Request;
 use DateTime;
 
-has 'cache_dir';
-has 'db_cache_id';
-
 has data_url => 'https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate';
-
-has 'ua' => sub {
-    my $self = shift;
-    return LWP::UserAgent::Cached->new(
-        cache_dir => $self->cache_dir,
-
-        # nocache_if => sub {
-        #     my $response = shift;
-        #     return $response->code != 200;    # do not cache any bad response
-        # },
-        recache_if => sub {
-            my ($response, $path, $request) = @_;
-            my $stat    = Mojo::File->new($path)->lstat;
-            my $age     = time - $stat->mtime;
-            my $recache = ($age > 60 * 60 * 4) ? 1 : 0;    # recache anything older than 4 hours
-            $self->app->log->debug("Age($path)=$age secs => recache=$recache");
-            return $recache;
-
-        },
-    );
-};
 
 sub is_available {
     my $self = shift;
@@ -52,17 +28,19 @@ sub _perform_authenticated_request {
 
     my $access_token = $self->app->get_config('_googlefit_access_token');
     $req->header('Authorization' => "Bearer " . $access_token);
-    my $response = $self->ua->request($req);
+    my $response = $self->caching_ua->request($req);
 
     # p $response;
 
     if (!$response->is_success) {
         my $new_access_token = $self->get_new_access_token_from_refresh_token();
+        if ($new_access_token && $new_access_token ne $access_token) {
         $req->header('Authorization' => "Bearer " . $new_access_token);
 
-        $response = $self->ua->request($req);
+        $response = $self->caching_ua->request($req);
 
         # p $response;
+        }
     }
 
     return $response;
