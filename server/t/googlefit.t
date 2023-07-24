@@ -24,3 +24,5 @@ my $x = $api->fetch_from_web(1);
 
 my $y = $api->get_weight_series();
 p $y;
+
+p $api->get_last_known_weight;

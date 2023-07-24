@@ -35,6 +35,9 @@ function drawBasic() {
         // remove chart area border
         chartArea: { left: 0, top: 0, width: '100%', height: '100%' },
 
+        // interpolate NULL values
+        interpolateNulls: true,
+
 //        hAxis: {
 //          title: 'Time'
 //        },
@@ -62,7 +65,7 @@ function drawBasic() {
         </div>
 
         <div class="current-weight-big">
-            <span><%= sprintf("%.1f", $weight) %></span><span class="current-weight-small-kg"> kg</span>
+            <span><%= sprintf("%.1f", $last_weight) %></span><span class="current-weight-small-kg"> kg</span>
         </div>
 
         <div class="weight-chart" id="weight_chart_div">

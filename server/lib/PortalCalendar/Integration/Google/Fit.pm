@@ -15,6 +15,8 @@ use DateTime;
 
 has data_url => 'https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate';
 
+has fetch_days => 45;   # <2 months, otherwise it returns "aggregate duration too large" error
+
 sub is_available {
     my $self = shift;
     return $self->app->get_config('_googlefit_access_token') && $self->app->get_config('_googlefit_refresh_token');
@@ -55,7 +57,7 @@ sub fetch_from_web {
     my $cache = PortalCalendar::DatabaseCache->new(app => $self->app);
     return $cache->get_or_set(
         sub {
-            my $dt_start = DateTime->now()->subtract(days => 30)->truncate(to => 'day');
+            my $dt_start = DateTime->now()->subtract(days => $self->fetch_days)->truncate(to => 'day');
             my $dt_end   = DateTime->now();
 
             my $json_body = {
@@ -117,6 +119,19 @@ sub get_weight_series {
     }
 
     return \@ret;
+}
+
+sub get_last_known_weight {
+    my $self = shift;
+
+    my $weight;
+    my $series = $self->get_weight_series;
+    for (my $i = $#{ $series }; $i >= 0; $i--) {
+        $weight = $series->[$i]->{weight};
+        last if defined $weight;
+    }
+
+    return $weight;
 }
 
 1;

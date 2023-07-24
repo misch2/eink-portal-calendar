@@ -224,7 +224,7 @@ sub html_for_date {
         my $url = $self->app->get_config("web_calendar_ics_url${calendar_no}");
         next unless $url;
 
-        my $calendar = PortalCalendar::Integration::iCal->new(ics_url => $url, , db_cache_id => $calendar_no, app => $self->app);
+        my $calendar = PortalCalendar::Integration::iCal->new(ics_url => $url,, db_cache_id => $calendar_no, app => $self->app);
         try {
             push @today_events, $calendar->get_today_events($dt);    # cached if possible
                                                                      #p @today_events;
@@ -325,9 +325,7 @@ sub html_for_date {
     if ($self->app->get_config("googlefit_client_id")) {
         my $api = PortalCalendar::Integration::Google::Fit->new(app => $self->app);
         $weight_series = $api->get_weight_series;
-        if ($weight_series) {
-            $last_weight = $weight_series->[-1]->{weight};
-        };
+        $last_weight   = $api->get_last_known_weight;
     }
 
     return $self->app->render(
@@ -345,7 +343,7 @@ sub html_for_date {
         forecast        => $forecast,
 
         # googlefit data:
-        weight => $last_weight,
+        last_weight        => $last_weight,
         weight_series => $weight_series,
 
         # processed weather values:
