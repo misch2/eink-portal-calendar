@@ -46,7 +46,7 @@ function drawBasic() {
 
         // show points
         pointShape: 'circle',   //  'circle', 'triangle', 'square', 'diamond', 'star', or 'polygon'
-        pointSize: 5,
+        pointSize: 4,
     };
 
     var chart = new google.visualization.LineChart(document.getElementById('weight_chart_div'));
