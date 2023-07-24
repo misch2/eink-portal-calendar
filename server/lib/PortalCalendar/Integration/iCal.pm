@@ -68,9 +68,6 @@ sub get_today_events {
     $date   = $date->clone()->set_time_zone($self->app->get_config('timezone'));
     @events = grep { $_->{DTSTART} > $date || $_->{allday} } @events;
 
-    use DDP;
-    p @events;
-
     map { $_->{SUMMARY} =~ s/\\,/,/g } @events;    # fix "AA\,BB" situation
 
     return @events;
