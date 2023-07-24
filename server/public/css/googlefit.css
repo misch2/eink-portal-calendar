@@ -28,3 +28,11 @@ div.weight-chart {
     width: 100%;
     height: 5rem;
 }
+
+div.day-of-week-block {
+    margin-top: 2rem;
+}
+
+div.icons-container {
+    margin-top: 1rem;
+}
