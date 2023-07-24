@@ -30,7 +30,9 @@ function drawBasic() {
         // remove x-axis labels and gridlines
         hAxis: { textPosition: 'none', gridlines: { Xcolor: 'transparent' } },
         // dtto for y-axis
-        vAxis: { textPosition: 'none', gridlines: { Xcolor: 'transparent' } },
+        // vAxis: { textPosition: 'none', gridlines: { Xcolor: 'transparent' } },
+        vAxis: { XXXtitle: 'Váha', XXXtextPosition: 'none', gridlines: { Xcolor: 'transparent', color: '#000', count: 3 }, minorGridlines: { color: 'transparent' },
+            textStyle: { fontSize: 12, color: '#000000' } },
 
         // remove chart area border
         chartArea: { left: 0, top: 0, width: '100%', height: '100%' },
@@ -38,12 +40,8 @@ function drawBasic() {
         // interpolate NULL values
         interpolateNulls: true,
 
-//        hAxis: {
-//          title: 'Time'
-//        },
-//        vAxis: {
-//          title: 'Popularity'
-//        }
+        // smooth curve
+        curveType: 'function',
       };
 
       var chart = new google.visualization.LineChart(document.getElementById('weight_chart_div'));
