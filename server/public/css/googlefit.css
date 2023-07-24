@@ -1,12 +1,14 @@
 
 div.current-weight-big {
-    /* border: 1px solid #000000; */
+    /* border: 1px solid #000000;
+    background-color: bisque; */
+
     font-family: 'DINCondensed';
     font-size: 11rem;
     transform: scale(0.8, 1);
     /* translate(-0.12em, -0.19em); */
     /* margin-bottom: -0.25em; */
-    margin: -0.15em -0.18em -0.10em -0.195em;
+    margin: -0.10em -0.18em -0.10em -0.195em;
 }
 
 span.current-weight-small-kg {
@@ -18,10 +20,11 @@ div.weight-chart {
     margin-top: 2rem;
     margin-bottom: 2rem;
 
-    /* background-color: antiquewhite; */
-    /* border: 1px solid #000000; */
-    /* margin-top: 1rem; */
+    /* background-color: thistle;
+    border: 1px solid #000000; */
+
+    margin-top: -1rem;
     margin-bottom: 0.5rem;
     width: 100%;
-    height: 4rem;
+    height: 5rem;
 }
