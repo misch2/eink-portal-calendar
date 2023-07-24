@@ -28,6 +28,7 @@ I choose this approach because it's easier (and more fun) for me to implement th
 1. ~~Add battery voltage measurement~~
 1. ~~Add MQTT support (to see status in HomeAssistant)~~
 1. ~~Add battery level indicator~~
+1. ~~Add integration with Google Fit and display a weight data+chart~~
 
 [^1]: I didn't consider the need for ESP board with very low power consumption. I therefore bought one that was available immediately (ESP8266 with integrated e-Paper driver). But while it's perfectly usable when powered through USB, it wouldn't keep working sufficiently long with AAA batteries. I therefore switched to low power ESP32 board.
 
