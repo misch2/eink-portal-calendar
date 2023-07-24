@@ -14,13 +14,14 @@ google.charts.load('current', {packages: ['corechart', 'line']});
 google.charts.setOnLoadCallback(drawBasic);
 
 function drawBasic() {
-      var data = new google.visualization.DataTable();
-      data.addColumn('string', 'Day');
-      data.addColumn('number', 'Weight');
+    var data = new google.visualization.DataTable();
+    data.addColumn('string', 'Day');
+    data.addColumn('number', 'Weight');
 
-      data.addRows(<%== encode_json([map { [$_->{date}, $_->{weight}] } @{ $weight_series }]) %>);
+    data.addRows(<%== encode_json([map { [$_->{date}, $_->{weight}] } @{ $weight_series }]) %>);
 
-      var options = {
+    // https://developers.google.com/chart/interactive/docs/gallery/linechart
+    var options = {
         colors:['black', 'black'],
         enableInteractivity: false,
         theme: 'maximized',
@@ -42,12 +43,16 @@ function drawBasic() {
 
         // smooth curve
         curveType: 'function',
-      };
 
-      var chart = new google.visualization.LineChart(document.getElementById('weight_chart_div'));
+        // show points
+        pointShape: 'circle',   //  'circle', 'triangle', 'square', 'diamond', 'star', or 'polygon'
+        pointSize: 5,
+    };
 
-      chart.draw(data, options);
-    }
+    var chart = new google.visualization.LineChart(document.getElementById('weight_chart_div'));
+
+    chart.draw(data, options);
+}
 </script>
 
 <body>
