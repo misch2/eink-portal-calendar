@@ -197,10 +197,9 @@ get '/calendar/bitmap/epapergray' => sub {
 get '/auth/googlefit' => sub {
     my $self = shift;
 
-    my $goauth = PortalCalendar::Integration::Google->new;
-
     # see https://developers.google.com/identity/protocols/oauth2/web-server#httprest_1
-    my $url = $goauth->googlefit_oauth2_auth_url .
+    my $goauth = PortalCalendar::Integration::Google->new;
+    my $url    = $goauth->googlefit_oauth2_auth_url .
         #
         "?client_id=" . $self->get_config('googlefit_client_id') .
         #
@@ -223,8 +222,9 @@ get '/auth/googlefit/cb' => sub {
     $self->log->info("converting code to a token");
 
     #Get tokens from auth code
-    my $res = $self->app->ua->post(
-        PortalCalendar::Integration::Google->googlefit_oauth2_token_url,
+    my $goauth = PortalCalendar::Integration::Google->new;
+    my $res    = $self->app->ua->post(
+        $goauth->googlefit_oauth2_token_url,
         'form',
         {
             code          => $self->req->param('code'),
@@ -250,8 +250,9 @@ get '/auth/googlefit/cb' => sub {
 
     # Save both tokens
     #$self->log->info(DDP::np($res->json));
-    $self->set_config('_googlefit_access_token',  $res->json->{access_token}); 
+    $self->set_config('_googlefit_access_token',  $res->json->{access_token});
     $self->set_config('_googlefit_refresh_token', $res->json->{refresh_token});
+
     # $self->set_config('_googlefit_token_json',    encode_json($res->json));
 
     $self->redirect_to('/auth/googlefit/success');
@@ -272,7 +273,7 @@ get '/auth/googlefit/success' => sub {
         # page-specific variables
         a_token    => $self->app->get_config('_googlefit_access_token'),
         r_token    => $self->app->get_config('_googlefit_refresh_token'),
-        token_json => '?',  # DDP::np($token_json),
+        token_json => '?',                                                  # DDP::np($token_json),
     );
 };
 
