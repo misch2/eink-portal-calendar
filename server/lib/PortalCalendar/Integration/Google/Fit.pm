@@ -15,6 +15,8 @@ use DateTime;
 
 has data_url => 'https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate';
 
+has 'max_cache_age' => 60 * 10;    # 10 minutes
+
 has fetch_days => 45;   # <2 months, otherwise it returns "aggregate duration too large" error
 
 sub is_available {

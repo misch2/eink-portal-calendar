@@ -236,7 +236,7 @@ get '/auth/googlefit/cb' => sub {
             #scope         => googlefit_oauth2_scope,
         }
     )->res;
-    $self->log->info("response: " . $res->status_line);
+    $self->log->info("response: " . $res->as_string);
 
     if (!$res->is_success) {
         return $self->render(
@@ -252,8 +252,8 @@ get '/auth/googlefit/cb' => sub {
     # Save both tokens
     #$self->log->info(DDP::np($res->json));
     $self->log->info("JSON content: " . DDP::np($res->json));
-    $self->set_config('_googlefit_access_token',  $res->json->{access_token});
     $self->set_config('_googlefit_refresh_token', $res->json->{refresh_token});
+    $self->set_config('_googlefit_access_token',  $res->json->{access_token});
 
     # $self->set_config('_googlefit_token_json',    encode_json($res->json));
 
