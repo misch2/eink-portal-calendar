@@ -6,6 +6,7 @@ requires 'Digest';
 requires 'DBIx::Class::Schema';
 requires 'File::Copy';
 requires 'File::pushd';
+requires 'File::Path';
 requires 'File::Slurp';
 requires 'File::Temp';
 requires 'FindBin';

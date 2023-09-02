@@ -21,5 +21,5 @@ foreach my $bucket (@{ $data->{bucket} }) {
     next unless defined $weight;
 
     #warn "$start - $end";
-    print sprintf("%s: %5.1f kg\n", $start->ymd('-'), $weight);
+    print sprintf("%s - %s: %5.1f kg\n", $start, $end, $weight);
 }

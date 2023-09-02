@@ -199,7 +199,7 @@ get '/auth/googlefit' => sub {
 
     # see https://developers.google.com/identity/protocols/oauth2/web-server#httprest_1
     my $goauth = PortalCalendar::Integration::Google->new;
-    my $url    = $goauth->googlefit_oauth2_auth_url .
+    my $url    = $goauth->google_oauth2_auth_url .
         #
         "?client_id=" . $self->get_config('googlefit_client_id') .
         #
@@ -224,7 +224,7 @@ get '/auth/googlefit/cb' => sub {
     #Get tokens from auth code
     my $goauth = PortalCalendar::Integration::Google->new;
     my $res    = $self->app->ua->post(
-        $goauth->googlefit_oauth2_token_url,
+        $goauth->google_oauth2_token_url,
         'form',
         {
             code          => $self->req->param('code'),
@@ -326,13 +326,13 @@ helper enqueue_task_only_once => sub {
     return $new_id;
 };
 
-helper schema => sub { state $schema = PortalCalendar::Schema->connect('dbi:SQLite:local/calendar.db') };
+helper schema => sub { state $schema = PortalCalendar::Schema->connect("dbi:SQLite:local/calendar.db")  };
 
 plugin 'Config';    # loads config from app.<mode>.conf (production/development) or from app.conf as a fallback
 plugin 'TagHelpers';
 plugin 'RenderFile';
 plugin 'Minion' => {
-    SQLite => 'sqlite:' . "$Bin/local/minion.db",    # app->home->child('minion.db'),
+    SQLite => 'sqlite:' . "local/minion.db",    # app->home->child('minion.db'),
 
 };
 plugin 'Minion::Admin' => {                          # Host Admin UI
@@ -413,7 +413,7 @@ sub setup_logger {
 }
 
 sub run_migrations {
-    my $db = Mojo::SQLite->new('sqlite:local/calendar.db');
+    my $db = Mojo::SQLite->new("sqlite:local/calendar.db");
     $db->auto_migrate(1)->migrations->from_data();
 
     # execute any SQL via this handle to run the migrations automatically:

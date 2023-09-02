@@ -9,8 +9,8 @@ use DDP;
 use Try::Tiny;
 use HTTP::Request;
 
-has 'googlefit_oauth2_auth_url'  => 'https://accounts.google.com/o/oauth2/v2/auth';
-has 'googlefit_oauth2_token_url' => 'https://oauth2.googleapis.com/token';
+has 'google_oauth2_auth_url'  => 'https://accounts.google.com/o/oauth2/v2/auth';
+has 'google_oauth2_token_url' => 'https://oauth2.googleapis.com/token';
 has 'googlefit_oauth2_scope'     => 'https://www.googleapis.com/auth/fitness.body.read';    # space separated scopes
 
 sub get_new_access_token_from_refresh_token {
@@ -20,7 +20,7 @@ sub get_new_access_token_from_refresh_token {
 
     #Get tokens from auth code
     my $res = $self->app->app->ua->post(
-        $self->googlefit_oauth2_token_url,
+        $self->google_oauth2_token_url,
         'form',
         {
             client_id     => $self->app->get_config('googlefit_client_id'),

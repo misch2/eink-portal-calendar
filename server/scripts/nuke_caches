@@ -1,0 +1,22 @@
+#!/usr/bin/env perl
+
+use strict;
+
+use FindBin qw($Bin);
+use lib "$Bin/../lib";
+use File::Path;
+
+use Mojolicious::Lite;
+
+use PortalCalendar;
+use PortalCalendar::Schema;
+
+helper schema => sub { state $schema = PortalCalendar::Schema->connect("dbi:SQLite:$Bin/../local/calendar.db") };
+
+app->log->debug("Clearing database cache");
+app->schema->resultset('Cache')->delete_all;
+
+my $cache_dir = "$Bin/../cache/lwp";
+app->log->debug("Clearing LWP cache: $cache_dir");
+my $removed_count = File::Path::rmtree($cache_dir, { verbose => 1, safe => 1, keep_root => 1});
+app->log->debug("...removed $removed_count files");

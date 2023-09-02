@@ -16,7 +16,7 @@ use PortalCalendar::Schema;
 use PortalCalendar::Integration::iCal;
 use PortalCalendar::Integration::OpenWeather;
 
-helper schema => sub { state $schema = PortalCalendar::Schema->connect('dbi:SQLite:local/calendar.db') };
+helper schema => sub { state $schema = PortalCalendar::Schema->connect("dbi:SQLite:$Bin/../local/calendar.db") };
 
 foreach my $row (app->schema->resultset('Cache')->search(undef, { order_by => 'id' })->all) {
     my $perldata = Storable::thaw(b64_decode($row->data));
