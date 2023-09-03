@@ -15,10 +15,18 @@ google.charts.setOnLoadCallback(drawBasic);
 
 function drawBasic() {
     var data = new google.visualization.DataTable();
-    data.addColumn('string', 'Day');
+    data.addColumn('date', 'Day');
     data.addColumn('number', 'Weight');
 
-    data.addRows(<%== encode_json([map { [$_->{date}, $_->{weight}] } @{ $weight_series }]) %>);
+    data.addRows([
+        % foreach my $point (@{ $weight_series }) {
+        [
+            %= sprintf("new Date(%d, %d, %d, %d, %d, %d, 0)", $point->{date}->year, $point->{date}->month, $point->{date}->day, $point->{date}->hour, $point->{date}->minute, $point->{date}->second)
+            ,
+            %== encode_json($point->{weight})
+        ],
+        % }
+    ]);
 
     // https://developers.google.com/chart/interactive/docs/gallery/linechart
     var options = {
@@ -28,8 +36,20 @@ function drawBasic() {
 
         // remove legend
         legend: { position: 'none' },
-        // remove x-axis labels and gridlines
-        hAxis: { textPosition: 'none', gridlines: { Xcolor: 'transparent' } },
+        // x-axis labels and gridlines
+        hAxis: { XtextPosition: 'none', format: 'MMM', gridlines: { color: '#888' }, minorGridlines: { color: 'transparent' },
+            textStyle: { fontSize: 10, color: '#000000' },
+            ticks: [
+                % foreach my $point (@{ $weight_series }) {
+                    % if ($point->{date}->day == 1) {
+                    {
+                        %= "v:" . sprintf("new Date(%d, %d, %d)", $point->{date}->year, $point->{date}->month, $point->{date}->day) . ","
+                        %== "f:'" . $point->{date}->format_cldr('LLLL') . "'"
+                    },
+                    % }
+                % }
+            ],
+        },
         // dtto for y-axis
         // vAxis: { textPosition: 'none', gridlines: { Xcolor: 'transparent' } },
         vAxis: { XXXtitle: 'Váha', XXXtextPosition: 'none', gridlines: { Xcolor: 'transparent', color: '#000', count: 3 }, minorGridlines: { color: 'transparent' },

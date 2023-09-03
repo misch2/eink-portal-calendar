@@ -343,7 +343,7 @@ sub html_for_date {
         forecast        => $forecast,
 
         # googlefit data:
-        last_weight        => $last_weight,
+        last_weight   => $last_weight,
         weight_series => $weight_series,
 
         # processed weather values:

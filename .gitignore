@@ -18,3 +18,4 @@ client/.vscode/extensions.json
 client/.vscode/settings.json
 
 .vstags
+.vscode/
