@@ -472,6 +472,18 @@ sub generate_bitmap {
         my $out;
         $img->write(data => \$out, type => 'png') or die;
         return $self->app->render(data => $out, format => 'png');
+    } elsif ($args->{format} eq 'png_gray') {
+        # Convert to 1 gray channel only
+        my $tmp = $img->convert(preset => 'grey');
+        die $img->errstr unless $tmp;
+        $img = $tmp;
+        $tmp = $img->convert(preset => 'noalpha');
+        die $img->errstr unless $tmp;
+        $img = $tmp;
+
+        my $out;
+        $img->write(data => \$out, type => 'png') or die;
+        return $self->app->render(data => $out, format => 'png');
     } elsif ($args->{format} =~ /^raw/) {
         my $bitmap = '';
         if ($args->{format} eq 'raw8bpp') {
