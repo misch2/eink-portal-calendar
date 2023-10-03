@@ -22,6 +22,7 @@ use PortalCalendar::Schema;
 use PortalCalendar::Integration::iCal;
 use PortalCalendar::Integration::OpenWeather;
 use PortalCalendar::Integration::MQTT;
+use PortalCalendar::Integration::Google::Fit;
 
 has 'app';
 
@@ -223,7 +224,7 @@ sub html_for_date {
         my $url = $self->app->get_config("web_calendar_ics_url${calendar_no}");
         next unless $url;
 
-        my $calendar = PortalCalendar::Integration::iCal->new(ics_url => $url, cache_dir => $self->app->app->home->child("cache/lwp"), db_cache_id => $calendar_no, app => $self->app);
+        my $calendar = PortalCalendar::Integration::iCal->new(ics_url => $url,, db_cache_id => $calendar_no, app => $self->app);
         try {
             push @today_events, $calendar->get_today_events($dt);    # cached if possible
                                                                      #p @today_events;
@@ -284,7 +285,7 @@ sub html_for_date {
     my $forecast;
     my @forecast_5_days = ();
     if ($self->app->get_config("openweather")) {
-        my $api = PortalCalendar::Integration::OpenWeather->new(app => $self->app, cache_dir => $self->app->app->home->child("cache/lwp"));
+        my $api = PortalCalendar::Integration::OpenWeather->new(app => $self->app);
         $current_weather = $api->fetch_current_from_web;
         $forecast        = $api->fetch_forecast_from_web;
 
@@ -319,6 +320,14 @@ sub html_for_date {
         # p @forecast_5_days;
     }
 
+    my $weight_series;
+    my $last_weight;
+    if ($self->app->get_config("googlefit_client_id")) {
+        my $api = PortalCalendar::Integration::Google::Fit->new(app => $self->app);
+        $weight_series = $api->get_weight_series;
+        $last_weight   = $api->get_last_known_weight;
+    }
+
     return $self->app->render(
         template => 'calendar_themes/' . $self->app->get_config('theme'),
         format   => 'html',
@@ -332,6 +341,10 @@ sub html_for_date {
         # raw weather values:
         current_weather => $current_weather,
         forecast        => $forecast,
+
+        # googlefit data:
+        last_weight   => $last_weight,
+        weight_series => $weight_series,
 
         # processed weather values:
         forecast_5_days => \@forecast_5_days,
@@ -456,6 +469,18 @@ sub generate_bitmap {
     }
 
     if ($args->{format} eq 'png') {
+        my $out;
+        $img->write(data => \$out, type => 'png') or die;
+        return $self->app->render(data => $out, format => 'png');
+    } elsif ($args->{format} eq 'png_gray') {
+        # Convert to 1 gray channel only
+        my $tmp = $img->convert(preset => 'grey');
+        die $img->errstr unless $tmp;
+        $img = $tmp;
+        $tmp = $img->convert(preset => 'noalpha');
+        die $img->errstr unless $tmp;
+        $img = $tmp;
+
         my $out;
         $img->write(data => \$out, type => 'png') or die;
         return $self->app->render(data => $out, format => 'png');

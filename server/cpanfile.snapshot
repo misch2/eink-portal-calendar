@@ -1296,6 +1296,24 @@ DISTRIBUTIONS
       Exporter 5.57
       ExtUtils::MakeMaker 0
       perl 5.008
+  IO-Socket-SSL-2.083
+    pathname: S/SU/SULLR/IO-Socket-SSL-2.083.tar.gz
+    provides:
+      IO::Socket::SSL 2.083
+      IO::Socket::SSL::Intercept 2.056
+      IO::Socket::SSL::OCSP_Cache 2.083
+      IO::Socket::SSL::OCSP_Resolver 2.083
+      IO::Socket::SSL::PublicSuffix undef
+      IO::Socket::SSL::SSL_Context 2.083
+      IO::Socket::SSL::SSL_HANDLE 2.083
+      IO::Socket::SSL::Session_Cache 2.083
+      IO::Socket::SSL::Trace 2.083
+      IO::Socket::SSL::Utils 2.015
+    requirements:
+      ExtUtils::MakeMaker 0
+      Mozilla::CA 0
+      Net::SSLeay 1.46
+      Scalar::Util 0
   IO-String-1.08
     pathname: G/GA/GAAS/IO-String-1.08.tar.gz
     provides:
@@ -1688,6 +1706,15 @@ DISTRIBUTIONS
       Module::Build::Tiny 0.035
       Mojolicious 7.82
       perl 5.020001
+  Mojolicious-Plugin-OAuth2-2.02
+    pathname: J/JH/JHTHORSEN/Mojolicious-Plugin-OAuth2-2.02.tar.gz
+    provides:
+      Mojolicious::Plugin::OAuth2 2.02
+      Mojolicious::Plugin::OAuth2::Mock undef
+    requirements:
+      ExtUtils::MakeMaker 0
+      IO::Socket::SSL 1.94
+      Mojolicious 8.25
   Mojolicious-Plugin-RenderFile-0.12
     pathname: K/KO/KOORCHIK/Mojolicious-Plugin-RenderFile-0.12.tar.gz
     provides:
@@ -1723,6 +1750,13 @@ DISTRIBUTIONS
       Sub::Defer 2.006006
       Sub::Quote 2.006006
       perl 5.006
+  Mozilla-CA-20221114
+    pathname: H/HA/HAARG/Mozilla-CA-20221114.tar.gz
+    provides:
+      Mozilla::CA 20221114
+    requirements:
+      ExtUtils::MakeMaker 0
+      perl 5.006
   Net-HTTP-6.22
     pathname: O/OA/OALDERS/Net-HTTP-6.22.tar.gz
     provides:
@@ -1748,6 +1782,19 @@ DISTRIBUTIONS
       Net::MQTT::Simple::SSL undef
     requirements:
       ExtUtils::MakeMaker 0
+  Net-SSLeay-1.92
+    pathname: C/CH/CHRISN/Net-SSLeay-1.92.tar.gz
+    provides:
+      Net::SSLeay 1.92
+      Net::SSLeay::Handle 1.92
+    requirements:
+      English 0
+      ExtUtils::MakeMaker 0
+      File::Spec::Functions 0
+      MIME::Base64 0
+      Text::Wrap 0
+      constant 0
+      perl 5.008001
   Package-Stash-0.40
     pathname: E/ET/ETHER/Package-Stash-0.40.tar.gz
     provides:

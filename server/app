@@ -3,6 +3,7 @@
 use strict;
 
 use FindBin qw($Bin);
+use lib "$Bin/mock";
 use lib "$Bin/lib";
 
 use Mojolicious::Lite;
@@ -13,10 +14,15 @@ use DateTime::Format::ISO8601;
 use DDP;
 use Time::HiRes;
 
+# FIXME for oauth:
+use Mojo::Util qw(url_escape);
+use Mojo::JSON qw(decode_json encode_json);
+
 use PortalCalendar;
 use PortalCalendar::Config;
 use PortalCalendar::Minion;
 use PortalCalendar::Schema;
+use PortalCalendar::Integration::Google;
 
 get '/ping' => sub {
     my $self = shift;
@@ -88,6 +94,7 @@ post '/config_ui' => sub {
 
     $self->enqueue_task_only_once('parse_calendars');
     $self->enqueue_task_only_once('parse_weather');
+    $self->enqueue_task_only_once('parse_googlefit');
     $self->enqueue_task_only_once('generate_image');
 
     $self->redirect_to('/config_ui');
@@ -144,11 +151,12 @@ get '/config' => sub {
     PortalCalendar->new(app => $self)->update_mqtt('battery_percent', $self->calculate_battery_percent());
 
     my $ret = {
+
         # {// undef} to force scalars
-        sleep            => $self->get_config('sleep_time') // undef,
+        sleep            => $self->get_config('sleep_time')    // undef,
         critical_voltage => $self->get_config('alert_voltage') // undef,
         battery_percent  => $self->calculate_battery_percent() // undef,
-        ota_mode         => ($self->get_config('ota_mode') ? \1 : \0),  # JSON true/false
+        ota_mode         => ($self->get_config('ota_mode') ? \1 : \0),    # JSON true/false
 
         #display     => "BW",                            # "bw", "grayscale",
         # bitmap_path => "/calendar/bitmap/epapermono",
@@ -184,6 +192,97 @@ get '/calendar/bitmap/epapergray' => sub {
             format    => 'raw2bpp',
         }
     );
+};
+
+get '/auth/googlefit' => sub {
+    my $self = shift;
+
+    # see https://developers.google.com/identity/protocols/oauth2/web-server#httprest_1
+    my $goauth = PortalCalendar::Integration::Google->new;
+    my $url    = $goauth->google_oauth2_auth_url .
+        #
+        "?client_id=" . $self->get_config('googlefit_client_id') .
+        #
+        "&access_type=offline&response_type=code&scope=" . $goauth->googlefit_oauth2_scope .
+        #
+        "&include_granted_scopes=true&redirect_uri=" . url_escape($self->get_config('googlefit_auth_callback'));
+
+    $self->log->info("Redirecting to [$url]");
+    $self->redirect_to($url);
+};
+
+# OAuth 2 callback from google
+get '/auth/googlefit/cb' => sub {
+    my ($self) = @_;
+
+    $self->log->info("in callback, received this:");
+    $self->log->info("code: " . $self->req->param('code'));
+    $self->log->info("scope: " . $self->req->param('scope'));
+
+    $self->log->info("converting code to a token");
+
+    #Get tokens from auth code
+    my $goauth = PortalCalendar::Integration::Google->new;
+    my $res    = $self->app->ua->post(
+        $goauth->google_oauth2_token_url,
+        'form',
+        {
+            code          => $self->req->param('code'),
+            client_id     => $self->get_config('googlefit_client_id'),
+            client_secret => $self->get_config('googlefit_client_secret'),
+            redirect_uri  => $self->get_config('googlefit_auth_callback'),
+            grant_type    => 'authorization_code',
+
+            #scope         => googlefit_oauth2_scope,
+        }
+    )->res;
+    $self->log->info("response: " . $res->as_string);
+
+    if (!$res->is_success) {
+        return $self->render(
+            template => 'auth_error',
+            format   => 'html',
+            nav_link => 'config_ui',
+
+            # page-specific variables
+            error => decode_json($res->body),
+        );
+    }
+
+    # Save both tokens
+    #$self->log->info(DDP::np($res->json));
+    $self->log->info("JSON content: " . DDP::np($res->json));
+    $self->set_config('_googlefit_refresh_token', $res->json->{refresh_token});
+    $self->set_config('_googlefit_access_token',  $res->json->{access_token});
+
+    # $self->set_config('_googlefit_token_json',    encode_json($res->json));
+
+    $self->redirect_to('/auth/googlefit/success');
+};
+
+get '/auth/googlefit/success' => sub {
+    my ($self) = @_;
+
+    # Read access token from session
+    my $a_token = $self->get_config('_googlefit_access_token') or die "No access token!";
+
+    # my $token_json = decode_json($self->get_config('_googlefit_token_json'));
+    return $self->render(
+        template => 'auth_success',
+        format   => 'html',
+        nav_link => 'config_ui',
+
+        # page-specific variables
+        a_token    => $self->app->get_config('_googlefit_access_token'),
+        r_token    => $self->app->get_config('_googlefit_refresh_token'),
+        token_json => '?',                                                  # DDP::np($token_json),
+    );
+};
+
+helper encode_json => sub {
+    my $self = shift;
+    my $data = shift;
+    return Mojo::JSON::encode_json($data);
 };
 
 helper config_obj => sub {
@@ -227,13 +326,13 @@ helper enqueue_task_only_once => sub {
     return $new_id;
 };
 
-helper schema => sub { state $schema = PortalCalendar::Schema->connect('dbi:SQLite:local/calendar.db') };
+helper schema => sub { state $schema = PortalCalendar::Schema->connect("dbi:SQLite:local/calendar.db")  };
 
 plugin 'Config';    # loads config from app.<mode>.conf (production/development) or from app.conf as a fallback
 plugin 'TagHelpers';
 plugin 'RenderFile';
 plugin 'Minion' => {
-    SQLite => 'sqlite:' . "$Bin/local/minion.db",    # app->home->child('minion.db'),
+    SQLite => 'sqlite:' . "local/minion.db",    # app->home->child('minion.db'),
 
 };
 plugin 'Minion::Admin' => {                          # Host Admin UI
@@ -246,7 +345,8 @@ plugin 'Cron' => {
     '0 * * * *' => sub {
         my $id1 = app->minion->enqueue('parse_calendars', []);
         my $id2 = app->minion->enqueue('parse_weather',   []);
-        app->minion->enqueue('generate_image', [], { parents => [ $id1, $id2 ] });
+        my $id3 = app->minion->enqueue('parse_googlefit', []);
+        app->minion->enqueue('generate_image', [], { parents => [ $id1, $id2, $id3 ] });
     },
 };
 
@@ -268,6 +368,11 @@ app->minion->add_task(
 app->minion->add_task(
     parse_weather => sub {
         PortalCalendar::Minion::reload_weather(@_);
+    }
+);
+app->minion->add_task(
+    parse_googlefit => sub {
+        PortalCalendar::Minion::reload_googlefit(@_);
     }
 );
 
@@ -308,7 +413,7 @@ sub setup_logger {
 }
 
 sub run_migrations {
-    my $db = Mojo::SQLite->new('sqlite:local/calendar.db');
+    my $db = Mojo::SQLite->new("sqlite:local/calendar.db");
     $db->auto_migrate(1)->migrations->from_data();
 
     # execute any SQL via this handle to run the migrations automatically:

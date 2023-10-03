@@ -1,5 +1,7 @@
 package PortalCalendar::Integration::OpenWeather;
 
+use base qw/PortalCalendar::Integration/;
+
 use Mojo::Base -base;
 use Mojo::JSON qw(decode_json encode_json);
 use Mojo::URL;
@@ -11,34 +13,12 @@ use iCal::Parser;
 use DDP;
 use DateTime;
 
-has 'app';
-has 'cache_dir';
-
 has 'api_key' => sub {
     my $self = shift;
     return $self->app->get_config('openweather_api_key');
 };
 
-has 'ua' => sub {
-    my $self = shift;
-    return LWP::UserAgent::Cached->new(
-        cache_dir => $self->cache_dir,
-
-        # nocache_if => sub {
-        #     my $response = shift;
-        #     return $response->code != 200;    # do not cache any bad response
-        # },
-        recache_if => sub {
-            my ($response, $path, $request) = @_;
-
-            my $stat    = Mojo::File->new($path)->lstat;
-            my $age     = time - $stat->mtime;
-            my $recache = ($age > 60 * 5) ? 1 : 0;         # recache anything older than 5 minutes
-            $self->app->log->debug("Age($path)=$age secs => recache=$recache");
-            return $recache;
-        },
-    );
-};
+has 'max_cache_age' => 60 * 5;    # 5 minutes
 
 sub fetch_current_from_web {
     my $self   = shift;
@@ -57,7 +37,7 @@ sub fetch_current_from_web {
             )->to_unsafe_string;
 
             $self->app->log->debug($url);
-            my $response = $self->ua->get($url);
+            my $response = $self->caching_ua->get($url);
 
             die $response->status_line . "\n" . $response->content
                 unless $response->is_success;
@@ -85,7 +65,7 @@ sub fetch_forecast_from_web {
             )->to_unsafe_string;
 
             $self->app->log->debug($url);
-            my $response = $self->ua->get($url);
+            my $response = $self->caching_ua->get($url);
 
             die $response->status_line . "\n" . $response->content
                 unless $response->is_success;

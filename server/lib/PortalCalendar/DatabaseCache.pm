@@ -17,7 +17,7 @@ sub get_or_set {
     if (!$force_refresh) {
         if (my $row = $self->app->schema->resultset('Cache')->find($db_cache_id)) {
             my $data = Storable::thaw(b64_decode($row->data));
-            $self->app->log->debug("returning parsed calendar data from cache #" . $db_cache_id);
+            $self->app->log->debug("returning parsed data from cache #" . $db_cache_id);
             return $data;
         }
     }

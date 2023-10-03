@@ -16,3 +16,6 @@ client/.vscode/launch.json
 client/.vscode/ipch
 client/.vscode/extensions.json
 client/.vscode/settings.json
+
+.vstags
+.vscode/
