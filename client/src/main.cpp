@@ -59,7 +59,7 @@ bool otaMode = false;
 /* RTC vars (survives deep sleep) */
 RTC_DATA_ATTR int bootCount = 0;
 // TODO check the length in read loop to prevent overflow
-RTC_DATA_ATTR char lastChecksum[64 + 1] = "";
+RTC_DATA_ATTR char lastChecksum[64 + 1] = "<not_defined_yet>";
 
 void setup() {
   wakeupAndConnect();
@@ -139,8 +139,8 @@ void wakeupAndConnect() {
   fullStartTime = millis();
   ++bootCount;
 
-  Serial.begin(115200);
-  Serial.println();
+  // Serial.begin(115200);
+  // Serial.println();
 
   DEBUG_PRINT("display setup start");
   DEBUG_PRINT("CS=%d, DC=%d, RST=%d, BUSY=%d", CS_PIN, DC_PIN, RST_PIN,
@@ -448,7 +448,7 @@ void runOTALoopInsteadOfUsualFunctionality() {
         DEBUG_PRINT("OTA: Rebooting...");
       })
       .onProgress([](unsigned int progress, unsigned int total) {
-        Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+        // Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
       })
       .onError([](ota_error_t error) {
         DEBUG_PRINT("OTA: Error %u", error);
