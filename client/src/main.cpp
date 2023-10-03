@@ -125,9 +125,13 @@ void loadConfigFromWeb() {
   bool tmpb = response["ota_mode"];
   otaMode = tmpb;
   if (otaMode) {
-    DEBUG_PRINT("OTA mode enabled");
+    DEBUG_PRINT("OTA mode enabled in JSON config");
+    if (esp_reset_reason() == ESP_RST_SW) {
+      DEBUG_PRINT("^ but reset reason was ESP_RST_SW => not running OTA loop");
+      otaMode = false;
+    }
   } else {
-    DEBUG_PRINT("OTA mode disabled");
+    DEBUG_PRINT("OTA mode disabled in JSON config");
   };
 }
 
@@ -429,6 +433,7 @@ void runOTALoopInsteadOfUsualFunctionality() {
   ArduinoOTA
       .onStart([]() {
         String type;
+        DEBUG_PRINT("OTA: command %s", ArduinoOTA.getCommand())
         if (ArduinoOTA.getCommand() == U_FLASH)
           type = "sketch";
         else  // U_SPIFFS
@@ -436,24 +441,28 @@ void runOTALoopInsteadOfUsualFunctionality() {
 
         // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS
         // using SPIFFS.end()
-        DEBUG_PRINT("Start updating %s", type.c_str());
+        DEBUG_PRINT("OTA: Start updating %s", type.c_str());
       })
-      .onEnd([]() { Serial.println("\nEnd"); })
+      .onEnd([]() {
+        DEBUG_PRINT("OTA: End");
+        DEBUG_PRINT("OTA: Rebooting...");
+      })
       .onProgress([](unsigned int progress, unsigned int total) {
         Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
       })
       .onError([](ota_error_t error) {
-        Serial.printf("Error[%u]: ", error);
-        if (error == OTA_AUTH_ERROR)
-          Serial.println("Auth Failed");
-        else if (error == OTA_BEGIN_ERROR)
-          Serial.println("Begin Failed");
-        else if (error == OTA_CONNECT_ERROR)
-          Serial.println("Connect Failed");
-        else if (error == OTA_RECEIVE_ERROR)
-          Serial.println("Receive Failed");
-        else if (error == OTA_END_ERROR)
-          Serial.println("End Failed");
+        DEBUG_PRINT("OTA: Error %u", error);
+        if (error == OTA_AUTH_ERROR) {
+          DEBUG_PRINT("OTA: Auth Failed");
+        } else if (error == OTA_BEGIN_ERROR) {
+          DEBUG_PRINT("OTA: Begin Failed");
+        } else if (error == OTA_CONNECT_ERROR) {
+          DEBUG_PRINT("OTA: Connect Failed");
+        } else if (error == OTA_RECEIVE_ERROR) {
+          DEBUG_PRINT("OTA: Receive Failed");
+        } else if (error == OTA_END_ERROR) {
+          DEBUG_PRINT("OTA: End Failed");
+        }
       });
 
   ArduinoOTA.begin();
