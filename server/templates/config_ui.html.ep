@@ -45,15 +45,15 @@
             <input id="sleep_time" name="sleep_time" type="number" class="form-control" value="<%= $values->{sleep_time} %>">
         </div>
         <div class="col-md-4">
-            <label for="min_voltage">Min voltage for a single AAA cell</label>
+            <label for="min_voltage">0 % battery [V]</label>
             <input id="min_voltage" name="min_voltage" type="number" step="0.01" class="form-control" value="<%= $values->{min_voltage} %>">
         </div>
         <div class="col-md-4">
-            <label for="alert_voltage">Critical (alert) voltage for a single AAA cell</label>
+            <label for="alert_voltage">Critical (alert) [V]</label>
             <input id="alert_voltage" name="alert_voltage" type="number" step="0.01" class="form-control" value="<%= $values->{alert_voltage} %>">
         </div>
         <div class="col-md-4">
-            <label for="max_voltage">Max voltage for a single AAA cell</label>
+            <label for="max_voltage">100 % battery [V]</label>
             <input id="max_voltage" name="max_voltage" type="number" step="0.01" class="form-control" value="<%= $values->{max_voltage} %>">
         </div>
     </fieldset>
