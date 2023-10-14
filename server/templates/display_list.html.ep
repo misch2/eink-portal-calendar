@@ -1,0 +1,11 @@
+% layout 'bootstrap5';
+
+<h3>Select your display</h3>
+
+<ul>
+% foreach my $d (@{ $displays }) {
+    <li>
+        <a href="/home/<%= $d->id %>"><%= $d->name %></a>
+    </li>
+% }
+</ul>

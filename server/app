@@ -32,6 +32,22 @@ get '/ping' => sub {
 get '/' => sub {
     my $self = shift;
 
+    my $displays = $self->schema->resultset('Display')->search({}, { -order_by => ['id'] });
+
+    return $self->render(
+        template => 'display_list',
+        format   => 'html',
+        nav_link => 'index',
+
+        display => undef,
+        displays => [$displays->all],
+    );
+};
+
+get '/home/:display' => sub {
+    my $self = shift;
+
+    my $display = $self->get_display_by_id($self->stash('display'));
     my $last_contact_ago;
     my $last_visit_dt;
     if (my $last_visit_raw = $self->get_config('_last_visit')) {
@@ -52,8 +68,9 @@ get '/' => sub {
 };
 
 # side by side comparison
-get '/test' => sub {
+get '/test/:display' => sub {
     my $self = shift;
+    my $display = $self->get_display_by_id($self->stash('display'));
     return $self->render(
         template => 'test',
         format   => 'html',
@@ -61,9 +78,10 @@ get '/test' => sub {
     );
 };
 
-get '/config_ui' => sub {
+get '/config_ui/:display' => sub {
     my $self = shift;
 
+    my $display = $self->get_display_by_id($self->stash('display'));
     my $values = {};
     foreach my $name (@{ $self->config_obj->parameters }) {
         my $value = $self->get_config($name);
@@ -81,8 +99,11 @@ get '/config_ui' => sub {
     );
 };
 
-post '/config_ui' => sub {
+post '/config_ui/:display' => sub {
     my $self = shift;
+
+    my $display = $self->get_display_by_id($self->stash('display'));
+    my $portal = PortalCalendar->new(app => $self, display => $display);
 
     foreach my $name (@{ $self->config_obj->parameters }) {
         my $value = $self->req->param($name);
@@ -91,30 +112,33 @@ post '/config_ui' => sub {
 
     $self->flash(message => "Parameters saved.");
 
-    PortalCalendar->new(app => $self)->update_mqtt('min_voltage',           $self->get_config('min_voltage'));
-    PortalCalendar->new(app => $self)->update_mqtt('max_voltage',           $self->get_config('max_voltage'));
-    PortalCalendar->new(app => $self)->update_mqtt('alert_voltage',         $self->get_config('alert_voltage'));
-    PortalCalendar->new(app => $self)->update_mqtt('voltage_divider_ratio', $self->get_config('voltage_divider_ratio'));
-    PortalCalendar->new(app => $self)->update_mqtt('sleep_time',            $self->get_config('sleep_time'));
+
+    $portal->update_mqtt('min_voltage',           $self->get_config('min_voltage'));
+    $portal->update_mqtt('max_voltage',           $self->get_config('max_voltage'));
+    $portal->update_mqtt('alert_voltage',         $self->get_config('alert_voltage'));
+    $portal->update_mqtt('voltage_divider_ratio', $self->get_config('voltage_divider_ratio'));
+    $portal->update_mqtt('sleep_time',            $self->get_config('sleep_time'));
 
     $self->enqueue_task_only_once('parse_calendars');
     $self->enqueue_task_only_once('parse_weather');
     $self->enqueue_task_only_once('parse_googlefit');
     $self->enqueue_task_only_once('generate_image');
 
-    $self->redirect_to('/config_ui');
+    $self->redirect_to('/config_ui/' . $display->id);
 };
 
 # main HTML page with calendar (either for current or for specific date)
-get '/calendar/html' => sub {
+get '/calendar/:display/html' => sub {
     my $self = shift;
-    return PortalCalendar->new(app => $self)->html_for_date(DateTime->now());
+    my $display = $self->get_display_by_id($self->stash('display'));
+    return PortalCalendar->new(app => $self, display => $display)->html_for_date(DateTime->now());
 };
 
-get '/calendar/html/:date' => sub {
+get '/calendar/:display/html/:date' => sub {
     my $self = shift;
+    my $display = $self->get_display_by_id($self->stash('display'));
     my $dt   = DateTime::Format::Strptime->new(pattern => '%Y-%m-%d')->parse_datetime($self->stash('date'));
-    return PortalCalendar->new(app => $self)->html_for_date($dt);
+    return PortalCalendar->new(app => $self, display => $display)->html_for_date($dt);
 };
 
 # /calendar/bitmap
@@ -124,13 +148,16 @@ get '/calendar/html/:date' => sub {
 get '/calendar/bitmap' => sub {
     my $self = shift;
 
+    my $mac = $self->req->param('mac');
+    my $display = $self->get_display_by_mac($mac);
+
     my $rotate = $self->req->param('rotate') // 0;
     my $flip   = $self->req->param('flip')   // '';
     my $colors = $self->req->param('colors') // 256;
     my $gamma  = $self->req->param('gamma')  // 1.0;
     my $format = $self->req->param('format') // 'png';
 
-    return PortalCalendar->new(app => $self)->generate_bitmap(
+    return PortalCalendar->new(app => $self, display => $display)->generate_bitmap(
         {
             rotate    => $rotate,
             flip      => $flip,
@@ -145,19 +172,36 @@ get '/calendar/bitmap' => sub {
 get '/config' => sub {
     my $self = shift;
 
+    my $mac = $self->req->param('mac');
+    my $display = $self->get_display_by_mac($mac);
+    if (!$display) {
+        $self->log->warn("Display with MAC [$mac] not found, creating it");
+        $display = $self->schema->resultset('Display')->create(
+            {
+                mac       => lc($mac),
+                name      => "MAC $mac",
+                width     => $self->req->param('w') // -1,
+                height    => $self->req->param('h') // -1,
+                rotation  => $self->req->param('r') // 0,
+                colortype => $self->req->param('c') // '?',
+            }
+        );
+    }
+
     $self->set_config('_last_visit', DateTime->now()->iso8601);
 
     $self->set_config('_last_voltage_raw', $self->req->param('adc') // $self->req->param('voltage_raw') // '');    # value has NOT NULL restriction
 
-    PortalCalendar->new(app => $self)->update_mqtt('voltage',         $self->get_calculated_voltage + 0.001);             # to force grafana to store changed values
-    PortalCalendar->new(app => $self)->update_mqtt('voltage_raw',     $self->get_config('_last_voltage_raw') + 0.001);    # to force grafana to store changed values
-    PortalCalendar->new(app => $self)->update_mqtt('battery_percent', $self->calculate_battery_percent() + 0.001);        # to force grafana to store changed values
-    PortalCalendar->new(app => $self)->update_mqtt('last_visit',      DateTime->now()->rfc3339);
-    PortalCalendar->new(app => $self)->update_mqtt('firmware',        $self->req->param('fw'));
+    my $portal = PortalCalendar->new(app => $self, display => $display);
+    $portal->update_mqtt('voltage',         $self->get_calculated_voltage + 0.001);             # to force grafana to store changed values
+    $portal->update_mqtt('voltage_raw',     $self->get_config('_last_voltage_raw') + 0.001);    # to force grafana to store changed values
+    $portal->update_mqtt('battery_percent', $self->calculate_battery_percent() + 0.001);        # to force grafana to store changed values
+    $portal->update_mqtt('last_visit',      DateTime->now()->rfc3339);
+    $portal->update_mqtt('firmware',        $self->req->param('fw'));
 
-    PortalCalendar->new(app => $self)->update_mqtt('voltage',         $self->get_calculated_voltage);
-    PortalCalendar->new(app => $self)->update_mqtt('voltage_raw',     $self->get_config('_last_voltage_raw'));
-    PortalCalendar->new(app => $self)->update_mqtt('battery_percent', $self->calculate_battery_percent());
+    $portal->update_mqtt('voltage',         $self->get_calculated_voltage);
+    $portal->update_mqtt('voltage_raw',     $self->get_config('_last_voltage_raw'));
+    $portal->update_mqtt('battery_percent', $self->calculate_battery_percent());
 
     my $ret = {
 
@@ -175,8 +219,11 @@ get '/config' => sub {
 get '/calendar/bitmap/epapermono' => sub {
     my $self = shift;
 
+    my $mac = $self->req->param('mac');
+    my $display = $self->get_display_by_mac($mac);
+
     $self->set_config('_last_visit', DateTime->now()->iso8601);
-    return PortalCalendar->new(app => $self)->generate_bitmap(
+    return PortalCalendar->new(app => $self, display => $display)->generate_bitmap(
         {
             rotate    => 3,
             numcolors => 2,
@@ -189,8 +236,11 @@ get '/calendar/bitmap/epapermono' => sub {
 get '/calendar/bitmap/epapergray' => sub {
     my $self = shift;
 
+    my $mac = $self->req->param('mac');
+    my $display = $self->get_display_by_mac($mac);
+
     $self->set_config('_last_visit', DateTime->now()->iso8601);
-    return PortalCalendar->new(app => $self)->generate_bitmap(
+    return PortalCalendar->new(app => $self, display => $display)->generate_bitmap(
         {
             rotate    => 3,
             numcolors => 4,
@@ -348,6 +398,23 @@ helper enqueue_task_only_once => sub {
     return $new_id;
 };
 
+helper get_display_by_mac => sub {
+    my $self = shift;
+    my $mac = shift;
+
+    $mac = lc($mac);
+    my $display = $self->schema->resultset('Display')->find({ mac => $mac });
+    return $display;
+};
+
+helper get_display_by_id => sub {
+    my $self = shift;
+    my $id = shift;
+
+    my $display = $self->schema->resultset('Display')->find({ id => $id});
+    return $display;
+};
+
 helper schema => sub { state $schema = PortalCalendar::Schema->connect("dbi:SQLite:local/calendar.db") };
 
 plugin 'Config';    # loads config from app.<mode>.conf (production/development) or from app.conf as a fallback
@@ -489,3 +556,15 @@ CREATE TABLE cache (
     id VARCHAR(255) NOT NULL PRIMARY KEY,
     data BLOB
 );
+
+-- 8 up
+CREATE TABLE displays (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    mac VARCHAR NOT NULL UNIQUE,
+    name VARCHAR NOT NULL UNIQUE,
+    width INTEGER NOT NULL,
+    height INTEGER NOT NULL,
+    rotation INTEGER NOT NULL,
+    colortype VARCHAR NOT NULL
+);
+

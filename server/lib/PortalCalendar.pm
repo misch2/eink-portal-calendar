@@ -25,6 +25,7 @@ use PortalCalendar::Integration::MQTT;
 use PortalCalendar::Integration::Google::Fit;
 
 has 'app';
+has 'display';
 
 Readonly my $WIDTH  => 480;
 Readonly my $HEIGHT => 800;

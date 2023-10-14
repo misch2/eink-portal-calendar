@@ -8,7 +8,7 @@
 
 <h3 class="mb-3">Configuration</h3>
 
-<form action="/config_ui" method="post">
+<form action="/config_ui/<%= $display %>" method="post">
 
     <fieldset class="mt-4 row">
         <legend class="w-auto">OTA mode</legend>

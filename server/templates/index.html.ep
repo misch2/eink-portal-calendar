@@ -58,7 +58,8 @@
 </p>
 
 <p class="row-fluid">
-<div class="preview-image">
-    <img src="/calendar/bitmap?format=png">
+    <div class="preview-image">
+        % my $disp_obj = get_display_by_id($display);
+        <img src="/calendar/bitmap?format=png&mac=<%= $disp_obj->mac %>">
     </div>
 </p>
