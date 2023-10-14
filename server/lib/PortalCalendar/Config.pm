@@ -11,9 +11,10 @@ has 'defaults' => sub {
     my $self = shift;
     return {
         sleep_time              => 3600,
-        min_voltage             => 1.0,
-        max_voltage             => 1.5,
-        alert_voltage           => 1.1,
+        min_voltage             => 3.6,
+        max_voltage             => 6.0,
+        alert_voltage           => 4.0,
+        voltage_divider_ratio   => 2.0,
         timezone                => 'UTC',
         broken_glass            => 0,
         web_calendar1           => 0,
