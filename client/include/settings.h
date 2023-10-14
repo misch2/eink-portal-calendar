@@ -14,8 +14,8 @@
 #define DISPLAY_HEIGHT 800
 
 // Uncomment correct color capability of your ePaper display
-// #define TYPE_BW // black and white
-#define TYPE_3C // 3 colors - black, white and red/yellow
+#define TYPE_BW // black and white
+// #define TYPE_3C // 3 colors - black, white and red/yellow
 //#define TYPE_GRAYSCALE // grayscale - 4 colors
 //#define TYPE_7C // 7 colors
 
@@ -34,24 +34,24 @@ VCC  - gray   #888 - to +3.3V
 */
 
 // EzSBC ESP32 breakout board
-// #define SPI_BUS HSPI
-// #define CS_PIN 15
-// #define DC_PIN 23
-// #define RST_PIN 33
-// #define BUSY_PIN 27
-// #define VOLTAGE_ADC_PIN 32
-
-// ESP32S3 devkitc1 N16R8 board
 #define SPI_BUS HSPI
-#define REMAP_SPI
-#define PIN_SPI_CLK 13  // CLK
-#define PIN_SPI_MISO 14 // unused
-#define PIN_SPI_MOSI 12 // DIN
-#define PIN_SPI_SS 15   // unused
+#define CS_PIN 15
+#define DC_PIN 23
+#define RST_PIN 33
+#define BUSY_PIN 27
+#define VOLTAGE_ADC_PIN 32
 
-#define CS_PIN 5    // SS
-#define DC_PIN 17   // D/C
-#define RST_PIN 16  // RES
-#define BUSY_PIN 4  // PIN_BUSY
-// #define VOLTAGE_ADC_PIN 32
+// // ESP32S3 devkitc1 N16R8 board
+// #define SPI_BUS HSPI
+// #define REMAP_SPI
+// #define PIN_SPI_CLK 13  // CLK
+// #define PIN_SPI_MISO 14 // unused
+// #define PIN_SPI_MOSI 12 // DIN
+// #define PIN_SPI_SS 15   // unused
+
+// #define CS_PIN 5    // SS
+// #define DC_PIN 17   // D/C
+// #define RST_PIN 16  // RES
+// #define BUSY_PIN 4  // PIN_BUSY
+// // #define VOLTAGE_ADC_PIN 32
 

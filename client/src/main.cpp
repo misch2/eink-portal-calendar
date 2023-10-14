@@ -48,11 +48,11 @@ const char* defined_color_type = "3C";
 //     GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN));
 // #endif
 // #else
-// GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN));
+GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN));
 // #endif
 
 // 7.5" 3C 800x480
-GxEPD2_3C<GxEPD2_750c_Z08, GxEPD2_750c_Z08::HEIGHT / 2> display(GxEPD2_750c_Z08(/*CS*/ CS_PIN, /*DC*/ DC_PIN, /*RST*/ RST_PIN, /*BUSY*/ BUSY_PIN));  // GDEY075Z08 800x480, GDEW075Z08
+// GxEPD2_3C<GxEPD2_750c_Z08, GxEPD2_750c_Z08::HEIGHT / 2> display(GxEPD2_750c_Z08(/*CS*/ CS_PIN, /*DC*/ DC_PIN, /*RST*/ RST_PIN, /*BUSY*/ BUSY_PIN));  // GDEY075Z08 800x480, GDEW075Z08
 
 WiFiManager wifiManager;
 WiFiClient wifiClient;
