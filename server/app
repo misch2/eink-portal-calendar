@@ -46,7 +46,7 @@ get '/' => sub {
 
         last_contact_ago => $last_contact_ago,
         last_visit_dt    => $last_visit_dt,
-        last_voltage     => ($self->get_config('_last_voltage')     // '(unknown)'),
+        last_voltage     => ($self->get_calculated_voltage          // '(unknown)'),
         last_voltage_raw => ($self->get_config('_last_voltage_raw') // '(unknown)'),
     );
 };
@@ -71,10 +71,11 @@ get '/config_ui' => sub {
     }
 
     return $self->render(
-        template         => 'config_ui',
-        format           => 'html',
-        values           => $values,
-        last_voltage     => ($self->get_config('_last_voltage')     // '(unknown)'),
+        template => 'config_ui',
+        format   => 'html',
+        values   => $values,
+
+        last_voltage     => ($self->get_calculated_voltage          // '(unknown)'),
         last_voltage_raw => ($self->get_config('_last_voltage_raw') // '(unknown)'),
         nav_link         => 'config_ui',
     );
@@ -144,8 +145,9 @@ get '/calendar/bitmap' => sub {
 get '/config' => sub {
     my $self = shift;
 
-    $self->set_config('_last_visit',       DateTime->now()->iso8601);
-    $self->set_config('_last_voltage',     $self->req->param('voltage')     // '');    # value has NOT NULL restriction
+    $self->set_config('_last_visit', DateTime->now()->iso8601);
+
+    # $self->set_config('_last_voltage',     $self->req->param('voltage')     // '');    # value has NOT NULL restriction
     $self->set_config('_last_voltage_raw', $self->req->param('voltage_raw') // '');    # value has NOT NULL restriction
 
     PortalCalendar->new(app => $self)->update_mqtt('voltage',         $self->req->param('voltage') + 0.001);          # to force grafana to store changed values
@@ -304,6 +306,21 @@ helper get_config => sub {
     return $self->config_obj->get($name);
 };
 
+helper get_calculated_voltage => sub {
+    my $self = shift;
+
+    my $raw_adc_reading       = $self->get_config('_last_voltage_raw');
+    my $voltage_divider_ratio = $self->get_config('voltage_divider_ratio');
+    return unless $raw_adc_reading && $voltage_divider_ratio;
+
+    my $adc_reference_voltage = 3.3;
+    my $adc_resolution        = 4095;
+
+    my $voltage = $raw_adc_reading * $adc_reference_voltage / $adc_resolution * $voltage_divider_ratio;
+
+    return $voltage;
+};
+
 helper set_config => sub {
     my $self  = shift;
     my $name  = shift;
@@ -315,7 +332,8 @@ helper calculate_battery_percent => sub {
     my $self = shift;
     my $min  = $self->get_config('min_voltage');
     my $max  = $self->get_config('max_voltage');
-    my $cur  = $self->get_config('_last_voltage');
+
+    my $cur = $self->get_calculated_voltage;
     return unless $min && $max && $cur;
     return 100 * ($cur - $min) / ($max - $min);
 };
