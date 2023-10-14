@@ -162,8 +162,8 @@ get '/config' => sub {
     my $ret = {
 
         # {// undef} to force scalars
-        sleep                 => $self->get_config('sleep_time')            // undef,
-        critical_voltage      => $self->get_config('alert_voltage')         // undef,
+        sleep                 => $self->get_config('sleep_time') // undef,
+        is_critical_voltage   => (($self->get_calculated_voltage < $self->get_config('alert_voltage')) ? 1 : 0),
         voltage_divider_ratio => $self->get_config('voltage_divider_ratio') // undef,
         battery_percent       => $self->calculate_battery_percent()         // undef,
         ota_mode              => ($self->get_config('ota_mode') ? \1 : \0),    # JSON true/false
