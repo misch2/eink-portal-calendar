@@ -58,7 +58,19 @@
         </div>
         <div class="col-md-3">
             <label for="voltage_divider_ratio">Voltage divider ratio ((R1+R2)/R1) [>1.0]</label>
-            <input id="voltage_divider_ratio" name="voltage_divider_ratio" type="number" step="0.01" class="form-control" value="<%= $values->{voltage_divider_ratio} %>">
+            <input id="voltage_divider_ratio" name="voltage_divider_ratio" type="number" step="0.0001" class="form-control" value="<%= $values->{voltage_divider_ratio} %>">
+        </div>
+        <div class="col-md-12">
+            Hint: To iteratively fine-tune voltage divider ratio use this formula:
+
+            <pre>
+    V_real = ???          # real voltage on battery, measured by multimeter
+    V_cur = <%= sprintf("%4.2f", $last_voltage) %>          # last reported voltage
+    ADC_cur_raw = <%= sprintf("%4d", $last_voltage_raw) %>    # last reported raw ADC reading
+    Ratio_cur = <%= sprintf("%6.4f", $values->{voltage_divider_ratio}) %>    # current voltage divider ratio
+
+    Ratio_new := Ratio_cur * V_real / V_cur
+            </pre>
         </div>
     </fieldset>
 

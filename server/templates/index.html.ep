@@ -48,7 +48,7 @@
     % }
 </p>
 <p class="row-fluid">
-    Last voltage: <%= $last_voltage %> V (<%= calculate_battery_percent() %> %). 
+    Last voltage: <%= $last_voltage %> V (<%= sprintf("%.0f", calculate_battery_percent()) %> %, raw=<%= $last_voltage_raw %>). 
     OTA mode: <%= get_config('ota_mode') ? 'on' : 'off' %>.
 </p>
 

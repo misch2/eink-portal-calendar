@@ -71,10 +71,12 @@ get '/config_ui' => sub {
     }
 
     return $self->render(
-        template => 'config_ui',
-        format   => 'html',
-        values   => $values,
-        nav_link => 'config_ui',
+        template         => 'config_ui',
+        format           => 'html',
+        values           => $values,
+        last_voltage     => ($self->get_config('_last_voltage')     // '(unknown)'),
+        last_voltage_raw => ($self->get_config('_last_voltage_raw') // '(unknown)'),
+        nav_link         => 'config_ui',
     );
 };
 
