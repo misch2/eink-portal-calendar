@@ -61,6 +61,7 @@ uint32_t fullStartTime;
 static const uint16_t input_buffer_pixels = DISPLAY_HEIGHT;
 uint8_t input_row_mono_buffer[input_buffer_pixels];  // at most 1 byte per pixel
 String serverURLBase = String("http://") + CALENDAR_URL_HOST + ":" + CALENDAR_URL_PORT;
+String firmware = xstr(AUTO_VERSION);
 int voltageLastReadRaw = 0;
 
 /* RTC vars (survives deep sleep) */
@@ -118,7 +119,7 @@ void checkVoltage() {
 };
 
 void loadConfigFromWeb() {
-  String jsonURL = serverURLBase + "/config?voltage_raw=" + voltageLastReadRaw;
+  String jsonURL = serverURLBase + "/config?mac=" + WiFi.macAddress() + "&adc=" + voltageLastReadRaw + "&w=" + String(DISPLAY_WIDTH) + "&h=" + String(DISPLAY_HEIGHT) + "&c=" + String(defined_color_type) + "&fw=" + String(firmware);
   DEBUG_PRINT("Loading config from web");
 
   String jsonText = httpGETRequestAsString(jsonURL.c_str());
@@ -138,7 +139,6 @@ void loadConfigFromWeb() {
   }
 
   bool tmpb = response["ota_mode"];
-  otaMode = 1;  // FIXME tmpb;
   if (otaMode) {
     DEBUG_PRINT("OTA mode enabled in remote config");
     if (esp_reset_reason() == ESP_RST_SW) {
@@ -387,6 +387,8 @@ bool startWiFi() {
   DEBUG_PRINT("Build version: %s %s", __DATE__, __TIME__);
   DEBUG_PRINT("Connected to WiFi in %lu ms", millis() - start);
   DEBUG_PRINT("IP address: %s", WiFi.localIP().toString().c_str());
+  DEBUG_PRINT("MAC address: %s", WiFi.macAddress().c_str());
+
   return true;
 }
 

@@ -32,3 +32,7 @@ uint32_t read8n(WiFiClient& client, uint8_t* buffer, int32_t bytes);
 // fonts
 #include "Open_Sans_Regular_16.h"
 #include "Open_Sans_Regular_24.h"
+
+// helper for stringifying defines
+#define xstr(a) str(a)
+#define str(a) #a
