@@ -46,7 +46,8 @@ get '/' => sub {
 
         last_contact_ago => $last_contact_ago,
         last_visit_dt    => $last_visit_dt,
-        last_voltage     => ($self->get_config('_last_voltage') // '(unknown)'),
+        last_voltage     => ($self->get_config('_last_voltage')     // '(unknown)'),
+        last_voltage_raw => ($self->get_config('_last_voltage_raw') // '(unknown)'),
     );
 };
 
@@ -141,14 +142,17 @@ get '/calendar/bitmap' => sub {
 get '/config' => sub {
     my $self = shift;
 
-    $self->set_config('_last_visit',   DateTime->now()->iso8601);
-    $self->set_config('_last_voltage', $self->req->param('voltage') // '');    # value has NOT NULL restriction
+    $self->set_config('_last_visit',       DateTime->now()->iso8601);
+    $self->set_config('_last_voltage',     $self->req->param('voltage')     // '');    # value has NOT NULL restriction
+    $self->set_config('_last_voltage_raw', $self->req->param('voltage_raw') // '');    # value has NOT NULL restriction
 
     PortalCalendar->new(app => $self)->update_mqtt('voltage',         $self->req->param('voltage') + 0.001);          # to force grafana to store changed values
+    PortalCalendar->new(app => $self)->update_mqtt('voltage_raw',     $self->req->param('voltage_raw') + 0.001);      # to force grafana to store changed values
     PortalCalendar->new(app => $self)->update_mqtt('battery_percent', $self->calculate_battery_percent() + 0.001);    # to force grafana to store changed values
     PortalCalendar->new(app => $self)->update_mqtt('last_visit',      DateTime->now()->rfc3339);
 
     PortalCalendar->new(app => $self)->update_mqtt('voltage',         $self->req->param('voltage'));
+    PortalCalendar->new(app => $self)->update_mqtt('voltage_raw',     $self->req->param('voltage_raw'));
     PortalCalendar->new(app => $self)->update_mqtt('battery_percent', $self->calculate_battery_percent());
 
     my $ret = {
