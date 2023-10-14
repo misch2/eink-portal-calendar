@@ -63,13 +63,15 @@
         <div class="col-md-12">
             Hint: To iteratively fine-tune voltage divider ratio use this formula:
 
+<input type="hidden" name="calc_V_cur" value="<%= $last_voltage %>">
+<input type="hidden" name="calc_ADC_cur_raw" value="<%= $last_voltage_raw %>">
             <pre>
-    V_real = ???          # real voltage on battery, measured by multimeter
+    V_real = <input type="text" name="calc_V_real" size="6" value="<%= sprintf("%4.2f", $last_voltage) %>"> V   # real voltage on battery, measured by multimeter
     V_cur = <%= sprintf("%4.2f", $last_voltage) %>          # last reported voltage
     ADC_cur_raw = <%= sprintf("%4d", $last_voltage_raw) %>    # last reported raw ADC reading
     Ratio_cur = <%= sprintf("%6.4f", $values->{voltage_divider_ratio}) %>    # current voltage divider ratio
 
-    Ratio_new := Ratio_cur * V_real / V_cur
+    Ratio_new = Ratio_cur * V_real / V_cur = <span id="calc_Ratio_new" class="font-weight: bold"></span>    # new voltage divider ratio
             </pre>
         </div>
     </fieldset>
@@ -250,3 +252,20 @@
     </div>
 
 </form>
+
+<script type="text/javascript">
+    function updateRatio() {
+        var V_real = parseFloat(document.getElementsByName('calc_V_real')[0].value);
+        var V_cur = parseFloat(document.getElementsByName('calc_V_cur')[0].value);
+        var ADC_cur_raw = parseFloat(document.getElementsByName('calc_ADC_cur_raw')[0].value);
+        var Ratio_cur = parseFloat(document.getElementsByName('voltage_divider_ratio')[0].value);
+
+        var Ratio_new = Ratio_cur * V_real / V_cur;
+        document.getElementById('calc_Ratio_new').innerHTML = Ratio_new.toFixed(4);
+    }
+
+    document.getElementsByName('calc_V_real')[0].addEventListener('input', updateRatio);
+    document.getElementsByName('voltage_divider_ratio')[0].addEventListener('input', updateRatio);
+
+    updateRatio();
+</script>
