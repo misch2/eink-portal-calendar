@@ -1,6 +1,6 @@
 void stopWiFi();
 bool startWiFi();
-float getVoltage();
+void readVoltage();
 
 void basicInit();
 void wakeupAndConnect();

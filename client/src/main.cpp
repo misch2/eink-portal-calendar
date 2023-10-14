@@ -1,10 +1,12 @@
 #define DEBUG
-// #define USE_GxEPD2_4G
-// #define USE_GRAYSCALE_DISPLAY
+
+// #define USE_GRAYSCALE_BW_DISPLAY
 
 #include "secrets_config.h"
+#include "settings.h"
 
 // generic libraries
+#include <Adafruit_GFX.h>
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
@@ -14,32 +16,43 @@
 #include <WiFiManager.h>
 #include <WiFiUdp.h>
 
-#ifdef USE_GxEPD2_4G
-#ifdef USE_GRAYSCALE_DISPLAY
-#include <GxEPD2_4G_4G.h>
-#else
-#include <GxEPD2_4G_BW.h>
-#endif
-#else
+#ifdef TYPE_BW
 #include <GxEPD2_BW.h>
+const char* defined_color_type = "BW";
+#endif
+
+#ifdef TYPE_GRAYSCALE
+const char* defined_color_type = "4G";
+#ifdef USE_GRAYSCALE_BW_DISPLAY
+#include <GxEPD2_4G_BW.h>
+#else
+#include <GxEPD2_4G_4G.h>
+#endif
+#endif
+
+#ifdef TYPE_3C
+const char* defined_color_type = "3C";
+#include <GxEPD2_3C.h>
 #endif
 
 #include "debug.h"
 #include "main.h"
-#include "settings.h"
 
 /* local vars */
-#ifdef USE_GxEPD2_4G
-#ifdef USE_GRAYSCALE_DISPLAY
-GxEPD2_4G_4G<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(
-    GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN));
-#else
-GxEPD2_4G_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(
-    GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN));
-#endif
-#else
-GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN));
-#endif
+// #ifdef USE_GxEPD2_4G
+// #ifdef USE_GRAYSCALE_DISPLAY
+// GxEPD2_4G_4G<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(
+//     GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN));
+// #else
+// GxEPD2_4G_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(
+//     GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN));
+// #endif
+// #else
+// GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN));
+// #endif
+
+// 7.5" 3C 800x480
+GxEPD2_3C<GxEPD2_750c_Z08, GxEPD2_750c_Z08::HEIGHT / 2> display(GxEPD2_750c_Z08(/*CS*/ CS_PIN, /*DC*/ DC_PIN, /*RST*/ RST_PIN, /*BUSY*/ BUSY_PIN));  // GDEY075Z08 800x480, GDEW075Z08
 
 WiFiManager wifiManager;
 WiFiClient wifiClient;
@@ -48,20 +61,23 @@ uint32_t fullStartTime;
 static const uint16_t input_buffer_pixels = DISPLAY_HEIGHT;
 uint8_t input_row_mono_buffer[input_buffer_pixels];  // at most 1 byte per pixel
 String serverURLBase = String("http://") + CALENDAR_URL_HOST + ":" + CALENDAR_URL_PORT;
-
-// configurable remotely
-uint64_t sleepTime = SECONDS_PER_HOUR;
-float criticalVoltage = 1.1;
-bool otaMode = false;
+int voltageLastReadRaw = 0;
 
 /* RTC vars (survives deep sleep) */
 RTC_DATA_ATTR int bootCount = 0;
 // TODO check the length in read loop to prevent overflow
 RTC_DATA_ATTR char lastChecksum[64 + 1] = "<not_defined_yet>";
 
+// remotely configurable variables (via JSON)
+uint64_t sleepTime = SECONDS_PER_HOUR;
+bool voltageIsCritical = 0;
+bool otaMode = false;
+
 void setup() {
   basicInit();
+  readVoltage();  // only once, because it discharges the 100nF capacitor
   wakeupAndConnect();
+  DEBUG("Display type: %s", defined_color_type);
 
   if (otaMode) {
     runInfinoteOTALoopInsteadOfUsualFunctionality();
@@ -76,24 +92,26 @@ void loop() {
   // Shouldn't get here at all due to the deep sleep called in setup
 }
 
-float getVoltage() {
-  int value = analogRead(SINGLE_AAA_VOLTAGE_PIN);
-  float volts = value * 3.3 / 4095.0;
-  DEBUG_PRINT("Voltage raw read (pin %d): %d", SINGLE_AAA_VOLTAGE_PIN, value);
-  DEBUG_PRINT("Voltage: %f", volts);
-  return volts;
+void readVoltage() {
+#ifdef VOLTAGE_ADC_PIN
+  voltageLastReadRaw = analogRead(VOLTAGE_ADC_PIN);
+  DEBUG_PRINT("Voltage raw read (pin %d): %d", VOLTAGE_ADC_PIN, voltageLastReadRaw);
+#else
+  voltageLastReadRaw = 0;
+  DEBUG_PRINT("Voltage not measured, no pin defined");
+#endif
 };
 
 void checkVoltage() {
-  float voltage = getVoltage();
-  if (voltage < criticalVoltage) {
-    error(String("Voltage ") + voltage + "V critical, below " +
-          criticalVoltage + "V");
+#ifdef VOLTAGE_ADC_PIN
+  if (voltageIsCritical) {
+    error(String("Voltage critical as reported by server"));
   };
+#endif
 };
 
 void loadConfigFromWeb() {
-  String jsonURL = serverURLBase + "/config?voltage=" + getVoltage();
+  String jsonURL = serverURLBase + "/config?voltage_raw=" + voltageLastReadRaw;
   DEBUG_PRINT("Loading config from web");
 
   String jsonText = httpGETRequestAsString(jsonURL.c_str());
@@ -112,12 +130,6 @@ void loadConfigFromWeb() {
     DEBUG_PRINT("sleepTime set to %d seconds", tmpi);
   }
 
-  float tmpf = response["critical_voltage"];
-  if (tmpf != 0) {
-    criticalVoltage = tmpf;
-    DEBUG_PRINT("criticalVoltage set to %f volts", tmpf);
-  }
-
   bool tmpb = response["ota_mode"];
   otaMode = tmpb;
   if (otaMode) {
@@ -130,6 +142,9 @@ void loadConfigFromWeb() {
   } else {
     DEBUG_PRINT("OTA mode disabled in JSON config");
   };
+
+  tmpb = response["is_critical_voltage"];
+  voltageIsCritical = tmpb;
 }
 
 void basicInit() {
@@ -415,8 +430,6 @@ void displayText(String message) {
 void runInfinoteOTALoopInsteadOfUsualFunctionality() {
   DEBUG_PRINT("Running OTA loop");
 
-  // ArduinoOTA.handle();
-
   ArduinoOTA.setHostname(SYSLOG_MYHOSTNAME);
   ArduinoOTA
       .onStart([]() {
@@ -433,7 +446,6 @@ void runInfinoteOTALoopInsteadOfUsualFunctionality() {
       })
       .onEnd([]() {
         DEBUG_PRINT("OTA: End");
-        DEBUG_PRINT("OTA: Rebooting...");
       })
       .onProgress([](unsigned int progress, unsigned int total) {
         // Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
@@ -454,6 +466,7 @@ void runInfinoteOTALoopInsteadOfUsualFunctionality() {
       });
 
   ArduinoOTA.begin();
+
   while (true) {
     ArduinoOTA.handle();
     delay(100);
@@ -483,6 +496,14 @@ void initDisplay() {
               BUSY_PIN);
   delay(100);
   SPIClass* spi = new SPIClass(SPI_BUS);
+
+#ifdef REMAP_SPI
+  Serial.println("remapping SPI");
+  // only CLK and MOSI are important for EPD
+  spi->begin(PIN_SPI_CLK, PIN_SPI_MISO, PIN_SPI_MOSI, PIN_SPI_SS);  // swap pins
+  Serial.println("remapped");
+#endif
+
   /* 2ms reset for waveshare board */
   display.init(115200, false, 2, false, *spi,
                SPISettings(7000000, MSBFIRST, SPI_MODE0));
