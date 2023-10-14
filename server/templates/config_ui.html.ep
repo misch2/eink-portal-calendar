@@ -44,17 +44,36 @@
             <label for="sleep_time">Sleep time (seconds)</label>
             <input id="sleep_time" name="sleep_time" type="number" class="form-control" value="<%= $values->{sleep_time} %>">
         </div>
-        <div class="col-md-4">
-            <label for="min_voltage">Min voltage for a single AAA cell</label>
+        <div class="col-md-3">
+            <label for="min_voltage">0 % battery [V]</label>
             <input id="min_voltage" name="min_voltage" type="number" step="0.01" class="form-control" value="<%= $values->{min_voltage} %>">
         </div>
-        <div class="col-md-4">
-            <label for="alert_voltage">Critical (alert) voltage for a single AAA cell</label>
+        <div class="col-md-3">
+            <label for="max_voltage">100 % battery [V]</label>
+            <input id="max_voltage" name="max_voltage" type="number" step="0.01" class="form-control" value="<%= $values->{max_voltage} %>">
+        </div>
+        <div class="col-md-3">
+            <label for="alert_voltage">Critical (alert) [V]</label>
             <input id="alert_voltage" name="alert_voltage" type="number" step="0.01" class="form-control" value="<%= $values->{alert_voltage} %>">
         </div>
-        <div class="col-md-4">
-            <label for="max_voltage">Max voltage for a single AAA cell</label>
-            <input id="max_voltage" name="max_voltage" type="number" step="0.01" class="form-control" value="<%= $values->{max_voltage} %>">
+        <div class="col-md-3">
+            <label for="voltage_divider_ratio">Voltage divider ratio ((R1+R2)/R1) [>1.0]</label>
+            <input id="voltage_divider_ratio" name="voltage_divider_ratio" type="number" step="0.0001" class="form-control" value="<%= $values->{voltage_divider_ratio} %>">
+        </div>
+        <div class="col-md-12">
+            Hint: To iteratively fine-tune voltage divider ratio use this formula:
+
+<input type="hidden" name="calc_V_cur" value="<%= $last_voltage %>">
+<input type="hidden" name="calc_ADC_cur_raw" value="<%= $last_voltage_raw %>">
+            <pre>
+    V_real = <input type="text" name="calc_V_real" size="6" value="<%= sprintf("%4.2f", $last_voltage) %>"> V   # real voltage on battery, measured by multimeter
+    Ratio_cur = <%= sprintf("%6.4f", $values->{voltage_divider_ratio}) %>    # current voltage divider ratio
+
+    ADC_cur_raw = <%= sprintf("%4d", $last_voltage_raw) %>    # last reported raw ADC reading
+    V_cur = <%= sprintf("%4.2f", $last_voltage) %>          # last calculated voltage
+
+    Ratio_new = Ratio_cur * V_real / V_cur = <span id="calc_Ratio_new" class="font-weight: bold"></span>    # new voltage divider ratio
+            </pre>
         </div>
     </fieldset>
 
@@ -234,3 +253,20 @@
     </div>
 
 </form>
+
+<script type="text/javascript">
+    function updateRatio() {
+        var V_real = parseFloat(document.getElementsByName('calc_V_real')[0].value);
+        var V_cur = parseFloat(document.getElementsByName('calc_V_cur')[0].value);
+        var ADC_cur_raw = parseFloat(document.getElementsByName('calc_ADC_cur_raw')[0].value);
+        var Ratio_cur = <%= $values->{voltage_divider_ratio} %>; // parseFloat(document.getElementsByName('voltage_divider_ratio')[0].value);
+
+        var Ratio_new = Ratio_cur * V_real / V_cur;
+        document.getElementById('calc_Ratio_new').innerHTML = Ratio_new.toFixed(4);
+    }
+
+    document.getElementsByName('calc_V_real')[0].addEventListener('input', updateRatio);
+    // document.getElementsByName('voltage_divider_ratio')[0].addEventListener('input', updateRatio);
+
+    updateRatio();
+</script>
