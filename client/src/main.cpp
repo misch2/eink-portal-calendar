@@ -73,11 +73,18 @@ uint64_t sleepTime = SECONDS_PER_HOUR;
 bool voltageIsCritical = 0;
 bool otaMode = false;
 
+// #define DEBUG_FREE_HEAP Serial.printf("Free internal heap %u at %s#%d\n", ESP.getFreeHeap(), __FILE__, __LINE__)
+#define DEBUG_FREE_HEAP 
+
 void setup() {
   basicInit();
+  DEBUG_FREE_HEAP;
+
+  DEBUG_FREE_HEAP;
   readVoltage();  // only once, because it discharges the 100nF capacitor
+  DEBUG_FREE_HEAP;
   wakeupAndConnect();
-  DEBUG("Display type: %s", defined_color_type);
+  DEBUG_FREE_HEAP;
 
   if (otaMode) {
     runInfinoteOTALoopInsteadOfUsualFunctionality();
@@ -131,7 +138,7 @@ void loadConfigFromWeb() {
   }
 
   bool tmpb = response["ota_mode"];
-  otaMode = tmpb;
+  otaMode = 1;  // FIXME tmpb;
   if (otaMode) {
     DEBUG_PRINT("OTA mode enabled in remote config");
     if (esp_reset_reason() == ESP_RST_SW) {
@@ -429,10 +436,12 @@ void displayText(String message) {
 
 void runInfinoteOTALoopInsteadOfUsualFunctionality() {
   DEBUG_PRINT("Running OTA loop");
+  DEBUG_FREE_HEAP;
 
   ArduinoOTA.setHostname(SYSLOG_MYHOSTNAME);
   ArduinoOTA
       .onStart([]() {
+        DEBUG_FREE_HEAP;
         String type;
         DEBUG_PRINT("OTA: command %s", ArduinoOTA.getCommand())
         if (ArduinoOTA.getCommand() == U_FLASH)
@@ -443,14 +452,18 @@ void runInfinoteOTALoopInsteadOfUsualFunctionality() {
         // NOTE: if updating SPIFFS this would be the place to unmount
         // SPIFFS using SPIFFS.end()
         DEBUG_PRINT("OTA: Start updating %s", type.c_str());
+        DEBUG_FREE_HEAP;
       })
       .onEnd([]() {
+        DEBUG_FREE_HEAP;
         DEBUG_PRINT("OTA: End");
       })
       .onProgress([](unsigned int progress, unsigned int total) {
-        // Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+        DEBUG_FREE_HEAP;
+        Serial.printf("Progress: %u%%\r", (progress / (total / 100)));  // FIXME
       })
       .onError([](ota_error_t error) {
+        DEBUG_FREE_HEAP;
         DEBUG_PRINT("OTA: Error %u", error);
         if (error == OTA_AUTH_ERROR) {
           DEBUG_PRINT("OTA: Auth Failed");
@@ -468,8 +481,9 @@ void runInfinoteOTALoopInsteadOfUsualFunctionality() {
   ArduinoOTA.begin();
 
   while (true) {
+    DEBUG_FREE_HEAP;
     ArduinoOTA.handle();
-    delay(100);
+    delay(500);
   }
 
   DEBUG_PRINT("OTA loop done");
@@ -485,15 +499,17 @@ void error(String message) {
 void errorNoWifi() { error("WiFi connect/login unsuccessful."); }
 
 void espDeepSleep(uint64_t seconds) {
-  DEBUG_PRINT("Sleeping for %llus", seconds);
+  DEBUG_PRINT("Sleeping for %lus", seconds);
   esp_sleep_enable_timer_wakeup(seconds * uS_PER_S);
   esp_deep_sleep_start();
 }
 
 void initDisplay() {
-  DEBUG_PRINT("display setup start");
+  DEBUG_PRINT("Display setup start");
   DEBUG_PRINT("CS=%d, DC=%d, RST=%d, BUSY=%d", CS_PIN, DC_PIN, RST_PIN,
               BUSY_PIN);
+  DEBUG("display type: %s", defined_color_type);
+
   delay(100);
   SPIClass* spi = new SPIClass(SPI_BUS);
 
@@ -507,7 +523,7 @@ void initDisplay() {
   /* 2ms reset for waveshare board */
   display.init(115200, false, 2, false, *spi,
                SPISettings(7000000, MSBFIRST, SPI_MODE0));
-  DEBUG_PRINT("display setup finished");
+  DEBUG_PRINT("Display setup finished");
 }
 
 void stopDisplay() {
