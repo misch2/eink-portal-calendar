@@ -38,8 +38,7 @@ GxEPD2_4G_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(
     GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN));
 #endif
 #else
-GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(
-    GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN));
+GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN));
 #endif
 
 WiFiManager wifiManager;
@@ -48,8 +47,7 @@ HTTPClient http;
 uint32_t fullStartTime;
 static const uint16_t input_buffer_pixels = DISPLAY_HEIGHT;
 uint8_t input_row_mono_buffer[input_buffer_pixels];  // at most 1 byte per pixel
-String serverURLBase =
-    String("http://") + CALENDAR_URL_HOST + ":" + CALENDAR_URL_PORT;
+String serverURLBase = String("http://") + CALENDAR_URL_HOST + ":" + CALENDAR_URL_PORT;
 
 // configurable remotely
 uint64_t sleepTime = SECONDS_PER_HOUR;
@@ -59,20 +57,18 @@ bool otaMode = false;
 /* RTC vars (survives deep sleep) */
 RTC_DATA_ATTR int bootCount = 0;
 // TODO check the length in read loop to prevent overflow
-RTC_DATA_ATTR char lastChecksum[64 + 1] = "";
+RTC_DATA_ATTR char lastChecksum[64 + 1] = "<not_defined_yet>";
 
 void setup() {
+  basicInit();
   wakeupAndConnect();
-  checkResetReason();
-  loadConfigFromWeb();
 
   if (otaMode) {
-    runOTALoopInsteadOfUsualFunctionality();
-  } else {
-    checkVoltage();
-    fetchAndDrawImageIfNeeded();
-  }
+    runInfinoteOTALoopInsteadOfUsualFunctionality();
+  };
 
+  checkVoltage();
+  fetchAndDrawImageIfNeeded();
   disconnectAndHibernate();
 }
 
@@ -113,78 +109,78 @@ void loadConfigFromWeb() {
   int tmpi = response["sleep"];
   if (tmpi != 0) {
     sleepTime = tmpi;
-    DEBUG_PRINT("sleepTime set to %d", tmpi);
+    DEBUG_PRINT("sleepTime set to %d seconds", tmpi);
   }
 
   float tmpf = response["critical_voltage"];
   if (tmpf != 0) {
     criticalVoltage = tmpf;
-    DEBUG_PRINT("criticalVoltage set to %f", tmpf);
+    DEBUG_PRINT("criticalVoltage set to %f volts", tmpf);
   }
 
   bool tmpb = response["ota_mode"];
   otaMode = tmpb;
   if (otaMode) {
-    DEBUG_PRINT("OTA mode enabled");
+    DEBUG_PRINT("OTA mode enabled in remote config");
+    if (esp_reset_reason() == ESP_RST_SW) {
+      DEBUG_PRINT("^ but last reset was a software one => not running OTA loop.");
+      DEBUG_PRINT("To force OTA mode again, reset the device manually.");
+      otaMode = false;
+    }
   } else {
-    DEBUG_PRINT("OTA mode disabled");
+    DEBUG_PRINT("OTA mode disabled in JSON config");
   };
 }
 
-void wakeupAndConnect() {
+void basicInit() {
   fullStartTime = millis();
   ++bootCount;
-
   Serial.begin(115200);
-  Serial.println();
+}
 
-  DEBUG_PRINT("display setup start");
-  DEBUG_PRINT("CS=%d, DC=%d, RST=%d, BUSY=%d", CS_PIN, DC_PIN, RST_PIN,
-              BUSY_PIN);
-  delay(100);
-  SPIClass* spi = new SPIClass(SPI_BUS);
-  /* 2ms reset for waveshare board */
-  display.init(115200, false, 2, false, *spi,
-               SPISettings(7000000, MSBFIRST, SPI_MODE0));
-  DEBUG_PRINT("setup finished");
-
+void wakeupAndConnect() {
+  initDisplay();
   if (!startWiFi()) {
     errorNoWifi();
   }
+  logResetReason();
+  loadConfigFromWeb();
 }
 
-void checkResetReason() {
+void logResetReason() {
   esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
   esp_reset_reason_t reset_reason = esp_reset_reason();
 
-  DEBUG_PRINT("Wakeup cause: %d, reset cause: %d", wakeup_reason, reset_reason);
-
   if (reset_reason == ESP_RST_UNKNOWN) {
-    DEBUG_PRINT("ESP_RST_UNKNOWN");
+    DEBUG_PRINT("Reset reason: UNKNOWN");
   } else if (reset_reason == ESP_RST_POWERON) {
-    DEBUG_PRINT("ESP_RST_POWERON");
+    DEBUG_PRINT("Reset reason: POWERON");
   } else if (reset_reason == ESP_RST_SW) {
-    DEBUG_PRINT("ESP_RST_SW");
+    DEBUG_PRINT("Reset reason: SW");
   } else if (reset_reason == ESP_RST_PANIC) {
-    DEBUG_PRINT("ESP_RST_PANIC");
+    DEBUG_PRINT("Reset reason: PANIC");
   } else if (reset_reason == ESP_RST_INT_WDT) {
-    DEBUG_PRINT("ESP_RST_INT_WDT");
+    DEBUG_PRINT("Reset reason: INT_WDT");
   } else if (reset_reason == ESP_RST_TASK_WDT) {
-    DEBUG_PRINT("ESP_RST_TASK_WDT");
+    DEBUG_PRINT("Reset reason: TASK_WDT");
   } else if (reset_reason == ESP_RST_WDT) {
-    DEBUG_PRINT("ESP_RST_WDT");
+    DEBUG_PRINT("Reset reason: _WDT");
   } else if (reset_reason == ESP_RST_DEEPSLEEP) {
-    DEBUG_PRINT("ESP_RST_DEEPSLEEP");
+    DEBUG_PRINT("Reset reason: DEEPSLEEP");
   } else if (reset_reason == ESP_RST_BROWNOUT) {
-    DEBUG_PRINT("ESP_RST_BROWNOUT");
+    DEBUG_PRINT("Reset reason: BROWNOUT");
   } else if (reset_reason == ESP_RST_SDIO) {
-    DEBUG_PRINT("ESP_RST_SDIO");
+    DEBUG_PRINT("Reset reason: SDIO");
+  } else {
+    DEBUG_PRINT("Reset reason: ? (%d)", reset_reason);
   }
 
   if (wakeup_reason == ESP_SLEEP_WAKEUP_TIMER) {
-    DEBUG_PRINT("ESP_SLEEP_WAKEUP_TIMER");
+    DEBUG_PRINT("Wakeup reason: TIMER");
   } else if (wakeup_reason == ESP_SLEEP_WAKEUP_UNDEFINED) {
-    DEBUG_PRINT("ESP_SLEEP_WAKEUP_UNDEFINED");
+    DEBUG_PRINT("Wakeup reason: UNDEFINED");
+  } else {
+    DEBUG_PRINT("Wakeup reason: ? (%d)", wakeup_reason);
   }
 
   DEBUG_PRINT("Boot count: %d, last image checksum: %s", bootCount,
@@ -192,10 +188,9 @@ void checkResetReason() {
 }
 
 void disconnectAndHibernate() {
-  // last syslog message before the WiFi disconnects
-  DEBUG_PRINT("Total execution time: %lums", millis() - fullStartTime);
-  DEBUG_PRINT("Going to hibernate for %llu seconds", sleepTime);
-  display.powerOff();
+  logRuntimeStats();
+  // ^ last syslog message before the WiFi disconnects
+  stopDisplay();
   stopWiFi();
   espDeepSleep(sleepTime);
 }
@@ -213,19 +208,12 @@ void fetchAndDrawImageIfNeeded() {
 #endif
 }
 
-void showRawBitmapFrom_HTTP(const char* host,
-                            int port,
-                            const char* path,
-                            int16_t x,
-                            int16_t y,
-                            int16_t w,
-                            int16_t h,
-                            int16_t bytes_per_row,
-                            int16_t rows_at_once) {
+void showRawBitmapFrom_HTTP(const char* host, int port, const char* path,
+                            int16_t x, int16_t y, int16_t w, int16_t h,
+                            int16_t bytes_per_row, int16_t rows_at_once) {
   bool connection_ok = false;
   uint32_t startTime = millis();
-  if ((x >= display.epd2.WIDTH) || (y >= display.epd2.HEIGHT))
-    return;
+  if ((x >= display.epd2.WIDTH) || (y >= display.epd2.HEIGHT)) return;
 
   DEBUG_PRINT("Downloading http://%s:%d%s", host, port, path);
   if (!wifiClient.connect(host, port)) {
@@ -260,8 +248,10 @@ void showRawBitmapFrom_HTTP(const char* host,
   };
 
   if (!connection_ok) {
-    error("Unexpected HTTP response, didn't found '200 OK'.\nLast line was:\n" +
-          line);
+    error(
+        "Unexpected HTTP response, didn't found '200 OK'.\nLast line "
+        "was:\n" +
+        line);
     return;
   }
 
@@ -372,7 +362,8 @@ bool startWiFi() {
     return false;
   }
   DEBUG_PRINT("---");
-  DEBUG_PRINT("Connected to WiFi in %lums", millis() - start);
+  DEBUG_PRINT("Build version: %s %s", __DATE__, __TIME__);
+  DEBUG_PRINT("Connected to WiFi in %lu ms", millis() - start);
   DEBUG_PRINT("IP address: %s", WiFi.localIP().toString().c_str());
   return true;
 }
@@ -387,8 +378,7 @@ uint32_t read8n(WiFiClient& client, uint8_t* buffer, int32_t bytes) {
       remain--;
     } else
       delay(1);
-    if (millis() - start > 2000)
-      break;  // don't hang forever
+    if (millis() - start > 2000) break;  // don't hang forever
   }
   return bytes - remain;
 }
@@ -422,38 +412,45 @@ void displayText(String message) {
   display.refresh();  // full refresh
 }
 
-void runOTALoopInsteadOfUsualFunctionality() {
+void runInfinoteOTALoopInsteadOfUsualFunctionality() {
   DEBUG_PRINT("Running OTA loop");
 
   // ArduinoOTA.handle();
+
+  ArduinoOTA.setHostname(SYSLOG_MYHOSTNAME);
   ArduinoOTA
       .onStart([]() {
         String type;
+        DEBUG_PRINT("OTA: command %s", ArduinoOTA.getCommand())
         if (ArduinoOTA.getCommand() == U_FLASH)
           type = "sketch";
         else  // U_SPIFFS
           type = "filesystem";
 
-        // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS
-        // using SPIFFS.end()
-        DEBUG_PRINT("Start updating %s", type.c_str());
+        // NOTE: if updating SPIFFS this would be the place to unmount
+        // SPIFFS using SPIFFS.end()
+        DEBUG_PRINT("OTA: Start updating %s", type.c_str());
       })
-      .onEnd([]() { Serial.println("\nEnd"); })
+      .onEnd([]() {
+        DEBUG_PRINT("OTA: End");
+        DEBUG_PRINT("OTA: Rebooting...");
+      })
       .onProgress([](unsigned int progress, unsigned int total) {
-        Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+        // Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
       })
       .onError([](ota_error_t error) {
-        Serial.printf("Error[%u]: ", error);
-        if (error == OTA_AUTH_ERROR)
-          Serial.println("Auth Failed");
-        else if (error == OTA_BEGIN_ERROR)
-          Serial.println("Begin Failed");
-        else if (error == OTA_CONNECT_ERROR)
-          Serial.println("Connect Failed");
-        else if (error == OTA_RECEIVE_ERROR)
-          Serial.println("Receive Failed");
-        else if (error == OTA_END_ERROR)
-          Serial.println("End Failed");
+        DEBUG_PRINT("OTA: Error %u", error);
+        if (error == OTA_AUTH_ERROR) {
+          DEBUG_PRINT("OTA: Auth Failed");
+        } else if (error == OTA_BEGIN_ERROR) {
+          DEBUG_PRINT("OTA: Begin Failed");
+        } else if (error == OTA_CONNECT_ERROR) {
+          DEBUG_PRINT("OTA: Connect Failed");
+        } else if (error == OTA_RECEIVE_ERROR) {
+          DEBUG_PRINT("OTA: Receive Failed");
+        } else if (error == OTA_END_ERROR) {
+          DEBUG_PRINT("OTA: End Failed");
+        }
       });
 
   ArduinoOTA.begin();
@@ -472,12 +469,32 @@ void error(String message) {
   disconnectAndHibernate();
 }
 
-void errorNoWifi() {
-  error("WiFi connect/login unsuccessful.");
-}
+void errorNoWifi() { error("WiFi connect/login unsuccessful."); }
 
 void espDeepSleep(uint64_t seconds) {
   DEBUG_PRINT("Sleeping for %llus", seconds);
   esp_sleep_enable_timer_wakeup(seconds * uS_PER_S);
   esp_deep_sleep_start();
+}
+
+void initDisplay() {
+  DEBUG_PRINT("display setup start");
+  DEBUG_PRINT("CS=%d, DC=%d, RST=%d, BUSY=%d", CS_PIN, DC_PIN, RST_PIN,
+              BUSY_PIN);
+  delay(100);
+  SPIClass* spi = new SPIClass(SPI_BUS);
+  /* 2ms reset for waveshare board */
+  display.init(115200, false, 2, false, *spi,
+               SPISettings(7000000, MSBFIRST, SPI_MODE0));
+  DEBUG_PRINT("display setup finished");
+}
+
+void stopDisplay() {
+  //
+  display.powerOff();
+}
+
+void logRuntimeStats() {
+  DEBUG_PRINT("Total execution time: %lu ms", millis() - fullStartTime);
+  DEBUG_PRINT("Going to hibernate for %lu seconds", sleepTime);
 }
