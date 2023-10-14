@@ -61,7 +61,9 @@ uint32_t fullStartTime;
 static const uint16_t input_buffer_pixels = DISPLAY_HEIGHT;
 uint8_t input_row_mono_buffer[input_buffer_pixels];  // at most 1 byte per pixel
 String serverURLBase = String("http://") + CALENDAR_URL_HOST + ":" + CALENDAR_URL_PORT;
-String firmware = xstr(AUTO_VERSION);
+// String firmware = xstr(AUTO_VERSION); // FIXME doesn't work, produces "AUTO_VERSION" instea
+String firmware = __DATE__ " " __TIME__;
+
 int voltageLastReadRaw = 0;
 
 /* RTC vars (survives deep sleep) */
@@ -119,7 +121,12 @@ void checkVoltage() {
 };
 
 void loadConfigFromWeb() {
-  String jsonURL = serverURLBase + "/config?mac=" + WiFi.macAddress() + "&adc=" + voltageLastReadRaw + "&w=" + String(DISPLAY_WIDTH) + "&h=" + String(DISPLAY_HEIGHT) + "&c=" + String(defined_color_type) + "&fw=" + String(firmware);
+
+  String fw_escaped = firmware;
+  fw_escaped.replace(" ", "_");
+  fw_escaped.replace(":", "_");
+
+  String jsonURL = serverURLBase + "/config?mac=" + WiFi.macAddress() + "&adc=" + voltageLastReadRaw + "&w=" + String(DISPLAY_WIDTH) + "&h=" + String(DISPLAY_HEIGHT) + "&c=" + String(defined_color_type) + "&fw=" + fw_escaped;
   DEBUG_PRINT("Loading config from web");
 
   String jsonText = httpGETRequestAsString(jsonURL.c_str());
@@ -244,7 +251,7 @@ void showRawBitmapFrom_HTTP(const char* host, int port, const char* path,
     return;
   }
 
-  wifiClient.print(String("GET ") + path + " HTTP/1.1\r\n" + "Host: " + host +
+  wifiClient.print(String("GET ") + path + "?mac=" + WiFi.macAddress() + " HTTP/1.1\r\n" + "Host: " + host +
                    "\r\n" + "User-Agent: Portal_Calendar_on_ESP\r\n" +
                    "Connection: close\r\n\r\n");
   String line = "<not read anything yet>";
@@ -384,7 +391,8 @@ bool startWiFi() {
     return false;
   }
   DEBUG_PRINT("---");
-  DEBUG_PRINT("Build version: %s %s", __DATE__, __TIME__);
+  // DEBUG_PRINT("Build date: %s %s", __DATE__, __TIME__);
+  DEBUG_PRINT("Firmware version: %s", firmware.c_str());
   DEBUG_PRINT("Connected to WiFi in %lu ms", millis() - start);
   DEBUG_PRINT("IP address: %s", WiFi.localIP().toString().c_str());
   DEBUG_PRINT("MAC address: %s", WiFi.macAddress().c_str());
