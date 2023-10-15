@@ -23,6 +23,7 @@ use PortalCalendar::Integration::iCal;
 use PortalCalendar::Integration::OpenWeather;
 use PortalCalendar::Integration::MQTT;
 use PortalCalendar::Integration::Google::Fit;
+use PortalCalendar::Integration::SvatkyAPI;
 
 has 'app';
 has 'display';
@@ -330,6 +331,8 @@ sub html_for_date {
         $last_weight   = $api->get_last_known_weight;
     }
 
+    my $svatky_api = PortalCalendar::Integration::SvatkyAPI->new(app => $self->app, db_cache_id => $self->display->id, config => $self->app->config_obj);
+
     return $self->app->render(
         template => 'calendar_themes/' . $self->app->get_config('theme'),
         format   => 'html',
@@ -341,16 +344,19 @@ sub html_for_date {
         calendar_events      => \@today_events,
         has_calendar_entries => $has_calendar_entries,
 
+        # name day:
+        name_day_details => $svatky_api->get_today_details,
+
         # raw weather values:
         current_weather => $current_weather,
         forecast        => $forecast,
+        # processed weather values:
+        forecast_5_days => \@forecast_5_days,
 
         # googlefit data:
         last_weight   => $last_weight,
         weight_series => $weight_series,
 
-        # processed weather values:
-        forecast_5_days => \@forecast_5_days,
     );
 }
 

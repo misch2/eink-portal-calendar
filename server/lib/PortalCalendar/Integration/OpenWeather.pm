@@ -54,7 +54,7 @@ sub fetch_forecast_from_web {
     my $forced = shift;
 
     my $cache = PortalCalendar::DatabaseCache->new(app => $self->app);
-    return $cache->get_or_set(
+    my $data = $cache->get_or_set(
         sub {
             my $url = Mojo::URL->new('https://api.openweathermap.org/data/2.5/forecast')->query(
                 lat   => $self->config->get('lat'),
@@ -75,6 +75,8 @@ sub fetch_forecast_from_web {
         $self->db_cache_id . '/weather_forecast',
         $forced
     );
+
+    return $data;
 }
 
 1;

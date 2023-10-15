@@ -201,7 +201,7 @@ sub setup_logger {
         goto &Mojo::Log::warn;
     };
 
-    $app->log->level($app->config->{logging}->{level});
+    $app->log->level($ENV{MOJO_LOG_LEVEL} // $app->config->{logging}->{level});
 
     if ($app->config->{logging}->{file} eq 'STDERR') {
 
