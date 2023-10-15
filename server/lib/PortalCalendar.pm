@@ -1,623 +1,290 @@
 package PortalCalendar;
+use Mojo::Base 'Mojolicious';
 
-use Mojo::Base -base;
-
-use DDP;
+use Mojo::SQLite;
 use DateTime;
 use DateTime::Format::Strptime;
 use DateTime::Format::ISO8601;
 use DDP;
-use Digest;
-use Imager;
-use List::Util;
-use Readonly;
-use Text::Unidecode;
 use Time::HiRes;
-use Try::Tiny;
+
+# FIXME for oauth:
+use Mojo::Util qw(url_escape);
+use Mojo::JSON qw(decode_json encode_json);
+use Mojo::Log;
 
 use PortalCalendar;
 use PortalCalendar::Config;
 use PortalCalendar::Minion;
 use PortalCalendar::Schema;
-use PortalCalendar::Integration::iCal;
-use PortalCalendar::Integration::OpenWeather;
-use PortalCalendar::Integration::MQTT;
-use PortalCalendar::Integration::Google::Fit;
+use PortalCalendar::Integration::Google;
 
-has 'app';
-has 'display';
+sub setup_routes {
+    my $app = shift;
 
-Readonly my $WIDTH  => 480;
-Readonly my $HEIGHT => 800;
+    # Router
+    my $r = $app->routes;
 
-Readonly my @PORTAL_ICONS => qw(a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 b11 b14 c3 c4 c7 d2 d3 d4 d5 e1 e2 e4);
-Readonly my %ICON_NAME_TO_FILENAME => (
-    CUBE_DISPENSER    => 'a1',
-    CUBE_HAZARD       => 'a2',
-    PELLET_HAZARD     => 'a3',
-    PELLET_CATCHER    => 'a4',
-    FLING_ENTER       => 'a5',
-    FLING_EXIT        => 'a6',
-    TURRET_HAZARD     => 'a7',
-    DIRTY_WATER       => 'a8',
-    WATER_HAZARD      => 'a9',
-    CAKE              => 'a10',
-    LASER_REDIRECTION => 'c3',
-    CUBE_BUTTON       => 'd5',
-    BLADES_HAZARD     => 'e4',
-    BRIDGE_SHIELD     => 'd2',
-    FAITH_PLATE       => 'e1',
-    LASER_HAZARD      => 'd3',
-    LASER_SENSOR      => 'c4',
-    LIGHT_BRIDGE      => 'e2',
-    PLAYER_BUTTON     => 'd4',
-);
+    # Route
+    $r->get('/ping')->to('Data#ping');
+    $r->get('/config')->to('Data#config');
+    $r->get('/calendar/bitmap')->to('Data#bitmap');
+    $r->get('/calendar/bitmap/epapermono')->to('Data#bitmap_epaper_mono');
+    $r->get('/calendar/bitmap/epapergray')->to('Data#bitmap_epaper_gray');
 
-Readonly my @CHAMBER_ICONS_BY_DAY_NUMBER => (
-    [
-        # P1 Chamber 1
-        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_HAZARD' => 0 ], [ 'PELLET_HAZARD' => 0 ], [ 'PELLET_CATCHER' => 0 ], [ 'WATER_HAZARD' => 0 ],
-        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 0 ], [ 'CAKE'         => 0 ],
-    ],
-    [
-        # P1 Chamber 4
-        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_HAZARD' => 1 ], [ 'PELLET_HAZARD' => 0 ], [ 'PELLET_CATCHER' => 0 ], [ 'WATER_HAZARD' => 0 ],
-        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 0 ], [ 'CAKE'         => 0 ],
-    ],
-    [
-        # P1 Chamber 5
-        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_HAZARD' => 1 ], [ 'PELLET_HAZARD' => 0 ], [ 'PELLET_CATCHER' => 0 ], [ 'WATER_HAZARD' => 0 ],
-        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 0 ], [ 'CAKE'         => 0 ],
-    ],
-    [
-        # P1 Chamber 6
-        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_HAZARD' => 0 ], [ 'PELLET_HAZARD' => 1 ], [ 'PELLET_CATCHER' => 1 ], [ 'WATER_HAZARD' => 0 ],
-        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 0 ], [ 'CAKE'         => 0 ],
-    ],
-    [
-        # P1 Chamber 8
-        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_HAZARD' => 0 ], [ 'PELLET_HAZARD' => 1 ], [ 'PELLET_CATCHER' => 1 ], [ 'WATER_HAZARD' => 1 ],
-        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 1 ], [ 'CAKE'         => 0 ],
-    ],
-    [
-        # P1 Chamber 9
-        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_HAZARD' => 1 ], [ 'PELLET_HAZARD' => 0 ], [ 'PELLET_CATCHER' => 0 ], [ 'WATER_HAZARD' => 0 ],
-        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 0 ], [ 'CAKE'         => 0 ],
-    ],
-    [
-        # P1 Chamber 10
-        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_HAZARD' => 0 ], [ 'PELLET_HAZARD' => 0 ], [ 'PELLET_CATCHER' => 0 ], [ 'WATER_HAZARD' => 0 ],
-        [ 'FLING_ENTER'    => 1 ], [ 'FLING_EXIT'  => 1 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 0 ], [ 'CAKE'         => 0 ],
-    ],
-    [
-        # P1 Chamber 11
-        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_HAZARD' => 0 ], [ 'PELLET_HAZARD' => 1 ], [ 'PELLET_CATCHER' => 1 ], [ 'WATER_HAZARD' => 1 ],
-        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 1 ], [ 'CAKE'         => 0 ],
-    ],
-    [
-        # P1 Chamber 12
-        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_HAZARD' => 1 ], [ 'PELLET_HAZARD' => 0 ], [ 'PELLET_CATCHER' => 0 ], [ 'WATER_HAZARD' => 0 ],
-        [ 'FLING_ENTER'    => 1 ], [ 'FLING_EXIT'  => 1 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 0 ], [ 'CAKE'         => 0 ],
-    ],
-    [
-        # P1 Chamber 13
-        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_HAZARD' => 1 ], [ 'PELLET_HAZARD' => 1 ], [ 'PELLET_CATCHER' => 1 ], [ 'WATER_HAZARD' => 0 ],
-        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 0 ], [ 'CAKE'         => 0 ],
-    ],
-    [
-        # P1 Chamber 14
-        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_HAZARD' => 1 ], [ 'PELLET_HAZARD' => 1 ], [ 'PELLET_CATCHER' => 1 ], [ 'WATER_HAZARD' => 1 ],
-        [ 'FLING_ENTER'    => 1 ], [ 'FLING_EXIT'  => 1 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 1 ], [ 'CAKE'         => 0 ],
-    ],
-    [
-        # P1 Chamber 15
-        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_HAZARD' => 0 ], [ 'PELLET_HAZARD' => 1 ], [ 'PELLET_CATCHER' => 1 ], [ 'WATER_HAZARD' => 1 ],
-        [ 'FLING_ENTER'    => 1 ], [ 'FLING_EXIT'  => 1 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 1 ], [ 'CAKE'         => 0 ],
-    ],
-    [
-        # P1 Chamber 16
-        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_HAZARD' => 1 ], [ 'PELLET_HAZARD' => 0 ], [ 'PELLET_CATCHER' => 0 ], [ 'WATER_HAZARD' => 0 ],
-        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'TURRET_HAZARD' => 1 ], [ 'DIRTY_WATER'    => 0 ], [ 'CAKE'         => 0 ],
-    ],
-    [
-        # P1 Chamber 17
-        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_HAZARD' => 1 ], [ 'PELLET_HAZARD' => 1 ], [ 'PELLET_CATCHER' => 1 ], [ 'WATER_HAZARD' => 0 ],
-        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 0 ], [ 'CAKE'         => 0 ],
-    ],
-    [
-        # P1 Chamber 18
-        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_HAZARD' => 1 ], [ 'PELLET_HAZARD' => 1 ], [ 'PELLET_CATCHER' => 1 ], [ 'WATER_HAZARD' => 1 ],
-        [ 'FLING_ENTER'    => 1 ], [ 'FLING_EXIT'  => 1 ], [ 'TURRET_HAZARD' => 1 ], [ 'DIRTY_WATER'    => 1 ], [ 'CAKE'         => 0 ],
-    ],
-    [
-        # P1 Chamber 19
-        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_HAZARD' => 0 ], [ 'PELLET_HAZARD' => 1 ], [ 'PELLET_CATCHER' => 1 ], [ 'WATER_HAZARD' => 1 ],
-        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'    => 1 ], [ 'CAKE'         => 1 ],
-    ],
-    [
-        # P2 The Cold Boot Chamber 1
-        [ 'LASER_SENSOR'  => 1 ], [ 'LASER_REDIRECTION' => 0 ], [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_BUTTON'  => 0 ], [ 'CUBE_HAZARD' => 0 ],
-        [ 'PLAYER_BUTTON' => 0 ], [ 'WATER_HAZARD'      => 0 ], [ 'TURRET_HAZARD'  => 0 ], [ 'LASER_HAZARD' => 0 ], [ 'DIRTY_WATER' => 0 ],
-    ],
-    [
-        # P2 The Cold Boot Chamber 2
-        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_BUTTON'       => 1 ], [ 'CUBE_HAZARD'   => 1 ], [ 'PLAYER_BUTTON' => 0 ], [ 'WATER_HAZARD' => 0 ],
-        [ 'LASER_SENSOR'   => 1 ], [ 'LASER_REDIRECTION' => 1 ], [ 'TURRET_HAZARD' => 0 ], [ 'LASER_HAZARD'  => 0 ], [ 'DIRTY_WATER'  => 0 ],
-    ],
-    [
-        # P2 The Cold Boot Chamber 3
-        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_BUTTON'       => 0 ], [ 'CUBE_HAZARD'   => 0 ], [ 'PLAYER_BUTTON' => 0 ], [ 'WATER_HAZARD' => 0 ],
-        [ 'LASER_SENSOR'   => 1 ], [ 'LASER_REDIRECTION' => 1 ], [ 'TURRET_HAZARD' => 0 ], [ 'LASER_HAZARD'  => 0 ], [ 'DIRTY_WATER'  => 0 ],
-    ],
-    [
-        # P2 The Cold Boot Chamber 4
-        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_BUTTON'       => 1 ], [ 'CUBE_HAZARD'   => 1 ], [ 'PLAYER_BUTTON' => 0 ], [ 'WATER_HAZARD' => 1 ],
-        [ 'LASER_SENSOR'   => 1 ], [ 'LASER_REDIRECTION' => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'LASER_HAZARD'  => 0 ], [ 'DIRTY_WATER'  => 0 ],
-    ],
-    [
-        # P2 The Cold Boot Chamber 5
-        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_BUTTON' => 1 ], [ 'CUBE_HAZARD' => 1 ], [ 'PLAYER_BUTTON' => 0 ], [ 'WATER_HAZARD' => 1 ],
-        [ 'FLING_ENTER'    => 0 ], [ 'FLING_EXIT'  => 0 ], [ 'FAITH_PLATE' => 1 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'  => 0 ],
-    ],
-    [
-        # P2 The Cold Boot Chamber 7
-        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_BUTTON'  => 1 ], [ 'CUBE_HAZARD'       => 1 ], [ 'WATER_HAZARD'  => 0 ], [ 'FLING_ENTER' => 1 ],
-        [ 'FLING_EXIT'     => 1 ], [ 'LASER_SENSOR' => 1 ], [ 'LASER_REDIRECTION' => 0 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER' => 0 ],
-    ],
-    [
-        # P2 The Cold Boot Chamber 8
-        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_BUTTON'  => 1 ], [ 'CUBE_HAZARD'       => 1 ], [ 'WATER_HAZARD'  => 0 ], [ 'FLING_ENTER' => 0 ],
-        [ 'FLING_EXIT'     => 0 ], [ 'LASER_SENSOR' => 1 ], [ 'LASER_REDIRECTION' => 1 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER' => 0 ],
-    ],
-    [
-        # P2 The Return Chamber 9
-        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_BUTTON'       => 0 ], [ 'CUBE_HAZARD' => 1 ], [ 'PLAYER_BUTTON' => 0 ], [ 'WATER_HAZARD' => 0 ],
-        [ 'LASER_SENSOR'   => 1 ], [ 'LASER_REDIRECTION' => 1 ], [ 'FAITH_PLATE' => 1 ], [ 'TURRET_HAZARD' => 0 ], [ 'DIRTY_WATER'  => 0 ],
-    ],
-    [
-        # P2 The Return Chamber 10
-        [ 'CUBE_DISPENSER'    => 1 ], [ 'CUBE_BUTTON' => 1 ], [ 'CUBE_HAZARD' => 1 ], [ 'WATER_HAZARD' => 0 ], [ 'LASER_SENSOR' => 1 ],
-        [ 'LASER_REDIRECTION' => 1 ], [ 'FAITH_PLATE' => 1 ], [ 'FLING_ENTER' => 1 ], [ 'FLING_EXIT'   => 1 ], [ 'DIRTY_WATER'  => 0 ],
-    ],
-    [
-        # P2 The Return Chamber 11
-        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_BUTTON'   => 1 ], [ 'CUBE_HAZARD'   => 1 ], [ 'PLAYER_BUTTON'     => 0 ], [ 'WATER_HAZARD' => 1 ],
-        [ 'LIGHT_BRIDGE'   => 1 ], [ 'TURRET_HAZARD' => 0 ], [ 'BRIDGE_SHIELD' => 0 ], [ 'LASER_REDIRECTION' => 0 ], [ 'DIRTY_WATER'  => 0 ],
-    ],
-    [
-        # P2 The Return Chamber 13
-        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_BUTTON'   => 1 ], [ 'CUBE_HAZARD'   => 1 ], [ 'PLAYER_BUTTON' => 0 ], [ 'WATER_HAZARD' => 0 ],
-        [ 'LIGHT_BRIDGE'   => 0 ], [ 'TURRET_HAZARD' => 1 ], [ 'BRIDGE_SHIELD' => 0 ], [ 'LASER_HAZARD'  => 0 ], [ 'DIRTY_WATER'  => 0 ],
-    ],
-    [
-        # P2 The Return Chamber 15
-        [ 'CUBE_DISPENSER' => 0 ], [ 'CUBE_BUTTON'   => 1 ], [ 'CUBE_HAZARD'   => 0 ], [ 'PLAYER_BUTTON' => 0 ], [ 'WATER_HAZARD' => 0 ],
-        [ 'LIGHT_BRIDGE'   => 1 ], [ 'TURRET_HAZARD' => 1 ], [ 'BRIDGE_SHIELD' => 1 ], [ 'FAITH_PLATE'   => 1 ], [ 'DIRTY_WATER'  => 0 ],
-    ],
-    [
-        # P2 The Return Chamber 16
-        [ 'CUBE_DISPENSER'    => 0 ], [ 'CUBE_BUTTON'  => 1 ], [ 'CUBE_HAZARD'   => 0 ], [ 'PLAYER_BUTTON' => 1 ], [ 'WATER_HAZARD' => 0 ],
-        [ 'LASER_REDIRECTION' => 1 ], [ 'LASER_SENSOR' => 1 ], [ 'TURRET_HAZARD' => 1 ], [ 'LASER_HAZARD'  => 1 ], [ 'DIRTY_WATER'  => 0 ],
-    ],
-    [
-        # P2 The Surprise Chamber 18
-        [ 'CUBE_DISPENSER' => 1 ], [ 'CUBE_BUTTON'       => 0 ], [ 'CUBE_HAZARD'   => 1 ], [ 'WATER_HAZARD'  => 1 ], [ 'LIGHT_BRIDGE' => 1 ],
-        [ 'LASER_SENSOR'   => 1 ], [ 'LASER_REDIRECTION' => 1 ], [ 'TURRET_HAZARD' => 1 ], [ 'BRIDGE_SHIELD' => 1 ], [ 'LASER_HAZARD' => 1 ],
-    ],
-    [
-        # P2 The Surprise Chamber 19
-        [ 'CUBE_DISPENSER'    => 0 ], [ 'CUBE_BUTTON' => 0 ], [ 'CUBE_HAZARD'   => 0 ], [ 'PLAYER_BUTTON' => 0 ], [ 'LASER_SENSOR' => 1 ],
-        [ 'LASER_REDIRECTION' => 1 ], [ 'FAITH_PLATE' => 1 ], [ 'TURRET_HAZARD' => 1 ], [ 'LASER_HAZARD'  => 1 ], [ 'DIRTY_WATER'  => 0 ],
-    ]
-);
+    $r->get('/')->to('UI#select_display');
+    $r->get('/home/:display_number')->to('UI#home');
+    $r->get('/test/:display_number')->to('UI#test');
+    $r->get('/calendar/:display_number/html')->to('UI#calendar_html_default_date');
+    $r->get('/calendar/:display_number/html/:date')->to('UI#calendar_html_specific_date');
+    $r->get('/config_ui/:display_number')->to('UI#config_ui_show');
+    $r->post('/config_ui/:display_number')->to('UI#config_ui_save');
 
-sub html_for_date {
-    my $self = shift;
-    my $dt   = shift;
+    return;
+}
 
-    # keep the calendar random, but consistent for any given day
-    srand($dt->ymd(''));
+sub enqueue_task_only_once {
+    my $app  = shift;
+    my $name = shift;
 
-    my @today_events;
-    foreach my $calendar_no (1 .. 3) {
-        next unless $self->app->get_config("web_calendar${calendar_no}");
-
-        my $url = $self->app->get_config("web_calendar_ics_url${calendar_no}");
-        next unless $url;
-
-        my $calendar = PortalCalendar::Integration::iCal->new(ics_url => $url,, db_cache_id => $calendar_no, app => $self->app);
-        try {
-            push @today_events, $calendar->get_today_events($dt);    # cached if possible
-                                                                     #p @today_events;
-        } catch {
-            warn "Error: $_";
-        };
-    }
-    @today_events = sort { $a->{DTSTART} cmp $b->{DTSTART} } @today_events;
-
-    my $has_calendar_entries = (scalar @today_events ? 1 : 0);
-
-    my @icons;
-    if (!$self->app->get_config('totally_random_icon')) {
-
-        # true icon sets like wuspy has it
-        my $set = $CHAMBER_ICONS_BY_DAY_NUMBER[ $dt->day - 1 ];
-        die "no icon set for " . $dt if !$set;
-
-        foreach (@{$set}) {
-            my $name    = $_->[0];
-            my $enabled = $_->[1];
-
-            push @icons,
-                {
-                name   => $ICON_NAME_TO_FILENAME{$name},
-                grayed => ($enabled ? 0 : 1)
-                };
-        }
-
-        if ($has_calendar_entries) {
-            pop @icons while (scalar @icons > $self->app->get_config('max_icons_with_calendar'));
-        }
+    my $new_id;
+    if (my $total = $app->minion->jobs({ states => ['inactive'], tasks => [$name] })->total) {
+        $app->log->warn("Task '$name' already enqueued, skipping it");
     } else {
-
-        # random icon set
-        my $gray_probability = 0.25;
-        foreach my $name (List::Util::shuffle @PORTAL_ICONS) {
-            push @icons,
-                {
-                name   => $name,
-                grayed => (rand() < $gray_probability ? 1 : 0)
-                };
-        }
-        while (scalar @icons < 16) {    # produce enough icons even with small number of source images
-            push @icons, @icons;
-        }
-
-        my $min_icons_count = $self->app->get_config('min_random_icons');
-        my $max_icons_count = $has_calendar_entries ? $self->app->get_config('max_icons_with_calendar') : $self->app->get_config('max_random_icons');
-        $min_icons_count = $max_icons_count if $min_icons_count > $max_icons_count;
-
-        my $icons_count = $min_icons_count + int(rand($max_icons_count - $min_icons_count + 1));
-        @icons = @icons[ 0 .. $icons_count - 1 ];
-
+        $app->log->info("Enqueuing task '$name'");
+        $new_id = $app->minion->enqueue($name, []);
     }
-
-    my $current_weather;
-    my $forecast;
-    my @forecast_5_days = ();
-    if ($self->app->get_config("openweather")) {
-        my $api = PortalCalendar::Integration::OpenWeather->new(app => $self->app);
-        $current_weather = $api->fetch_current_from_web;
-        $forecast        = $api->fetch_forecast_from_web;
-
-        # p $forecast, as => 'forecast';
-        # p $current_weather, as => 'current';
-
-        foreach my $days_add (0 .. 4) {
-            my $dt = DateTime->now->truncate(to => 'day')->add(days => $days_add);
-
-            my %daily_details = ();
-            foreach my $hours_add (8, 12, 16) {
-                my $dt2         = $dt->clone->add(hours => $hours_add);
-                my $time_of_day = 'morning';
-                $time_of_day = 'noon'      if $hours_add == 12;
-                $time_of_day = 'afternoon' if $hours_add == 16;
-
-                if (my $f = $self->find_nearest_forecast($forecast->{list}, $dt2)) {
-                    $daily_details{$time_of_day} = {
-                        required_dt => $dt2,
-                        forecast    => $f
-                    };
-                }
-            }
-
-            push @forecast_5_days,
-                {
-                date    => $dt,
-                details => \%daily_details,
-                };
-        }
-
-        # p @forecast_5_days;
-    }
-
-    my $weight_series;
-    my $last_weight;
-    if ($self->app->get_config("googlefit_client_id")) {
-        my $api = PortalCalendar::Integration::Google::Fit->new(app => $self->app);
-        $weight_series = $api->get_weight_series;
-        $last_weight   = $api->get_last_known_weight;
-    }
-
-    return $self->app->render(
-        template => 'calendar_themes/' . $self->app->get_config('theme'),
-        format   => 'html',
-
-        # other variables
-        date                 => $dt,
-        icons                => \@icons,
-        calendar_events      => \@today_events,
-        has_calendar_entries => $has_calendar_entries,
-
-        # raw weather values:
-        current_weather => $current_weather,
-        forecast        => $forecast,
-
-        # googlefit data:
-        last_weight   => $last_weight,
-        weight_series => $weight_series,
-
-        # processed weather values:
-        forecast_5_days => \@forecast_5_days,
-    );
+    return $new_id;
 }
 
-# Finds a forecast with datetime nearest to the required one.
-# Returns nothing when there is no match.
-sub find_nearest_forecast {
-    my $self        = shift;
-    my $list        = shift;
-    my $dt_required = shift;
+sub setup_helpers {
+    my $app = shift;
 
-    my $ret;
-    my $prev_weather;
-    my $dt_prev;
-
-    # individual forecasts
-    foreach my $current_weather (@{$list}) {
-        my $dt_current = DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone($self->app->get_config('timezone'));
-
-        if (DateTime->compare($dt_current, $dt_required) == 0) {
-
-            # lucky guess, exact match
-            $ret = $current_weather;
-            last;
-        } elsif (DateTime->compare($dt_current, $dt_required) < 0) {
-
-            # still searching
-            $prev_weather = $current_weather;
-            $dt_prev      = $dt_current->clone;
-            next;
-        } else {
-
-            # what was closer?
-            if ($prev_weather) {
-                my $prev_diff = $dt_required->clone->subtract_datetime($dt_prev);
-                my $next_diff = $dt_current->clone->subtract_datetime($dt_required);
-                if (DateTime::Duration->compare($prev_diff, $next_diff) > 0) {
-
-                    # first interval is longer
-                    $ret = $current_weather;
-                    last;
-                } else {
-
-                    # 2nd interval is longer
-                    $ret = $prev_weather;
-                    last;
-                }
-            }
-        }
-    }
-
-    return $ret;
-}
-
-sub generate_bitmap {
-    my $self = shift;
-    my $args = shift;
-
-    # This source image needs to be generated by 'server/scripts/generate_img_from_web' set up to run periodically from a cron job.
-    my $img = Imager->new(file => $self->app->app->home->child("generated_images/current_calendar.png")) or die Imager->errstr;
-
-    # If the generated image is larger (probably due to invalid CSS), crop it so that it display at least something:
-    if ($img->getheight > $HEIGHT) {
-        my $tmp = $img->crop(left => 0, top => 0, width => $WIDTH, height => $HEIGHT);
-        die $img->errstr unless $tmp;
-        $img = $tmp;
-    }
-
-    if ($args->{rotate} && $args->{rotate} != 0) {
-        my $tmp;
-        if ($args->{rotate} == 1) {
-            $tmp = $img->rotate(right => 90);
-        } elsif ($args->{rotate} == 2) {
-            $tmp = $img->rotate(right => 180);
-        } elsif ($args->{rotate} == 3) {
-            $tmp = $img->rotate(right => 270);
-        } else {
-            die "unknown 'rotate' value: $args->{rotate}";
-        }
-        die $img->errstr unless $tmp;
-        $img = $tmp;
-    }
-
-    if ($args->{flip} && $args->{flip} ne '') {
-        my $tmp;
-        if ($args->{flip} eq 'x') {
-            $tmp = $img->flip(dir => 'h');
-        } elsif ($args->{flip} eq 'y') {
-            $tmp = $img->flip(dir => 'v');
-        } elsif ($args->{flip} eq 'xy') {
-            $tmp = $img->flip(dir => 'vh');
-        } else {
-            die "unknown 'flip' value: $args->{flip}";
-        }
-        die $img->errstr unless $tmp;
-        $img = $tmp;
-    }
-
-    if ($args->{gamma} && $args->{gamma} != 1) {
-        my @map = map { int(0.5 + 255 * ($_ / 255)**$args->{gamma}) } 0 .. 255;    # inplace conversion, no need to use $tmp here
-        $img->map(all => \@map);
-    }
-
-    if ($args->{numcolors} && $args->{numcolors} < 256) {
-        my $tmp = $img->to_paletted(
-            {
-                make_colors => {
-                    2   => 'mono',
-                    4   => 'gray4',
-                    16  => 'gray16',
-                    256 => 'gray',
-                }->{ $args->{numcolors} },
-                translate => 'closest',    # closest, errdiff
-
-                # errdiff     => 'jarvis',      # floyd, jarvis, stucki, ...
-            }
-        );
-        die $img->errstr unless $tmp;
-        $img = $tmp;
-    }
-
-    if ($args->{format} eq 'png') {
-        my $out;
-        $img->write(data => \$out, type => 'png') or die;
-        return $self->app->render(data => $out, format => 'png');
-    } elsif ($args->{format} eq 'png_gray') {
-        # Convert to 1 gray channel only
-        my $tmp = $img->convert(preset => 'grey');
-        die $img->errstr unless $tmp;
-        $img = $tmp;
-        $tmp = $img->convert(preset => 'noalpha');
-        die $img->errstr unless $tmp;
-        $img = $tmp;
-
-        my $out;
-        $img->write(data => \$out, type => 'png') or die;
-        return $self->app->render(data => $out, format => 'png');
-    } elsif ($args->{format} =~ /^raw/) {
-        my $bitmap = '';
-        if ($args->{format} eq 'raw8bpp') {
-            foreach my $y (0 .. $img->getheight - 1) {
-                foreach my $gray ($img->getsamples(y => $y, format => '8bit', channels => [0])) {
-                    $bitmap .= chr($gray);
-                }
-            }
-        } elsif ($args->{format} eq 'raw2bpp') {
-            foreach my $y (0 .. $img->getheight - 1) {
-                my $byte   = 0;
-                my $bitcnt = 0;
-                foreach my $gray ($img->getsamples(y => $y, format => '8bit', channels => [0])) {
-                    my $bits = $gray >> 6;    # 0-3 range
-                    $byte = $byte << 2 | $bits;
-                    $bitcnt += 2;
-                    if ($bitcnt == 8) {
-                        $bitmap .= chr($byte);
-                        $byte   = 0;
-                        $bitcnt = 0;
-                    }
-                }
-            }
-        } elsif ($args->{format} eq 'raw1bpp') {
-            foreach my $y (0 .. $img->getheight - 1) {
-                my $byte   = 0;
-                my $bitcnt = 0;
-                foreach my $gray ($img->getsamples(y => $y, format => '8bit', channels => [0])) {
-                    my $bit = $gray ? 1 : 0;
-                    $byte = $byte << 1 | $bit;
-                    $bitcnt++;
-                    if ($bitcnt == 8) {
-                        $bitmap .= chr($byte);
-                        $byte   = 0;
-                        $bitcnt = 0;
-                    }
-                }
-            }
-        } else {
-            die "Unknown format requested: " . $args->{format};
-        }
-
-        # output format:
-        #    "MM"
-        #   checksum
-        #    <sequence of raw values directly usable for uploading into eink display>
-        my $out = "MM\n";
-
-        # sha-1: 40 chars
-        # sha-256: 64 chars
-        $out .= Digest->new("SHA-1")->add($bitmap)->hexdigest . "\n";
-        $out .= $bitmap;
-
-        $self->app->res->headers->content_type('application/octet-stream');
-        $self->app->res->headers->header('Content-Transfer-Encoding' => 'binary');
-        return $self->app->render(data => $out);
-    } else {
-        die "Unknown format requested: " . $args->{format};
-    }
-}
-
-sub update_mqtt {
-    my $self = shift;
-
-    my $key   = shift;
-    my $value = shift;
-
-    return unless $self->app->get_config('mqtt');
-
-    my $api        = PortalCalendar::Integration::MQTT->new(app => $self->app);
-    my %ha_details = (
-        voltage => {
-            component           => 'sensor',
-            entity_category     => "diagnostic",
-            device_class        => "voltage",       # see https://www.home-assistant.io/integrations/sensor/#device-class
-            state_class         => 'measurement',
-            unit_of_measurement => 'V',
-            icon                => 'mdi:battery',
-        },
-        alert_voltage => {
-            component           => 'sensor',
-            entity_category     => "diagnostic",
-            device_class        => "voltage",             # see https://www.home-assistant.io/integrations/sensor/#device-class
-            state_class         => 'measurement',
-            unit_of_measurement => 'V',
-            icon                => 'mdi:battery-alert',
-        },
-        min_voltage => {
-            component           => 'sensor',
-            entity_category     => "diagnostic",
-            device_class        => "voltage",               # see https://www.home-assistant.io/integrations/sensor/#device-class
-            state_class         => 'measurement',
-            unit_of_measurement => 'V',
-            icon                => 'mdi:battery-outline',
-        },
-        max_voltage => {
-            component           => 'sensor',
-            entity_category     => "diagnostic",
-            device_class        => "voltage",               # see https://www.home-assistant.io/integrations/sensor/#device-class
-            state_class         => 'measurement',
-            unit_of_measurement => 'V',
-            icon                => 'mdi:battery',
-        },
-        battery_percent => {
-            component           => 'sensor',
-            entity_category     => "diagnostic",
-            device_class        => "battery",               # see https://www.home-assistant.io/integrations/sensor/#device-class
-            state_class         => 'measurement',
-            unit_of_measurement => '%',
-            icon                => 'mdi:battery-unknown',
-        },
-        sleep_time => {
-            component           => 'sensor',
-            entity_category     => "diagnostic",
-            device_class        => "duration",              # see https://www.home-assistant.io/integrations/sensor/#device-class
-            state_class         => 'measurement',
-            unit_of_measurement => 's',
-            icon                => 'mdi:sleep',
-        },
-        last_visit => {
-            component           => 'sensor',
-            entity_category     => "diagnostic",
-            device_class        => "timestamp",             # see https://www.home-assistant.io/integrations/sensor/#device-class
-            state_class         => '',
-            unit_of_measurement => '',
-            icon                => 'mdi:clock-time-four',
+    $app->helper(
+        foo => sub {
+            warn "test";
         }
     );
 
-    my $ha_detail = $ha_details{$key};
-    $api->publish_retained($key, $value, $ha_detail);
+    $app->helper(
+        schema => sub {
+            state $schema = PortalCalendar::Schema->connect("dbi:SQLite:local/calendar.db");
+        }
+    );
+
+    $app->helper(
+        get_display_by_mac => sub {
+            my $self = shift;
+            my $mac  = shift;
+
+            $mac = lc($mac);
+            my $display = $self->schema->resultset('Display')->find({ mac => $mac });
+            $self->log->warn("Display with MAC [$mac] not found") unless $display;
+            return $display;
+        }
+    );
+
+    $app->helper(
+        get_display_by_id => sub {
+            my $self = shift;
+            my $id   = shift;
+
+            my $display = $self->schema->resultset('Display')->find({ id => $id });
+            $self->log->warn("Display with ID $id not found") unless $display;
+            return $display;
+        }
+    );
+
+    $app->helper(
+        encode_json => sub {
+            my $app  = shift;
+            my $data = shift;
+            return Mojo::JSON::encode_json($data);
+        }
+    );
+
+    return;
+}
+
+sub setup_plugins {
+    my $app = shift;
+
+    $app->plugin('Config');    # loads config from app.<mode>.conf (production/development) or from app.conf as a fallback
+    $app->plugin('TagHelpers');
+    $app->plugin('RenderFile');
+    $app->plugin(
+        'Minion' => {
+            SQLite => 'sqlite:' . "local/minion.db",    # $app->home->child('minion.db'),
+
+        }
+    );
+    $app->plugin(
+        'Minion::Admin' => {                            # Host Admin UI
+            route => $app->routes->any('/admin'),
+        }
+    );
+    $app->plugin(
+        'Cron' => {
+
+            # every hour
+            '0 * * * *' => sub {
+                my $id1 = $app->minion->enqueue('parse_calendars', []);
+                my $id2 = $app->minion->enqueue('parse_weather',   []);
+                my $id3 = $app->minion->enqueue('parse_googlefit', []);
+                $app->minion->enqueue('generate_image', [], { parents => [ $id1, $id2, $id3 ] });
+            },
+        }
+    );
+
+    return;
+}
+
+# This method will run once at server start
+sub startup {
+    my $app = shift;
+
+    $app->setup_plugins();
+    $app->setup_logger();
+    $app->setup_helpers();
+
+    $app->run_migrations();
+    $app->setup_routes();
+
+    # define minion tasks
+    $app->minion->add_task(
+        #
+        generate_image => sub {
+            PortalCalendar::Minion::regenerate_image(@_);
+        }
+    );
+    $app->minion->add_task(
+        parse_calendars => sub {
+            PortalCalendar::Minion::reload_calendars(@_);
+        }
+    );
+    $app->minion->add_task(
+        parse_weather => sub {
+            PortalCalendar::Minion::reload_weather(@_);
+        }
+    );
+    $app->minion->add_task(
+        parse_googlefit => sub {
+            PortalCalendar::Minion::reload_googlefit(@_);
+        }
+    );
+
+    $app->enqueue_task_only_once('generate_image');
+
+    $app->renderer->cache->max_keys(0) if $app->config->{disable_renderer_cache};    # do not cache CSS etc. in devel mode
+    $app->secrets([ $app->config->{mojo_passphrase} ]);
+
+    DateTime->DefaultLocale($app->config->{datetime_locale});
+
+    $app->log->info("Application starting");
+}
+
+########################################################################
+
+sub setup_logger {
+    my $app = shift;
+
+    # redirect warnings
+    $SIG{__WARN__} = sub {
+        my $message = shift;
+        $message =~ s/\n$//;
+        @_ = ($app->log, $message);
+        goto &Mojo::Log::warn;
+    };
+
+    $app->log->level($app->config->{logging}->{level});
+
+    if ($app->config->{logging}->{file} eq 'STDERR') {
+
+        # logging to STDERR (for morbo command line usage):
+        $app->log->handle(\*STDERR);
+    } else {
+        $app->log->path($app->config->{logging}->{file});
+    }
+
+    $app->log->info("Starting app...");
+    return;
+}
+
+sub run_migrations {
+    my $app = shift;
+
+    my $db = Mojo::SQLite->new("sqlite:local/calendar.db");
+    $db->auto_migrate(1)->migrations->from_data();
+
+    # execute any SQL via this handle to run the migrations automatically:
+    my $version = $db->db->query('select sqlite_version() as version');
 
     return;
 }
 
 1;
+
+__DATA__
+@@ migrations
+-- 1 up
+CREATE TABLE config (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR NOT NULL,
+    value VARCHAR NOT NULL
+);
+
+-- 2 up
+-- INSERT INTO config (name, value) VALUES ('broken_glass', '0');
+
+-- 3 up
+-- INSERT INTO config (name, value) VALUES ('sleep_time', '3600');
+
+-- 4 up
+-- INSERT INTO config (name, value) VALUES ('web_calendar1', '0');
+-- INSERT INTO config (name, value) VALUES ('web_calendar_ics_url1', '');
+-- INSERT INTO config (name, value) VALUES ('web_calendar2', '0');
+-- INSERT INTO config (name, value) VALUES ('web_calendar_ics_url2', '');
+-- INSERT INTO config (name, value) VALUES ('web_calendar3', '0');
+-- INSERT INTO config (name, value) VALUES ('web_calendar_ics_url3', '');
+-- INSERT INTO config (name, value) VALUES ('max_icons_for_calendar', '5');
+--
+-- INSERT INTO config (name, value) VALUES ('totally_random_icon', '0');
+-- INSERT INTO config (name, value) VALUES ('min_random_icons', '4');
+-- INSERT INTO config (name, value) VALUES ('max_random_icons', '10');
+-- INSERT INTO config (name, value) VALUES ('max_icons_with_calendar', '5');
+
+-- 5 up
+CREATE TABLE calendar_events_raw (
+    calendar_id INTEGER NOT NULL PRIMARY KEY,
+    events_raw BLOB
+);
+
+-- 6 up
+ALTER TABLE calendar_events_raw RENAME TO cache;
+ALTER TABLE cache RENAME COLUMN calendar_id TO id;
+ALTER TABLE cache RENAME COLUMN events_raw TO data;
+
+-- 7 up
+DROP TABLE cache;
+CREATE TABLE cache (
+    id VARCHAR(255) NOT NULL PRIMARY KEY,
+    data BLOB
+);
+
+-- 8 up
+CREATE TABLE displays (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    mac VARCHAR NOT NULL UNIQUE,
+    name VARCHAR NOT NULL UNIQUE,
+    width INTEGER NOT NULL,
+    height INTEGER NOT NULL,
+    rotation INTEGER NOT NULL,
+    colortype VARCHAR NOT NULL
+);
+
+-- 9 up
+ALTER TABLE config ADD display_id INTEGER REFERENCES displays(id);
+
+-- 10 up
+CREATE UNIQUE INDEX config_name_display ON config (name, display_id);
+UPDATE config SET display_id=1 WHERE display_id IS NULL;

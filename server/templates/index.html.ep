@@ -48,8 +48,8 @@
     % }
 </p>
 <p class="row-fluid">
-    Last voltage: <%= $last_voltage %> V (<%= sprintf("%.0f", calculate_battery_percent()) %> %, raw=<%= $last_voltage_raw %>). 
-    OTA mode: <%= get_config('ota_mode') ? 'on' : 'off' %>.
+    Last voltage: <%= $last_voltage // '(unknown)' %> V (<%= defined($battery_percent) ? sprintf("%.0f", $battery_percent) : '(unknown)' %> %). 
+    OTA mode: <%= $config_obj->get('ota_mode') ? 'on' : 'off' %>.
 </p>
 
 <p class="row-fluid pb-3">
@@ -59,7 +59,6 @@
 
 <p class="row-fluid">
     <div class="preview-image">
-        % my $disp_obj = get_display_by_id($display);
-        <img src="/calendar/bitmap?format=png&mac=<%= $disp_obj->mac %>">
+        <img src="/calendar/bitmap?format=png&mac=<%= $display->mac %>">
     </div>
 </p>

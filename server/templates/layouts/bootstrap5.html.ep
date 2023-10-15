@@ -18,10 +18,12 @@
     <div class="container">
         <h1>Portal calendar</h1>
 
-        % my $disp_obj = get_display_by_id($display);
-        % my $disp_name = $disp_obj ? $disp_obj->name : 'Unknown display';
-        % if ($disp_obj) {
-            <h4>Selected display: <%= $disp_name %></h4>
+        % my $display_name;
+        % my $display_number;
+        % if ($display) {
+        %   $display_name = $display ? $display->name : 'Unknown display';
+        %   $display_number = $display->id;
+            <h4>Selected display: <%= $display_name %></h4>
         % }
 
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -31,15 +33,15 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbar-main">
                     <ul class="navbar-nav">
-                        % if ($disp_obj) {
+                        % if ($display) {
                             <li class="nav-item">
-                                <a class="nav-link <%= $nav_link eq 'index' ? 'active' : '' %>" href="/home/<%= $display %>">Home</a>
+                                <a class="nav-link <%= $nav_link eq 'index' ? 'active' : '' %>" href="/home/<%= $display_number %>">Home</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link <%= $nav_link eq 'compare' ? 'active' : '' %>" href="/test/<%= $display %>">Test page</a>
+                                <a class="nav-link <%= $nav_link eq 'compare' ? 'active' : '' %>" href="/test/<%= $display_number %>">Test page</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link <%= $nav_link eq 'config_ui' ? 'active' : '' %>" href="/config_ui/<%= $display %>">Config</a>
+                                <a class="nav-link <%= $nav_link eq 'config_ui' ? 'active' : '' %>" href="/config_ui/<%= $display_number %>">Config</a>
                             </li>
                         % } else {
                             <li class="nav-item">

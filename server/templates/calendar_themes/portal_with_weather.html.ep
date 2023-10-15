@@ -8,7 +8,7 @@
 
 <body>
 
-    %if (get_config('broken_glass')) {
+    %if ($app->get_config('broken_glass')) {
         <div id="overlay-image"></div>
     %}
     <div id="spacer">
@@ -83,7 +83,7 @@
                 </p>
             </div>
             <div style="font-size: 0.7rem">
-                Data from: <%= DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone(get_config('timezone'))->strftime('%c') %>
+                Data from: <%= DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone($app->get_config('timezone'))->strftime('%c') %>
             </div>
         </div>
 

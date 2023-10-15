@@ -39,6 +39,12 @@ __PACKAGE__->table("config");
   data_type: 'varchar'
   is_nullable: 0
 
+=head2 display_id
+
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -48,6 +54,8 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 0 },
   "value",
   { data_type => "varchar", is_nullable => 0 },
+  "display_id",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -64,21 +72,45 @@ __PACKAGE__->set_primary_key("id");
 
 =head1 UNIQUE CONSTRAINTS
 
-=head2 C<name_unique>
+=head2 C<name_display_id_unique>
 
 =over 4
 
 =item * L</name>
 
+=item * L</display_id>
+
 =back
 
 =cut
 
-__PACKAGE__->add_unique_constraint("name_unique", ["name"]);
+__PACKAGE__->add_unique_constraint("name_display_id_unique", ["name", "display_id"]);
+
+=head1 RELATIONS
+
+=head2 display
+
+Type: belongs_to
+
+Related object: L<PortalCalendar::Schema::Result::Display>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "display",
+  "PortalCalendar::Schema::Result::Display",
+  { id => "display_id" },
+  {
+    is_deferrable => 0,
+    join_type     => "LEFT",
+    on_delete     => "NO ACTION",
+    on_update     => "NO ACTION",
+  },
+);
 
 
-# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-02-12 22:05:12
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:jOU7k8I8YW522GspkwvCGg
+# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-10-15 15:10:39
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:W6XRJaN+x2CjLFd1K1j89A
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

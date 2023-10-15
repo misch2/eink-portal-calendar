@@ -116,9 +116,27 @@ __PACKAGE__->add_unique_constraint("mac_unique", ["mac"]);
 
 __PACKAGE__->add_unique_constraint("name_unique", ["name"]);
 
+=head1 RELATIONS
 
-# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-10-14 19:54:09
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:DHrBxQ4Jud6RnmDva8hCVg
+=head2 configs
+
+Type: has_many
+
+Related object: L<PortalCalendar::Schema::Result::Config>
+
+=cut
+
+__PACKAGE__->has_many(
+  "configs",
+  "PortalCalendar::Schema::Result::Config",
+  { "foreign.display_id" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+
+# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-10-15 11:53:38
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:m0HCEJWpyau+DYuwv1xtKA
+
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
