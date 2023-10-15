@@ -56,6 +56,7 @@ has boolean_parameters => sub {
             web_calendar1
             web_calendar2
             web_calendar3
+            mqtt
             openweather
             ota_mode
             /

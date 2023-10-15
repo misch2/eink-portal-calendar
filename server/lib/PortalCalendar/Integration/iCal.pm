@@ -35,7 +35,7 @@ sub get_events {
         sub {
             my $ical = iCal::Parser->new(
                 no_todos     => 1,
-                tz           => $self->app->get_config('timezone'),    # database config, editable in UI
+                tz           => $self->config->get('timezone'),    # database config, editable in UI
                 timezone_map => $self->app->config->{timezone_map},    # different type of config: .conf file
             );
 
@@ -65,7 +65,7 @@ sub get_today_events {
 
     my @events = values %{$events};
 
-    $date   = $date->clone()->set_time_zone($self->app->get_config('timezone'));
+    $date   = $date->clone()->set_time_zone($self->config->get('timezone'));
     @events = grep { $_->{DTSTART} > $date || $_->{allday} } @events;
 
     map { $_->{SUMMARY} =~ s/\\,/,/g } @events;    # fix "AA\,BB" situation

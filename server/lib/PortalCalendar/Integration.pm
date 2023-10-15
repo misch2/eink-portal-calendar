@@ -11,6 +11,7 @@ use Try::Tiny;
 
 has 'app';
 has 'db_cache_id';
+has 'config';
 
 has 'cache_dir' => sub {
     my $self = shift;
