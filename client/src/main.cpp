@@ -3,9 +3,6 @@
 #define EXPAND(x) x
 #define CONCAT3(a, b, c) STRINGIFY(EXPAND(a)EXPAND(b)EXPAND(c))
 
-// dynamically include board-specific config
-#include CONCAT3(boards/,BOARD_CONFIG,.h)
-
 // generic libraries
 #include <Adafruit_GFX.h>
 #include <Arduino.h>
@@ -16,6 +13,9 @@
 #include <Syslog.h>
 #include <WiFiManager.h>
 #include <WiFiUdp.h>
+
+// dynamically include board-specific config
+#include CONCAT3(boards/,BOARD_CONFIG,.h)
 
 #ifdef TYPE_BW
 #include <GxEPD2_BW.h>
@@ -44,6 +44,7 @@ DISPLAY_INSTANCE
 
 #define DISPLAY_BUFFER_SIZE (BYTES_PER_ROW * ROWS_AT_ONCE)
 
+
 WiFiManager wifiManager;
 WiFiClient wifiClient;
 HTTPClient http;
@@ -53,7 +54,6 @@ unsigned char input_row_mono_buffer[input_buffer_pixels];  // at most 1 byte per
 String serverURLBase = String("http://") + CALENDAR_URL_HOST + ":" + CALENDAR_URL_PORT;
 // String firmware = xstr(AUTO_VERSION); // FIXME doesn't work, produces "AUTO_VERSION" instea
 String firmware = __DATE__ " " __TIME__;
-
 int voltageLastReadRaw = 0;
 
 /* RTC vars (survives deep sleep) */
@@ -227,14 +227,15 @@ void showRawBitmapFrom_HTTP(const char* host, int port, const char* path,
   uint32_t startTime = millis();
   if ((x >= display.epd2.WIDTH) || (y >= display.epd2.HEIGHT)) return;
 
-  DEBUG_PRINT("Downloading http://%s:%d%s", host, port, path);
+  String partial_uri = String(path) + "?mac=" + WiFi.macAddress();
+  DEBUG_PRINT("Downloading http://%s:%d%s", host, port, partial_uri.c_str());
   if (!wifiClient.connect(host, port)) {
     DEBUG_PRINT("HTTP connection failed");
     error("Connection to HTTP server failed.");
     return;
   }
 
-  wifiClient.print(String("GET ") + path + "?mac=" + WiFi.macAddress() + " HTTP/1.1\r\n" + "Host: " + host +
+  wifiClient.print(String("GET ") + partial_uri + " HTTP/1.1\r\n" + "Host: " + host +
                    "\r\n" + "User-Agent: Portal_Calendar_on_ESP\r\n" +
                    "Connection: close\r\n\r\n");
   String line = "<not read anything yet>";
