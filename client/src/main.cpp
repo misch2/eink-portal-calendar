@@ -42,12 +42,14 @@ const char* defined_color_type = "3C";
 // macro to define "display" variable dynamically with the right type
 DISPLAY_INSTANCE
 
+#define DISPLAY_BUFFER_SIZE (BYTES_PER_ROW * ROWS_AT_ONCE)
+
 WiFiManager wifiManager;
 WiFiClient wifiClient;
 HTTPClient http;
 uint32_t fullStartTime;
-static const uint16_t input_buffer_pixels = DISPLAY_HEIGHT;
-uint8_t input_row_mono_buffer[input_buffer_pixels];  // at most 1 byte per pixel
+static const int input_buffer_pixels = DISPLAY_HEIGHT;
+unsigned char input_row_mono_buffer[input_buffer_pixels];  // at most 1 byte per pixel
 String serverURLBase = String("http://") + CALENDAR_URL_HOST + ":" + CALENDAR_URL_PORT;
 // String firmware = xstr(AUTO_VERSION); // FIXME doesn't work, produces "AUTO_VERSION" instea
 String firmware = __DATE__ " " __TIME__;
@@ -65,7 +67,7 @@ bool voltageIsCritical = 0;
 bool otaMode = false;
 
 // #define DEBUG_FREE_HEAP Serial.printf("Free internal heap %u at %s#%d\n", ESP.getFreeHeap(), __FILE__, __LINE__)
-#define DEBUG_FREE_HEAP 
+#define DEBUG_FREE_HEAP
 
 void setup() {
   basicInit();
@@ -109,7 +111,6 @@ void checkVoltage() {
 };
 
 void loadConfigFromWeb() {
-
   String fw_escaped = firmware;
   fw_escaped.replace(" ", "_");
   fw_escaped.replace(":", "_");
@@ -213,16 +214,10 @@ void disconnectAndHibernate() {
 }
 
 void fetchAndDrawImageIfNeeded() {
-#ifdef USE_GRAYSCALE_DISPLAY
   showRawBitmapFrom_HTTP(CALENDAR_URL_HOST, CALENDAR_URL_PORT,
-                         "/calendar/bitmap/epapergray", 0, 0, DISPLAY_HEIGHT,
-                         DISPLAY_WIDTH, /* bpp */ DISPLAY_HEIGHT, 1);
-#else
-  showRawBitmapFrom_HTTP(CALENDAR_URL_HOST, CALENDAR_URL_PORT,
-                         "/calendar/bitmap/epapermono", 0, 0, DISPLAY_HEIGHT,
-                         DISPLAY_WIDTH,
-                         /* bpp */ DISPLAY_HEIGHT / 8, /* rows at once */ 8);
-#endif
+                         "/calendar/bitmap/epaper", 0, 0, DISPLAY_WIDTH,
+                         DISPLAY_HEIGHT,
+                         BYTES_PER_ROW, ROWS_AT_ONCE);
 }
 
 void showRawBitmapFrom_HTTP(const char* host, int port, const char* path,
@@ -293,6 +288,10 @@ void showRawBitmapFrom_HTTP(const char* host, int port, const char* path,
   strcpy(lastChecksum, line.c_str());  // to survive a reboot
 
   DEBUG_PRINT("Reading image data");
+
+  DEBUG("XXXXXXXXXXXXXXXXXXXXXXX");
+  rows_at_once = 1;
+
   uint32_t bytes_read = 0;                              // read so far
   for (uint16_t row = 0; row < h; row += rows_at_once)  // for each line
   {
