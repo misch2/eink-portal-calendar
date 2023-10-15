@@ -28,6 +28,7 @@ sub setup_routes {
     $r->get('/ping')->to('Data#ping');
     $r->get('/config')->to('Data#config');
     $r->get('/calendar/bitmap')->to('Data#bitmap');
+    $r->get('/calendar/bitmap/epaper')->to('Data#bitmap_epaper');
     $r->get('/calendar/bitmap/epapermono')->to('Data#bitmap_epaper_mono');
     $r->get('/calendar/bitmap/epapergray')->to('Data#bitmap_epaper_gray');
 
@@ -39,8 +40,8 @@ sub setup_routes {
     $r->get('/config_ui/:display_number')->to('UI#config_ui_show');
     $r->post('/config_ui/:display_number')->to('UI#config_ui_save');
 
-    $r->get('/auth/googlefit/cb')->to('Other#googlefit_callback'); # has to be fixed format, without any parameters
-    #^ must be first, to match sooner than the next route
+    $r->get('/auth/googlefit/cb')->to('Other#googlefit_callback');    # has to be fixed format, without any parameters
+                                                                      #^ must be first, to match sooner than the next route
     $r->get('/auth/googlefit/:display_number')->to('UI#googlefit_redirect');
     $r->get('/auth/googlefit/success/:display_number')->to('UI#googlefit_success');
 
@@ -148,7 +149,7 @@ sub startup {
     my $app = shift;
 
     # Add another namespace to load commands from
-    push @{$app->commands->namespaces}, 'PortalCalendar::Command';
+    push @{ $app->commands->namespaces }, 'PortalCalendar::Command';
 
     $app->setup_plugins();
     $app->setup_logger();
