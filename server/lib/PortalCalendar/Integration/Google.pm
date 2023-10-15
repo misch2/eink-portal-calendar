@@ -23,11 +23,11 @@ sub get_new_access_token_from_refresh_token {
         $self->google_oauth2_token_url,
         'form',
         {
-            client_id     => $self->app->get_config('googlefit_client_id'),
-            client_secret => $self->app->get_config('googlefit_client_secret'),
-            redirect_uri  => $self->app->get_config('googlefit_auth_callback'),
+            client_id     => $self->config->get('googlefit_client_id'),
+            client_secret => $self->config->get('googlefit_client_secret'),
+            redirect_uri  => $self->config->get('googlefit_auth_callback'),
             grant_type    => 'refresh_token',
-            refresh_token => $self->app->get_config('_googlefit_refresh_token'),
+            refresh_token => $self->config->get('_googlefit_refresh_token'),
         }
     )->res;
 
@@ -38,10 +38,10 @@ sub get_new_access_token_from_refresh_token {
 
     # Save the new access token
     #$self->log->info(DDP::np($res->json));
-    $self->app->set_config('_googlefit_access_token',  $res->json->{access_token});
-    $self->app->log->info("Access token refreshed: " . $self->app->get_config('_googlefit_access_token'));
+    $self->config->set('_googlefit_access_token',  $res->json->{access_token});
+    $self->app->log->info("Access token refreshed: " . $self->config->get('_googlefit_access_token'));
 
-    return $self->app->get_config('_googlefit_access_token');
+    return $self->config->get('_googlefit_access_token');
 };
 
 1;

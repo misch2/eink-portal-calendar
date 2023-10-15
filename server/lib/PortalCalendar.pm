@@ -39,6 +39,10 @@ sub setup_routes {
     $r->get('/config_ui/:display_number')->to('UI#config_ui_show');
     $r->post('/config_ui/:display_number')->to('UI#config_ui_save');
 
+    $r->get('/auth/googlefit')->to('UI#googlefit_redirect');
+    $r->get('/auth/googlefit/cb')->to('UI#googlefit_callback');
+    $r->get('/auth/googlefit/success/:display_number')->to('UI#googlefit_success');
+
     return;
 }
 

@@ -1,11 +1,19 @@
 % layout 'bootstrap5';
 
-<h3>Success</h3>
+<h3>Error</h3>
 
-Auth token: 
-<pre><%= $a_token %></pre>
-<br>
-Refresh token: 
-<pre><%= $r_token %></pre>
+Error getting authentication token:
+
+<p>
+Code:
+<pre>
+<%= $error->{error} %>
+</pre>
+
+<p>
+Description:
+<pre>
+<%= $error->{error_description} %>
+</pre>
 <p>
 

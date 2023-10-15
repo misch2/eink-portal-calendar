@@ -2,9 +2,15 @@
 package PortalCalendar::Controller::UI;
 use Mojo::Base 'PortalCalendar::Controller';
 
+use Mojo::Util qw(url_escape b64_decode b64_encode);
+use Mojo::JSON qw(decode_json encode_json);
+use Try::Tiny;
+
 has display => sub {
+
+    # req_param for URLs where the main part has to be static, e.g. for Google APIs
     my $self = shift;
-    return $self->get_display_by_id($self->stash('display_number'));
+    return $self->get_display_by_id($self->stash('display_number') // $self->req->param('display_number'));
 };
 
 sub select_display {
@@ -124,89 +130,107 @@ sub calendar_html_specific_date {
     return $util->html_for_date($dt);
 }
 
-# get '/auth/googlefit' => sub {
-#     my $self = shift;
+sub googlefit_redirect {
+    my $self = shift;
 
-#     # see https://developers.google.com/identity/protocols/oauth2/web-server#httprest_1
-#     my $goauth = PortalCalendar::Integration::Google->new(config => $self->config_obj);
-#     my $url    = $goauth->google_oauth2_auth_url .
-#         #
-#         "?client_id=" . $self->get_config('googlefit_client_id') .
-#         #
-#         "&access_type=offline&response_type=code&scope=" . $goauth->googlefit_oauth2_scope .
-#         #
-#         "&include_granted_scopes=true&redirect_uri=" . url_escape($self->get_config('googlefit_auth_callback'));
+    # see https://developers.google.com/identity/protocols/oauth2/web-server#httprest_1
+    my $goauth = PortalCalendar::Integration::Google->new(config => $self->config_obj);
+    my $url    = $goauth->google_oauth2_auth_url .
+        #
+        "?client_id=" . $self->get_config('googlefit_client_id') .
+        #
+        "&access_type=offline&response_type=code&scope=" . $goauth->googlefit_oauth2_scope .
+        #
+        "&state=" . url_escape(b64_encode(encode_json({ display_number => $self->display->id }))) .
+        #
+        "&include_granted_scopes=true&redirect_uri=" . url_escape($self->get_config('googlefit_auth_callback'));
 
-#     $self->log->info("Redirecting to [$url]");
-#     $self->redirect_to($url);
-# };
+    $self->log->info("Redirecting to [$url]");
+    $self->redirect_to($url);
+}
 
-# # OAuth 2 callback from google
-# get '/auth/googlefit/cb' => sub {
-#     my ($self) = @_;
+# OAuth 2 callback from google
+# Very specific work with config here! Can't use display accessors or config methods because it doesn't get the display ID in the URL
+sub googlefit_callback {
+    my $self = shift;
 
-#     $self->log->info("in callback, received this:");
-#     $self->log->info("code: " . $self->req->param('code'));
-#     $self->log->info("scope: " . $self->req->param('scope'));
+    my $display;
+    try {
+        my $json = decode_json(b64_decode($self->req->param('state')));
+        $display = $self->get_display_by_id($json->{display_number});
+    } catch {
+        $self->log->error("Error decoding state: $_");
+    };
 
-#     $self->log->info("converting code to a token");
+    my $config_obj = PortalCalendar::Config->new(app => $self->app, display => $display);
 
-#     #Get tokens from auth code
-#     my $goauth = PortalCalendar::Integration::Google->new(config => $self->config_obj);
-#     my $res    = $self->$self->ua->post(
-#         $goauth->google_oauth2_token_url,
-#         'form',
-#         {
-#             code          => $self->req->param('code'),
-#             client_id     => $self->get_config('googlefit_client_id'),
-#             client_secret => $self->get_config('googlefit_client_secret'),
-#             redirect_uri  => $self->get_config('googlefit_auth_callback'),
-#             grant_type    => 'authorization_code',
+    $self->log->info("in callback, received this (for display #" . $display->id . "):");
+    $self->log->info("code: " . $self->req->param('code'));
+    $self->log->info("scope: " . $self->req->param('scope'));
 
-#             #scope         => googlefit_oauth2_scope,
-#         }
-#     )->res;
-#     $self->log->info("response: " . $res->as_string);
+    $self->log->info("converting code to a token");
 
-#     if (!$res->is_success) {
-#         return $self->render(
-#             template => 'auth_error',
-#             format   => 'html',
-#             nav_link => 'config_ui',
+    #Get tokens from auth code
+    my $goauth = PortalCalendar::Integration::Google->new(config => $config_obj);
+    my $res    = $self->app->ua->post(
+        $goauth->google_oauth2_token_url,
+        'form',
+        {
+            code          => $self->req->param('code'),
+            client_id     => $config_obj->get('googlefit_client_id'),
+            client_secret => $config_obj->get('googlefit_client_secret'),
+            redirect_uri  => $config_obj->get('googlefit_auth_callback'),
+            grant_type    => 'authorization_code',
 
-#             # page-specific variables
-#             error => decode_json($res->body),
-#         );
-#     }
+            #scope         => googlefit_oauth2_scope,
+        }
+    )->result;
 
-#     # Save both tokens
-#     #$self->log->info(DDP::np($res->json));
-#     $self->log->info("JSON content: " . DDP::np($res->json));
-#     $self->set_config('_googlefit_refresh_token', $res->json->{refresh_token});
-#     $self->set_config('_googlefit_access_token',  $res->json->{access_token});
+    $self->log->info("response: " . $res->to_string);
 
-#     # $self->set_config('_googlefit_token_json',    encode_json($res->json));
+    if (!$res->is_success) {
+        return $self->render(
+            template => 'auth_error',
+            format   => 'html',
+            nav_link => 'config_ui',
 
-#     $self->redirect_to('/auth/googlefit/success');
-# };
+            display => undef,
 
-# get '/auth/googlefit/success' => sub {
-#     my ($self) = @_;
+            # page-specific variables
+            error => decode_json($res->body),
+        );
+    }
 
-#     # Read access token from session
-#     my $a_token = $self->get_config('_googlefit_access_token') or die "No access token!";
+    # Save both tokens
+    #$self->log->info(DDP::np($res->json));
+    $self->log->info("JSON content: " . DDP::np($res->json));
+    $config_obj->set('_googlefit_refresh_token', $res->json->{refresh_token});
+    $config_obj->set('_googlefit_access_token',  $res->json->{access_token});
 
-#     # my $token_json = decode_json($self->get_config('_googlefit_token_json'));
-#     return $self->render(
-#         template => 'auth_success',
-#         format   => 'html',
-#         nav_link => 'config_ui',
+    # $self->set_config('_googlefit_token_json',    encode_json($res->json));
 
-#         # page-specific variables
-#         a_token    => $self->$self->get_config('_googlefit_access_token'),
-#         r_token    => $self->$self->get_config('_googlefit_refresh_token'),
-#         token_json => '?',                                                  # DDP::np($token_json),
-#     );
-# };
+    $self->redirect_to('/auth/googlefit/success/' . $display->id);
+}
+
+sub googlefit_success {
+    my $self = shift;
+
+    # Read access token from session
+    my $a_token = $self->get_config('_googlefit_access_token') or die "No access token!";
+
+    # my $token_json = decode_json($self->get_config('_googlefit_token_json'));
+    return $self->render(
+        template => 'auth_success',
+        format   => 'html',
+        nav_link => 'config_ui',
+
+        display => $self->display,
+
+        # page-specific variables
+        a_token    => $self->get_config('_googlefit_access_token'),
+        r_token    => $self->get_config('_googlefit_refresh_token'),
+        token_json => '?',                                                    # DDP::np($token_json),
+    );
+}
 
 1;
