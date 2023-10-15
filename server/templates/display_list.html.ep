@@ -1,0 +1,19 @@
+% layout 'bootstrap5';
+
+<h3>Select your display</h3>
+
+<ul>
+% foreach my $d (@{ $displays }) {
+    <li>
+        <%= "#" . $d->id %>) 
+        <a href="/home/<%= $d->id %>"><%= $d->name %></a>
+        <div style="font-size: 0.8em; margin-left: 1em;">
+            MAC <%= $d->mac %>, 
+            resolution <%= $d->width %> &times; <%= $d->height %>, 
+            rotate <%= $d->rotation %>, 
+            gamma <%= $d->gamma %>,
+            type <%= $d->colortype %>.
+        </div>
+    </li>
+% }
+</ul>

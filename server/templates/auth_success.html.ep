@@ -6,6 +6,3 @@
 Authorization token successfully received.
 </p>
 
-<pre><%= $token_json %></pre>
-<p>
-

@@ -2,7 +2,7 @@
 
 # load ENV settings
 dir=$(dirname $0)
-cd $dir/.. && carton exec -- ./app minion job --enqueue parse_calendars
-cd $dir/.. && carton exec -- ./app minion job --enqueue generate_image
+cd $dir/.. && carton exec -- ./scripts/portal_calendar minion job --enqueue parse_calendars
+cd $dir/.. && carton exec -- ./scripts/portal_calendar minion job --enqueue generate_image
 echo "Job enqueued"
 

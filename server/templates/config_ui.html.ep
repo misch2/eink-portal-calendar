@@ -8,7 +8,7 @@
 
 <h3 class="mb-3">Configuration</h3>
 
-<form action="/config_ui" method="post">
+<form action="/config_ui/<%= $display->id %>" method="post">
 
     <fieldset class="mt-4 row">
         <legend class="w-auto">OTA mode</legend>
@@ -219,7 +219,7 @@
         <legend class="w-auto">Google Fit integration</legend>
 
         <div class="form-group col-12">
-            <a href="/auth/googlefit">Authorize</a>
+            <a href="/auth/googlefit/<%= $display->id %>">Authorize</a>
         </div>
 
         <div class="form-group col-12">

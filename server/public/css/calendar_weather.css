@@ -1,0 +1,117 @@
+/* resets */
+
+html,
+body {
+    /* background-color: aqua; */
+    font-size: 17pt;
+    font-family: 'Times New Roman', Times, serif;
+}
+
+html,
+body,
+div,
+p {
+    padding: 0;
+    margin: 0;
+}
+
+
+/* debug */
+
+div,
+p {
+    /* border: 3px dotted gray; */
+}
+
+div {
+    /* background-color: cadetblue; */
+}
+
+div div {
+    /* background-color: coral; */
+}
+
+div div div {
+    /* background-color: bisque; */
+}
+
+div div div div {
+    /* background-color: darkolivegreen; */
+}
+
+@font-face {
+    font-family: 'DIN';
+    /* src: url('/fonts/D-DIN.otf') format('opentype'); */
+    /* test cestiny: */
+    src: url('/fonts/651-font.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'DINCondensed';
+    src: url('/fonts/D-DINCondensed.otf') format('opentype');
+}
+
+body {
+    /* background-color: burlywood; */
+    font-family: 'DIN';
+}
+
+div#spacer {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    height: 780px;
+    width: 460px;
+    /* background-color: gainsboro; */
+}
+
+div.day-of-week-block {
+    font-family: 'DIN';
+    font-size: 1rem;
+}
+
+div.dow-number-and-name {
+    display: flex;
+    justify-content: space-between;
+    height: 1rem;
+}
+
+div.day-of-week-block div.separator {
+    margin-top: 0.3rem;
+    border-bottom: 2px solid black;
+    margin-bottom: 0.3rem;
+}
+
+div.name-day-header {
+    text-align: center;
+}
+
+div.day-number-big {
+    font-family: 'DINCondensed';
+    font-size: 7rem;
+    transform: scale(0.8, 1);
+    text-align: center;
+
+    margin: 0.25rem 0;
+}
+
+div.weather-container-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-auto-rows: 1fr;
+    grid-column-gap: 0.2rem;
+    grid-row-gap: 0.2rem;
+
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    padding-top: 0.5rem;
+    /* padding-top: 9px; */
+    border-top: 2px solid black;
+}
+
+div.weather-item {
+    /* font-family: 'DINCondensed'; */
+    font-size: 0.8rem;
+    border: 1px solid black;
+    padding: 0.2em;
+}

@@ -1,5 +1,5 @@
 <html>
-%= stylesheet '/css/calendar.css'
+%= stylesheet '/css/calendar_weather.css'
 %= stylesheet '/css/weather-icons.min.css'
 % my $decorator = sub { shift };        # returns input as-is
 % $decorator = sub { uc(shift) };       # UPPERCASE
@@ -7,87 +7,85 @@
 %# $decorator = sub { Text::Unidecode::unidecode(uc(shift)) }; # UPPERCASE with accents removed
 
 <body>
-
-    %if (get_config('broken_glass')) {
-        <div id="overlay-image"></div>
-    %}
     <div id="spacer">
-        <div class="top-month-header">
-            <div class="month-name">
-                %# LLLL = standalone month name
-                <%= $decorator->($date->format_cldr('LLLL')) %>
-            </div>
-        </div>
-
-        <div class="day-number-big">
-            <%= sprintf("%02d", $date->day) %>
-        </div>
-
         <div class="day-of-week-block">
             <div class="dow-number-and-name">
                 <div>
-                    <%= $date->day .'/'. $date->month_length %>
+                    <%= $decorator->($name_day_details->{dayNumber} . '. ' . $name_day_details->{month}->{genitive}) %>
                 </div>
                 <div>
                     <%= $decorator->($date->day_name) %>
                 </div>
             </div>
             <div class="separator"></div>
-            <div class="bunch-of-bars">
-                % for (1 .. $date->day) {
-                    <div class="bar"></div>
-                % }
-            </div>
         </div>
 
-        <div class="weather-container" style="justify-content: space-between; align-items: flex-start">
-            % my $temp = int($current_weather->{main}->{temp} + 0.5);
-            % my $feel_temp = int($current_weather->{main}->{feels_like} + 0.5);
-            % my $wind = int($current_weather->{wind}->{speed} + 0.5);
-            % my $rain = $current_weather->{rain}->{'1h'};
-            % my $snow = $current_weather->{snow}->{'1h'};
-            % my $day_or_night = ($current_weather->{dt} < $current_weather->{sys}->{sunrise} || $current_weather->{dt} > $current_weather->{sys}->{sunset}) ? 'night' : 'day';
+        <div class="name-day-header">
+            <%= $decorator->($name_day_details->{name}) %>
+        </div>
 
-            <p>
-                % foreach my $condition (@{ $current_weather->{weather} }) {
-                    %# https://erikflowers.github.io/weather-icons/api-list.html
-                    <i class="wi wi-owm-<%= $day_or_night %>-<%= $condition->{id} %>" style="font-size: 3rem"></i>
-                    <span style="font-weight: bold"><%= ucfirst($condition->{description}) %></span>
-                % }
-            </p>
-<!--             <div class="flex-break"></div> -->
+        <div class="day-number-big">
+            <%= sprintf("%02d", $date->day) %>
+        </div>
 
-            <div style="display: grid; grid-template-columns: 0fr 1fr; column-gap: 0.5rem; row-gap: 0.25rem; justify-items: start; align-items: start">
-                <i class="wi wi-thermometer-exterior" style="font-size: 1rem; margin-top: 0.4rem"></i>
-                <p>
-                    <%= $temp %>
-                    % if (abs($temp - $feel_temp) > 1) {
-                        (<%= $feel_temp %>)
-                    % }
-                    °C
-                </p>
-                <i class="wi wi-strong-wind" style="font-size: 1rem; margin-top: 0.2rem"></i>
-                <p>
-                    <%= $wind %> m/s
-                </p>
-                <i class="wi wi-cloud" style="font-size: 1rem; margin-top: 0.15rem"></i> 
-                <p>
-                    <%= $current_weather->{clouds}->{all} %> %
-                    % if ($rain > 0) {
+        
+        <div class="weather-container-grid">
+        %# See https://openweathermap.org/forecast5#fields_JSON
+        % my $cnt = 0;
+        % foreach my $item (@{ $forecast->{list} }) {
+            % $cnt++;
+            % last if $cnt > 5;
+
+            % my $rain = 0+($item->{rain}->{'3h'} // 0); # mm in 3 hours
+            % my $snow = 0+($item->{snow}->{'3h'} // 0); # mm in 3 hours
+            % my $total_precip = $rain + $snow;
+            % my $dt = DateTime->from_epoch(epoch => $item->{dt},, time_zone => 'UTC');
+            % my $now = DateTime->now;
+
+            %# Current! sunrise/sunset data aren't available in the forecast
+            % my $day_or_night = ($item->{dt} < $current_weather->{sys}->{sunrise} || $item->{dt} > $current_weather->{sys}->{sunset}) ? 'night' : 'day';
+
+            % my $day_description = '';
+            % if ($dt->ymd eq $now->ymd) {
+            %    $day_description = 'dnes';
+            % } elsif ($dt->ymd eq $now->clone->add(days => 1)->ymd) {
+            %    $day_description = 'zítra';
+            % } else {
+            %    $day_description = $dt->day_name;
+            % }
+
+            <div class="weather-item">
+                <div>
+                    <%= $day_description %>
+                </div>
+                <div>
+                    <%= sprintf("%02d:00", $dt->hour) %>
+                </div>
+                <div>
+                    % foreach my $condition (@{ $item->{weather} }) {
+                        %# https://erikflowers.github.io/weather-icons/api-list.html
+                        <span style="font-weight: bold"><%= $condition->{description} %></span>
                         <br>
-                        <i class="wi wi-rain" style="font-size: 1rem"></i> <%= $rain %> mm
+                        <i class="wi wi-owm-<%= $day_or_night %>-<%= $condition->{id} %>" style="font-size: 2rem"></i>
                     % }
-                    % if ($snow > 0) {
-                        <i class="wi wi-snow" style="font-size: 1rem"></i> <%= $snow %> mm
-                    % }
-                </p>
+                </div>
+                <div>
+                    <%= sprintf('%.1f', $item->{main}->{temp_min}) %> &deg;C 
+                    <br>
+                    - 
+                    <br>
+                    <%= sprintf('%.1f', $item->{main}->{temp_max}) %> &deg;C
+                </div>
+                <div>
+                    <%= sprintf('%.1f', $total_precip) %> mm
+                </div>
             </div>
-            <div style="font-size: 0.7rem">
-                Data from: <%= DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone(get_config('timezone'))->strftime('%c') %>
-            </div>
+        % }
         </div>
 
-        <img id="aperture-logo" src="/images/Aperture_Laboratories_Logo.png">
+        <div style="font-size: 0.7rem">
+            Data from: <%= DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone($app->get_config('timezone'))->strftime('%c') %>
+        </div>
     </div>
 </body>
 

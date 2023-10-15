@@ -15,7 +15,7 @@ use DateTime;
 
 has 'api_key' => sub {
     my $self = shift;
-    return $self->app->get_config('openweather_api_key');
+    return $self->config->get('openweather_api_key');
 };
 
 has 'max_cache_age' => 60 * 5;    # 5 minutes
@@ -29,11 +29,11 @@ sub fetch_current_from_web {
         sub {
 
             my $url = Mojo::URL->new('https://api.openweathermap.org/data/2.5/weather')->query(
-                lat   => $self->app->get_config('lat'),
-                lon   => $self->app->get_config('lon'),
+                lat   => $self->config->get('lat'),
+                lon   => $self->config->get('lon'),
                 units => 'metric',
                 appid => $self->api_key,
-                lang  => $self->app->get_config('openweather_lang'),
+                lang  => $self->config->get('openweather_lang'),
             )->to_unsafe_string;
 
             $self->app->log->debug($url);
@@ -44,7 +44,7 @@ sub fetch_current_from_web {
 
             return decode_json($response->decoded_content);
         },
-        'weather_current',
+        $self->db_cache_id . '/weather_current',
         $forced
     );
 }
@@ -54,14 +54,14 @@ sub fetch_forecast_from_web {
     my $forced = shift;
 
     my $cache = PortalCalendar::DatabaseCache->new(app => $self->app);
-    return $cache->get_or_set(
+    my $data = $cache->get_or_set(
         sub {
             my $url = Mojo::URL->new('https://api.openweathermap.org/data/2.5/forecast')->query(
-                lat   => $self->app->get_config('lat'),
-                lon   => $self->app->get_config('lon'),
+                lat   => $self->config->get('lat'),
+                lon   => $self->config->get('lon'),
                 units => 'metric',
                 appid => $self->api_key,
-                lang  => $self->app->get_config('openweather_lang'),
+                lang  => $self->config->get('openweather_lang'),
             )->to_unsafe_string;
 
             $self->app->log->debug($url);
@@ -72,9 +72,11 @@ sub fetch_forecast_from_web {
 
             return decode_json($response->decoded_content);
         },
-        'weather_forecast',
+        $self->db_cache_id . '/weather_forecast',
         $forced
     );
+
+    return $data;
 }
 
 1;
