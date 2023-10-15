@@ -143,6 +143,9 @@ sub setup_plugins {
 sub startup {
     my $app = shift;
 
+    # Add another namespace to load commands from
+    push @{$app->commands->namespaces}, 'PortalCalendar::Command';
+
     $app->setup_plugins();
     $app->setup_logger();
     $app->setup_helpers();
