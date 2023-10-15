@@ -1,9 +1,10 @@
-#define DEBUG
+#define STRINGIFY(x) STR(x)
+#define STR(x) #x
+#define EXPAND(x) x
+#define CONCAT3(a, b, c) STRINGIFY(EXPAND(a)EXPAND(b)EXPAND(c))
 
-// #define USE_GRAYSCALE_BW_DISPLAY
-
-#include "secrets_config.h"
-#include "settings.h"
+// dynamically include board-specific config
+#include CONCAT3(boards/,BOARD_CONFIG,.h)
 
 // generic libraries
 #include <Adafruit_GFX.h>
@@ -38,21 +39,8 @@ const char* defined_color_type = "3C";
 #include "debug.h"
 #include "main.h"
 
-/* local vars */
-// #ifdef USE_GxEPD2_4G
-// #ifdef USE_GRAYSCALE_DISPLAY
-// GxEPD2_4G_4G<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(
-//     GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN));
-// #else
-// GxEPD2_4G_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(
-//     GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN));
-// #endif
-// #else
-GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN));
-// #endif
-
-// 7.5" 3C 800x480
-// GxEPD2_3C<GxEPD2_750c_Z08, GxEPD2_750c_Z08::HEIGHT / 2> display(GxEPD2_750c_Z08(/*CS*/ CS_PIN, /*DC*/ DC_PIN, /*RST*/ RST_PIN, /*BUSY*/ BUSY_PIN));  // GDEY075Z08 800x480, GDEW075Z08
+// macro to define "display" variable dynamically with the right type
+DISPLAY_INSTANCE
 
 WiFiManager wifiManager;
 WiFiClient wifiClient;

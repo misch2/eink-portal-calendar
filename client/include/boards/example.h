@@ -1,3 +1,14 @@
+// #define DEBUG
+// #define USE_GRAYSCALE_BW_DISPLAY
+
+#define CALENDAR_URL_HOST "192.168.0.100"
+#define CALENDAR_URL_PORT 8000
+
+#define SYSLOG_SERVER "192.168.0.101"
+#define SYSLOG_PORT 514
+#define SYSLOG_MYHOSTNAME "esp32"
+#define SYSLOG_MYAPPNAME "portal-calendar-client"
+
 // Display is 800x480 B/W
 // https://www.laskakit.cz/waveshare-7-5--640x384-epaper-raw-displej-bw/ aka
 // WaveShare SKU 13187: https://www.waveshare.com/7.5inch-e-paper.htm aka
@@ -20,7 +31,6 @@
 //#define TYPE_7C // 7 colors
 
 /*
-
 WaveShare ePaper Driver HAT connector (from top to bottom):
 
 BUSY - violet #808 - to any input GPIO
@@ -41,17 +51,4 @@ VCC  - gray   #888 - to +3.3V
 #define BUSY_PIN 27
 #define VOLTAGE_ADC_PIN 32
 
-// // ESP32S3 devkitc1 N16R8 board
-// #define SPI_BUS HSPI
-// #define REMAP_SPI
-// #define PIN_SPI_CLK 13  // CLK
-// #define PIN_SPI_MISO 14 // unused
-// #define PIN_SPI_MOSI 12 // DIN
-// #define PIN_SPI_SS 15   // unused
-
-// #define CS_PIN 5    // SS
-// #define DC_PIN 17   // D/C
-// #define RST_PIN 16  // RES
-// #define BUSY_PIN 4  // PIN_BUSY
-// // #define VOLTAGE_ADC_PIN 32
-
+#define DISPLAY_INSTANCE  GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN));
