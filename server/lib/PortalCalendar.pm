@@ -39,7 +39,7 @@ sub setup_routes {
     $r->get('/config_ui/:display_number')->to('UI#config_ui_show');
     $r->post('/config_ui/:display_number')->to('UI#config_ui_save');
 
-    $r->get('/auth/googlefit/cb')->to('UI#googlefit_callback'); # has to be fixed format, without any parameters
+    $r->get('/auth/googlefit/cb')->to('Other#googlefit_callback'); # has to be fixed format, without any parameters
     #^ must be first, to match sooner than the next route
     $r->get('/auth/googlefit/:display_number')->to('UI#googlefit_redirect');
     $r->get('/auth/googlefit/success/:display_number')->to('UI#googlefit_success');
