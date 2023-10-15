@@ -17,7 +17,6 @@ use PortalCalendar;
 use PortalCalendar::Config;
 use PortalCalendar::Minion;
 use PortalCalendar::Schema;
-use PortalCalendar::Integration::Google;
 
 sub setup_routes {
     my $app = shift;

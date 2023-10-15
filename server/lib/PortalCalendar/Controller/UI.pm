@@ -87,7 +87,7 @@ sub config_ui_show {
 sub config_ui_save {
     my $self = shift;
 
-    my $util = PortalCalendar::Util->new(app => $self);
+    my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
 
     foreach my $name (@{ $self->config_obj->parameters }) {
         my $value = $self->req->param($name);
@@ -113,13 +113,13 @@ sub config_ui_save {
 # main HTML page with calendar (either for current or for specific date)
 sub calendar_html_default_date {
     my $self = shift;
-    my $util = PortalCalendar::Util->new(app => $self);
+    my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
     return $util->html_for_date(DateTime->now());
 }
 
 sub calendar_html_specific_date {
     my $self = shift;
-    my $util = PortalCalendar::Util->new(app => $self);
+    my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
     my $dt   = DateTime::Format::Strptime->new(pattern => '%Y-%m-%d')->parse_datetime($self->stash('date'));
     return $util->html_for_date($dt);
 }
@@ -128,7 +128,7 @@ sub calendar_html_specific_date {
 #     my $self = shift;
 
 #     # see https://developers.google.com/identity/protocols/oauth2/web-server#httprest_1
-#     my $goauth = PortalCalendar::Integration::Google->new;
+#     my $goauth = PortalCalendar::Integration::Google->new(config => $self->config_obj);
 #     my $url    = $goauth->google_oauth2_auth_url .
 #         #
 #         "?client_id=" . $self->get_config('googlefit_client_id') .
@@ -152,7 +152,7 @@ sub calendar_html_specific_date {
 #     $self->log->info("converting code to a token");
 
 #     #Get tokens from auth code
-#     my $goauth = PortalCalendar::Integration::Google->new;
+#     my $goauth = PortalCalendar::Integration::Google->new(config => $self->config_obj);
 #     my $res    = $self->$self->ua->post(
 #         $goauth->google_oauth2_token_url,
 #         'form',

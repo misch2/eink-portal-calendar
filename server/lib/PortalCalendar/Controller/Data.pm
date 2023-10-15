@@ -41,7 +41,7 @@ sub config {
 
     $self->set_config('_last_voltage_raw', $self->req->param('adc') // $self->req->param('voltage_raw') // '');    # value has NOT NULL restriction
 
-    my $util = PortalCalendar::Util->new(app => $self);
+    my $util = PortalCalendar::Util->new(app => $self, display => $display);
     $util->update_mqtt('voltage',         $self->get_calculated_voltage + 0.001);                                  # to force grafana to store changed values
     $util->update_mqtt('voltage_raw',     $self->get_config('_last_voltage_raw') + 0.001);                         # to force grafana to store changed values
     $util->update_mqtt('battery_percent', $self->calculate_battery_percent() + 0.001);                             # to force grafana to store changed values
@@ -77,7 +77,7 @@ sub bitmap {
     my $gamma  = $self->req->param('gamma')  // 1.0;
     my $format = $self->req->param('format') // 'png';
 
-    my $util = PortalCalendar::Util->new(app => $self);
+    my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
     return $util->generate_bitmap(
         {
             rotate    => $rotate,
@@ -94,7 +94,7 @@ sub bitmap_epaper_mono {
     my $self = shift;
 
     $self->set_config('_last_visit', DateTime->now()->iso8601);
-    my $util = PortalCalendar::Util->new(app => $self);
+    my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
     return $util->generate_bitmap(
         {
             rotate    => 3,
@@ -109,7 +109,7 @@ sub bitmap_epaper_gray {
     my $self = shift;
 
     $self->set_config('_last_visit', DateTime->now()->iso8601);
-    my $util = PortalCalendar::Util->new(app => $self);
+    my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
     return $util->generate_bitmap(
         {
             rotate    => 3,

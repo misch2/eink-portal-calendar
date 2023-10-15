@@ -17,7 +17,6 @@ use PortalCalendar::Config;
 use PortalCalendar::Minion;
 use PortalCalendar::Schema;
 use PortalCalendar::Util;
-use PortalCalendar::Integration::Google;
 
 has display => sub { die "override in subclass" };
 
