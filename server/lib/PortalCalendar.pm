@@ -39,8 +39,9 @@ sub setup_routes {
     $r->get('/config_ui/:display_number')->to('UI#config_ui_show');
     $r->post('/config_ui/:display_number')->to('UI#config_ui_save');
 
-    $r->get('/auth/googlefit')->to('UI#googlefit_redirect');
-    $r->get('/auth/googlefit/cb')->to('UI#googlefit_callback');
+    $r->get('/auth/googlefit/cb')->to('UI#googlefit_callback'); # has to be fixed format, without any parameters
+    #^ must be first, to match sooner than the next route
+    $r->get('/auth/googlefit/:display_number')->to('UI#googlefit_redirect');
     $r->get('/auth/googlefit/success/:display_number')->to('UI#googlefit_success');
 
     return;
@@ -179,8 +180,6 @@ sub startup {
         }
     );
 
-    $app->enqueue_task_only_once('generate_image');
-
     $app->renderer->cache->max_keys(0) if $app->config->{disable_renderer_cache};    # do not cache CSS etc. in devel mode
     $app->secrets([ $app->config->{mojo_passphrase} ]);
 
@@ -294,3 +293,7 @@ ALTER TABLE config ADD display_id INTEGER REFERENCES displays(id);
 -- 10 up
 CREATE UNIQUE INDEX config_name_display ON config (name, display_id);
 UPDATE config SET display_id=1 WHERE display_id IS NULL;
+
+-- 11 up
+ALTER TABLE displays ADD gamma NUMERIC(4,2);
+UPDATE displays SET gamma=1.8 WHERE gamma IS NULL;

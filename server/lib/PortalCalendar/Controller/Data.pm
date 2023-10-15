@@ -89,7 +89,34 @@ sub bitmap {
     );
 }
 
-# shortcuts so that we can finetune the parameters here and not constantly reupload them into ESP
+# Return bitmap to client (ePaper display, special format of bitmnap):
+sub bitmap_epaper {
+    my $self = shift;
+
+    $self->set_config('_last_visit', DateTime->now()->iso8601);
+
+    my $numcolors = 256;
+    my $format    = 'raw8bpp';
+    if ($self->display->colortype eq 'BW') {
+        $numcolors = 2;
+        $format    = 'raw1bpp';
+    } elsif ($self->display->colortype eq '3C') {
+        $numcolors = 3;
+        $format    = 'raw2bpp';
+    }
+
+    my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
+    return $util->generate_bitmap(
+        {
+            rotate    => $self->display->rotation,
+            gamma     => $self->display->gamma,
+            numcolors => $numcolors,
+            format    => $format,
+        }
+    );
+}
+
+# FIXME obsoleted, deprecated, to be removed in client code.
 sub bitmap_epaper_mono {
     my $self = shift;
 
@@ -105,6 +132,7 @@ sub bitmap_epaper_mono {
     );
 }
 
+# FIXME obsoleted, deprecated, to be removed in client code.
 sub bitmap_epaper_gray {
     my $self = shift;
 

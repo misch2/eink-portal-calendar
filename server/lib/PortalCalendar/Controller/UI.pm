@@ -7,10 +7,8 @@ use Mojo::JSON qw(decode_json encode_json);
 use Try::Tiny;
 
 has display => sub {
-
-    # req_param for URLs where the main part has to be static, e.g. for Google APIs
     my $self = shift;
-    return $self->get_display_by_id($self->stash('display_number') // $self->req->param('display_number'));
+    return $self->get_display_by_id($self->stash('display_number'));
 };
 
 sub select_display {
@@ -229,7 +227,7 @@ sub googlefit_success {
         # page-specific variables
         a_token    => $self->get_config('_googlefit_access_token'),
         r_token    => $self->get_config('_googlefit_refresh_token'),
-        token_json => '?',                                                    # DDP::np($token_json),
+        token_json => '?',                                             # DDP::np($token_json),
     );
 }
 
