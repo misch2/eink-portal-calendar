@@ -1,29 +1,36 @@
+// clang-format off
 #define STRINGIFY(x) STR(x)
 #define STR(x) #x
 #define EXPAND(x) x
 #define CONCAT3(a, b, c) STRINGIFY(EXPAND(a)EXPAND(b)EXPAND(c))
+// clang-format on
 
 // generic libraries
 #include <Adafruit_GFX.h>
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include <ArduinoOTA.h>
 #include <HTTPClient.h>
 #include <SPI.h>
 #include <Syslog.h>
 #include <WiFiManager.h>
 #include <WiFiUdp.h>
+// must be included after WiFiManager
+#include <ArduinoOTA.h>
 
 // dynamically include board-specific config
+// clang-format off
 #include CONCAT3(boards/,BOARD_CONFIG,.h)
+// clang-format on
 
-#ifdef TYPE_BW
+#define DISPLAY_BUFFER_SIZE (DISPLAY_WIDTH * BITMAP_BPP / 8)
+
+#ifdef DISPLAY_TYPE_BW
 #include <GxEPD2_BW.h>
-const char* defined_color_type = "BW";
+const char *defined_color_type = "BW";
 #endif
 
-#ifdef TYPE_GRAYSCALE
-const char* defined_color_type = "4G";
+#ifdef DISPLAY_TYPE_GRAYSCALE
+const char *defined_color_type = "4G";
 #ifdef USE_GRAYSCALE_BW_DISPLAY
 #include <GxEPD2_4G_BW.h>
 #else
@@ -31,8 +38,8 @@ const char* defined_color_type = "4G";
 #endif
 #endif
 
-#ifdef TYPE_3C
-const char* defined_color_type = "3C";
+#ifdef DISPLAY_TYPE_3C
+const char *defined_color_type = "3C";
 #include <GxEPD2_3C.h>
 #endif
 
@@ -42,19 +49,9 @@ const char* defined_color_type = "3C";
 // macro to define "display" variable dynamically with the right type
 DISPLAY_INSTANCE
 
-#define DISPLAY_BUFFER_SIZE (BYTES_PER_ROW * ROWS_AT_ONCE)
-
-
-WiFiManager wifiManager;
-WiFiClient wifiClient;
-HTTPClient http;
-uint32_t fullStartTime;
-static const int input_buffer_pixels = DISPLAY_HEIGHT;
-unsigned char input_row_mono_buffer[input_buffer_pixels];  // at most 1 byte per pixel
-String serverURLBase = String("http://") + CALENDAR_URL_HOST + ":" + CALENDAR_URL_PORT;
 // String firmware = xstr(AUTO_VERSION); // FIXME doesn't work, produces "AUTO_VERSION" instea
 String firmware = __DATE__ " " __TIME__;
-int voltageLastReadRaw = 0;
+String serverURLBase = String("http://") + CALENDAR_URL_HOST + ":" + CALENDAR_URL_PORT;
 
 /* RTC vars (survives deep sleep) */
 RTC_DATA_ATTR int bootCount = 0;
@@ -66,21 +63,24 @@ uint64_t sleepTime = SECONDS_PER_HOUR;
 bool voltageIsCritical = 0;
 bool otaMode = false;
 
-// #define DEBUG_FREE_HEAP Serial.printf("Free internal heap %u at %s#%d\n", ESP.getFreeHeap(), __FILE__, __LINE__)
-#define DEBUG_FREE_HEAP
+// ordinary vars
+WiFiManager wifiManager;
+WiFiClient wifiClient;
+HTTPClient http;
+uint32_t fullStartTime;
+int voltageLastReadRaw = 0;
 
 void setup() {
   basicInit();
-  DEBUG_FREE_HEAP;
-
-  DEBUG_FREE_HEAP;
   readVoltage();  // only once, because it discharges the 100nF capacitor
-  DEBUG_FREE_HEAP;
   wakeupAndConnect();
-  DEBUG_FREE_HEAP;
 
   if (otaMode) {
-    runInfinoteOTALoopInsteadOfUsualFunctionality();
+    DEBUG_PRINT("Running OTA loop");
+    while (true) {
+      ArduinoOTA.handle();
+      delay(500);
+    }
   };
 
   checkVoltage();
@@ -136,14 +136,12 @@ void loadConfigFromWeb() {
 
   bool tmpb = response["ota_mode"];
   if (otaMode) {
-    DEBUG_PRINT("OTA mode enabled in remote config");
+    DEBUG_PRINT("Permament OTA mode enabled in remote config");
     if (esp_reset_reason() == ESP_RST_SW) {
       DEBUG_PRINT("^ but last reset was a software one => not running OTA loop.");
       DEBUG_PRINT("To force OTA mode again, reset the device manually.");
       otaMode = false;
     }
-  } else {
-    DEBUG_PRINT("OTA mode disabled in JSON config");
   };
 
   tmpb = response["is_critical_voltage"];
@@ -162,6 +160,8 @@ void wakeupAndConnect() {
     errorNoWifi();
   }
   logResetReason();
+  initOTA();
+  ArduinoOTA.handle();
   loadConfigFromWeb();
 }
 
@@ -201,8 +201,7 @@ void logResetReason() {
     DEBUG_PRINT("Wakeup reason: ? (%d)", wakeup_reason);
   }
 
-  DEBUG_PRINT("Boot count: %d, last image checksum: %s", bootCount,
-              lastChecksum);
+  DEBUG_PRINT("Boot count: %d, last image checksum: %s", bootCount, lastChecksum);
 }
 
 void disconnectAndHibernate() {
@@ -214,19 +213,20 @@ void disconnectAndHibernate() {
 }
 
 void fetchAndDrawImageIfNeeded() {
-  showRawBitmapFrom_HTTP(CALENDAR_URL_HOST, CALENDAR_URL_PORT,
-                         "/calendar/bitmap/epaper", 0, 0, DISPLAY_WIDTH,
-                         DISPLAY_HEIGHT,
-                         BYTES_PER_ROW, ROWS_AT_ONCE);
+  showRawBitmapFrom_HTTP(CALENDAR_URL_HOST, CALENDAR_URL_PORT, "/calendar/bitmap/epaper", 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_BUFFER_SIZE);
 }
 
-void showRawBitmapFrom_HTTP(const char* host, int port, const char* path,
-                            int16_t x, int16_t y, int16_t w, int16_t h,
-                            int16_t bytes_per_row, int16_t rows_at_once) {
+void showRawBitmapFrom_HTTP(const char *host, int port, const char *path, int16_t x, int16_t y, int16_t w, int16_t h, int16_t bytes_per_row) {
+  static const int input_buffer_pixels = DISPLAY_HEIGHT;
+  static unsigned char input_row_mono_buffer[input_buffer_pixels];   // at most 1 byte per pixel
+  static unsigned char input_row_color_buffer[input_buffer_pixels];  // at most 1 byte per pixel
+
   bool connection_ok = false;
   uint32_t startTime = millis();
-  if ((x >= display.epd2.WIDTH) || (y >= display.epd2.HEIGHT)) return;
+  if ((x >= display.epd2.WIDTH) || (y >= display.epd2.HEIGHT))
+    return;
 
+  ArduinoOTA.handle();
   String partial_uri = String(path) + "?mac=" + WiFi.macAddress();
   DEBUG_PRINT("Downloading http://%s:%d%s", host, port, partial_uri.c_str());
   if (!wifiClient.connect(host, port)) {
@@ -235,11 +235,10 @@ void showRawBitmapFrom_HTTP(const char* host, int port, const char* path,
     return;
   }
 
-  wifiClient.print(String("GET ") + partial_uri + " HTTP/1.1\r\n" + "Host: " + host +
-                   "\r\n" + "User-Agent: Portal_Calendar_on_ESP\r\n" +
-                   "Connection: close\r\n\r\n");
+  wifiClient.print(String("GET ") + partial_uri + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "User-Agent: Portal_Calendar_on_ESP\r\n" + "Connection: close\r\n\r\n");
   String line = "<not read anything yet>";
   while (wifiClient.connected()) {
+    ArduinoOTA.handle();
     line = wifiClient.readStringUntil('\n');
     DEBUG_PRINT(" read line: [%s\n]\n", line.c_str());
     if (!connection_ok) {
@@ -286,23 +285,24 @@ void showRawBitmapFrom_HTTP(const char* host, int port, const char* path,
     DEBUG_PRINT(
         "Checksum has changed, reading image and refreshing the display");
   };
-  strcpy(lastChecksum, line.c_str());  // to survive a reboot
+  strcpy(lastChecksum, line.c_str());  // to survive a deep sleep
 
   DEBUG_PRINT("Reading image data");
 
-  DEBUG("XXXXXXXXXXXXXXXXXXXXXXX");
-  rows_at_once = 1;
-
-  uint32_t bytes_read = 0;                              // read so far
-  for (uint16_t row = 0; row < h; row += rows_at_once)  // for each line
-  {
+  uint32_t bytes_read = 0;
+  for (uint16_t row = 0; row < h; row++) {
     if (!connection_ok || !(wifiClient.connected() || wifiClient.available()))
       break;
     yield();  // prevent WDT
+    ArduinoOTA.handle();
 
-    uint32_t got =
-        read8n(wifiClient, input_row_mono_buffer, bytes_per_row * rows_at_once);
-    bytes_read += got;
+#ifdef DISPLAY_TYPE_BW
+    bytes_read += read8n(wifiClient, input_row_mono_buffer, bytes_per_row);
+#endif
+#ifdef DISPLAY_TYPE_3C
+    bytes_read += read8n(wifiClient, input_row_mono_buffer, bytes_per_row);
+    bytes_read += read8n(wifiClient, input_row_color_buffer, bytes_per_row);
+#endif
 
     if (!connection_ok) {
       DEBUG_PRINT("Bytes read so far: %d", bytes_read);
@@ -310,23 +310,31 @@ void showRawBitmapFrom_HTTP(const char* host, int port, const char* path,
       break;
     }
 
-#ifdef USE_GRAYSCALE_DISPLAY
-    // https://github.com/ZinggJM/GxEPD2_4G/blob/master/src/epd/GxEPD2_750_T7.cpp
-    display.writeImage_4G(input_row_mono_buffer, 8, x, y + row, w, 1, false,
-                          false, false);
-#else
-    display.writeImage(input_row_mono_buffer, x, y + row, w, rows_at_once);
+// #ifdef USE_GRAYSCALE_DISPLAY
+//     // https://github.com/ZinggJM/GxEPD2_4G/blob/master/src/epd/GxEPD2_750_T7.cpp
+//     display.writeImage_4G(input_row_mono_buffer, 8, x, y + row, w, 1, false,
+//                           false, false);
+// #endif
+#ifdef DISPLAY_TYPE_BW
+    display.writeImage(input_row_mono_buffer, x, y + row, w, 1);
 #endif
+#ifdef DISPLAY_TYPE_3C
+    display.writeImage(input_row_mono_buffer, input_row_color_buffer, x, y + row, w, 1);
+#endif
+
   }  // end line
   DEBUG_PRINT("Bytes read: %d", bytes_read);
 
+  ArduinoOTA.handle();
   display.refresh();  // full refresh
+
   DEBUG_PRINT("downloaded and displayed in %lu ms", millis() - startTime);
 
+  ArduinoOTA.handle();
   wifiClient.stop();
 }
 
-String httpGETRequestAsString(const char* url) {
+String httpGETRequestAsString(const char *url) {
   // Your IP address with path or Domain name with URL path
   DEBUG_PRINT("connecting to %s", url);
   http.setConnectTimeout(10000);
@@ -388,7 +396,8 @@ bool startWiFi() {
   return true;
 }
 
-uint32_t read8n(WiFiClient& client, uint8_t* buffer, int32_t bytes) {
+uint32_t
+read8n(WiFiClient &client, uint8_t *buffer, int32_t bytes) {
   int32_t remain = bytes;
   uint32_t start = millis();
   while ((client.connected() || client.available()) && (remain > 0)) {
@@ -398,7 +407,8 @@ uint32_t read8n(WiFiClient& client, uint8_t* buffer, int32_t bytes) {
       remain--;
     } else
       delay(1);
-    if (millis() - start > 2000) break;  // don't hang forever
+    if (millis() - start > 2000)
+      break;  // don't hang forever
   }
   return bytes - remain;
 }
@@ -414,7 +424,11 @@ void displayText(String message) {
   uint16_t x = ((display.width() - tbw) / 2) - tbx;
   uint16_t y = ((display.height() - tbh) / 2) - tby;  // y is base line!
   DEBUG_PRINT("Text bounds for:\n\"%s\"\n are: [x=%d, y=%d][w=+%d,h=+%d]",
-              message.c_str(), x, y, tbw, tbh);
+              message.c_str(),
+              x,
+              y,
+              tbw,
+              tbh);
 
   // rectangle make the window big enough to cover (overwrite) previous text
   // uint16_t wh = Open_Sans_Regular_24.yAdvance;
@@ -432,14 +446,10 @@ void displayText(String message) {
   display.refresh();  // full refresh
 }
 
-void runInfinoteOTALoopInsteadOfUsualFunctionality() {
-  DEBUG_PRINT("Running OTA loop");
-  DEBUG_FREE_HEAP;
-
+void initOTA() {
   ArduinoOTA.setHostname(SYSLOG_MYHOSTNAME);
   ArduinoOTA
       .onStart([]() {
-        DEBUG_FREE_HEAP;
         String type;
         DEBUG_PRINT("OTA: command %s", ArduinoOTA.getCommand())
         if (ArduinoOTA.getCommand() == U_FLASH)
@@ -450,18 +460,14 @@ void runInfinoteOTALoopInsteadOfUsualFunctionality() {
         // NOTE: if updating SPIFFS this would be the place to unmount
         // SPIFFS using SPIFFS.end()
         DEBUG_PRINT("OTA: Start updating %s", type.c_str());
-        DEBUG_FREE_HEAP;
       })
       .onEnd([]() {
-        DEBUG_FREE_HEAP;
         DEBUG_PRINT("OTA: End");
       })
       .onProgress([](unsigned int progress, unsigned int total) {
-        DEBUG_FREE_HEAP;
         Serial.printf("Progress: %u%%\r", (progress / (total / 100)));  // FIXME
       })
       .onError([](ota_error_t error) {
-        DEBUG_FREE_HEAP;
         DEBUG_PRINT("OTA: Error %u", error);
         if (error == OTA_AUTH_ERROR) {
           DEBUG_PRINT("OTA: Auth Failed");
@@ -475,16 +481,8 @@ void runInfinoteOTALoopInsteadOfUsualFunctionality() {
           DEBUG_PRINT("OTA: End Failed");
         }
       });
-
   ArduinoOTA.begin();
-
-  while (true) {
-    DEBUG_FREE_HEAP;
-    ArduinoOTA.handle();
-    delay(500);
-  }
-
-  DEBUG_PRINT("OTA loop done");
+  DEBUG_PRINT("OTA: Ready on %s.local", SYSLOG_MYHOSTNAME);
 }
 
 void error(String message) {
@@ -494,7 +492,9 @@ void error(String message) {
   disconnectAndHibernate();
 }
 
-void errorNoWifi() { error("WiFi connect/login unsuccessful."); }
+void errorNoWifi() {
+  error("WiFi connect/login unsuccessful.");
+}
 
 void espDeepSleep(uint64_t seconds) {
   DEBUG_PRINT("Sleeping for %lus", seconds);
@@ -504,12 +504,10 @@ void espDeepSleep(uint64_t seconds) {
 
 void initDisplay() {
   DEBUG_PRINT("Display setup start");
-  DEBUG_PRINT("CS=%d, DC=%d, RST=%d, BUSY=%d", CS_PIN, DC_PIN, RST_PIN,
-              BUSY_PIN);
-  DEBUG("display type: %s", defined_color_type);
+  DEBUG_PRINT("CS=%d, DC=%d, RST=%d, BUSY=%d", CS_PIN, DC_PIN, RST_PIN, BUSY_PIN);
 
   delay(100);
-  SPIClass* spi = new SPIClass(SPI_BUS);
+  SPIClass *spi = new SPIClass(SPI_BUS);
 
 #ifdef REMAP_SPI
   Serial.println("remapping SPI");
@@ -519,8 +517,7 @@ void initDisplay() {
 #endif
 
   /* 2ms reset for waveshare board */
-  display.init(115200, false, 2, false, *spi,
-               SPISettings(7000000, MSBFIRST, SPI_MODE0));
+  display.init(115200, false, 2, false, *spi, SPISettings(7000000, MSBFIRST, SPI_MODE0));
   DEBUG_PRINT("Display setup finished");
 }
 

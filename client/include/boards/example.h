@@ -24,16 +24,13 @@
 // GDEW075T7 800x480, EK79655 (GD7965)
 #define DISPLAY_WIDTH 800
 #define DISPLAY_HEIGHT 480
+#define BITMAP_BPP 1
 
 // Uncomment correct color capability of your ePaper display
-#define TYPE_BW // black and white
+#define DISPLAY_TYPE_BW // black and white
 // #define TYPE_3C // 3 colors - black, white and red/yellow
 //#define TYPE_GRAYSCALE // grayscale - 4 colors
 //#define TYPE_7C // 7 colors
-
-#define BYTES_PER_ROW (DISPLAY_WIDTH / 8)
-#define ROWS_AT_ONCE 8
-
 
 /*
 WaveShare ePaper Driver HAT connector (from top to bottom):
