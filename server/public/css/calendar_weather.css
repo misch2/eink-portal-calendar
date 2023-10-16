@@ -116,7 +116,7 @@ div.name-day-name {
 div.weather-forecast-container-grid {
     position: absolute;
     width: 100%;
-    top: 280;
+    top: 320;
     left: 0;
 
     display: grid;
@@ -127,13 +127,13 @@ div.weather-forecast-container-grid {
 
 div.weather-single-day-container-grid {
     display: grid;
-    grid-template-columns: 1fr 1.5fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1.5fr 1.2fr 1fr 1.2fr;
     grid-column-gap: 0.2rem;
     grid-row-gap: 0.2rem;
 }
 
 div.weather-item {
-    font-size: 0.8rem;
+    font-size: 1.0rem;
     border: 1px solid black;
     padding: 0.2em;
 }

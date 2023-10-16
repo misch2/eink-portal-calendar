@@ -45,7 +45,7 @@
         % my $cnt = 0;
         % foreach my $item (@{ $forecast->{list} }) {
             % $cnt++;
-            % last if $cnt > 6;
+            % last if $cnt > 5;
 
             % my $rain = 0+($item->{rain}->{'3h'} // 0); # mm in 3 hours
             % my $snow = 0+($item->{snow}->{'3h'} // 0); # mm in 3 hours
@@ -94,7 +94,6 @@
                     </div>
                 </div>
                 <div style="text-align: center">
-                    % $rain = 5.6;
                     % if ($rain > 0) {
                         <div>
                             <i class="wi wi-rain" style="font-size: 1rem"></i>
