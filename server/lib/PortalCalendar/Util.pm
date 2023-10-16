@@ -577,9 +577,8 @@ sub generate_bitmap {
         $out .= Digest->new("SHA-1")->add($bitmap)->hexdigest . "\n";
         $out .= $bitmap;
 
-        # FIXME enable again
-        # $self->app->res->headers->content_type('application/octet-stream');
-        # $self->app->res->headers->header('Content-Transfer-Encoding' => 'binary');
+        $self->app->res->headers->content_type('application/octet-stream');
+        $self->app->res->headers->header('Content-Transfer-Encoding' => 'binary');
         return $self->app->render(data => $out);
     } else {
         die "Unknown format requested: " . $args->{format};
