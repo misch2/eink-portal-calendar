@@ -41,7 +41,7 @@ sub home {
     return $self->render(
         template => 'index',
         format   => 'html',
-        nav_link => 'index',
+        nav_link => 'home',
 
         display    => $self->display,
         config_obj => $self->config_obj,
