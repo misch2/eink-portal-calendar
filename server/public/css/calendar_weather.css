@@ -37,6 +37,7 @@ div div div {
 
 div div div div {
     /* background-color: darkolivegreen; */
+    /* background-color: #eee; */
 }
 
 @font-face {
@@ -56,62 +57,91 @@ body {
     font-family: 'DIN';
 }
 
-div#spacer {
+div#visible-area {
     position: absolute;
     top: 10px;
     left: 10px;
     height: 780px;
     width: 460px;
+    overflow: hidden;
     /* background-color: gainsboro; */
 }
 
-div.day-of-week-block {
-    font-family: 'DIN';
-    font-size: 1rem;
-}
+div.date-row {
+    font-size: 1.5rem;
 
-div.dow-number-and-name {
     display: flex;
     justify-content: space-between;
-    height: 1rem;
+    position: absolute;
+    width: 100%;
 }
 
-div.day-of-week-block div.separator {
-    margin-top: 0.3rem;
+div.top-date-row {
+    top: 0;
+    left: 0;
+}
+
+div.bottom-date-row {
+    top: 225;
+    left: 0;
+}
+
+div.horizontal-separator {
+    position: absolute;
+    width: 100%;
+    top: 0;
+    left: 0;
     border-bottom: 2px solid black;
-    margin-bottom: 0.3rem;
-}
-
-div.name-day-header {
-    text-align: center;
 }
 
 div.day-number-big {
-    font-family: 'DINCondensed';
-    font-size: 7rem;
-    transform: scale(0.8, 1);
+    position: absolute;
+    width: 100%;
+    top: 20;
+    left: 0;
+    font-size: 6rem;
     text-align: center;
-
-    margin: 0.25rem 0;
 }
 
-div.weather-container-grid {
+div.name-day-name {
+    position: absolute;
+    width: 100%;
+    top: 170;
+    left: 0;
+
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+div.weather-forecast-container-grid {
+    position: absolute;
+    width: 100%;
+    top: 280;
+    left: 0;
+
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-auto-rows: 1fr;
+    grid-template-rows: repeat(5, 1fr);
     grid-column-gap: 0.2rem;
     grid-row-gap: 0.2rem;
+}
 
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-    padding-top: 0.5rem;
-    /* padding-top: 9px; */
-    border-top: 2px solid black;
+div.weather-single-day-container-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 1fr 1fr 1fr;
+    grid-column-gap: 0.2rem;
+    grid-row-gap: 0.2rem;
 }
 
 div.weather-item {
-    /* font-family: 'DINCondensed'; */
     font-size: 0.8rem;
     border: 1px solid black;
     padding: 0.2em;
+}
+
+div.bottom-signature {
+    position: absolute;
+    width: 100%;
+    top: 760;
+    left: 0;
+    font-size: 0.7rem;
 }

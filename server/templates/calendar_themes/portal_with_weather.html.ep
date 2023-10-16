@@ -7,34 +7,45 @@
 %# $decorator = sub { Text::Unidecode::unidecode(uc(shift)) }; # UPPERCASE with accents removed
 
 <body>
-    <div id="spacer">
-        <div class="day-of-week-block">
-            <div class="dow-number-and-name">
-                <div>
-                    <%= $decorator->($name_day_details->{dayNumber} . '. ' . $name_day_details->{month}->{genitive}) %>
-                </div>
-                <div>
-                    <%= $decorator->($date->day_name) %>
-                </div>
-            </div>
-            <div class="separator"></div>
-        </div>
-
-        <div class="name-day-header">
-            <%= $decorator->($name_day_details->{name}) %>
-        </div>
-
+    <div id="visible-area">
         <div class="day-number-big">
             <%= sprintf("%02d", $date->day) %>
         </div>
 
+        <div class="name-day-name">
+            <%= $decorator->($name_day_details->{name}) %>
+        </div>
+
+        <div class="date-row top-date-row">
+            <div>
+                <%= $decorator->($name_day_details->{month}->{nominative}) %>
+            </div>
+            <div>
+            </div>
+        </div>
+
+        <div class="horizontal-separator" style="top: 45"></div>
+        <div class="horizontal-separator" style="top: 220"></div>
+
+        <div class="date-row bottom-date-row">
+            <div>
+                <%= $decorator->($name_day_details->{dayNumber} . '. ' . $name_day_details->{monthNumber} . '.') %>
+            </div>
+            <div>
+                <%= $decorator->($name_day_details->{dayInWeek}) %>
+            </div>
+        </div>
+
+
+
+
         
-        <div class="weather-container-grid">
+        <div class="weather-forecast-container-grid">
         %# See https://openweathermap.org/forecast5#fields_JSON
         % my $cnt = 0;
         % foreach my $item (@{ $forecast->{list} }) {
             % $cnt++;
-            % last if $cnt > 5;
+            % last if $cnt > 6;
 
             % my $rain = 0+($item->{rain}->{'3h'} // 0); # mm in 3 hours
             % my $snow = 0+($item->{snow}->{'3h'} // 0); # mm in 3 hours
@@ -54,36 +65,58 @@
             %    $day_description = $dt->day_name;
             % }
 
-            <div class="weather-item">
+            <div class="weather-item weather-single-day-container-grid">
                 <div>
                     <%= $day_description %>
-                </div>
-                <div>
+                    <br>
                     <%= sprintf("%02d:00", $dt->hour) %>
                 </div>
                 <div>
                     % foreach my $condition (@{ $item->{weather} }) {
-                        %# https://erikflowers.github.io/weather-icons/api-list.html
-                        <span style="font-weight: bold"><%= $condition->{description} %></span>
-                        <br>
-                        <i class="wi wi-owm-<%= $day_or_night %>-<%= $condition->{id} %>" style="font-size: 2rem"></i>
+                        <div style="font-weight: bold"><%= $condition->{description} %></div>
                     % }
                 </div>
                 <div>
-                    <%= sprintf('%.1f', $item->{main}->{temp_min}) %> &deg;C 
-                    <br>
-                    - 
-                    <br>
-                    <%= sprintf('%.1f', $item->{main}->{temp_max}) %> &deg;C
+                    % foreach my $condition (@{ $item->{weather} }) {
+                        %# https://erikflowers.github.io/weather-icons/api-list.html
+                        <i class="wi wi-owm-<%= $day_or_night %>-<%= $condition->{id} %>" style="font-size: 2rem; margin-top: 0.5rem; margin-left: 0.5rem"></i>
+                    % }
                 </div>
-                <div>
-                    <%= sprintf('%.1f', $total_precip) %> mm
+                <div style="text-align: center">
+                    <div>
+                        <%= sprintf('%.1f', $item->{main}->{temp_min}) %> &deg;C
+                    </div>
+                    <div style="line-height: 40%">
+                        - 
+                    </div>
+                    <div>
+                        <%= sprintf('%.1f', $item->{main}->{temp_max}) %> &deg;C
+                    </div>
+                </div>
+                <div style="text-align: center">
+                    % $rain = 5.6;
+                    % if ($rain > 0) {
+                        <div>
+                            <i class="wi wi-rain" style="font-size: 1rem"></i>
+                        </div>
+                        <div style="margin-top: 0.2rem">
+                            <%= sprintf('%.1f', $rain) %> mm
+                        </div>
+                    % }
+                    % if ($snow > 0) {
+                        <div>
+                            <i class="wi wi-snow" style="font-size: 1rem"></i>
+                        </div>
+                        <div style="margin-top: 0.2rem">
+                            <%= sprintf('%.1f', $snow) %> mm
+                        </div>
+                    % }
                 </div>
             </div>
         % }
         </div>
 
-        <div style="font-size: 0.7rem">
+        <div class="bottom-signature">
             Data from: <%= DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone($app->get_config('timezone'))->strftime('%c') %>
         </div>
     </div>
