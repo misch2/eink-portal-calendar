@@ -37,8 +37,10 @@ sub setup_routes {
     $r->get('/config_ui/:display_number')->to('UI#config_ui_show');
     $r->post('/config_ui/:display_number')->to('UI#config_ui_save');
 
-    $r->get('/auth/googlefit/cb')->to('Other#googlefit_callback');    # has to be fixed format, without any parameters
-                                                                      #^ must be first, to match sooner than the next route
+    # This MUST be first, to match sooner than the next route. Also it can't accept any parameters (Google OAuth restriction)
+    $r->get('/auth/googlefit/cb')->to('Other#googlefit_callback');
+
+    # But test of callbacks are not restricted in any way
     $r->get('/auth/googlefit/:display_number')->to('UI#googlefit_redirect');
     $r->get('/auth/googlefit/success/:display_number')->to('UI#googlefit_success');
 
@@ -61,12 +63,6 @@ sub enqueue_task_only_once {
 
 sub setup_helpers {
     my $app = shift;
-
-    $app->helper(
-        foo => sub {
-            warn "test";
-        }
-    );
 
     $app->helper(
         schema => sub {
@@ -295,3 +291,9 @@ UPDATE config SET display_id=1 WHERE display_id IS NULL;
 -- 11 up
 ALTER TABLE displays ADD gamma NUMERIC(4,2);
 UPDATE displays SET gamma=1.8 WHERE gamma IS NULL;
+
+-- 12 up
+ALTER TABLE displays ADD border_top INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE displays ADD border_right INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE displays ADD border_bottom INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE displays ADD border_left INTEGER NOT NULL DEFAULT 0;

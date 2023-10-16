@@ -65,6 +65,30 @@ __PACKAGE__->table("displays");
   is_nullable: 1
   size: [4,2]
 
+=head2 border_top
+
+  data_type: 'integer'
+  default_value: 0
+  is_nullable: 0
+
+=head2 border_right
+
+  data_type: 'integer'
+  default_value: 0
+  is_nullable: 0
+
+=head2 border_bottom
+
+  data_type: 'integer'
+  default_value: 0
+  is_nullable: 0
+
+=head2 border_left
+
+  data_type: 'integer'
+  default_value: 0
+  is_nullable: 0
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -84,6 +108,14 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 0 },
   "gamma",
   { data_type => "numeric", is_nullable => 1, size => [4, 2] },
+  "border_top",
+  { data_type => "integer", default_value => 0, is_nullable => 0 },
+  "border_right",
+  { data_type => "integer", default_value => 0, is_nullable => 0 },
+  "border_bottom",
+  { data_type => "integer", default_value => 0, is_nullable => 0 },
+  "border_left",
+  { data_type => "integer", default_value => 0, is_nullable => 0 },
 );
 
 =head1 PRIMARY KEY
@@ -142,8 +174,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-10-15 19:16:42
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:RQ0JmYdN2kHJRUVJo2rk3Q
+# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-10-16 20:24:27
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:B80kD7CaEh1aflGAsueZdA
 
 
 

@@ -4,10 +4,10 @@
 % my $height = $display->height;
 
 % my $border_size           = 50;
-% my $border_overlay_top    = -3;
-% my $border_overlay_right  = 27;
-% my $border_overlay_bottom = -3;
-% my $border_overlay_left   = -3;
+% my $border_overlay_top    = $display->border_top;    # -3;
+% my $border_overlay_right  = $display->border_right;  # 27;
+% my $border_overlay_bottom = $display->border_bottom; # -3;
+% my $border_overlay_left   = $display->border_left;   # -3;
 
 %= stylesheet begin
 .preview-image {
