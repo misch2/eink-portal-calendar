@@ -46,6 +46,7 @@
     % } else {
         never.
     % }
+    <%= $waiting_tasks %> waiting tasks.
 </p>
 <p class="row-fluid">
     Last voltage: <%= $last_voltage // '(unknown)' %> V (<%= defined($battery_percent) ? sprintf("%.0f", $battery_percent) : '(unknown)' %> %). 

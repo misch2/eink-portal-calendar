@@ -46,6 +46,7 @@ sub home {
         display    => $self->display,
         config_obj => $self->config_obj,
 
+        waiting_tasks    => $self->app->minion->jobs({ states => [ 'inactive', 'active' ] })->total,
         last_contact_ago => $last_contact_ago,
         last_visit_dt    => $last_visit_dt,
         last_voltage     => $self->get_calculated_voltage          // undef,
