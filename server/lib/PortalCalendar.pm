@@ -30,7 +30,6 @@ sub setup_routes {
     $r->get('/calendar/bitmap')->to('Data#bitmap');
     $r->get('/calendar/bitmap/epaper')->to('Data#bitmap_epaper');
     $r->get('/calendar/bitmap/epapermono')->to('Data#bitmap_epaper_mono');
-    $r->get('/calendar/bitmap/epapergray')->to('Data#bitmap_epaper_gray');
 
     $r->get('/')->to('UI#select_display');
     $r->get('/home/:display_number')->to('UI#home');
