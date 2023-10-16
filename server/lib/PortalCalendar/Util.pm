@@ -28,9 +28,6 @@ use PortalCalendar::Integration::SvatkyAPI;
 has 'app';
 has 'display';
 
-Readonly my $WIDTH  => 480;
-Readonly my $HEIGHT => 800;
-
 Readonly my @PORTAL_ICONS => qw(a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 b11 b14 c3 c4 c7 d2 d3 d4 d5 e1 e2 e4);
 Readonly my %ICON_NAME_TO_FILENAME => (
     CUBE_DISPENSER    => 'a1',
@@ -350,6 +347,7 @@ sub html_for_date {
         # raw weather values:
         current_weather => $current_weather,
         forecast        => $forecast,
+
         # processed weather values:
         forecast_5_days => \@forecast_5_days,
 
@@ -418,8 +416,8 @@ sub generate_bitmap {
     my $img = Imager->new(file => $self->app->app->home->child("generated_images/current_calendar_" . $self->app->display->id . ".png")) or die Imager->errstr;
 
     # If the generated image is larger (probably due to invalid CSS), crop it so that it display at least something:
-    if ($img->getheight > $HEIGHT) {
-        my $tmp = $img->crop(left => 0, top => 0, width => $WIDTH, height => $HEIGHT);
+    if ($img->getheight > $self->display->height) {
+        my $tmp = $img->crop(left => 0, top => 0, width => $self->display->width, height => $self->display->height);
         die $img->errstr unless $tmp;
         $img = $tmp;
     }
@@ -462,15 +460,10 @@ sub generate_bitmap {
     if ($args->{numcolors} && $args->{numcolors} < 256) {
         my $tmp = $img->to_paletted(
             {
-                make_colors => {
-                    2   => 'mono',
-                    4   => 'gray4',
-                    16  => 'gray16',
-                    256 => 'gray',
-                }->{ $args->{numcolors} },
-                translate => 'closest',    # closest, errdiff
-
-                # errdiff     => 'jarvis',      # floyd, jarvis, stucki, ...
+                make_colors => $args->{colormap_name},
+                translate   => 'closest',                                                               # closest, errdiff
+                                                                                                        # errdiff     => 'jarvis',      # floyd, jarvis, stucki, ...
+                colors      => [ map { Imager::Color->new($_) } @{ $args->{colormap_colors} || [] } ]
             }
         );
         die $img->errstr unless $tmp;

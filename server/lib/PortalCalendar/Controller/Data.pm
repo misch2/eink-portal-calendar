@@ -71,20 +71,22 @@ sub config {
 sub bitmap {
     my $self = shift;
 
-    my $rotate = $self->req->param('rotate') // 0;
-    my $flip   = $self->req->param('flip')   // '';
-    my $colors = $self->req->param('colors') // 256;
-    my $gamma  = $self->req->param('gamma')  // 1.0;
-    my $format = $self->req->param('format') // 'png';
+    my $rotate        = $self->req->param('rotate')        // 0;
+    my $flip          = $self->req->param('flip')          // '';
+    my $colors        = $self->req->param('colors')        // 256;
+    my $gamma         = $self->req->param('gamma')         // 1.0;
+    my $format        = $self->req->param('format')        // 'png';
+    my $colormap_name = $self->req->param('colormap_name') // 'webmap';
 
     my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
     return $util->generate_bitmap(
         {
-            rotate    => $rotate,
-            flip      => $flip,
-            numcolors => $colors,
-            gamma     => $gamma,
-            format    => $format,
+            rotate        => $rotate,
+            flip          => $flip,
+            numcolors     => $colors,
+            gamma         => $gamma,
+            format        => $format,
+            colormap_name => $colormap_name,
         }
     );
 }
@@ -95,23 +97,40 @@ sub bitmap_epaper {
 
     $self->set_config('_last_visit', DateTime->now()->iso8601);
 
-    my $numcolors = 256;
-    my $format    = 'raw8bpp';
+    my $numcolors       = 256;
+    my $format          = 'raw8bpp';
+    my $colormap_name   = 'gray';      # see Imager::ImageTypes
+    my $colormap_colors = [];          # only for the 'none' colormap_name
     if ($self->display->colortype eq 'BW') {
-        $numcolors = 2;
-        $format    = 'raw1bpp';
-    } elsif ($self->display->colortype eq '3C') {
-        $numcolors = 3;
-        $format    = 'raw2bpp';
+        $numcolors     = 2;
+        $colormap_name = 'mono';
+        $format        = 'raw1bpp';
+    } elsif ($self->display->colortype eq '4G') {
+        $numcolors     = 4;
+        $colormap_name = 'gray4';
+        $format        = 'raw2bpp';
+    } elsif ($self->display->colortype eq '16G') {
+        $numcolors     = 16;
+        $colormap_name = 'gray16';
+        $format        = 'raw4bpp';
+    } elsif ($self->display->colortype eq '3C') {    # FIXME maybe rename to 3C_RED ?
+        $numcolors     = 3;
+        $colormap_name = 'webmap';
+
+        # $colormap_name   = 'none';
+        # $colormap_colors = [ '#000000', '#ffffff', '#ff0000' ];
+        $format = 'raw2bpp';
     }
 
     my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
     return $util->generate_bitmap(
         {
-            rotate    => $self->display->rotation,
-            gamma     => $self->display->gamma,
-            numcolors => $numcolors,
-            format    => $format,
+            rotate          => $self->display->rotation,
+            gamma           => $self->display->gamma,
+            numcolors       => $numcolors,
+            colormap_name   => $colormap_name,
+            colormap_colors => $colormap_colors,
+            format          => $format,
         }
     );
 }
@@ -124,10 +143,11 @@ sub bitmap_epaper_mono {
     my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
     return $util->generate_bitmap(
         {
-            rotate    => 3,
-            numcolors => 2,
-            gamma     => 1.8,
-            format    => 'raw1bpp',
+            rotate        => 3,
+            numcolors     => 2,
+            gamma         => 1.8,
+            format        => 'raw1bpp',
+            colormap_name => 'mono',
         }
     );
 }
@@ -140,10 +160,11 @@ sub bitmap_epaper_gray {
     my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
     return $util->generate_bitmap(
         {
-            rotate    => 3,
-            numcolors => 4,
-            gamma     => 1.8,
-            format    => 'raw2bpp',
+            rotate        => 3,
+            numcolors     => 4,
+            gamma         => 1.8,
+            format        => 'raw2bpp',
+            colormap_name => 'gray4',
         }
     );
 }
