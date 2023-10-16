@@ -549,7 +549,7 @@ sub generate_bitmap {
                     #   0       0   = red   #f00
                     #   1       0   = red   #f00
 
-                    my $bw_bit    = ($r + $g + $b) / 3 > 128 ? 0 : 1;   # 0 = black, 1 = white
+                    my $bw_bit    = ($r + $g + $b) / 3 > 128 ? 1 : 0;   # 0 = black, 1 = white
                     my $color_bit = ($r > 128 && $g < 128)   ? 0 : 1;   # 0 = red (override), 1 = B&W
 
                     $byte_bw    = $byte_bw << 1 | $bw_bit;
