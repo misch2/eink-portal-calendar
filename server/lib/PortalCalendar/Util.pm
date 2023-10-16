@@ -489,15 +489,16 @@ sub generate_bitmap {
         my $out;
         $img->write(data => \$out, type => 'png') or die;
         return $self->app->render(data => $out, format => 'png');
-    } elsif ($args->{format} =~ /^raw/) {
+    } elsif ($args->{format} eq 'epaper_native') {
+        # BW, 4G, 16G, 3C
         my $bitmap = '';
-        if ($args->{format} eq 'raw8bpp') {
+        if ($args->{display_type} eq '256G') {
             foreach my $y (0 .. $img->getheight - 1) {
                 foreach my $gray ($img->getsamples(y => $y, format => '8bit', channels => [0])) {
                     $bitmap .= chr($gray);
                 }
             }
-        } elsif ($args->{format} eq 'raw2bpp') {
+        } elsif ($args->{display_type} eq '4G') {
             foreach my $y (0 .. $img->getheight - 1) {
                 my $byte   = 0;
                 my $bitcnt = 0;
@@ -512,7 +513,7 @@ sub generate_bitmap {
                     }
                 }
             }
-        } elsif ($args->{format} eq 'raw1bpp') {
+        } elsif ($args->{display_type} eq 'BW') {
             foreach my $y (0 .. $img->getheight - 1) {
                 my $byte   = 0;
                 my $bitcnt = 0;
@@ -527,7 +528,8 @@ sub generate_bitmap {
                     }
                 }
             }
-        } elsif ($args->{format} eq 'raw1bpp3c') {    # dual buffers on each row, one for 1-bit black, 2nd one for 1-bit color
+        } elsif ($args->{display_type} eq '3C') {
+            # dual buffers on each row, one for 1-bit black, 2nd one for 1-bit color
             foreach my $y (0 .. $img->getheight - 1) {
                 my @buffer_bw    = ();
                 my @buffer_color = ();
@@ -546,11 +548,11 @@ sub generate_bitmap {
                     # ----   -----
                     #   0       1   = black #000
                     #   1       1   = white #fff
-                    #   0       0   = red   #f00
-                    #   1       0   = red   #f00
+                    #   0       0   = red/yellow  #f00/#ff0
+                    #   1       0   = red/yellow  #f00/#ff0
 
                     my $bw_bit    = ($r + $g + $b) / 3 > 128 ? 1 : 0;   # 0 = black, 1 = white
-                    my $color_bit = ($r > 128 && $g < 128)   ? 0 : 1;   # 0 = red (override), 1 = B&W
+                    my $color_bit = ($r > 128 && $b < 128)   ? 0 : 1;   # 0 = red (override), 1 = B&W
 
                     $byte_bw    = $byte_bw << 1 | $bw_bit;
                     $byte_color = $byte_color << 1 | $color_bit;
@@ -575,13 +577,13 @@ sub generate_bitmap {
                 @buffer_color = ();
             }
         } else {
-            die "Unknown format requested: " . $args->{format};
+            die "Unknown format requested: $args->{format} / $args->{display_type}";
         }
 
         # output format:
         #    "MM"
         #   checksum
-        #    <sequence of raw values directly usable for uploading into eink display>
+        #    <sequence of raw values directly usable for uploading into an eink display>
         my $out = "MM\n";
 
         # sha-1: 40 chars

@@ -97,29 +97,23 @@ sub bitmap_epaper {
 
     $self->set_config('_last_visit', DateTime->now()->iso8601);
 
-    my $numcolors       = 256;
-    my $format          = 'raw8bpp';
-    my $colormap_name   = 'gray';      # see Imager::ImageTypes
-    my $colormap_colors = [];          # only for the 'none' colormap_name
+    my $numcolors;
+    my $colormap_name;           # see Imager::ImageTypes
+    my $colormap_colors = [];    # only for the 'none' colormap_name
     if ($self->display->colortype eq 'BW') {
         $numcolors     = 2;
         $colormap_name = 'mono';
-        $format        = 'raw1bpp';
     } elsif ($self->display->colortype eq '4G') {
         $numcolors     = 4;
         $colormap_name = 'gray4';
-        $format        = 'raw2bpp';
     } elsif ($self->display->colortype eq '16G') {
         $numcolors     = 16;
         $colormap_name = 'gray16';
-        $format        = 'raw4bpp';
-    } elsif ($self->display->colortype eq '3C') {    # FIXME maybe rename to 3C_RED ?
+    } elsif ($self->display->colortype eq '3C') {
         $numcolors     = 3;
         $colormap_name = 'webmap';
-
-        # $colormap_name   = 'none';
-        # $colormap_colors = [ '#000000', '#ffffff', '#ff0000' ];
-        $format = 'raw1bpp3c';
+    } else {
+        die "unknown display type: " . $self->display->colortype;
     }
 
     my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
@@ -130,7 +124,8 @@ sub bitmap_epaper {
             numcolors       => $numcolors,
             colormap_name   => $colormap_name,
             colormap_colors => $colormap_colors,
-            format          => $format,
+            format          => 'epaper_native',
+            display_type    => $self->display->colortype,
         }
     );
 }
@@ -146,7 +141,7 @@ sub bitmap_epaper_mono {
             rotate        => 3,
             numcolors     => 2,
             gamma         => 1.8,
-            format        => 'raw1bpp',
+            format        => 'epaper_native',
             colormap_name => 'mono',
         }
     );

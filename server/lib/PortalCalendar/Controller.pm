@@ -7,9 +7,6 @@ use DateTime::Format::ISO8601;
 use DDP;
 use Time::HiRes;
 
-# FIXME for oauth:
-use Mojo::Util qw(url_escape);
-use Mojo::JSON qw(decode_json encode_json);
 use Mojo::Log;
 
 use PortalCalendar;

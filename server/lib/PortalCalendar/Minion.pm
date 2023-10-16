@@ -8,8 +8,6 @@ use PortalCalendar::Integration::OpenWeather;
 use PortalCalendar::Integration::Google::Fit;
 use DDP;
 
-# FIXME multiple displays
-
 sub regenerate_image {
     my $job  = shift;
     my @args = @_;
