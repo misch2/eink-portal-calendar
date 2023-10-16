@@ -119,7 +119,7 @@ sub bitmap_epaper {
 
         # $colormap_name   = 'none';
         # $colormap_colors = [ '#000000', '#ffffff', '#ff0000' ];
-        $format = 'raw2bpp';
+        $format = 'raw1bpp3c';
     }
 
     my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
@@ -148,23 +148,6 @@ sub bitmap_epaper_mono {
             gamma         => 1.8,
             format        => 'raw1bpp',
             colormap_name => 'mono',
-        }
-    );
-}
-
-# FIXME obsoleted, deprecated, to be removed in client code.
-sub bitmap_epaper_gray {
-    my $self = shift;
-
-    $self->set_config('_last_visit', DateTime->now()->iso8601);
-    my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
-    return $util->generate_bitmap(
-        {
-            rotate        => 3,
-            numcolors     => 4,
-            gamma         => 1.8,
-            format        => 'raw2bpp',
-            colormap_name => 'gray4',
         }
     );
 }

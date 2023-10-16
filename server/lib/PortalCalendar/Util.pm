@@ -525,6 +525,43 @@ sub generate_bitmap {
                     }
                 }
             }
+        } elsif ($args->{format} eq 'raw1bpp3c') {    # dual buffers on each row, one for 1-bit black, 2nd one for 1-bit color
+            foreach my $y (0 .. $img->getheight - 1) {
+                my @buffer_bw    = ();
+                my @buffer_color = ();
+                my $byte_bw      = 0;
+                my $byte_color   = 0;
+
+                my @rgb    = $img->getsamples(y => $y, format => '8bit', channels => [ 0, 1, 2 ]);
+                my $bitcnt = 0;
+                while ($#rgb >= 0) {
+                    my ($r, $g, $b) = splice @rgb, 0, 3;
+
+                    my $bw_bit    = ($r + $g + $b) / 3 > 128 ? 0 : 1;
+                    my $color_bit = ($r > 128 && $g < 128)   ? 1 : 0;
+
+                    $byte_bw    = $byte_bw << 1 | $bw_bit;
+                    $byte_color = $byte_color << 1 | $color_bit;
+                    $bitcnt++;
+
+                    if ($bitcnt == 8) {
+                        push @buffer_bw,    $byte_bw;
+                        push @buffer_color, $byte_color;
+                        $byte_bw    = 0;
+                        $byte_color = 0;
+                        $bitcnt     = 0;
+                    }
+                }
+
+                foreach (@buffer_bw) {
+                    $bitmap .= chr($_);
+                }
+                foreach (@buffer_color) {
+                    $bitmap .= chr($_);
+                }
+                @buffer_bw    = ();
+                @buffer_color = ();
+            }
         } else {
             die "Unknown format requested: " . $args->{format};
         }
@@ -540,8 +577,9 @@ sub generate_bitmap {
         $out .= Digest->new("SHA-1")->add($bitmap)->hexdigest . "\n";
         $out .= $bitmap;
 
-        $self->app->res->headers->content_type('application/octet-stream');
-        $self->app->res->headers->header('Content-Transfer-Encoding' => 'binary');
+        # FIXME enable again
+        # $self->app->res->headers->content_type('application/octet-stream');
+        # $self->app->res->headers->header('Content-Transfer-Encoding' => 'binary');
         return $self->app->render(data => $out);
     } else {
         die "Unknown format requested: " . $args->{format};
