@@ -539,8 +539,18 @@ sub generate_bitmap {
                 while ($#rgb >= 0) {
                     my ($r, $g, $b) = splice @rgb, 0, 3;
 
-                    my $bw_bit    = ($r + $g + $b) / 3 > 128 ? 0 : 1;
-                    my $color_bit = ($r > 128 && $g < 128)   ? 1 : 0;
+                    # How the 3C display interprets the data:
+                    #
+                    # mono   color
+                    # buffer buffer
+                    # ----   -----
+                    #   0       1   = black #000
+                    #   1       1   = white #fff
+                    #   0       0   = red   #f00
+                    #   1       0   = red   #f00
+
+                    my $bw_bit    = ($r + $g + $b) / 3 > 128 ? 0 : 1;   # 0 = black, 1 = white
+                    my $color_bit = ($r > 128 && $g < 128)   ? 0 : 1;   # 0 = red (override), 1 = B&W
 
                     $byte_bw    = $byte_bw << 1 | $bw_bit;
                     $byte_color = $byte_color << 1 | $color_bit;
