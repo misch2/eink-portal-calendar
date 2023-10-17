@@ -36,10 +36,7 @@
             </div>
 
             <div style="position: absolute; top: 10; left: 0; margin: auto; width: 100%; text-align: right">
-                <i class="wi wi-strong-wind" style="font-size: 1rem; margin-top: 0.2rem"></i>
-                <p>
-                    <%= $wind %> m/s
-                </p>
+                <i class="wi wi-strong-wind" style="font-size: 1rem; margin-top: 0.2rem"></i> <%= $wind %> m/s
             </div>
 
             <div style="position: absolute; top: 170; left: 0; margin: auto; width: 100%; text-align: left">
@@ -167,7 +164,7 @@
         </div>
 
         <div class="bottom-signature">
-            Data from: <%= DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone($app->get_config('timezone'))->strftime('%c') %>
+            Weather data updated: <%= DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone($app->get_config('timezone'))->strftime('%c') %>
         </div>
     </div>
 </body>
