@@ -146,6 +146,7 @@ div.weather-item {
 .weather-item-night {
     color: white;
     background-color: black;
+    font-weight: bold;  /* to compensate for the seemingly "thin" white text */
 }
 
 .weather-is-rain-or-snow {
