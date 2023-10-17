@@ -16,8 +16,8 @@
             % my $temp = int($current_weather->{main}->{temp} + 0.5);
             % my $feel_temp = int($current_weather->{main}->{feels_like} + 0.5);
             % my $wind = int($current_weather->{wind}->{speed} + 0.5);
-            % my $rain = 1 + $current_weather->{rain}->{'1h'};
-            % my $snow = 2 + $current_weather->{snow}->{'1h'};
+            % my $rain = $current_weather->{rain}->{'1h'};
+            % my $snow = $current_weather->{snow}->{'1h'};
             % my $total_precip = $rain + $snow;
             % my $dt = DateTime->from_epoch(epoch => $current_weather->{dt}, time_zone => 'UTC');
             
