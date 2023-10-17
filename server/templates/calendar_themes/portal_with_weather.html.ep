@@ -6,10 +6,66 @@
 %# $decorator = sub { ucfirst(shift) }; # Uppercase
 %# $decorator = sub { Text::Unidecode::unidecode(uc(shift)) }; # UPPERCASE with accents removed
 
+% use DateTime::Event::Sunrise;
+% my $sunrise = DateTime::Event::Sunrise->new(longitude => $app->get_config('lon'), latitude => $app->get_config('lat'));
+% my $now = DateTime->now;
+
 <body>
     <div id="visible-area">
-        <div class="day-number-big" style="color: red">
-            <%= sprintf("%02d", $date->day) %>
+        <div class="weather-current-big">
+            % my $temp = int($current_weather->{main}->{temp} + 0.5);
+            % my $feel_temp = int($current_weather->{main}->{feels_like} + 0.5);
+            % my $wind = int($current_weather->{wind}->{speed} + 0.5);
+            % my $rain = 1 + $current_weather->{rain}->{'1h'};
+            % my $snow = 2 + $current_weather->{snow}->{'1h'};
+            % my $total_precip = $rain + $snow;
+            % my $dt = DateTime->from_epoch(epoch => $current_weather->{dt}, time_zone => 'UTC');
+            
+            % my $day_or_night = $sunrise->sunrise_sunset_span($dt)->contains($dt) ? 'day' : 'night';
+            % my $class_rain_or_snow = $total_precip > 0 ? 'weather-is-rain-or-snow' : '';
+
+            <div style="position: absolute; top: 25; left: 0; margin: auto; width: 100%; text-align: center; font-size: 5rem">
+                <!-- <i class="wi wi-thermometer-exterior" style="font-size: 1rem; margin-top: 0.4rem"></i> -->
+                <p>
+                    <%= $temp %>
+                    %# % if (abs($temp - $feel_temp) > 1) {
+                    %#     (<%= $feel_temp %>)
+                    %# % }
+                    °C
+                </p>
+            </div>
+
+            <div style="position: absolute; top: 10; left: 0; margin: auto; width: 100%; text-align: right">
+                <i class="wi wi-strong-wind" style="font-size: 1rem; margin-top: 0.2rem"></i>
+                <p>
+                    <%= $wind %> m/s
+                </p>
+            </div>
+
+            <div style="position: absolute; top: 170; left: 0; margin: auto; width: 100%; text-align: left">
+                <i class="wi wi-cloud" style="font-size: 1rem; margin-top: 0.15rem"></i> <%= $current_weather->{clouds}->{all} %> %
+            </div>
+
+            % if ($total_precip > 0) {
+                <div style="position: absolute; top: 170; left: 0; margin: auto; width: 100%; text-align: right" class="<%= $class_rain_or_snow %>">
+                    % if ($rain > 0) {
+                        <i class="wi wi-rain" style="font-size: 1rem"></i> <%= $rain %> mm
+                    % }
+                    % if ($snow > 0) {
+                        <i class="wi wi-snow" style="font-size: 1rem"></i> <%= $snow %> mm
+                    % }
+                </div>
+            % }
+
+            <div style="position: absolute; top: 10; left: 0; margin: auto; width: 100%; text-align: left">
+                <p>
+                    % foreach my $condition (@{ $current_weather->{weather} }) {
+                        %# https://erikflowers.github.io/weather-icons/api-list.html
+                        <i class="wi wi-owm-<%= $day_or_night %>-<%= $condition->{id} %>" FIXMEstyle="font-size: 3rem"></i>
+                        <span FIXMEstyle="font-weight: bold"><%= ucfirst($condition->{description}) %></span>
+                    % }
+                </p>
+            </div>
         </div>
 
         <div class="date-row top-date-row">
@@ -35,28 +91,20 @@
         </div>
         -->
 
-        <div class="horizontal-separator" style="top: 220"></div>
-
-
-        
-        <div class="weather-forecast-container-grid" style="top: 260">
-
-
-        % use DateTime::Event::Sunrise;
-        % my $sunrise = DateTime::Event::Sunrise->new(longitude => $app->get_config('lon'), latitude => $app->get_config('lat'));
+        <div class="horizontal-separator" style="top: 260"></div>
+        <div class="weather-forecast-container-grid" style="top: 270">
 
         %# See https://openweathermap.org/forecast5#fields_JSON
         % my $cnt = 0;
         % foreach my $item (@{ $forecast->{list} }) {
             % $cnt++;
-            % last if $cnt > 5;
+            % last if $cnt > 6;
 
             % my $rain = 0+($item->{rain}->{'3h'} // 0); # mm in 3 hours
             % my $snow = 0+($item->{snow}->{'3h'} // 0); # mm in 3 hours
             % my $total_precip = $rain + $snow;
 
             % my $dt = DateTime->from_epoch(epoch => $item->{dt}, time_zone => 'UTC');
-            % my $now = DateTime->now;
             % my $day_or_night = $sunrise->sunrise_sunset_span($dt)->contains($dt) ? 'day' : 'night';
 
             % my $day_description = '';
@@ -68,7 +116,7 @@
             %    $day_description = $dt->day_name;
             % }
 
-            <div class="weather-item weather-item-<%= $day_or_night %> weather-single-day-container-grid">
+            <div class="weather-item weather-item-<%= $day_or_night %> <%= $total_precip > 0 ? 'weather-is-rain-or-snow' : '' %> weather-single-day-container-grid">
                 <div>
                     <%= $day_description %>
                     <br>

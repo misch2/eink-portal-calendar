@@ -290,7 +290,7 @@ sub html_for_date {
         $forecast        = $api->fetch_forecast_from_web;
 
         # p $forecast, as => 'forecast';
-        # p $current_weather, as => 'current';
+        # p $current_weather, as => 'current_weather';
 
         foreach my $days_add (0 .. 4) {
             my $dt = DateTime->now->truncate(to => 'day')->add(days => $days_add);

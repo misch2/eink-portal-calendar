@@ -103,6 +103,13 @@ div.day-number-big {
     text-align: center;
 }
 
+div.weather-current-big {
+    position: absolute;
+    width: 100%;
+    top: 50;
+    left: 0;
+}
+
 div.name-day-name {
     position: absolute;
     width: 100%;
@@ -136,9 +143,13 @@ div.weather-item {
     padding: 0.2em;
 }
 
-div.weather-item-night {
+.weather-item-night {
     color: white;
     background-color: black;
+}
+
+.weather-is-rain-or-snow {
+    color: red;
 }
 
 div.bottom-signature {
