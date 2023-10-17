@@ -152,6 +152,13 @@ div.weather-item {
 .weather-is-rain-or-snow {
     color: red;
 }
+.weather-item-night.weather-is-rain-or-snow {
+    color: white;
+    background-color: red;
+}
+div.weather-item.weather-item-night.weather-is-rain-or-snow {
+    border-color: red;
+}
 
 div.bottom-signature {
     position: absolute;
