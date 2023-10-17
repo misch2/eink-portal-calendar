@@ -138,11 +138,13 @@ sub bitmap_epaper_mono {
     my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
     return $util->generate_bitmap(
         {
-            rotate        => 3,
-            numcolors     => 2,
-            gamma         => 1.8,
-            format        => 'epaper_native',
-            colormap_name => 'mono',
+            rotate          => 3,
+            numcolors       => 2,
+            gamma           => 1.8,
+            colormap_name   => 'mono',
+            colormap_colors => [],
+            format          => 'epaper_native',
+            display_type    => $self->display->colortype,
         }
     );
 }
