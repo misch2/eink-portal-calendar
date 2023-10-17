@@ -89,6 +89,11 @@ __PACKAGE__->table("displays");
   default_value: 0
   is_nullable: 0
 
+=head2 firmware
+
+  data_type: 'varchar'
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -116,6 +121,8 @@ __PACKAGE__->add_columns(
   { data_type => "integer", default_value => 0, is_nullable => 0 },
   "border_left",
   { data_type => "integer", default_value => 0, is_nullable => 0 },
+  "firmware",
+  { data_type => "varchar", is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -174,8 +181,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-10-16 20:24:27
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:B80kD7CaEh1aflGAsueZdA
+# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-10-17 16:34:42
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:C3NRBP5wBsl3MMZaMoGJnA
 
 
 

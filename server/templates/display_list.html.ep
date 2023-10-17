@@ -12,7 +12,8 @@
             resolution <%= $d->width %> &times; <%= $d->height %>, 
             rotate <%= $d->rotation %>, 
             gamma <%= $d->gamma %>,
-            type <%= $d->colortype %>.
+            type <%= $d->colortype %>,
+            firmware "<%= $d->firmware %>".
         </div>
     </li>
 % }

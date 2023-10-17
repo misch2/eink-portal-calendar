@@ -2,6 +2,8 @@
 package PortalCalendar::Controller::Data;
 use Mojo::Base 'PortalCalendar::Controller';
 
+use DateTime;
+
 has mac => sub {
     my $self = shift;
     my $mac  = $self->req->param('mac');
@@ -27,12 +29,18 @@ sub config {
     if (!$display) {
         $display = $self->schema->resultset('Display')->create(
             {
-                mac       => $self->mac,
-                name      => "MAC " . uc($self->mac),
-                width     => $self->req->param('w') // -1,
-                height    => $self->req->param('h') // -1,
-                rotation  => $self->req->param('r') // 0,
-                colortype => $self->req->param('c') // '?',
+                mac          => $self->mac,
+                name         => "New display with MAC " . uc($self->mac) . " added on " . DateTime->now->stringify,
+                width        => $self->req->param('w')  // 100,
+                height       => $self->req->param('h')  // 200,
+                rotation     => $self->req->param('r')  // 0,
+                colortype    => $self->req->param('c')  // 'BW',
+                firmware           => $self->req->param('fw') // '',
+                gamma        => 2.2,
+                border_top   => 0,
+                border_right => 0,
+                border_bottom => 0,
+                border_left  => 0,
             }
         );
     }
@@ -46,7 +54,7 @@ sub config {
     $util->update_mqtt('voltage_raw',     $self->get_config('_last_voltage_raw') + 0.001);                         # to force grafana to store changed values
     $util->update_mqtt('battery_percent', $self->calculate_battery_percent() + 0.001);                             # to force grafana to store changed values
     $util->update_mqtt('last_visit',      DateTime->now()->rfc3339);
-    $util->update_mqtt('firmware',        $self->req->param('fw'));
+    $util->update_mqtt('firmware',        $display->firmware);
 
     $util->update_mqtt('voltage',         $self->get_calculated_voltage);
     $util->update_mqtt('voltage_raw',     $self->get_config('_last_voltage_raw'));
