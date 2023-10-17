@@ -1,24 +1,20 @@
-// clang-format off
-#define STRINGIFY(x) STR(x)
-#define STR(x) #x
-#define EXPAND(x) x
-#define CONCAT3(a, b, c) STRINGIFY(EXPAND(a)EXPAND(b)EXPAND(c))
-// clang-format on
-
 // generic libraries
 #include <Adafruit_GFX.h>
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include <ArduinoOTA.h>
 #include <HTTPClient.h>
 #include <SPI.h>
 #include <Syslog.h>
 #include <WiFiManager.h>
 #include <WiFiUdp.h>
-// must be included after WiFiManager
-#include <ArduinoOTA.h>
 
 // dynamically include board-specific config
 // clang-format off
+#define STRINGIFY(x) STR(x)
+#define STR(x) #x
+#define EXPAND(x) x
+#define CONCAT3(a, b, c) STRINGIFY(EXPAND(a)EXPAND(b)EXPAND(c))
 #include CONCAT3(boards/,BOARD_CONFIG,.h)
 // clang-format on
 
@@ -115,7 +111,8 @@ void loadConfigFromWeb() {
   fw_escaped.replace(" ", "_");
   fw_escaped.replace(":", "_");
 
-  String jsonURL = serverURLBase + "/config?mac=" + WiFi.macAddress() + "&adc=" + voltageLastReadRaw + "&w=" + String(DISPLAY_WIDTH) + "&h=" + String(DISPLAY_HEIGHT) + "&c=" + String(defined_color_type) + "&fw=" + fw_escaped;
+  String jsonURL = serverURLBase + "/config?mac=" + WiFi.macAddress() + "&adc=" + voltageLastReadRaw + "&w=" + String(DISPLAY_WIDTH) +
+                   "&h=" + String(DISPLAY_HEIGHT) + "&c=" + String(defined_color_type) + "&fw=" + fw_escaped;
   DEBUG_PRINT("Loading config from web");
 
   String jsonText = httpGETRequestAsString(jsonURL.c_str());
@@ -213,18 +210,19 @@ void disconnectAndHibernate() {
 }
 
 void fetchAndDrawImageIfNeeded() {
-  showRawBitmapFrom_HTTP(CALENDAR_URL_HOST, CALENDAR_URL_PORT, "/calendar/bitmap/epaper", 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_BUFFER_SIZE);
+  showRawBitmapFrom_HTTP(CALENDAR_URL_HOST, CALENDAR_URL_PORT, "/calendar/bitmap/epaper", 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 }
 
-void showRawBitmapFrom_HTTP(const char *host, int port, const char *path, int16_t x, int16_t y, int16_t w, int16_t h, int16_t bytes_per_row) {
+void showRawBitmapFrom_HTTP(const char *host, int port, const char *path, int16_t x, int16_t y, int16_t w, int16_t h) {
   static const int input_buffer_pixels = DISPLAY_HEIGHT;
   static unsigned char input_row_mono_buffer[input_buffer_pixels];   // at most 1 byte per pixel
   static unsigned char input_row_color_buffer[input_buffer_pixels];  // at most 1 byte per pixel
 
   bool connection_ok = false;
   uint32_t startTime = millis();
-  if ((x >= display.epd2.WIDTH) || (y >= display.epd2.HEIGHT))
+  if ((x >= display.epd2.WIDTH) || (y >= display.epd2.HEIGHT)) {
     return;
+  }
 
   ArduinoOTA.handle();
   String partial_uri = String(path) + "?mac=" + WiFi.macAddress();
@@ -235,15 +233,15 @@ void showRawBitmapFrom_HTTP(const char *host, int port, const char *path, int16_
     return;
   }
 
-  wifiClient.print(String("GET ") + partial_uri + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "User-Agent: Portal_Calendar_on_ESP\r\n" + "Connection: close\r\n\r\n");
+  wifiClient.print(String("GET ") + partial_uri + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "User-Agent: Portal_Calendar_on_ESP\r\n" +
+                   "Connection: close\r\n\r\n");
   String line = "<not read anything yet>";
   while (wifiClient.connected()) {
     ArduinoOTA.handle();
     line = wifiClient.readStringUntil('\n');
     DEBUG_PRINT(" read line: [%s\n]\n", line.c_str());
     if (!connection_ok) {
-      DEBUG_PRINT("Waiting for OK response from server. Current line: %s",
-                  line.c_str());
+      DEBUG_PRINT("Waiting for OK response from server. Current line: %s", line.c_str());
       connection_ok = line.startsWith("HTTP/1.1 200 OK");
       //   if (connection_ok)
       //     DEBUG_PRINT("line: %s", line.c_str());
@@ -282,8 +280,7 @@ void showRawBitmapFrom_HTTP(const char *host, int port, const char *path, int16_
     DEBUG_PRINT("Not refreshing, image is unchanged");
     return;
   } else {
-    DEBUG_PRINT(
-        "Checksum has changed, reading image and refreshing the display");
+    DEBUG_PRINT("Checksum has changed, reading image and refreshing the display");
   };
   strcpy(lastChecksum, line.c_str());  // to survive a deep sleep
 
@@ -291,17 +288,16 @@ void showRawBitmapFrom_HTTP(const char *host, int port, const char *path, int16_
 
   uint32_t bytes_read = 0;
   for (uint16_t row = 0; row < h; row++) {
-    if (!connection_ok || !(wifiClient.connected() || wifiClient.available()))
-      break;
+    if (!connection_ok || !(wifiClient.connected() || wifiClient.available())) break;
     yield();  // prevent WDT
     ArduinoOTA.handle();
 
 #ifdef DISPLAY_TYPE_BW
-    bytes_read += read8n(wifiClient, input_row_mono_buffer, bytes_per_row);
+    bytes_read += read8n(wifiClient, input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
 #endif
 #ifdef DISPLAY_TYPE_3C
-    bytes_read += read8n(wifiClient, input_row_mono_buffer, bytes_per_row);
-    bytes_read += read8n(wifiClient, input_row_color_buffer, bytes_per_row);
+    bytes_read += read8n(wifiClient, input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
+    bytes_read += read8n(wifiClient, input_row_color_buffer, DISPLAY_BUFFER_SIZE);
 #endif
 
     if (!connection_ok) {
@@ -396,8 +392,7 @@ bool startWiFi() {
   return true;
 }
 
-uint32_t
-read8n(WiFiClient &client, uint8_t *buffer, int32_t bytes) {
+uint32_t read8n(WiFiClient &client, uint8_t *buffer, int32_t bytes) {
   int32_t remain = bytes;
   uint32_t start = millis();
   while ((client.connected() || client.available()) && (remain > 0)) {
@@ -407,8 +402,7 @@ read8n(WiFiClient &client, uint8_t *buffer, int32_t bytes) {
       remain--;
     } else
       delay(1);
-    if (millis() - start > 2000)
-      break;  // don't hang forever
+    if (millis() - start > 2000) break;  // don't hang forever
   }
   return bytes - remain;
 }
@@ -423,12 +417,7 @@ void displayText(String message) {
   // center bounding box by transposition of origin:
   uint16_t x = ((display.width() - tbw) / 2) - tbx;
   uint16_t y = ((display.height() - tbh) / 2) - tby;  // y is base line!
-  DEBUG_PRINT("Text bounds for:\n\"%s\"\n are: [x=%d, y=%d][w=+%d,h=+%d]",
-              message.c_str(),
-              x,
-              y,
-              tbw,
-              tbh);
+  DEBUG_PRINT("Text bounds for:\n\"%s\"\n are: [x=%d, y=%d][w=+%d,h=+%d]", message.c_str(), x, y, tbw, tbh);
 
   // rectangle make the window big enough to cover (overwrite) previous text
   // uint16_t wh = Open_Sans_Regular_24.yAdvance;
@@ -461,9 +450,7 @@ void initOTA() {
         // SPIFFS using SPIFFS.end()
         DEBUG_PRINT("OTA: Start updating %s", type.c_str());
       })
-      .onEnd([]() {
-        DEBUG_PRINT("OTA: End");
-      })
+      .onEnd([]() { DEBUG_PRINT("OTA: End"); })
       .onProgress([](unsigned int progress, unsigned int total) {
         Serial.printf("Progress: %u%%\r", (progress / (total / 100)));  // FIXME
       })
@@ -492,9 +479,7 @@ void error(String message) {
   disconnectAndHibernate();
 }
 
-void errorNoWifi() {
-  error("WiFi connect/login unsuccessful.");
-}
+void errorNoWifi() { error("WiFi connect/login unsuccessful."); }
 
 void espDeepSleep(uint64_t seconds) {
   DEBUG_PRINT("Sleeping for %lus", seconds);

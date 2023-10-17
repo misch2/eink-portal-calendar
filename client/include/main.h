@@ -15,9 +15,7 @@ void initDisplay();
 void espDeepSleep(uint64_t seconds);
 
 String httpGETRequestAsString(const char* url);
-void showRawBitmapFrom_HTTP(const char* host, int port, const char* path,
-                            int16_t x, int16_t y, int16_t w, int16_t h,
-                            int16_t bytes_per_row);
+void showRawBitmapFrom_HTTP(const char* host, int port, const char* path, int16_t x, int16_t y, int16_t w, int16_t h);
 void displayText(String message);
 void error(String message);
 void errorNoWifi();

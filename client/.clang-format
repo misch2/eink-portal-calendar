@@ -9,5 +9,5 @@
 #  - GNU A style complying with the GNU coding standards
 BasedOnStyle: Google
 
-#IndentWidth: 2
-ColumnLimit: 0
+IndentWidth: 2
+ColumnLimit: 160
