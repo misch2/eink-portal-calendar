@@ -24,7 +24,7 @@
             % my $day_or_night = $sunrise->sunrise_sunset_span($dt)->contains($dt) ? 'day' : 'night';
             % my $class_rain_or_snow = $total_precip > 0 ? 'weather-is-rain-or-snow' : '';
 
-            <div style="position: absolute; top: 25; left: 0; margin: auto; width: 100%; text-align: center; font-size: 5rem">
+            <div style="position: absolute; top: 25; left: 0; margin: auto; width: 100%; text-align: center; font-size: 5rem" class="<%= $class_rain_or_snow %>">
                 <!-- <i class="wi wi-thermometer-exterior" style="font-size: 1rem; margin-top: 0.4rem"></i> -->
                 <p>
                     <%= $temp %>
