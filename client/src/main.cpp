@@ -111,6 +111,7 @@ void loadConfigFromWeb() {
   }
 
   bool tmpb = response["ota_mode"];
+  otaMode = tmpb;
   if (otaMode) {
     DEBUG_PRINT("Permament OTA mode enabled in remote config");
     if (esp_reset_reason() == ESP_RST_SW) {
