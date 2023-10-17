@@ -29,18 +29,18 @@ sub config {
     if (!$display) {
         $display = $self->schema->resultset('Display')->create(
             {
-                mac          => $self->mac,
-                name         => "New display with MAC " . uc($self->mac) . " added on " . DateTime->now->stringify,
-                width        => $self->req->param('w')  // 100,
-                height       => $self->req->param('h')  // 200,
-                rotation     => $self->req->param('r')  // 0,
-                colortype    => $self->req->param('c')  // 'BW',
-                firmware           => $self->req->param('fw') // '',
-                gamma        => 2.2,
-                border_top   => 0,
-                border_right => 0,
+                mac           => $self->mac,
+                name          => "New display with MAC " . uc($self->mac) . " added on " . DateTime->now->stringify,
+                width         => $self->req->param('w')  // 100,
+                height        => $self->req->param('h')  // 200,
+                rotation      => $self->req->param('r')  // 0,
+                colortype     => $self->req->param('c')  // 'BW',
+                firmware      => $self->req->param('fw') // '',
+                gamma         => 2.2,
+                border_top    => 0,
+                border_right  => 0,
                 border_bottom => 0,
-                border_left  => 0,
+                border_left   => 0,
             }
         );
     }

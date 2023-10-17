@@ -522,6 +522,25 @@ DISTRIBUTIONS
       DateTime 0.27
       DateTime::Set 0.3600
       ExtUtils::MakeMaker 0
+  DateTime-Event-Sunrise-0.0506
+    pathname: J/JF/JFORGET/DateTime-Event-Sunrise-0.0506.tar.gz
+    provides:
+      DateTime::Event::Sunrise 0.0506
+    requirements:
+      Carp 0
+      DateTime 0.16
+      DateTime::Duration 0
+      DateTime::Set 0.16
+      DateTime::Span 0
+      DateTime::SpanSet 0
+      ExtUtils::MakeMaker 6.57_02
+      Math::Trig 0
+      POSIX 0
+      Params::Validate 0
+      Set::Infinite 0
+      Test::Exception 0
+      Test::More 0
+      perl 5.008005
   DateTime-Format-Builder-0.83
     pathname: D/DR/DROLSKY/DateTime-Format-Builder-0.83.tar.gz
     provides:

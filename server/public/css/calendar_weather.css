@@ -116,8 +116,6 @@ div.name-day-name {
 div.weather-forecast-container-grid {
     position: absolute;
     width: 100%;
-    top: 320;
-    left: 0;
 
     display: grid;
     grid-template-rows: repeat(5, 1fr);
@@ -136,6 +134,11 @@ div.weather-item {
     font-size: 1.0rem;
     border: 1px solid black;
     padding: 0.2em;
+}
+
+div.weather-item-night {
+    color: white;
+    background-color: black;
 }
 
 div.bottom-signature {

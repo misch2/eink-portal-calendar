@@ -8,39 +8,43 @@
 
 <body>
     <div id="visible-area">
-        <div class="day-number-big">
+        <div class="day-number-big" style="color: red">
             <%= sprintf("%02d", $date->day) %>
-        </div>
-
-        <div class="name-day-name">
-            <%= $decorator->($name_day_details->{name}) %>
         </div>
 
         <div class="date-row top-date-row">
             <div>
-                <%= $decorator->($name_day_details->{month}->{nominative}) %>
+                <%= $decorator->($name_day_details->{dayNumber}) %>. <%= $decorator->($name_day_details->{month}->{genitive}) %>
             </div>
             <div>
+                <%= $decorator->($name_day_details->{name}) %>
             </div>
         </div>
 
         <div class="horizontal-separator" style="top: 45"></div>
-        <div class="horizontal-separator" style="top: 220"></div>
 
+        <!--
+        <div class="horizontal-separator" style="top: 220"></div>
         <div class="date-row bottom-date-row">
             <div>
-                <%= $decorator->($name_day_details->{dayNumber} . '. ' . $name_day_details->{monthNumber} . '.') %>
+                %# <%= $decorator->($name_day_details->{dayNumber} . '. ' . $name_day_details->{monthNumber} . '.') %>
             </div>
             <div>
-                <%= $decorator->($name_day_details->{dayInWeek}) %>
+                %# <%= $decorator->($name_day_details->{dayInWeek}) %>
             </div>
         </div>
+        -->
 
-
+        <div class="horizontal-separator" style="top: 220"></div>
 
 
         
-        <div class="weather-forecast-container-grid">
+        <div class="weather-forecast-container-grid" style="top: 260">
+
+
+        % use DateTime::Event::Sunrise;
+        % my $sunrise = DateTime::Event::Sunrise->new(longitude => $app->get_config('lon'), latitude => $app->get_config('lat'));
+
         %# See https://openweathermap.org/forecast5#fields_JSON
         % my $cnt = 0;
         % foreach my $item (@{ $forecast->{list} }) {
@@ -50,11 +54,10 @@
             % my $rain = 0+($item->{rain}->{'3h'} // 0); # mm in 3 hours
             % my $snow = 0+($item->{snow}->{'3h'} // 0); # mm in 3 hours
             % my $total_precip = $rain + $snow;
-            % my $dt = DateTime->from_epoch(epoch => $item->{dt},, time_zone => 'UTC');
-            % my $now = DateTime->now;
 
-            %# Current! sunrise/sunset data aren't available in the forecast
-            % my $day_or_night = ($item->{dt} < $current_weather->{sys}->{sunrise} || $item->{dt} > $current_weather->{sys}->{sunset}) ? 'night' : 'day';
+            % my $dt = DateTime->from_epoch(epoch => $item->{dt}, time_zone => 'UTC');
+            % my $now = DateTime->now;
+            % my $day_or_night = $sunrise->sunrise_sunset_span($dt)->contains($dt) ? 'day' : 'night';
 
             % my $day_description = '';
             % if ($dt->ymd eq $now->ymd) {
@@ -65,7 +68,7 @@
             %    $day_description = $dt->day_name;
             % }
 
-            <div class="weather-item weather-single-day-container-grid">
+            <div class="weather-item weather-item-<%= $day_or_night %> weather-single-day-container-grid">
                 <div>
                     <%= $day_description %>
                     <br>
