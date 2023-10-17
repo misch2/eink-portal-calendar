@@ -19,16 +19,15 @@ use PortalCalendar::Schema;
 sub setup_routes {
     my $app = shift;
 
-    # Router
     my $r = $app->routes;
 
-    # Route
+    # Data only (API) endpoints
     $r->get('/ping')->to('Data#ping');
     $r->get('/config')->to('Data#config');
     $r->get('/calendar/bitmap')->to('Data#bitmap');
     $r->get('/calendar/bitmap/epaper')->to('Data#bitmap_epaper');
-    $r->get('/calendar/bitmap/epapermono')->to('Data#bitmap_epaper_mono');
 
+    # UI endpoints
     $r->get('/')->to('UI#select_display');
     $r->get('/home/:display_number')->to('UI#home');
     $r->get('/test/:display_number')->to('UI#test');

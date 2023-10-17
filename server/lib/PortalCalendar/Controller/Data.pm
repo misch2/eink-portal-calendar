@@ -130,23 +130,4 @@ sub bitmap_epaper {
     );
 }
 
-# FIXME obsoleted, deprecated, to be removed in client code.
-sub bitmap_epaper_mono {
-    my $self = shift;
-
-    $self->set_config('_last_visit', DateTime->now()->iso8601);
-    my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
-    return $util->generate_bitmap(
-        {
-            rotate          => 3,
-            numcolors       => 2,
-            gamma           => 1.8,
-            colormap_name   => 'mono',
-            colormap_colors => [],
-            format          => 'epaper_native',
-            display_type    => $self->display->colortype,
-        }
-    );
-}
-
 1;
