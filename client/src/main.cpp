@@ -39,6 +39,8 @@ const char *defined_color_type = "3C";
 #include <GxEPD2_3C.h>
 #endif
 
+// TODO add other display types too
+
 #include "debug.h"
 #include "main.h"
 
@@ -50,9 +52,8 @@ String firmware = __DATE__ " " __TIME__;
 String serverURLBase = String("http://") + CALENDAR_URL_HOST + ":" + CALENDAR_URL_PORT;
 
 /* RTC vars (survives deep sleep) */
-RTC_DATA_ATTR int bootCount = 0;
-// TODO check the length in read loop to prevent overflow
-RTC_DATA_ATTR char lastChecksum[64 + 1] = "<not_defined_yet>";
+RTC_DATA_ATTR int wakeupCount = 0;
+RTC_DATA_ATTR char lastChecksum[64 + 1] = "<not_defined_yet>";  // TODO check the length in read loop to prevent overflow
 
 // remotely configurable variables (via JSON)
 uint64_t sleepTime = SECONDS_PER_HOUR;
@@ -65,28 +66,6 @@ WiFiClient wifiClient;
 HTTPClient http;
 uint32_t fullStartTime;
 int voltageLastReadRaw = 0;
-
-void setup() {
-  basicInit();
-  readVoltage();  // only once, because it discharges the 100nF capacitor
-  wakeupAndConnect();
-
-  if (otaMode) {
-    DEBUG_PRINT("Running OTA loop");
-    while (true) {
-      ArduinoOTA.handle();
-      delay(500);
-    }
-  };
-
-  checkVoltage();
-  fetchAndDrawImageIfNeeded();
-  disconnectAndHibernate();
-}
-
-void loop() {
-  // Shouldn't get here at all due to the deep sleep called in setup
-}
 
 void readVoltage() {
 #ifdef VOLTAGE_ADC_PIN
@@ -147,7 +126,7 @@ void loadConfigFromWeb() {
 
 void basicInit() {
   fullStartTime = millis();
-  ++bootCount;
+  ++wakeupCount;
   Serial.begin(115200);
 }
 
@@ -158,7 +137,6 @@ void wakeupAndConnect() {
   }
   logResetReason();
   initOTA();
-  ArduinoOTA.handle();
   loadConfigFromWeb();
 }
 
@@ -198,7 +176,7 @@ void logResetReason() {
     DEBUG_PRINT("Wakeup reason: ? (%d)", wakeup_reason);
   }
 
-  DEBUG_PRINT("Boot count: %d, last image checksum: %s", bootCount, lastChecksum);
+  DEBUG_PRINT("Boot count: %d, last image checksum: %s", wakeupCount, lastChecksum);
 }
 
 void disconnectAndHibernate() {
@@ -224,7 +202,6 @@ void showRawBitmapFrom_HTTP(const char *host, int port, const char *path, int16_
     return;
   }
 
-  ArduinoOTA.handle();
   String partial_uri = String(path) + "?mac=" + WiFi.macAddress();
   DEBUG_PRINT("Downloading http://%s:%d%s", host, port, partial_uri.c_str());
   if (!wifiClient.connect(host, port)) {
@@ -237,7 +214,6 @@ void showRawBitmapFrom_HTTP(const char *host, int port, const char *path, int16_
                    "Connection: close\r\n\r\n");
   String line = "<not read anything yet>";
   while (wifiClient.connected()) {
-    ArduinoOTA.handle();
     line = wifiClient.readStringUntil('\n');
     DEBUG_PRINT(" read line: [%s\n]\n", line.c_str());
     if (!connection_ok) {
@@ -259,9 +235,8 @@ void showRawBitmapFrom_HTTP(const char *host, int port, const char *path, int16_
 
   if (!connection_ok) {
     error(
-        "Unexpected HTTP response, didn't found '200 OK'.\nLast line "
-        "was:\n" +
-        line);
+        "Unexpected HTTP response, didn't found '200 OK'.\n"
+        "Last line was:\n" + line + "\n");
     return;
   }
 
@@ -269,7 +244,7 @@ void showRawBitmapFrom_HTTP(const char *host, int port, const char *path, int16_
   line = wifiClient.readStringUntil('\n');
   if (line != "MM")  // signature
   {
-    error("Invalid bitmap received.");
+    error("Invalid bitmap received, doesn't start with a magic sequence.");
   }
 
   DEBUG_PRINT("Reading checksum");
@@ -290,7 +265,6 @@ void showRawBitmapFrom_HTTP(const char *host, int port, const char *path, int16_
   for (uint16_t row = 0; row < h; row++) {
     if (!connection_ok || !(wifiClient.connected() || wifiClient.available())) break;
     yield();  // prevent WDT
-    ArduinoOTA.handle();
 
 #ifdef DISPLAY_TYPE_BW
     bytes_read += read8n(wifiClient, input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
@@ -299,6 +273,7 @@ void showRawBitmapFrom_HTTP(const char *host, int port, const char *path, int16_
     bytes_read += read8n(wifiClient, input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
     bytes_read += read8n(wifiClient, input_row_color_buffer, DISPLAY_BUFFER_SIZE);
 #endif
+    // TODO add other display types too
 
     if (!connection_ok) {
       DEBUG_PRINT("Bytes read so far: %d", bytes_read);
@@ -317,16 +292,13 @@ void showRawBitmapFrom_HTTP(const char *host, int port, const char *path, int16_
 #ifdef DISPLAY_TYPE_3C
     display.writeImage(input_row_mono_buffer, input_row_color_buffer, x, y + row, w, 1);
 #endif
+    // TODO add other display types too
 
   }  // end line
   DEBUG_PRINT("Bytes read: %d", bytes_read);
 
-  ArduinoOTA.handle();
   display.refresh();  // full refresh
-
   DEBUG_PRINT("downloaded and displayed in %lu ms", millis() - startTime);
-
-  ArduinoOTA.handle();
   wifiClient.stop();
 }
 
@@ -342,6 +314,13 @@ String httpGETRequestAsString(const char *url) {
   String payload = "";
   if (httpResponseCode == 200) {
     payload = http.getString();
+  } else {
+        error("Unexpected HTTP response, didn't found '200 OK'.\n"
+          "URL: " + String(url) + "\n"
+          "Response code: " + String(httpResponseCode) + "\n"
+          "Response body:\n" + 
+          http.getString() + "\n"
+        );
   }
 
   DEBUG_PRINT("end, response=%d", httpResponseCode);
@@ -407,9 +386,13 @@ uint32_t read8n(WiFiClient &client, uint8_t *buffer, int32_t bytes) {
   return bytes - remain;
 }
 
-void displayText(String message) {
+void displayText(String message, const GFXfont *font) {
   display.setRotation(3);
-  display.setFont(&Open_Sans_Regular_24);
+
+  if (font == NULL) {
+    font = &Open_Sans_Regular_24;
+  };
+  display.setFont(font);
   display.setTextColor(GxEPD_BLACK);
   int16_t tbx, tby;
   uint16_t tbw, tbh;
@@ -475,7 +458,7 @@ void initOTA() {
 void error(String message) {
   strcpy(lastChecksum, "");  // to force reload of image next time
   DEBUG_PRINT("Displaying error: %s", message.c_str());
-  displayText(message);
+  displayText(message, &DejaVu_Sans_Mono_16);
   disconnectAndHibernate();
 }
 
@@ -514,4 +497,26 @@ void stopDisplay() {
 void logRuntimeStats() {
   DEBUG_PRINT("Total execution time: %lu ms", millis() - fullStartTime);
   DEBUG_PRINT("Going to hibernate for %lu seconds", sleepTime);
+}
+
+void setup() {
+  basicInit();
+  readVoltage();  // only once, because it discharges the 100nF capacitor
+  wakeupAndConnect();
+
+  if (otaMode) {
+    DEBUG_PRINT("Running OTA loop");
+    while (true) {
+      ArduinoOTA.handle();
+      delay(500);
+    }
+  };
+
+  checkVoltage();
+  fetchAndDrawImageIfNeeded();
+  disconnectAndHibernate();
+}
+
+void loop() {
+  // Shouldn't get here at all due to the deep sleep called in setup
 }
