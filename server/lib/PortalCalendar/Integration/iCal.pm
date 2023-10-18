@@ -11,10 +11,11 @@ use iCal::Parser;
 use DDP;
 use DateTime;
 use Try::Tiny;
+use Time::Seconds;
+
+has 'lwp_max_cache_age' => 4 * ONE_HOUR;
 
 has 'ics_url';
-
-has 'max_cache_age' => 60 * 60 * 4;    # 4 hours
 
 sub fetch_from_web {
     my $self = shift;
@@ -35,7 +36,7 @@ sub get_events {
         sub {
             my $ical = iCal::Parser->new(
                 no_todos     => 1,
-                tz           => $self->config->get('timezone'),    # database config, editable in UI
+                tz           => $self->config->get('timezone'),        # database config, editable in UI
                 timezone_map => $self->app->config->{timezone_map},    # different type of config: .conf file
             );
 

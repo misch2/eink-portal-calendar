@@ -12,13 +12,13 @@ use DDP;
 use Try::Tiny;
 use HTTP::Request;
 use DateTime;
+use Time::Seconds;
 
-has data_url => 'https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate';
+has lwp_max_cache_age => 10 * ONE_MINUTE;
 
-has max_cache_age => 60 * 10;    # 10 minutes
-
-has fetch_days                    => 90;    # any length
-has fetch_days_during_single_call => 30;    # <2 months, otherwise it returns "aggregate duration too large" error
+has data_url                      => 'https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate';
+has fetch_days                    => 90;                                                                   # any length
+has fetch_days_during_single_call => 30;                                                                   # <2 months, otherwise it returns "aggregate duration too large" error
 
 sub is_available {
     my $self = shift;

@@ -8,23 +8,24 @@ use PortalCalendar::DatabaseCache;
 
 use DDP;
 use Try::Tiny;
+use Time::Seconds;
 
 has 'app';
-has 'db_cache_id';
 has 'config';
+has 'db_cache_id';
 
-has 'cache_dir' => sub {
+has 'lwp_cache_dir' => sub {
     my $self = shift;
 
     return $self->app->app->home->child("cache/lwp");
 };
 
-has 'max_cache_age' => 60 * 60 * 1;    # 1 hour
+has 'lwp_max_cache_age' => 1 * ONE_HOUR;
 
 has 'caching_ua' => sub {
     my $self = shift;
     return LWP::UserAgent::Cached->new(
-        cache_dir => $self->cache_dir,
+        lwp_cache_dir => $self->lwp_cache_dir,
 
         nocache_if => sub {
             my $response = shift;
@@ -35,13 +36,12 @@ has 'caching_ua' => sub {
             my ($response, $path, $request) = @_;
             my $stat    = Mojo::File->new($path)->lstat;
             my $age     = time - $stat->mtime;
-            my $recache = ($age > $self->max_cache_age) ? 1 : 0;    # recache anything older than max age
+            my $recache = ($age > $self->lwp_max_cache_age) ? 1 : 0;    # recache anything older than max age
             $self->app->log->debug("Age($path)=$age secs => recache=$recache");
             return $recache;
 
         },
     );
 };
-
 
 1;

@@ -33,7 +33,7 @@ sub set_config {
     my $name  = shift;
     my $value = shift;
     return $self->config_obj->set($name, $value);
-};
+}
 
 sub get_calculated_voltage {
     my $self = shift;
@@ -58,7 +58,7 @@ sub calculate_battery_percent {
     my $cur = $self->get_calculated_voltage;
     return unless $min && $max && $cur;
     my $percentage = 100 * ($cur - $min) / ($max - $min);
-    return max(100, min(0, $percentage));  # clip to 0-100
+    return max(100, min(0, $percentage));    # clip to 0-100
 }
 
 1;

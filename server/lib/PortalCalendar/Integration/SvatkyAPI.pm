@@ -12,8 +12,9 @@ use LWP::UserAgent::Cached;
 use iCal::Parser;
 use DDP;
 use DateTime;
+use Time::Seconds;
 
-has 'max_cache_age' => 60 * 60 * 8;    # 8 hours
+has 'lwp_max_cache_age' => 8 * ONE_HOUR;
 
 sub get_today_details {
     my $self   = shift;

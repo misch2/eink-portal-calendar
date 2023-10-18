@@ -11,11 +11,11 @@ use HTTP::Request;
 
 has 'google_oauth2_auth_url'  => 'https://accounts.google.com/o/oauth2/v2/auth';
 has 'google_oauth2_token_url' => 'https://oauth2.googleapis.com/token';
-has 'googlefit_oauth2_scope'     => 'https://www.googleapis.com/auth/fitness.body.read';    # space separated scopes
+has 'googlefit_oauth2_scope'  => 'https://www.googleapis.com/auth/fitness.body.read';    # space separated scopes
 
 sub get_new_access_token_from_refresh_token {
     my $self = shift;
-    
+
     $self->app->log->info("Getting new access token");
 
     #Get tokens from auth code
@@ -38,10 +38,10 @@ sub get_new_access_token_from_refresh_token {
 
     # Save the new access token
     #$self->log->info(DDP::np($res->json));
-    $self->config->set('_googlefit_access_token',  $res->json->{access_token});
+    $self->config->set('_googlefit_access_token', $res->json->{access_token});
     $self->app->log->info("Access token refreshed: " . $self->config->get('_googlefit_access_token'));
 
     return $self->config->get('_googlefit_access_token');
-};
+}
 
 1;

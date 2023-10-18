@@ -12,13 +12,14 @@ use LWP::UserAgent::Cached;
 use iCal::Parser;
 use DDP;
 use DateTime;
+use Time::Seconds;
+
+has 'lwp_max_cache_age' => 5 * ONE_MINUTE;
 
 has 'api_key' => sub {
     my $self = shift;
     return $self->config->get('openweather_api_key');
 };
-
-has 'max_cache_age' => 60 * 5;    # 5 minutes
 
 sub fetch_current_from_web {
     my $self   = shift;
@@ -54,7 +55,7 @@ sub fetch_forecast_from_web {
     my $forced = shift;
 
     my $cache = PortalCalendar::DatabaseCache->new(app => $self->app);
-    my $data = $cache->get_or_set(
+    my $data  = $cache->get_or_set(
         sub {
             my $url = Mojo::URL->new('https://api.openweathermap.org/data/2.5/forecast')->query(
                 lat   => $self->config->get('lat'),

@@ -16,9 +16,9 @@ sub run {
     $app->log->debug("Clearing database cache");
     $app->schema->resultset('Cache')->delete_all;
 
-    my $cache_dir = $app->home->child('cache/lwp');
-    $app->log->debug("Clearing LWP cache: $cache_dir");
-    my $removed_count = File::Path::rmtree($cache_dir, { verbose => 1, safe => 1, keep_root => 1 });
+    my $lwp_cache_dir = $app->home->child('cache/lwp');
+    $app->log->debug("Clearing LWP cache: $lwp_cache_dir");
+    my $removed_count = File::Path::rmtree($lwp_cache_dir, { verbose => 1, safe => 1, keep_root => 1 });
     $app->log->debug("...removed $removed_count files");
 }
 
