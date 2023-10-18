@@ -6,7 +6,7 @@ use DateTime::Format::Strptime;
 use DateTime::Format::ISO8601;
 use DDP;
 use Time::HiRes;
-
+use List::Util qw(min max);
 use Mojo::Log;
 
 use PortalCalendar;
@@ -57,7 +57,8 @@ sub calculate_battery_percent {
 
     my $cur = $self->get_calculated_voltage;
     return unless $min && $max && $cur;
-    return 100 * ($cur - $min) / ($max - $min);
+    my $percentage = 100 * ($cur - $min) / ($max - $min);
+    return max(100, min(0, $percentage));  # clip to 0-100
 }
 
 1;
