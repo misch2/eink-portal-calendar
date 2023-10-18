@@ -5,16 +5,13 @@ use base qw/PortalCalendar::Integration/;
 use Mojo::Base -base;
 use Mojo::JSON qw(decode_json encode_json);
 use Mojo::URL;
-use Mojo::File;
+
 use PortalCalendar::DatabaseCache;
 
-use LWP::UserAgent::Cached;
-use iCal::Parser;
 use DDP;
-use DateTime;
 use Time::Seconds;
 
-has 'lwp_max_cache_age' => 5 * ONE_MINUTE;
+has 'lwp_max_cache_age' => 30 * ONE_MINUTE;
 
 has 'api_key' => sub {
     my $self = shift;
@@ -28,7 +25,6 @@ sub fetch_current_from_web {
     my $cache = PortalCalendar::DatabaseCache->new(app => $self->app);
     return $cache->get_or_set(
         sub {
-
             my $url = Mojo::URL->new('https://api.openweathermap.org/data/2.5/weather')->query(
                 lat   => $self->config->get('lat'),
                 lon   => $self->config->get('lon'),
@@ -37,7 +33,7 @@ sub fetch_current_from_web {
                 lang  => $self->config->get('openweather_lang'),
             )->to_unsafe_string;
 
-            $self->app->log->debug($url);
+            $self->app->log->debug("GET $url");
             my $response = $self->caching_ua->get($url);
 
             die $response->status_line . "\n" . $response->content
@@ -65,7 +61,7 @@ sub fetch_forecast_from_web {
                 lang  => $self->config->get('openweather_lang'),
             )->to_unsafe_string;
 
-            $self->app->log->debug($url);
+            $self->app->log->debug("GET $url");
             my $response = $self->caching_ua->get($url);
 
             die $response->status_line . "\n" . $response->content

@@ -6,11 +6,10 @@ use Test::Mojo;
 use Test::More;
 
 use DDP;
+use PortalCalendar::Config;
 use PortalCalendar::Integration::Google::Fit;
 
-# Load application script relative to the "t" directory
-my $appfile = curfile->dirname->sibling('app');
-my $t = Test::Mojo->new($appfile);
+my $t = Test::Mojo->new('PortalCalendar');
 #  => {
 #     # mocked config
 #     _googlefit_access_token => '12345',
@@ -18,7 +17,8 @@ my $t = Test::Mojo->new($appfile);
 #     _googlefit_token_json => '{"a":"b"}',
 # });
 
-my $api = PortalCalendar::Integration::Google::Fit->new(app => $t->app);
+my $config = PortalCalendar::Config->new(app => $t->app, display => undef);
+my $api = PortalCalendar::Integration::Google::Fit->new(app => $t->app, config => $config);
 my $x = $api->fetch_from_web(1);
 #p $x;
 

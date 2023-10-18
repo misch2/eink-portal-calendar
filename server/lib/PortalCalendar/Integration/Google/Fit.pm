@@ -14,7 +14,7 @@ use HTTP::Request;
 use DateTime;
 use Time::Seconds;
 
-has lwp_max_cache_age => 10 * ONE_MINUTE;
+has lwp_max_cache_age => 1 * ONE_HOUR;
 
 has data_url                      => 'https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate';
 has fetch_days                    => 90;                                                                   # any length

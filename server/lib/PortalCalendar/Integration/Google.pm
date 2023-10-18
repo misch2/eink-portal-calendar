@@ -32,7 +32,7 @@ sub get_new_access_token_from_refresh_token {
     )->res;
 
     if (!$res->is_success) {
-        $self->logger->error(DDP::np($res));
+        $self->app->log->error(DDP::np($res));
         return;
     }
 

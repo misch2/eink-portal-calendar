@@ -39,7 +39,6 @@ has 'caching_ua' => sub {
             my $recache = ($age > $self->lwp_max_cache_age) ? 1 : 0;    # recache anything older than max age
             $self->app->log->debug("Age($path)=$age secs => recache=$recache");
             return $recache;
-
         },
     );
 };
