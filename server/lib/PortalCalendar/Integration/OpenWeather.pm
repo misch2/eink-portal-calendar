@@ -1,6 +1,6 @@
 package PortalCalendar::Integration::OpenWeather;
 
-use base qw/PortalCalendar::Integration/;
+use Mojo::Base qw/PortalCalendar::Integration/;
 
 use Mojo::Base -base;
 use Mojo::JSON qw(decode_json encode_json);

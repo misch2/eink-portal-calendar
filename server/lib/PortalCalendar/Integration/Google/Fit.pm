@@ -1,6 +1,6 @@
 package PortalCalendar::Integration::Google::Fit;
 
-use base qw/PortalCalendar::Integration::Google/;
+use Mojo::Base qw/PortalCalendar::Integration::Google/;
 
 use Mojo::Base -base;
 use Mojo::File;

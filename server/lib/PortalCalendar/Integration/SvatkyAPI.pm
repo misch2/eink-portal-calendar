@@ -1,8 +1,7 @@
 package PortalCalendar::Integration::SvatkyAPI;
 
-use base qw/PortalCalendar::Integration/;
+use Mojo::Base qw/PortalCalendar::Integration/;
 
-use Mojo::Base -base;
 use Mojo::JSON qw(decode_json);
 use Mojo::URL;
 

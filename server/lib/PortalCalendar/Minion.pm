@@ -3,9 +3,6 @@ package PortalCalendar::Minion;
 use Mojo::Base 'Mojolicious';
 use PortalCalendar::Config;
 use PortalCalendar::Web2Png;
-use PortalCalendar::Integration::iCal;
-use PortalCalendar::Integration::OpenWeather;
-use PortalCalendar::Integration::Google::Fit;
 use DDP;
 
 sub regenerate_image {

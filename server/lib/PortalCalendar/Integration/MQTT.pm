@@ -1,8 +1,7 @@
 package PortalCalendar::Integration::MQTT;
 
-use base qw/PortalCalendar::Integration/;
+use Mojo::Base qw/PortalCalendar::Integration/;
 
-use Mojo::Base -base;
 use Mojo::JSON qw(encode_json);
 
 use Net::MQTT::Simple;

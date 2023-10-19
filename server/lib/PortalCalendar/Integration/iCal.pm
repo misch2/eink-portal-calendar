@@ -1,6 +1,6 @@
 package PortalCalendar::Integration::iCal;
 
-use base qw/PortalCalendar::Integration/;
+use Mojo::Base qw/PortalCalendar::Integration/;
 
 use Mojo::Base -base;
 use Mojo::File;
