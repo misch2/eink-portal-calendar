@@ -117,7 +117,7 @@ sub fetch_from_web {
 
             return $global_json;
         },
-        $self->db_cache_id . '/googlefit_weight_aggregated'
+        __PACKAGE__ . '/' . $self->db_cache_id . '/weight_aggregated'
     );
 }
 

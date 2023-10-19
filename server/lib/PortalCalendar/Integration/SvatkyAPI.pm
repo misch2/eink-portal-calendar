@@ -5,6 +5,7 @@ use base qw/PortalCalendar::Integration/;
 use Mojo::Base -base;
 use Mojo::JSON qw(decode_json);
 use Mojo::URL;
+
 use PortalCalendar::DatabaseCache;
 
 use DateTime;
@@ -22,7 +23,13 @@ sub get_today_details {
     die $response->status_line . "\n" . $response->content
         unless $response->is_success;
 
-    return decode_json($response->decoded_content);
+    my $cache = PortalCalendar::DatabaseCache->new(app => $self->app, max_cache_age => 1 * ONE_DAY);
+    return $cache->get_or_set(
+        sub {
+            return decode_json($response->decoded_content);
+        },
+        __PACKAGE__ . '/' . $self->db_cache_id . '/date-' . $date->ymd('-')
+    );
 }
 
 1;

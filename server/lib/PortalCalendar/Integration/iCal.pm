@@ -48,7 +48,7 @@ sub get_events {
             return $events;
 
         },
-        $self->db_cache_id
+        __PACKAGE__ . '/' . $self->db_cache_id
     );
     return $cal_data->{events};
 }

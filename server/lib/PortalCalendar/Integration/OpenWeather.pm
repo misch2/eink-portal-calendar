@@ -38,7 +38,7 @@ sub fetch_current_from_web {
 
             return decode_json($response->decoded_content);
         },
-        $self->db_cache_id . '/weather_current'
+        __PACKAGE__ . '/' . $self->db_cache_id . '/current'
     );
 }
 
@@ -64,7 +64,7 @@ sub fetch_forecast_from_web {
 
             return decode_json($response->decoded_content);
         },
-        $self->db_cache_id . '/weather_forecast'
+        __PACKAGE__ . '/' . $self->db_cache_id . '/forecast'
     );
 
     return $data;
