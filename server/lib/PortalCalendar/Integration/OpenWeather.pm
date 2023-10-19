@@ -17,8 +17,7 @@ has 'api_key' => sub {
 };
 
 sub fetch_current_from_web {
-    my $self   = shift;
-    my $forced = shift;
+    my $self = shift;
 
     my $cache = PortalCalendar::DatabaseCache->new(app => $self->app, max_cache_age => 30 * ONE_MINUTE);
     return $cache->get_or_set(
@@ -39,14 +38,12 @@ sub fetch_current_from_web {
 
             return decode_json($response->decoded_content);
         },
-        $self->db_cache_id . '/weather_current',
-        $forced
+        $self->db_cache_id . '/weather_current'
     );
 }
 
 sub fetch_forecast_from_web {
-    my $self   = shift;
-    my $forced = shift;
+    my $self = shift;
 
     my $cache = PortalCalendar::DatabaseCache->new(app => $self->app, max_cache_age => 30 * ONE_MINUTE);
     my $data  = $cache->get_or_set(
@@ -67,8 +64,7 @@ sub fetch_forecast_from_web {
 
             return decode_json($response->decoded_content);
         },
-        $self->db_cache_id . '/weather_forecast',
-        $forced
+        $self->db_cache_id . '/weather_forecast'
     );
 
     return $data;

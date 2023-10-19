@@ -15,19 +15,16 @@ sub get_or_set {
     my $self          = shift;
     my $callback      = shift;
     my $db_cache_id   = shift;
-    my $force_refresh = shift;
 
     my $now_epoch = DateTime->now(time_zone => 'UTC')->epoch;
-    if (!$force_refresh) {
-        if (my $row = $self->app->schema->resultset('Cache')->find($db_cache_id)) {
-            my $age = $now_epoch - $row->created_utc;
-            if ($age < $self->max_cache_age) {
-                my $data = Storable::thaw(b64_decode($row->data));
-                $self->app->log->debug("returning parsed data from cache (id [" . $db_cache_id . "], age $age seconds < limit " . $self->max_cache_age . " seconds)");
-                return $data;
-            } else {
-                $self->app->log->info("ignoring cache id [" . $db_cache_id . "], age $age seconds >= limit " . $self->max_cache_age . " seconds");
-            }
+    if (my $row = $self->app->schema->resultset('Cache')->find($db_cache_id)) {
+        my $age = $now_epoch - $row->created_utc;
+        if ($age < $self->max_cache_age) {
+            my $data = Storable::thaw(b64_decode($row->data));
+            $self->app->log->debug("returning parsed data from cache (id [" . $db_cache_id . "], age $age seconds < limit " . $self->max_cache_age . " seconds)");
+            return $data;
+        } else {
+            $self->app->log->info("ignoring cache id [" . $db_cache_id . "], age $age seconds >= limit " . $self->max_cache_age . " seconds");
         }
     }
 

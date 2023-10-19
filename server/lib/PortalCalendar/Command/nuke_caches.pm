@@ -6,6 +6,7 @@ use File::Path;
 has description => 'Clears all caches';
 has usage       => <<"USAGE";
 $0 nuke_caches
+$0 nuke_caches --db-only
 
 USAGE
 
@@ -15,6 +16,8 @@ sub run {
 
     $app->log->debug("Clearing database cache");
     $app->schema->resultset('Cache')->delete_all;
+
+    return if $args[0] && $args[0] eq '--db-only';  # FIXME disgusting but it works
 
     my $lwp_cache_dir = $app->home->child('cache/lwp');
     $app->log->debug("Clearing LWP cache: $lwp_cache_dir");

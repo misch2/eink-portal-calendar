@@ -51,7 +51,6 @@ sub _perform_authenticated_request {
 
 sub fetch_from_web {
     my $self   = shift;
-    my $forced = shift;
 
     return unless $self->is_available;
 
@@ -118,18 +117,16 @@ sub fetch_from_web {
 
             return $global_json;
         },
-        $self->db_cache_id . '/googlefit_weight_aggregated',
-        $forced
+        $self->db_cache_id . '/googlefit_weight_aggregated'
     );
 }
 
 sub get_weight_series {
     my $self   = shift;
-    my $forced = shift;
 
     return unless $self->is_available;
 
-    my $data = $self->fetch_from_web($forced);
+    my $data = $self->fetch_from_web;
     $self->app->log->debug("parsing Google Fit weight data...");
 
     my @ret = ();

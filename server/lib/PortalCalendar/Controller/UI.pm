@@ -107,9 +107,8 @@ sub config_ui_save {
     $util->update_mqtt('voltage_divider_ratio', $self->get_config('voltage_divider_ratio'));
     $util->update_mqtt('sleep_time',            $self->get_config('sleep_time'));
 
-    $self->app->enqueue_task_only_once('parse_calendars');
-    $self->app->enqueue_task_only_once('parse_weather');
-    $self->app->enqueue_task_only_once('parse_googlefit');
+    $self->app->log->debug("Clearing database cache");
+    $self->app->schema->resultset('Cache')->delete_all;
     $self->app->enqueue_task_only_once('generate_image');
 
     $self->redirect_to('/config_ui/' . $self->display->id);

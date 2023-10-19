@@ -27,7 +27,6 @@ sub fetch_from_web {
 
 sub get_events {
     my $self   = shift;
-    my $forced = shift;
 
     my $cache    = PortalCalendar::DatabaseCache->new(app => $self->app, max_cache_age => 2 * ONE_HOUR);
     my $cal_data = $cache->get_or_set(
@@ -49,8 +48,7 @@ sub get_events {
             return $events;
 
         },
-        $self->db_cache_id,
-        $forced
+        $self->db_cache_id
     );
     return $cal_data->{events};
 }

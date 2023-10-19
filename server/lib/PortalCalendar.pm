@@ -94,12 +94,9 @@ sub setup_plugins {
     $app->plugin(
         'Cron' => {
 
-            # every hour
-            '0 * * * *' => sub {
-                my $id1 = $app->minion->enqueue('parse_calendars', []);
-                my $id2 = $app->minion->enqueue('parse_weather',   []);
-                my $id3 = $app->minion->enqueue('parse_googlefit', []);
-                $app->minion->enqueue('generate_image', [], { parents => [ $id1, $id2, $id3 ] });
+            # every 15 minutes
+            '*/15 * * * *' => sub {
+                $app->minion->enqueue('generate_image', []);
             },
         }
     );
@@ -127,21 +124,6 @@ sub startup {
         #
         generate_image => sub {
             PortalCalendar::Minion::regenerate_image(@_);
-        }
-    );
-    $app->minion->add_task(
-        parse_calendars => sub {
-            PortalCalendar::Minion::reload_calendars(@_);
-        }
-    );
-    $app->minion->add_task(
-        parse_weather => sub {
-            PortalCalendar::Minion::reload_weather(@_);
-        }
-    );
-    $app->minion->add_task(
-        parse_googlefit => sub {
-            PortalCalendar::Minion::reload_googlefit(@_);
         }
     );
 
