@@ -4,8 +4,6 @@ use Mojo::Base -base;
 use Mojo::File;
 use Mojo::JSON qw(decode_json encode_json);
 
-use PortalCalendar::DatabaseCache;
-
 use DDP;
 use Try::Tiny;
 use Time::Seconds;
@@ -20,7 +18,8 @@ has 'lwp_cache_dir' => sub {
     return $self->app->app->home->child("cache/lwp");
 };
 
-has 'lwp_max_cache_age' => 1 * ONE_HOUR;
+# Only to prevent contacting the server too often. It is not intended to be a long term or content-dependent cache, that's a task for DatabaseCache.
+has 'lwp_max_cache_age' => 10 * ONE_MINUTE;
 
 has 'caching_ua' => sub {
     my $self = shift;

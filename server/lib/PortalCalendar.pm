@@ -272,3 +272,5 @@ ALTER TABLE displays ADD border_left INTEGER NOT NULL DEFAULT 0;
 -- 13 up
 ALTER TABLE displays ADD firmware VARCHAR;
 
+-- 14 up
+ALTER TABLE cache ADD created_utc INTEGER NOT NULL DEFAULT 0;

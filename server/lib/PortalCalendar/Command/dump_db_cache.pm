@@ -18,7 +18,7 @@ sub run {
     $app->log->info("Database cache content:");
     foreach my $row ($app->schema->resultset('Cache')->search(undef, { order_by => 'id' })->all) {
         my $perldata = Storable::thaw(b64_decode($row->data));
-        p $perldata, as => 'cache row id "' . $row->id . '":', output => 'stdout';
+        p $perldata, as => 'cache row id "' . $row->id . '" created at ' . $row->created_utc . ':', output => 'stdout';
         print "\n";
     }
 }

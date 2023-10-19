@@ -11,8 +11,6 @@ use PortalCalendar::DatabaseCache;
 use DDP;
 use Time::Seconds;
 
-has 'lwp_max_cache_age' => 30 * ONE_MINUTE;
-
 has 'api_key' => sub {
     my $self = shift;
     return $self->config->get('openweather_api_key');
@@ -22,7 +20,7 @@ sub fetch_current_from_web {
     my $self   = shift;
     my $forced = shift;
 
-    my $cache = PortalCalendar::DatabaseCache->new(app => $self->app);
+    my $cache = PortalCalendar::DatabaseCache->new(app => $self->app, max_cache_age => 30 * ONE_MINUTE);
     return $cache->get_or_set(
         sub {
             my $url = Mojo::URL->new('https://api.openweathermap.org/data/2.5/weather')->query(
@@ -50,7 +48,7 @@ sub fetch_forecast_from_web {
     my $self   = shift;
     my $forced = shift;
 
-    my $cache = PortalCalendar::DatabaseCache->new(app => $self->app);
+    my $cache = PortalCalendar::DatabaseCache->new(app => $self->app, max_cache_age => 30 * ONE_MINUTE);
     my $data  = $cache->get_or_set(
         sub {
             my $url = Mojo::URL->new('https://api.openweathermap.org/data/2.5/forecast')->query(

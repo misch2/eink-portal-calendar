@@ -13,8 +13,6 @@ use DateTime;
 use Try::Tiny;
 use Time::Seconds;
 
-has 'lwp_max_cache_age' => 4 * ONE_HOUR;
-
 has 'ics_url';
 
 sub fetch_from_web {
@@ -31,7 +29,7 @@ sub get_events {
     my $self   = shift;
     my $forced = shift;
 
-    my $cache    = PortalCalendar::DatabaseCache->new(app => $self->app);
+    my $cache    = PortalCalendar::DatabaseCache->new(app => $self->app, max_cache_age => 2 * ONE_HOUR);
     my $cal_data = $cache->get_or_set(
         sub {
             my $ical = iCal::Parser->new(

@@ -14,8 +14,6 @@ use HTTP::Request;
 use DateTime;
 use Time::Seconds;
 
-has lwp_max_cache_age => 1 * ONE_HOUR;
-
 has data_url                      => 'https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate';
 has fetch_days                    => 90;                                                                   # any length
 has fetch_days_during_single_call => 30;                                                                   # <2 months, otherwise it returns "aggregate duration too large" error
@@ -57,7 +55,7 @@ sub fetch_from_web {
 
     return unless $self->is_available;
 
-    my $cache = PortalCalendar::DatabaseCache->new(app => $self->app);
+    my $cache = PortalCalendar::DatabaseCache->new(app => $self->app, max_cache_age => 1 * ONE_HOUR);
     return $cache->get_or_set(
         sub {
             my $global_dt_start = DateTime->now()->subtract(days => ($self->fetch_days - 1))->truncate(to => 'day');
