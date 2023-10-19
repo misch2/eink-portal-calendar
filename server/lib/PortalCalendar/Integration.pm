@@ -36,7 +36,11 @@ has 'caching_ua' => sub {
             my $stat    = Mojo::File->new($path)->lstat;
             my $age     = time - $stat->mtime;
             my $recache = ($age > $self->lwp_max_cache_age) ? 1 : 0;    # recache anything older than max age
-            $self->app->log->debug("Age($path)=$age secs => recache=$recache");
+            if ($recache) {
+                $self->app->log->info("Age($path)=$age secs => too old, will reload from the source");
+            } else {
+                $self->app->log->debug("Age($path)=$age secs => still OK");
+            }
             return $recache;
         },
     );

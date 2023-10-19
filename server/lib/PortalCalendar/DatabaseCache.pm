@@ -19,16 +19,19 @@ sub get_or_set {
 
     my $now_epoch = DateTime->now(time_zone => 'UTC')->epoch;
     if (!$force_refresh) {
-        my $limit_epoch = $now_epoch - $self->max_cache_age;
         if (my $row = $self->app->schema->resultset('Cache')->find($db_cache_id)) {
-            if ($row->created_utc >= $limit_epoch) {
+            my $age = $now_epoch - $row->created_utc;
+            if ($age < $self->max_cache_age) {
                 my $data = Storable::thaw(b64_decode($row->data));
-                $self->app->log->debug("returning parsed data from cache [" . $db_cache_id . "]");
+                $self->app->log->debug("returning parsed data from cache (id [" . $db_cache_id . "], age $age seconds < limit " . $self->max_cache_age . " seconds)");
                 return $data;
+            } else {
+                $self->app->log->info("ignoring cache id [" . $db_cache_id . "], age $age seconds >= limit " . $self->max_cache_age . " seconds");
             }
         }
     }
 
+    $self->app->log->info("recalculating cached data for id [" . $db_cache_id . "]");
     my $data = $callback->();
 
     $self->app->log->debug("storing serialized data into the DB");
