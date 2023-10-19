@@ -20,17 +20,12 @@ sub get_or_set {
     my $now_epoch = DateTime->now(time_zone => 'UTC')->epoch;
     if (!$force_refresh) {
         my $limit_epoch = $now_epoch - $self->max_cache_age;
-        if (
-            my $row = $self->app->schema->resultset('Cache')->search(
-                {
-                    id          => $db_cache_id,
-                    created_utc => { '>= ' => $limit_epoch }
-                }
-            )->first
-        ) {
-            my $data = Storable::thaw(b64_decode($row->data));
-            $self->app->log->debug("returning parsed data from cache [" . $db_cache_id . "]");
-            return $data;
+        if (my $row = $self->app->schema->resultset('Cache')->find($db_cache_id)) {
+            if ($row->created_utc >= $limit_epoch) {
+                my $data = Storable::thaw(b64_decode($row->data));
+                $self->app->log->debug("returning parsed data from cache [" . $db_cache_id . "]");
+                return $data;
+            }
         }
     }
 
