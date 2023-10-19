@@ -11,7 +11,7 @@ Type=forking
 Restart=always
 TimeoutStartSec=infinity
 TimeoutStopSec=600
-KillMode=process
+KillMode=control-group
 
 User=<USERNAME>
 Group=<GROUPNAME>
