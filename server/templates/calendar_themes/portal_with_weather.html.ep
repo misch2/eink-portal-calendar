@@ -67,26 +67,14 @@
 
         <div class="date-row top-date-row">
             <div>
-                <%= $decorator->($name_day_details->{dayNumber}) %>. <%= $decorator->($name_day_details->{month}->{genitive}) %>
+                <%= $decorator->($name_day_details->{as_number}->{day}) %>. <%= $decorator->($name_day_details->{as_text}->{month}->{genitive}) %>
             </div>
             <div>
-                <%= $decorator->($name_day_details->{name}) %>
+                <%= $decorator->($name_day_details->{as_text}->{name}) %>
             </div>
         </div>
 
         <div class="horizontal-separator" style="top: 45"></div>
-
-        <!--
-        <div class="horizontal-separator" style="top: 220"></div>
-        <div class="date-row bottom-date-row">
-            <div>
-                %# <%= $decorator->($name_day_details->{dayNumber} . '. ' . $name_day_details->{monthNumber} . '.') %>
-            </div>
-            <div>
-                %# <%= $decorator->($name_day_details->{dayInWeek}) %>
-            </div>
-        </div>
-        -->
 
         <div class="horizontal-separator" style="top: 260"></div>
         <div class="weather-forecast-container-grid" style="top: 270">

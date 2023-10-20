@@ -342,7 +342,7 @@ sub html_for_date {
         has_calendar_entries => $has_calendar_entries,
 
         # name day:
-        name_day_details => $svatky_api->get_today_details,
+        name_day_details => $svatky_api->get_today_details->{transformed},
 
         # raw weather values:
         current_weather => $current_weather,
@@ -490,6 +490,7 @@ sub generate_bitmap {
         $img->write(data => \$out, type => 'png') or die;
         return $self->app->render(data => $out, format => 'png');
     } elsif ($args->{format} eq 'epaper_native') {
+
         # BW, 4G, 16G, 3C
         my $bitmap = '';
         if ($args->{display_type} eq '256G') {
@@ -529,6 +530,7 @@ sub generate_bitmap {
                 }
             }
         } elsif ($args->{display_type} eq '3C') {
+
             # dual buffers on each row, one for 1-bit black, 2nd one for 1-bit color
             foreach my $y (0 .. $img->getheight - 1) {
                 my @buffer_bw    = ();
@@ -551,8 +553,8 @@ sub generate_bitmap {
                     #   0       0   = red/yellow  #f00/#ff0
                     #   1       0   = red/yellow  #f00/#ff0
 
-                    my $bw_bit    = ($r + $g + $b) / 3 > 128 ? 1 : 0;   # 0 = black, 1 = white
-                    my $color_bit = ($r > 128 && $b < 128)   ? 0 : 1;   # 0 = red (override), 1 = B&W
+                    my $bw_bit    = ($r + $g + $b) / 3 > 128 ? 1 : 0;    # 0 = black, 1 = white
+                    my $color_bit = ($r > 128 && $b < 128)   ? 0 : 1;    # 0 = red (override), 1 = B&W
 
                     $byte_bw    = $byte_bw << 1 | $bw_bit;
                     $byte_color = $byte_color << 1 | $color_bit;

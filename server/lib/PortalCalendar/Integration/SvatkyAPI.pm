@@ -25,7 +25,31 @@ sub get_today_details {
     my $cache = PortalCalendar::DatabaseCache->new(app => $self->app, max_cache_age => 1 * ONE_DAY);
     return $cache->get_or_set(
         sub {
-            return decode_json($response->decoded_content);
+            my $raw         = decode_json($response->decoded_content);
+            my $transformed = {
+                date    => $raw->{date},
+                as_bool => {
+                    holiday => $raw->{isHoliday},
+                },
+                as_number => {
+                    day   => $raw->{dayNumber},
+                    month => $raw->{monthNumber},
+                    year  => $raw->{year},
+                },
+                as_text => {
+                    day_of_week => $raw->{dayInWeek},
+                    month       => {
+                        nominative => $raw->{month}->{nominative},
+                        genitive   => $raw->{month}->{genitive},
+                    },
+                    name    => $raw->{name},
+                    holiday => $raw->{holidayName},
+                }
+            };
+            return {
+                raw         => $raw,
+                transformed => $transformed,
+            };
         },
         __PACKAGE__ . '/' . $self->db_cache_id . '/date-' . $date->ymd('-')
     );
