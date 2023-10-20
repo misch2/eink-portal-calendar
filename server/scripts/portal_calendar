@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Mojo::File qw(curfile);
-use lib curfile->dirname->sibling('mock')->to_string;
+use lib curfile->dirname->sibling('lib')->child('mock')->to_string;
 use lib curfile->dirname->sibling('lib')->to_string;
 use Mojolicious::Commands;
 
