@@ -146,8 +146,8 @@ div.weather-item {
 .weather-item-night {
     color: white;
 
-    /* background-color: #000; */
-    background-image: url("/images/checkered_mask_black.png");
+    background-color: #000;
+    /* background-image: url("/images/checkered_mask_black.png"); */
 
     font-weight: bold;
     /* to compensate for the seemingly "thin" white text */
