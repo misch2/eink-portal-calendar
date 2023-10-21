@@ -22,7 +22,7 @@
             % my $dt = DateTime->from_epoch(epoch => $current_weather->{dt}, time_zone => 'UTC');
             
             % my $day_or_night = $sunrise->sunrise_sunset_span($dt)->contains($dt) ? 'day' : 'night';
-            % my $class_rain_or_snow = $total_precip > 0 ? 'weather-is-rain-or-snow' : '';
+            % my $class_rain_or_snow = $total_precip >= 1.0 ? 'weather-is-rain-or-snow' : '';
 
             <div style="position: absolute; top: 25; left: 0; margin: auto; width: 100%; text-align: center; font-size: 5rem" class="<%= $class_rain_or_snow %>">
                 <!-- <i class="wi wi-thermometer-exterior" style="font-size: 1rem; margin-top: 0.4rem"></i> -->
@@ -101,7 +101,7 @@
             %    $day_description = $dt->day_name;
             % }
 
-            <div class="weather-item weather-item-<%= $day_or_night %> <%= $total_precip > 0 ? 'weather-is-rain-or-snow' : '' %> weather-single-day-container-grid">
+            <div class="weather-item weather-item-<%= $day_or_night %> <%= $total_precip >= 1.0 ? 'weather-is-rain-or-snow' : '' %> weather-single-day-container-grid">
                 <div>
                     <%= $day_description %>
                     <br>
