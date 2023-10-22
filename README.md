@@ -1,8 +1,8 @@
 # "Portal" calendar for e-ink display
 
-Heavily inspired by https://github.com/wuspy/portal_calendar. Only the software part is different here.
+Inspired by https://github.com/wuspy/portal_calendar. Hardware is exactly the same here, only the software (mainly the server part, but client too) is different here.
 
-The main difference is that this calendar is split into two parts:
+The software is divided into two parts:
  1. Simple ESP32 web client which handles the e-Paper display
  2. PC/Raspberry webserver which produces the images and takes care of everything else, e.g.:
     - integration with web calendars
