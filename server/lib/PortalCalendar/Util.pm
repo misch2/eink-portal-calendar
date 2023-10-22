@@ -411,7 +411,7 @@ sub generate_bitmap {
     my $self = shift;
     my $args = shift;
 
-    $self->app->log->info("Producing bitmap in this format: " . DDP::np($args));
+    $self->app->log->info("Producing bitmap");
 
     my $img = Imager->new(file => $self->app->app->home->child("generated_images/current_calendar_" . $self->display->id . ".png")) or die Imager->errstr;
 

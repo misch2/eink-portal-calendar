@@ -83,7 +83,7 @@ sub get {
     my $item = $self->app->schema->resultset('Config')->find({ name => $name, display_id => ($self->display ? $self->display->id : undef) });
 
     return $item->value if $item;
-    return $self->defaults->{$name};
+    return $self->defaults->{$name} // undef;
 }
 
 sub set {

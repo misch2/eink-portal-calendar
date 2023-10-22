@@ -85,8 +85,8 @@ sub config_ui_show {
         format   => 'html',
         values   => $values,
 
-        last_voltage     => ($self->get_calculated_voltage          // '(unknown)'),
-        last_voltage_raw => ($self->get_config('_last_voltage_raw') // '(unknown)'),
+        last_voltage     => $self->get_calculated_voltage,
+        last_voltage_raw => $self->get_config('_last_voltage_raw'),
         nav_link         => 'config_ui',
 
         display => $self->display,
