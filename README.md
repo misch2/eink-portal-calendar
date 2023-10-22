@@ -12,28 +12,6 @@ The software is divided into two parts:
  
 I choose this approach because it's easier (and more fun) for me to implement the server part in my favourite environments (Perl, NodeJS, HTML+CSS) than to try to do this directly on ESP32.
 
-## TODO
-
-1. ~~Support for Czech localization and characters~~
-1. ~~Grayed out icons~~
-1. ~~Add support for iCal.~~
-1. ~~Fix the icons at the bottom, make more of them available, make them more random.~~
-1. ~~Indicate possible WiFi outage or server unavailability on the display.~~
-1. ~~Refresh the display only if image has changed (=check image checksum against the previous value). This should allow the portal calendar to ask server periodically more often but still sleep a lot and preserve energy.~~
-1. ~~Replace the ESP8266 ePaper module with what [original project](https://github.com/wuspy/portal_calendar) uses, i.e. specific low power ESP32 board + separate e-Paper hat [^1].~~
-1. ~~Configurable through the UI.~~
-1. ~~Offload calendar parsing to minion worker.~~
-1. Maybe add support for a weather forecast (but I'll probably create a different project just for this purpose).
-1. ~~Add a config page to the server, to allow changing calendar properties (e.g. weather on/off, icon sets, etc.) easily without having to redeploy updated server.~~
-1. ~~Add battery voltage measurement~~
-1. ~~Add MQTT support (to see status in HomeAssistant)~~
-1. ~~Add battery level indicator~~
-1. ~~Add integration with Google Fit and display a weight data+chart~~
-1. ~~Add support for multiple calendars (inspired by https://zivyobraz.eu/)~~
-1. ~~Better battery voltage monitoring + move more things from client to the server~~
-
-[^1]: I didn't consider the need for ESP board with very low power consumption. I therefore bought one that was available immediately (ESP8266 with integrated e-Paper driver). But while it's perfectly usable when powered through USB, it wouldn't keep working sufficiently long with AAA batteries. I therefore switched to low power ESP32 board.
-
 ## Principles
 
 * Everything is designed for a specific e-Paper size of 480x800 pixels. 
@@ -120,6 +98,28 @@ Configuration UI:
 "Broken display" variant:
  
 ![image](https://user-images.githubusercontent.com/16558674/218329554-1cf13b36-d0ab-4a0a-9ead-7b298c4bb202.png)
+
+## TODO
+
+1. ~~Support for Czech localization and characters~~
+1. ~~Grayed out icons~~
+1. ~~Add support for iCal.~~
+1. ~~Fix the icons at the bottom, make more of them available, make them more random.~~
+1. ~~Indicate possible WiFi outage or server unavailability on the display.~~
+1. ~~Refresh the display only if image has changed (=check image checksum against the previous value). This should allow the portal calendar to ask server periodically more often but still sleep a lot and preserve energy.~~
+1. ~~Replace the ESP8266 ePaper module with what [original project](https://github.com/wuspy/portal_calendar) uses, i.e. specific low power ESP32 board + separate e-Paper hat [^1].~~
+1. ~~Configurable through the UI.~~
+1. ~~Offload calendar parsing to minion worker.~~
+1. ~~Maybe add support for a weather forecast (but I'll probably create a different project just for this purpose).~~
+1. ~~Add a config page to the server, to allow changing calendar properties (e.g. weather on/off, icon sets, etc.) easily without having to redeploy updated server.~~
+1. ~~Add battery voltage measurement~~
+1. ~~Add MQTT support (to see status in HomeAssistant)~~
+1. ~~Add battery level indicator~~
+1. ~~Add integration with Google Fit and display a weight data+chart~~
+1. ~~Add support for multiple calendars (inspired by https://zivyobraz.eu/)~~
+1. ~~Better battery voltage monitoring + move more things from client to the server~~
+
+[^1]: I didn't consider the need for ESP board with very low power consumption. I therefore bought one that was available immediately (ESP8266 with integrated e-Paper driver). But while it's perfectly usable when powered through USB, it wouldn't keep working sufficiently long with AAA batteries. I therefore switched to low power ESP32 board.
 
 ## Timing
 
