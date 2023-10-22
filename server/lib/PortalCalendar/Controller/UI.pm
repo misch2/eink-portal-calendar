@@ -6,6 +6,10 @@ use Mojo::Util qw(url_escape b64_decode b64_encode);
 use Mojo::JSON qw(decode_json encode_json);
 use Try::Tiny;
 
+use PortalCalendar::Integration::iCal;
+use PortalCalendar::Integration::OpenWeather;
+use PortalCalendar::Integration::Google::Fit;
+
 has display => sub {
     my $self = shift;
     return $self->get_display_by_id($self->stash('display_number'));
@@ -108,9 +112,11 @@ sub config_ui_save {
     $util->update_mqtt('sleep_time',            $self->get_config('sleep_time'));
 
     $self->app->log->debug("Clearing database cache");
-    $self->app->schema->resultset('Cache')->delete_all;
-    $self->app->enqueue_task_only_once('generate_image');
+    PortalCalendar::Integration::iCal->new(app => $self->app)->clear_db_cache;
+    PortalCalendar::Integration::OpenWeather->new(app => $self->app)->clear_db_cache;
+    PortalCalendar::Integration::Google::Fit->new(app => $self->app)->clear_db_cache;
 
+    $self->app->enqueue_task_only_once('generate_image');
     $self->redirect_to('/config_ui/' . $self->display->id);
 }
 
@@ -132,7 +138,7 @@ sub googlefit_redirect {
     my $self = shift;
 
     # see https://developers.google.com/identity/protocols/oauth2/web-server#httprest_1
-    my $goauth = PortalCalendar::Integration::Google->new(config => $self->config_obj);
+    my $goauth = PortalCalendar::Integration::Google->new(app => $self->app);
     my $url    = $goauth->google_oauth2_auth_url .
         #
         "?client_id=" . $self->get_config('googlefit_client_id') .

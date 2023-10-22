@@ -6,7 +6,6 @@ use Mojo::Base -base;
 use Mojo::File;
 use PortalCalendar::DatabaseCache;
 
-use LWP::UserAgent::Cached;
 use iCal::Parser;
 use DDP;
 use DateTime;
@@ -26,9 +25,11 @@ sub fetch_from_web {
 }
 
 sub get_events {
-    my $self   = shift;
+    my $self = shift;
 
-    my $cache    = PortalCalendar::DatabaseCache->new(app => $self->app, max_cache_age => 2 * ONE_HOUR);
+    my $cache = $self->db_cache;
+    $cache->max_age(2 * ONE_HOUR);
+
     my $cal_data = $cache->get_or_set(
         sub {
             my $ical = iCal::Parser->new(
@@ -48,7 +49,7 @@ sub get_events {
             return $events;
 
         },
-        __PACKAGE__ . '/' . $self->db_cache_id
+        $self->db_cache_key . '/ical'
     );
     return $cal_data->{events};
 }

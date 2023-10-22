@@ -256,3 +256,17 @@ ALTER TABLE displays ADD firmware VARCHAR;
 
 -- 14 up
 ALTER TABLE cache ADD created_utc INTEGER NOT NULL DEFAULT 0;
+
+-- 15 up
+DROP TABLE cache;
+CREATE TABLE cache (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    creator VARCHAR(255) NOT NULL,
+    display_id INTEGER REFERENCES displays(id),
+    key VARCHAR(255) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT 0,
+    expires_at DATETIME NOT NULL DEFAULT 0,
+    data BLOB
+);
+CREATE UNIQUE INDEX cache_creator_key_display_id ON cache (creator, key, display_id);
+CREATE INDEX cache_expires_at ON cache (expires_at, creator);

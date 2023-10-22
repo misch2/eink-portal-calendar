@@ -18,7 +18,7 @@ sub get_new_access_token_from_refresh_token {
     $self->app->log->info("Getting new access token");
 
     #Get tokens from auth code
-    my $res = $self->app->app->ua->post(
+    my $res = $self->app->ua->post(
         $self->google_oauth2_token_url,
         'form',
         {

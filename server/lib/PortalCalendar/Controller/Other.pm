@@ -6,32 +6,33 @@ use Mojo::Util qw(url_escape b64_decode b64_encode);
 use Mojo::JSON qw(decode_json encode_json);
 use Try::Tiny;
 
-has display    => sub { die "not available here" };
-has config_obj => sub { die "not available here" };
+has display    => sub { die "not available automatically" };
+has config_obj => sub { die "not available automatically" };
 
 # Very specific work with config here! Can't use display accessors or config methods because it doesn't get the display ID in the URL.
 # OAuth 2 callback from google
 sub googlefit_callback {
     my $self = shift;
 
-    my $display;
     try {
-        my $json = decode_json(b64_decode($self->req->param('state')));
-        $display = $self->get_display_by_id($json->{display_number});
+        my $json    = decode_json(b64_decode($self->req->param('state')));
+        my $display = $self->get_display_by_id($json->{display_number});
+        $self->display($display);
     } catch {
         $self->log->error("Error decoding state: $_");
     };
 
-    my $config_obj = PortalCalendar::Config->new(app => $self->app, display => $display);
+    my $config_obj = PortalCalendar::Config->new(app => $self->app, display => $self->display);
+    $self->config_obj($config_obj);
 
-    $self->log->info("in callback, received this (for display #" . $display->id . "):");
+    $self->log->info("in callback, received this (for display #" . $self->display->id . "):");
     $self->log->info("code: " . $self->req->param('code'));
     $self->log->info("scope: " . $self->req->param('scope'));
 
     $self->log->info("converting code to a token");
 
     #Get tokens from auth code
-    my $goauth = PortalCalendar::Integration::Google->new(config => $config_obj);
+    my $goauth = PortalCalendar::Integration::Google->new(app => $self->app, config => $config_obj);
     my $res    = $self->app->ua->post(
         $goauth->google_oauth2_token_url,
         'form',
@@ -69,7 +70,7 @@ sub googlefit_callback {
 
     # $self->set_config('_googlefit_token_json',    encode_json($res->json));
 
-    $self->redirect_to('/auth/googlefit/success/' . $display->id);
+    $self->redirect_to('/auth/googlefit/success/' . $self->display->id);
 }
 
 1;
