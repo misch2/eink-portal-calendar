@@ -19,7 +19,9 @@ has 'api_key' => sub {
 sub fetch_current_from_web {
     my $self = shift;
 
-    my $cache = PortalCalendar::DatabaseCache->new(app => $self->app, max_cache_age => 30 * ONE_MINUTE);
+    my $cache = $self->db_cache;
+    $cache->max_age(30 * ONE_MINUTE);
+
     return $cache->get_or_set(
         sub {
             my $url = Mojo::URL->new('https://api.openweathermap.org/data/2.5/weather')->query(
@@ -38,15 +40,17 @@ sub fetch_current_from_web {
 
             return decode_json($response->decoded_content);
         },
-        __PACKAGE__ . '/' . $self->db_cache_id . '/current'
+        $self->db_cache_key . '/current'
     );
 }
 
 sub fetch_forecast_from_web {
     my $self = shift;
 
-    my $cache = PortalCalendar::DatabaseCache->new(app => $self->app, max_cache_age => 30 * ONE_MINUTE);
-    my $data  = $cache->get_or_set(
+    my $cache = $self->db_cache;
+    $cache->max_age(30 * ONE_MINUTE);
+
+    my $data = $cache->get_or_set(
         sub {
             my $url = Mojo::URL->new('https://api.openweathermap.org/data/2.5/forecast')->query(
                 lat   => $self->config->get('lat'),
@@ -64,7 +68,7 @@ sub fetch_forecast_from_web {
 
             return decode_json($response->decoded_content);
         },
-        __PACKAGE__ . '/' . $self->db_cache_id . '/forecast'
+        $self->db_cache_key . '/forecast'
     );
 
     return $data;

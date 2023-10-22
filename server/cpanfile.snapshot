@@ -591,6 +591,15 @@ DISTRIBUTIONS
       parent 0
       strict 0
       warnings 0
+  DateTime-Format-SQLite-0.11
+    pathname: C/CF/CFAERBER/DateTime-Format-SQLite-0.11.tar.gz
+    provides:
+      DateTime::Format::SQLite 0.11
+    requirements:
+      DateTime 0.1
+      DateTime::Format::Builder 0.6
+      ExtUtils::MakeMaker 0
+      perl 5.003
   DateTime-Format-Strptime-1.79
     pathname: D/DR/DROLSKY/DateTime-Format-Strptime-1.79.tar.gz
     provides:

@@ -7,10 +7,13 @@ use Mojo::JSON qw(decode_json encode_json);
 use DDP;
 use Try::Tiny;
 use Time::Seconds;
+use LWP::UserAgent::Cached;
 
-has 'app';
-has 'config';
-has 'db_cache_id';
+use PortalCalendar::DatabaseCache;
+
+has 'app' => sub { die "app is not defined " };
+has 'display';               # not needed in some of the methods
+has 'db_cache_key' => '';    # optional, needed only when the integration uses multiple cache rows for different parts
 
 has 'lwp_cache_dir' => sub {
     my $self = shift;
@@ -20,6 +23,16 @@ has 'lwp_cache_dir' => sub {
 
 # Only to prevent contacting the server too often. It is not intended to be a long term or content-dependent cache, that's a task for DatabaseCache.
 has 'lwp_max_cache_age' => 10 * ONE_MINUTE;
+
+has 'config' => sub {
+    my $self = shift;
+    return $self->app->config_obj;
+};
+
+has 'db_cache' => sub {
+    my $self = shift;
+    return PortalCalendar::DatabaseCache->new(app => $self->app, creator => ref($self), display_id => ($self->display && $self->display->id));
+};
 
 has 'caching_ua' => sub {
     my $self = shift;
@@ -45,5 +58,10 @@ has 'caching_ua' => sub {
         },
     );
 };
+
+sub clear_db_cache {
+    my $self = shift;
+    $self->db_cache->clear;
+}
 
 1;

@@ -40,7 +40,7 @@ sub get_calculated_voltage {
 
     my $raw_adc_reading       = $self->get_config('_last_voltage_raw');
     my $voltage_divider_ratio = $self->get_config('voltage_divider_ratio');
-    return unless $raw_adc_reading && $voltage_divider_ratio;
+    return undef unless $raw_adc_reading && $voltage_divider_ratio;
 
     my $adc_reference_voltage = 3.3;
     my $adc_resolution        = 4095;

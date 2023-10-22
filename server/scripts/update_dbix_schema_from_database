@@ -1,0 +1,6 @@
+#!/bin/bash
+dbicdump \
+    -o dump_directory=lib/ \
+    -o components='["InflateColumn::DateTime"]' \
+    PortalCalendar::Schema \
+    dbi:SQLite:local/calendar.db

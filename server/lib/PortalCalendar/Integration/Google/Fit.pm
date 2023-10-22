@@ -50,11 +50,13 @@ sub _perform_authenticated_request {
 }
 
 sub fetch_from_web {
-    my $self   = shift;
+    my $self = shift;
 
     return unless $self->is_available;
 
-    my $cache = PortalCalendar::DatabaseCache->new(app => $self->app, max_cache_age => 1 * ONE_HOUR);
+    my $cache = $self->db_cache;
+    $cache->max_age(1 * ONE_HOUR);
+
     return $cache->get_or_set(
         sub {
             my $global_dt_start = DateTime->now()->subtract(days => ($self->fetch_days - 1))->truncate(to => 'day');
@@ -117,12 +119,12 @@ sub fetch_from_web {
 
             return $global_json;
         },
-        __PACKAGE__ . '/' . $self->db_cache_id . '/weight_aggregated'
+        $self->db_cache_key . '/weight_aggregated'
     );
 }
 
 sub get_weight_series {
-    my $self   = shift;
+    my $self = shift;
 
     return unless $self->is_available;
 

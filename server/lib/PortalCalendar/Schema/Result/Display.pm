@@ -15,6 +15,18 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
+=head1 COMPONENTS LOADED
+
+=over 4
+
+=item * L<DBIx::Class::InflateColumn::DateTime>
+
+=back
+
+=cut
+
+__PACKAGE__->load_components("InflateColumn::DateTime");
+
 =head1 TABLE: C<displays>
 
 =cut
@@ -165,6 +177,21 @@ __PACKAGE__->add_unique_constraint("name_unique", ["name"]);
 
 =head1 RELATIONS
 
+=head2 caches
+
+Type: has_many
+
+Related object: L<PortalCalendar::Schema::Result::Cache>
+
+=cut
+
+__PACKAGE__->has_many(
+  "caches",
+  "PortalCalendar::Schema::Result::Cache",
+  { "foreign.display_id" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
 =head2 configs
 
 Type: has_many
@@ -181,8 +208,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-10-17 16:34:42
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:C3NRBP5wBsl3MMZaMoGJnA
+# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-10-22 15:57:29
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:pmRySSZhorHwaKI1lhbYmw
 
 
 
