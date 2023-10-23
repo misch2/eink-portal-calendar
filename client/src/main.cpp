@@ -344,7 +344,7 @@ void stopWiFi() {
 
   WiFi.persistent(true);
 
-  DEBUG_PRINT("WiFi shutdown took %lums", millis() - start);
+  DEBUG_PRINT("WiFi shutdown took %lu ms", millis() - start);
   // }
 }
 
@@ -466,7 +466,7 @@ void error(String message) {
 void errorNoWifi() { error("WiFi connect/login unsuccessful."); }
 
 void espDeepSleep(uint64_t seconds) {
-  DEBUG_PRINT("Sleeping for %lus", seconds);
+  DEBUG_PRINT("Sleeping for %l s", seconds);
   esp_sleep_enable_timer_wakeup(seconds * uS_PER_S);
   esp_deep_sleep_start();
 }
@@ -497,7 +497,7 @@ void stopDisplay() {
 
 void logRuntimeStats() {
   DEBUG_PRINT("Total execution time: %lu ms", millis() - fullStartTime);
-  DEBUG_PRINT("Going to hibernate for %lu seconds", sleepTime);
+  DEBUG_PRINT("Going to hibernate for %l seconds", sleepTime);
 }
 
 void setup() {
