@@ -1,4 +1,6 @@
 <html>
+%# see https://icon-sets.iconify.design/material-symbols
+%= javascript 'https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js'
 %= stylesheet '/css/calendar_weather.css'
 %= stylesheet '/css/weather-icons.min.css'
 % my $decorator = sub { shift };        # returns input as-is
@@ -151,9 +153,25 @@
         % }
         </div>
 
-        <div class="bottom-signature">
+        <div id="bottom-signature">
             Weather data updated: <%= DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone($app->get_config('timezone'))->strftime('%c') %>
         </div>
+
+        <div id="battery-status">
+            % my $pct = $app->calculate_battery_percent();
+            % if ($pct >= 90) {
+                <iconify-icon icon="material-symbols:battery-20-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
+            % } elsif ($pct >= 70) {
+                <iconify-icon icon="material-symbols:battery-6-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
+            % } elsif ($pct >= 40) {
+                <iconify-icon icon="material-symbols:battery-4-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
+            % } elsif ($pct >= 10) {
+                <iconify-icon icon="material-symbols:battery-2-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
+            % } else {
+                <iconify-icon icon="material-symbols:battery-0-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
+            % }
+        </div>
+
     </div>
 </body>
 

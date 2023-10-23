@@ -166,10 +166,19 @@ div.weather-item.weather-item-night.weather-is-rain-or-snow {
     border-color: red;
 }
 
-div.bottom-signature {
+div#bottom-signature {
     position: absolute;
     width: 100%;
     top: 760;
     left: 0;
     font-size: 0.7rem;
+}
+
+div#battery-status {
+    position: absolute;
+    width: 100%;
+    text-align: right;
+    top: 755;
+    left: 0;
+    font-size: 1.3rem;
 }
