@@ -43,6 +43,7 @@ is($mock_ua_used, 1, "UA mock OK");
 like($x, qr/^BEGIN:VCALENDAR/, "Raw data looks like a calendar");
 
 my $y = $api->get_all();
+is($mock_dbcache_used,   1, "Cache mock OK");
 is(exists($y->{cals}),   1);
 is(exists($y->{events}), 1);
 is(exists($y->{todos}),  1);
