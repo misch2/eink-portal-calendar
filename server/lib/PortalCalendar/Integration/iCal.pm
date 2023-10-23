@@ -14,51 +14,65 @@ use Time::Seconds;
 
 has 'ics_url';
 
-sub fetch_from_web {
+sub raw_details_from_web {
     my $self = shift;
 
     my $response = $self->caching_ua->get($self->ics_url);
-    die $response->status_line
+    die $response->status_line . "\n" . $response->content
         unless $response->is_success;
 
     return $response->decoded_content;
 }
 
-sub get_events {
-    my $self = shift;
+sub transform_details {
+    my $self     = shift;
+    my $raw_text = shift;
 
+    my $ical = iCal::Parser->new(
+        no_todos     => 1,
+        tz           => $self->config->get('timezone'),        # database config, editable in UI
+        timezone_map => $self->app->config->{timezone_map},    # different type of config: .conf file
+    );
+
+    $self->app->log->debug("parsing calendar data...");
+    my $events = {};
+    try {
+        $events = $ical->parse_strings($raw_text);
+    } catch {
+        $self->app->log->error("Error parsing calendar data: $_");
+    };
+
+    return $events;
+}
+
+sub get_all {
+    my $self  = shift;
     my $cache = $self->db_cache;
     $cache->max_age(2 * ONE_HOUR);
 
     my $cal_data = $cache->get_or_set(
         sub {
-            my $ical = iCal::Parser->new(
-                no_todos     => 1,
-                tz           => $self->config->get('timezone'),        # database config, editable in UI
-                timezone_map => $self->app->config->{timezone_map},    # different type of config: .conf file
-            );
-
-            my $data = $self->fetch_from_web;
-            $self->app->log->debug("parsing calendar data...");
-            my $events = {};
-            try {
-                $events = $ical->parse_strings($data);
-            } catch {
-                $self->app->log->error("Error parsing calendar data: $_");
-            };
-            return $events;
-
+            my $raw       = $self->raw_details_from_web();
+            my $processed = $self->transform_details($raw);
+            return $processed;
         },
         $self->db_cache_key . '/ical'
     );
-    return $cal_data->{events};
+
+    return $cal_data;
+}
+
+sub get_events_only {
+    my $self = shift;
+
+    return $self->get_all()->{events};
 }
 
 sub get_today_events {
     my $self = shift;
     my $date = shift // DateTime->now();
 
-    my $all_events = $self->get_events();
+    my $all_events = $self->get_events_only();
     my $events     = $all_events->{ $date->year }->{ $date->month }->{ $date->day } || {};
 
     my @events = values %{$events};

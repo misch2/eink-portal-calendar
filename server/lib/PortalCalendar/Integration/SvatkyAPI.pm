@@ -10,7 +10,7 @@ use Time::Seconds;
 
 has 'lwp_max_cache_age' => 4 * ONE_HOUR;
 
-sub raw_details_for_date {
+sub raw_details_from_web {
     my $self = shift;
     my $date = shift;
 
@@ -20,12 +20,14 @@ sub raw_details_for_date {
     die $response->status_line . "\n" . $response->content
         unless $response->is_success;
 
-    return decode_json($response->decoded_content);
+    return $response->decoded_content;
 }
 
 sub transform_details {
-    my $self = shift;
-    my $raw  = shift;
+    my $self     = shift;
+    my $raw_text = shift;
+
+    my $raw = decode_json($raw_text);
 
     my $ret = {
         date    => $raw->{date},
@@ -60,7 +62,7 @@ sub get_today_details {
 
     return $cache->get_or_set(
         sub {
-            my $raw       = $self->raw_details_for_date($date);
+            my $raw       = $self->raw_details_from_web($date);
             my $processed = $self->transform_details($raw);
             return $processed;
         },
