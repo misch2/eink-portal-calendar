@@ -24,14 +24,14 @@ sub get_or_set {
     my $dtf        = $self->app->schema->storage->datetime_parser;
 
     if (
-        my $row = $self->app->schema->resultset('Cache')->find(
+        my $row = $self->app->schema->resultset('Cache')->search(
             {
                 creator    => $self->creator,
                 display_id => $self->display_id,
                 key        => $db_cache_key,
                 expires_at => { '>' => $dtf->format_datetime($now) }
             }
-        )
+        )->single
     ) {
         my $data = Storable::thaw(b64_decode($row->data));
         $self->app->log->debug("${log_prefix}returning parsed data from cache (expires in " . $row->expires_at->clone->subtract_datetime_absolute($now)->in_units('seconds') . " seconds, at " . $row->expires_at . ")");
