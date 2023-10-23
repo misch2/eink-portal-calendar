@@ -11,13 +11,13 @@ my $t   = Test::Mojo->new('PortalCalendar');
 my $api = PortalCalendar::Integration::SvatkyAPI->new(app => $t->app);
 
 my $mock_used = 0;
-my $module = Test::MockModule->new('PortalCalendar::DatabaseCache');
+my $module    = Test::MockModule->new('PortalCalendar::DatabaseCache');
 $module->mock('get_or_set', sub { $mock_used = 1; return $_[1]->() });    # run the callback directly, don't cache
 
 my $data = $api->get_today_details(DateTime->new(year => 2023, month => 1, day => 1));
-is($mock_used, 1, "Mocked cache was used");
+is($mock_used, 1, "Cache mock OK");
 is_deeply(
-    $data->{transformed},
+    $data,
     {
         as_bool => {
             holiday => 1,
@@ -44,7 +44,7 @@ is_deeply(
 
 $data = $api->get_today_details(DateTime->new(year => 2023, month => 10, day => 18));
 is_deeply(
-    $data->{transformed},
+    $data,
     {
         as_bool => {
             holiday => 0,

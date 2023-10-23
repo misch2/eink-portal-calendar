@@ -341,7 +341,7 @@ sub html_for_date {
         has_calendar_entries => $has_calendar_entries,
 
         # name day:
-        name_day_details => $svatky_api->get_today_details->{transformed},
+        name_day_details => $svatky_api->get_today_details,
 
         # raw weather values:
         current_weather => $current_weather,
