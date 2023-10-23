@@ -26,7 +26,10 @@ sub config {
     my $self = shift;
 
     my $display = $self->display;
-    if (!$display) {
+    if ($display) {
+        $display->firmware($self->req->param('fw') // '');
+        $display->update;
+    } else {
         $display = $self->schema->resultset('Display')->create(
             {
                 mac           => $self->mac,
