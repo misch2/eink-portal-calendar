@@ -8,6 +8,7 @@ use DDP;
 use Try::Tiny;
 use Time::Seconds;
 use LWP::UserAgent::Cached;
+#use LWP::ConsoleLogger::Everywhere;    # uncomment to debug LWP to STDOUT
 
 use PortalCalendar::DatabaseCache;
 
