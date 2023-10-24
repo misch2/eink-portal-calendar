@@ -154,7 +154,7 @@
         </div>
 
         <div id="bottom-signature">
-            Weather data updated: <%= DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone($app->get_config('timezone'))->strftime('%c') %>
+            Poslední aktualizace dat: <%= DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone($app->get_config('timezone'))->strftime('%c') %>
         </div>
 
         <div id="battery-status">
