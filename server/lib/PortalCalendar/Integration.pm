@@ -7,8 +7,10 @@ use Mojo::JSON qw(decode_json encode_json);
 use DDP;
 use Try::Tiny;
 use Time::Seconds;
-use LWP::UserAgent::Cached;
-#use LWP::ConsoleLogger::Everywhere;    # uncomment to debug LWP to STDOUT
+use LWP::UserAgent::Caching;
+use CHI;
+
+use LWP::ConsoleLogger::Everywhere;    # uncomment to debug LWP to STDOUT
 
 use PortalCalendar::DatabaseCache;
 
@@ -35,28 +37,33 @@ has 'db_cache' => sub {
     return PortalCalendar::DatabaseCache->new(app => $self->app, creator => ref($self), display_id => ($self->display && $self->display->id));
 };
 
-has 'caching_ua' => sub {
+has chi_cache => sub {
     my $self = shift;
-    return LWP::UserAgent::Cached->new(
-        agent         => "PortalCalendar/1.0 github.com/misch2/eink-portal-calendar",    # Non-generic agent name required, see https://api.met.no/doc/TermsOfService
-        lwp_cache_dir => $self->lwp_cache_dir,
 
-        nocache_if => sub {
-            my $response = shift;
-            return $response->code != 200;                                               # do not cache any bad response
-        },
+    CHI->new(
+        driver         => 'File',
+        root_dir       => $self->lwp_cache_dir->to_string,
+        file_extension => '.cache',
+        l1_cache       => {
+            driver   => 'Memory',
+            global   => 1,
+            max_size => 1024 * 1024
+        }
+    );
+};
 
-        recache_if => sub {
-            my ($response, $path, $request) = @_;
-            my $stat    = Mojo::File->new($path)->lstat;
-            my $age     = time - $stat->mtime;
-            my $recache = ($age > $self->lwp_max_cache_age) ? 1 : 0;                     # recache anything older than max age
-            if ($recache) {
-                $self->app->log->info("Age($path)=$age secs => too old, will reload from the source");
-            } else {
-                $self->app->log->debug("Age($path)=$age secs => still OK");
-            }
-            return $recache;
+has caching_ua => sub {
+    my $self = shift;
+
+    return LWP::UserAgent::Caching->new(
+        agent => "PortalCalendar/1.0 github.com/misch2/eink-portal-calendar",    # Non-generic agent name required, see https://api.met.no/doc/TermsOfService
+
+        http_caching => {
+            cache => $self->chi_cache,
+            type  => 'private',
+
+            # not over due within the next minute
+            request_directives => ("max-age=" . $self->lwp_max_cache_age . ', min-fresh=60'),
         },
     );
 };

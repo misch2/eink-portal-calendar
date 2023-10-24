@@ -8,7 +8,7 @@
         <th scope="col">Id</th>
         <th scope="col">Name</th>
         <th scope="col">MAC address</th>
-        <th scope="col">Width &times; height<br>(natural)</th>
+        <th scope="col">Width &times; height</th>
         <th scope="col">Color type</th>
         <th scope="col">Firmware</th>
     </tr>
