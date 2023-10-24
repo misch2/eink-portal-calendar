@@ -254,7 +254,7 @@ sub battery_percent {
     my $cur = $self->voltage;
     return unless $min && $max && $cur;
     my $percentage = 100 * ($cur - $min) / ($max - $min);
-    return max(100, min(0, $percentage));    # clip to 0-100
+    return min(100, max(0, $percentage));    # clip to 0-100
 }
 
 
