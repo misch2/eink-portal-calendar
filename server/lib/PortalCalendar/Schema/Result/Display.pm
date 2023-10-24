@@ -211,6 +211,8 @@ __PACKAGE__->has_many(
 # Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-10-22 15:57:29
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:pmRySSZhorHwaKI1lhbYmw
 
+use List::Util qw(min max);
+
 sub virtual_width {
     my $self = shift;
     return $self->width if $self->rotation % 180 == 0;
@@ -222,6 +224,39 @@ sub virtual_height {
     return $self->height if $self->rotation % 180 == 0;
     return $self->width;
 }
+
+sub get_config {
+    my $self = shift;
+    my $name = shift;
+    return $self->configs->search({ name => $name })->first->value // undef;
+}
+
+sub voltage {
+    my $self = shift;
+
+    my $raw_adc_reading       = $self->get_config('_last_voltage_raw');
+    my $voltage_divider_ratio = $self->get_config('voltage_divider_ratio');
+    return undef unless $raw_adc_reading && $voltage_divider_ratio;
+
+    my $adc_reference_voltage = 3.3;
+    my $adc_resolution        = 4095;
+
+    my $voltage = $raw_adc_reading * $adc_reference_voltage / $adc_resolution * $voltage_divider_ratio;
+
+    return $voltage;
+}
+
+sub battery_percent {
+    my $self = shift;
+    my $min  = $self->get_config('min_voltage');
+    my $max  = $self->get_config('max_voltage');
+
+    my $cur = $self->voltage;
+    return unless $min && $max && $cur;
+    my $percentage = 100 * ($cur - $min) / ($max - $min);
+    return max(100, min(0, $percentage));    # clip to 0-100
+}
+
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
 1;

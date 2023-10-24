@@ -21,9 +21,43 @@
         % my $display_name;
         % my $display_number;
         % if ($display) {
-        %   $display_name = $display ? $display->name : 'Unknown display';
-        %   $display_number = $display->id;
+            % $display_name = $display ? $display->name : 'Unknown display';
+            % $display_number = $display->id;
+
+            % my $last_contact_ago;
+            % my $last_visit_dt;
+            % if (my $last_visit_raw = $config_obj->get('_last_visit')) {
+            %     $last_visit_dt = DateTime::Format::ISO8601->parse_datetime($last_visit_raw);
+            %     $last_contact_ago = DateTime->now()->subtract_datetime($last_visit_dt);
+            % }
+
+            % my $waiting_tasks  = $config_obj->app->minion->jobs({ states => [ 'inactive', 'active' ] })->total;
+            % my $last_voltage = $display->voltage;
+            % my $battery_percent = $display->battery_percent;
+
             <h4>Selected display: <%= $display_name %></h4>
+            <p class="row-fluid">
+                Last contact: 
+                % if ($last_contact_ago) {
+                    % my ($hours, $minutes) = $last_contact_ago->in_units('hours', 'minutes');
+                    % if ($hours > 0) {
+                        <%= $hours %> hours
+                    % }
+                    <%= $minutes %> minutes ago.
+                    %# (<%= $last_visit_dt ? $last_visit_dt->strftime('%c') : '' %>).
+                % } else {
+                    never.
+                % }
+
+                Voltage:
+                <%= defined($last_voltage) ? sprintf("%.1f", $last_voltage) : '(unknown)' %> V (<%= defined($battery_percent) ? sprintf("%.0f", $battery_percent) : 'unknown' %> %). 
+
+                OTA mode: 
+                <%= $config_obj->get('ota_mode') ? 'on' : 'off' %>.
+
+                Waiting tasks: 
+                <%= $waiting_tasks %>. 
+            </p>
         % }
 
         <nav class="navbar navbar-expand-lg navbar-light bg-light">

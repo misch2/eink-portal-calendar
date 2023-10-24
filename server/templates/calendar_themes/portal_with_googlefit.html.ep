@@ -138,7 +138,7 @@ function drawBasic() {
         <img id="aperture-logo" src="/images/Aperture_Laboratories_Logo.png">
 
         <div id="battery-status">
-            % my $pct = $app->calculate_battery_percent();
+            % my $pct = $display->battery_percent();
             % if ($pct >= 90) {
                 <iconify-icon icon="material-symbols:battery-20-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
             % } elsif ($pct >= 70) {

@@ -56,22 +56,22 @@ sub config {
     $self->set_config('_last_voltage_raw', $self->req->param('adc') // $self->req->param('voltage_raw') // '');    # value has NOT NULL restriction
 
     my $util = PortalCalendar::Util->new(app => $self, display => $display);
-    $util->update_mqtt('voltage',         $self->get_calculated_voltage + 0.001);                                  # to force grafana to store changed values
+    $util->update_mqtt('voltage',         $display->voltage + 0.001);                                  # to force grafana to store changed values
+    $util->update_mqtt('battery_percent', $display->battery_percent() + 0.001);                             # to force grafana to store changed values
     $util->update_mqtt('voltage_raw',     $self->get_config('_last_voltage_raw') + 0.001);                         # to force grafana to store changed values
-    $util->update_mqtt('battery_percent', $self->calculate_battery_percent() + 0.001);                             # to force grafana to store changed values
-    $util->update_mqtt('last_visit',      DateTime->now()->rfc3339);
     $util->update_mqtt('firmware',        $display->firmware);
+    $util->update_mqtt('last_visit',      DateTime->now()->rfc3339);
 
-    $util->update_mqtt('voltage',         $self->get_calculated_voltage);
+    $util->update_mqtt('voltage',         $display->voltage);
+    $util->update_mqtt('battery_percent', $display->battery_percent());
     $util->update_mqtt('voltage_raw',     $self->get_config('_last_voltage_raw'));
-    $util->update_mqtt('battery_percent', $self->calculate_battery_percent());
 
     my $ret = {
 
         # {// undef} to force scalars
         sleep               => $self->get_config('sleep_time') // undef,
-        is_critical_voltage => (($self->get_calculated_voltage < $self->get_config('alert_voltage')) ? \1 : \0),    # JSON true/false
-        battery_percent     => $self->calculate_battery_percent() // undef,
+        is_critical_voltage => (($display->voltage < $self->get_config('alert_voltage')) ? \1 : \0),    # JSON true/false
+        battery_percent     => $display->battery_percent() // undef,
         ota_mode            => ($self->get_config('ota_mode') ? \1 : \0),                                           # JSON true/false
     };
 

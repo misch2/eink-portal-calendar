@@ -25,22 +25,14 @@ sub select_display {
         format   => 'html',
         nav_link => 'index',
 
-        display  => undef,
-        displays => [ $displays->all ],
+        display    => undef,
+        config_obj => $self->config_obj,
+        displays   => [ $displays->all ],
     );
 }
 
 sub home {
     my $self = shift;
-
-    my $last_contact_ago;
-    my $last_visit_dt;
-
-    if (my $last_visit_raw = $self->get_config('_last_visit')) {
-        $last_visit_dt = DateTime::Format::ISO8601->parse_datetime($last_visit_raw);
-
-        $last_contact_ago = DateTime->now()->subtract_datetime($last_visit_dt);
-    }
 
     return $self->render(
         template => 'index',
@@ -49,13 +41,6 @@ sub home {
 
         display    => $self->display,
         config_obj => $self->config_obj,
-
-        waiting_tasks    => $self->app->minion->jobs({ states => [ 'inactive', 'active' ] })->total,
-        last_contact_ago => $last_contact_ago,
-        last_visit_dt    => $last_visit_dt,
-        last_voltage     => $self->get_calculated_voltage          // undef,
-        battery_percent  => $self->calculate_battery_percent       // undef,
-        last_voltage_raw => $self->get_config('_last_voltage_raw') // undef,
     );
 }
 
@@ -67,7 +52,8 @@ sub test {
         format   => 'html',
         nav_link => 'compare',
 
-        display => $self->display,
+        display    => $self->display,
+        config_obj => $self->config_obj,
     );
 }
 
@@ -85,11 +71,12 @@ sub config_ui_show {
         format   => 'html',
         values   => $values,
 
-        last_voltage     => $self->get_calculated_voltage,
+        last_voltage     => $self->display->voltage,
         last_voltage_raw => $self->get_config('_last_voltage_raw'),
         nav_link         => 'config_ui',
 
-        display => $self->display,
+        display    => $self->display,
+        config_obj => $self->config_obj,
     );
 }
 
@@ -176,7 +163,8 @@ sub googlefit_success {
         format   => 'html',
         nav_link => 'config_ui',
 
-        display => $self->display,
+        display    => $self->display,
+        config_obj => $self->config_obj,
 
         # page-specific variables
         a_token    => $self->get_config('_googlefit_access_token'),

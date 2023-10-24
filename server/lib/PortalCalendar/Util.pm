@@ -333,6 +333,7 @@ sub html_for_date {
         template => 'calendar_themes/' . $self->app->get_config('theme'),
         format   => 'html',
         app      => $self->app,
+        display  => $self->display,
 
         # other variables
         date                 => $dt,
