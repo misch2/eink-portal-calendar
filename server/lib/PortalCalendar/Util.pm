@@ -413,6 +413,7 @@ sub generate_bitmap {
     my $args = shift;
 
     $self->app->log->info("Producing bitmap");
+    $self->app->log->info(np($args));
 
     my $img = Imager->new(file => $self->app->app->home->child("generated_images/current_calendar_" . $self->display->id . ".png")) or die Imager->errstr;
 
@@ -459,14 +460,14 @@ sub generate_bitmap {
     }
 
     if ($args->{numcolors} && $args->{numcolors} < 256) {
-        my $tmp = $img->to_paletted(
-            {
-                make_colors => $args->{colormap_name},
-                translate   => 'closest',                                                               # closest, errdiff
-                                                                                                        # errdiff     => 'jarvis',      # floyd, jarvis, stucki, ...
-                colors      => [ map { Imager::Color->new($_) } @{ $args->{colormap_colors} || [] } ]
-            }
-        );
+        my $imager_args = {
+            make_colors => $args->{colormap_name},
+            translate   => 'closest',                                                               # closest, errdiff
+                                                                                                    # errdiff     => 'jarvis',      # floyd, jarvis, stucki, ...
+            colors      => [ map { Imager::Color->new($_) } @{ $args->{colormap_colors} || [] } ]
+        };
+        my $tmp = $img->to_paletted($imager_args);
+
         die $img->errstr unless $tmp;
         $img = $tmp;
     }
