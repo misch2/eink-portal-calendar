@@ -35,8 +35,9 @@
 % end
 
 <p class="row-fluid pb-3">
-    Underlying image for the ePaper display.
-    It's used almost as-is by the display (it only gets quantized and gamma-corrected).
+    Image for the ePaper display
+    (if you'd like to see the original image generated from HTML+CSS template then look at the <a href="/test/<%= $display->id %>">test page</a>).
+    
 </p>
 
 <p class="row-fluid">
