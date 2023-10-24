@@ -6,7 +6,7 @@
     <div>
         Calendar page <a href="/calendar/<%= $display->id %>/html">as HTML</a>:
         <br>
-        <iframe src="/calendar/<%= $display->id %>/html" width="<%= $display->width %>" height="<%= $display->height %>" style="border: 1px solid black"></iframe>
+        <iframe src="/calendar/<%= $display->id %>/html" width="<%= $display->virtual_width %>" height="<%= $display->virtual_height %>" style="border: 1px solid black"></iframe>
 
     </div>
     <div>

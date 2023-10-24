@@ -21,7 +21,7 @@ sub regenerate_image {
     foreach my $display ($job->app->schema->resultset('Display')->all_displays) {
         $job->app->log->info("Processing display #" . $display->id);
 
-        $converter->convert_url($job->app->config->{url_start} . '/calendar/' . $display->id . '/html', $display->width, $display->height, $job->app->home->child("generated_images/current_calendar_" . $display->id . ".png"));
+        $converter->convert_url($job->app->config->{url_start} . '/calendar/' . $display->id . '/html', $display->virtual_width, $display->virtual_height, $job->app->home->child("generated_images/current_calendar_" . $display->id . ".png"));
     }
     $job->app->log->info("Finished processing");
 

@@ -13,7 +13,7 @@
     <nav>
     <div class="nav nav-tabs" id="nav-tab" role="tablist">
         <button class="nav-link active" id="nav-main-tab" data-bs-toggle="tab" data-bs-target="#nav-main" type="button" role="tab">Main</button>
-        <button class="nav-link" id="nav-client-tab" data-bs-toggle="tab" data-bs-target="#nav-client" type="button" role="tab">ePaper client</button>
+        <button class="nav-link" id="nav-client-tab" data-bs-toggle="tab" data-bs-target="#nav-client" type="button" role="tab">ePaper display (client)</button>
         <button class="nav-link" id="nav-calendar-tab" data-bs-toggle="tab" data-bs-target="#nav-calendar" type="button" role="tab">Calendar</button>
         <button class="nav-link" id="nav-openweather-tab" data-bs-toggle="tab" data-bs-target="#nav-openweather" type="button" role="tab">OpenWeather</button>
         <button class="nav-link" id="nav-mqtt-tab" data-bs-toggle="tab" data-bs-target="#nav-mqtt" type="button" role="tab">MQTT</button>
@@ -21,7 +21,7 @@
     </div>
     </nav>
     <div class="tab-content" id="nav-tabContent">
-        <div class="tab-pane fade show active" id="nav-main" role="tabpanel">
+        <div class="tab-pane show active" id="nav-main" role="tabpanel">
             <fieldset class="row">
                 <legend class="w-auto">Theme</legend>
 
@@ -72,7 +72,7 @@
             </fieldset>
         </div>
 
-        <div class="tab-pane fade" id="nav-client" role="tabpanel">
+        <div class="tab-pane" id="nav-client" role="tabpanel">
             <fieldset class="row">
                 <div class="col-md-12">
                     <div class="form-check form-switch">
@@ -84,6 +84,44 @@
                     <div>
                         <i>(Required for firmware update. ⚠️ It disables standard functionality and waits for OTA update indefinitely!)</i>
                     </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="mt-4 row">
+                <div class="col-md-12">
+                    <label for="display_name">Name</label>
+                    <input id="display_name" name="display_name" type="text" class="form-control" value="<%= $display->name %>">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="display_rotation">Rotation</label>
+                    <select id="display_rotation" name="display_rotation" class="form-select">
+                        <option value="0" <%= 'selected' if $display->rotation == 0 %>> 0° (<%= $display->width %> &times; <%= $display->height %>)</option>
+                        <option value="1" <%= 'selected' if $display->rotation == 1 %>> 90° (<%= $display->height %> &times; <%= $display->width %>)</option>
+                        <option value="2" <%= 'selected' if $display->rotation == 2 %>> 180° (<%= $display->width %> &times; <%= $display->height %> but upside down)</option>
+                        <option value="3" <%= 'selected' if $display->rotation == 3 %>> 270° (<%= $display->height %> &times; <%= $display->width %>)</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="display_gamma">Gamma</label>
+                    <input id="display_gamma" name="display_gamma" type="number" step="0.01" class="form-control" value="<%= $display->gamma %>">
+                </div>
+
+                <div class="col-md-3">
+                    <label for="display_border_top">Frame border top</label>
+                    <input id="display_border_top" name="display_border_top" type="number" step="1" class="form-control" value="<%= $display->border_top %>">
+                </div>
+                <div class="col-md-3">
+                    <label for="display_border_right">Frame border right</label>
+                    <input id="display_border_right" name="display_border_right" type="number" step="1" class="form-control" value="<%= $display->border_right %>">
+                </div>
+                <div class="col-md-3">
+                    <label for="display_border_bottom">Frame border bottom</label>
+                    <input id="display_border_bottom" name="display_border_bottom" type="number" step="1" class="form-control" value="<%= $display->border_bottom %>">
+                </div>
+                <div class="col-md-3">
+                    <label for="display_border_left">Frame border left</label>
+                    <input id="display_border_left" name="display_border_left" type="number" step="1" class="form-control" value="<%= $display->border_left %>">
                 </div>
             </fieldset>
 
@@ -125,7 +163,7 @@ Ratio_new = Ratio_cur * V_real / V_cur = <span id="calc_Ratio_new" class="font-w
             </fieldset>
         </div>
 
-        <div class="tab-pane fade" id="nav-calendar" role="tabpanel">
+        <div class="tab-pane" id="nav-calendar" role="tabpanel">
             <fieldset class="row">
                 <div class="form-group col-12">
                     <div class="form-check form-switch">
@@ -169,7 +207,7 @@ Ratio_new = Ratio_cur * V_real / V_cur = <span id="calc_Ratio_new" class="font-w
             </fieldset>
         </div>
 
-        <div class="tab-pane fade" id="nav-openweather" role="tabpanel">
+        <div class="tab-pane" id="nav-openweather" role="tabpanel">
             <fieldset class="row">
                 <div class="form-group col-12">
                     <div class="form-check form-switch">
@@ -205,7 +243,7 @@ Ratio_new = Ratio_cur * V_real / V_cur = <span id="calc_Ratio_new" class="font-w
             </fieldset>
         </div>
 
-        <div class="tab-pane fade" id="nav-mqtt" role="tabpanel">
+        <div class="tab-pane" id="nav-mqtt" role="tabpanel">
             <fieldset class="row">
                 <div class="form-group col-12">
                     <div class="form-check form-switch">
@@ -236,7 +274,7 @@ Ratio_new = Ratio_cur * V_real / V_cur = <span id="calc_Ratio_new" class="font-w
             </fieldset>
         </div>
 
-        <div class="tab-pane fade" id="nav-fit" role="tabpanel">
+        <div class="tab-pane" id="nav-fit" role="tabpanel">
             <fieldset class="row">
                 <div class="form-group col-12 mb-3">
                     <a class="btn btn-primary" href="/auth/googlefit/<%= $display->id %>">Authorize calendar to use Google Fit with the values below</a>

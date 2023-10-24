@@ -98,10 +98,21 @@ sub config_ui_save {
 
     my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
 
+    # Generic config parameters
     foreach my $name (@{ $self->config_obj->parameters }) {
         my $value = $self->req->param($name);
         $self->set_config($name, $value);
     }
+
+    # Parameters stored in the 'displays' table
+    $self->display->name($self->req->param('display_name'));
+    $self->display->rotation($self->req->param('display_rotation'));
+    $self->display->gamma($self->req->param('display_gamma'));
+    $self->display->border_top($self->req->param('display_border_top'));
+    $self->display->border_right($self->req->param('display_border_right'));
+    $self->display->border_bottom($self->req->param('display_border_bottom'));
+    $self->display->border_left($self->req->param('display_border_left'));
+    $self->display->update;
 
     $self->flash(message => "Parameters saved.");
 

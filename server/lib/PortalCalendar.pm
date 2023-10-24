@@ -36,7 +36,7 @@ sub setup_helpers {
 
     $app->helper(
         schema => sub {
-            state $schema = PortalCalendar::Schema->connect("dbi:SQLite:local/calendar.db");
+            state $schema = PortalCalendar::Schema->connect("dbi:SQLite:local/calendar.db", "", "", { sqlite_unicode => 1 });
         }
     );
 

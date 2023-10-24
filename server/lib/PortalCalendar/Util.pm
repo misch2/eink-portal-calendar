@@ -416,8 +416,8 @@ sub generate_bitmap {
     my $img = Imager->new(file => $self->app->app->home->child("generated_images/current_calendar_" . $self->display->id . ".png")) or die Imager->errstr;
 
     # If the generated image is larger (probably due to invalid CSS), crop it so that it display at least something:
-    if ($img->getheight > $self->display->height) {
-        my $tmp = $img->crop(left => 0, top => 0, width => $self->display->width, height => $self->display->height);
+    if ($img->getheight > $self->display->virtual_height) {
+        my $tmp = $img->crop(left => 0, top => 0, width => $self->display->virtual_width, height => $self->display->virtual_height);
         die $img->errstr unless $tmp;
         $img = $tmp;
     }

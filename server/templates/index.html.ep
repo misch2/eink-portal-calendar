@@ -1,7 +1,7 @@
 % layout 'bootstrap5';
 
-% my $width  = $display->width;
-% my $height = $display->height;
+% my $width  = $display->virtual_width;
+% my $height = $display->virtual_height;
 
 % my $border_size           = 50;
 % my $border_overlay_top    = $display->border_top;    # -3;

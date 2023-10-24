@@ -32,13 +32,16 @@ sub config {
     } else {
         $display = $self->schema->resultset('Display')->create(
             {
-                mac           => $self->mac,
-                name          => "New display with MAC " . uc($self->mac) . " added on " . DateTime->now->stringify,
-                width         => $self->req->param('w')  // 100,
-                height        => $self->req->param('h')  // 200,
-                rotation      => $self->req->param('r')  // 0,
-                colortype     => $self->req->param('c')  // 'BW',
-                firmware      => $self->req->param('fw') // '',
+                # Physical properties, not to be changed by the user:
+                mac       => $self->mac,
+                name      => "New display with MAC " . uc($self->mac) . " added on " . DateTime->now->stringify,
+                width     => $self->req->param('w'),
+                height    => $self->req->param('h'),
+                colortype => $self->req->param('c'),
+                firmware  => $self->req->param('fw') // '',
+
+                # Logical properties, updatable by the user:
+                rotation      => 0,
                 gamma         => 2.2,
                 border_top    => 0,
                 border_right  => 0,
