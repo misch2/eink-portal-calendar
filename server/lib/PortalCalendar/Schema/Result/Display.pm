@@ -257,6 +257,14 @@ sub battery_percent {
     return min(100, max(0, $percentage));    # clip to 0-100
 }
 
+sub colortype_formatted {
+    my $self      = shift;
+    my $colortype = $self->colortype;
+    return 'Black & White'                         if $colortype eq 'BW';
+    return 'Grayscale, 4 levels'                   if $colortype eq '4G';
+    return 'Black & White & Color (red or yellow)' if $colortype eq '3C';
+    return $colortype;
+}
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
 1;

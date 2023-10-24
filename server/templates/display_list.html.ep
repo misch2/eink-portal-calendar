@@ -5,13 +5,12 @@
 <table class="table FIXMEtable-striped table-hover">
 <thead>
     <tr>
-        <th scope="col">id</th>
-        <th scope="col">name</th>
-        <th scope="col">mac</th>
-        <th scope="col">width</th>
-        <th scope="col">height</th>
-        <th scope="col">colortype</th>
-        <th scope="col">firmware</th>
+        <th scope="col">Id</th>
+        <th scope="col">Name</th>
+        <th scope="col">MAC address</th>
+        <th scope="col">Width &times; height<br>(natural)</th>
+        <th scope="col">Color type</th>
+        <th scope="col">Firmware</th>
     </tr>
 </thead>
 <tbody>
@@ -28,12 +27,11 @@
         </td>
         <td>
             <%= $d->virtual_width %>
-        </td>
-        <td>
+            &times;
             <%= $d->virtual_height %>
         </td>
         <td>
-            <%= $d->colortype %>
+            <%= $d->colortype_formatted %>
         </td>
         <td>
             <%= $d->firmware %>

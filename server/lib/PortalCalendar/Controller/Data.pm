@@ -118,11 +118,13 @@ sub bitmap_epaper {
     my $rotate          = $self->display->rotation;
 
     if ($self->display->colortype eq 'BW') {
-        $numcolors     = 2;
-        $colormap_name = 'mono';
+        $numcolors       = 2;
+        $colormap_name   = 'none';
+        $colormap_colors = [ '#000000', '#ffffff' ];
     } elsif ($self->display->colortype eq '4G') {
-        $numcolors     = 4;
-        $colormap_name = 'gray4';
+        $numcolors       = 4;
+        $colormap_name   = 'none';
+        $colormap_colors = [ '#000000', '#555555', '#aaaaaa', '#ffffff' ];
     } elsif ($self->display->colortype eq '16G') {
         $numcolors     = 16;
         $colormap_name = 'gray16';
