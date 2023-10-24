@@ -41,6 +41,6 @@
 
 <p class="row-fluid">
     <div class="preview-image">
-        <img src="/calendar/bitmap?format=png&mac=<%= $display->mac %>">
+        <img src="/calendar/bitmap/epaper?ui_preview=1&mac=<%= $display->mac %>">
     </div>
 </p>

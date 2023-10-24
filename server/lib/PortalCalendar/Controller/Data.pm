@@ -56,8 +56,8 @@ sub config {
     $self->set_config('_last_voltage_raw', $self->req->param('adc') // $self->req->param('voltage_raw') // '');    # value has NOT NULL restriction
 
     my $util = PortalCalendar::Util->new(app => $self, display => $display);
-    $util->update_mqtt('voltage',         $display->voltage + 0.001);                                  # to force grafana to store changed values
-    $util->update_mqtt('battery_percent', $display->battery_percent() + 0.001);                             # to force grafana to store changed values
+    $util->update_mqtt('voltage',         $display->voltage + 0.001);                                              # to force grafana to store changed values
+    $util->update_mqtt('battery_percent', $display->battery_percent() + 0.001);                                    # to force grafana to store changed values
     $util->update_mqtt('voltage_raw',     $self->get_config('_last_voltage_raw') + 0.001);                         # to force grafana to store changed values
     $util->update_mqtt('firmware',        $display->firmware);
     $util->update_mqtt('last_visit',      DateTime->now()->rfc3339);
@@ -72,7 +72,7 @@ sub config {
         sleep               => $self->get_config('sleep_time') // undef,
         is_critical_voltage => (($display->voltage < $self->get_config('alert_voltage')) ? \1 : \0),    # JSON true/false
         battery_percent     => $display->battery_percent() // undef,
-        ota_mode            => ($self->get_config('ota_mode') ? \1 : \0),                                           # JSON true/false
+        ota_mode            => ($self->get_config('ota_mode') ? \1 : \0),                               # JSON true/false
     };
 
     $self->render(json => $ret);
@@ -112,8 +112,11 @@ sub bitmap_epaper {
     $self->set_config('_last_visit', DateTime->now()->iso8601);
 
     my $numcolors;
-    my $colormap_name;           # see Imager::ImageTypes
-    my $colormap_colors = [];    # only for the 'none' colormap_name
+    my $colormap_name;                                # see Imager::ImageTypes
+    my $colormap_colors = [];                         # only for the 'none' colormap_name
+    my $format          = 'epaper_native';
+    my $rotate          = $self->display->rotation;
+
     if ($self->display->colortype eq 'BW') {
         $numcolors     = 2;
         $colormap_name = 'mono';
@@ -130,15 +133,20 @@ sub bitmap_epaper {
         die "unknown display type: " . $self->display->colortype;
     }
 
+    if ($self->req->param('ui_preview')) {
+        $format = 'png';
+        $rotate = 0;
+    }
+
     my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
     return $util->generate_bitmap(
         {
-            rotate          => $self->display->rotation,
+            rotate          => $rotate,
             gamma           => $self->display->gamma,
             numcolors       => $numcolors,
             colormap_name   => $colormap_name,
             colormap_colors => $colormap_colors,
-            format          => 'epaper_native',
+            format          => $format,
             display_type    => $self->display->colortype,
         }
     );
