@@ -37,18 +37,19 @@ has 'db_cache' => sub {
 has 'caching_ua' => sub {
     my $self = shift;
     return LWP::UserAgent::Cached->new(
+        agent         => "PortalCalendar/1.0 github.com/misch2/eink-portal-calendar",    # Non-generic agent name required, see https://api.met.no/doc/TermsOfService
         lwp_cache_dir => $self->lwp_cache_dir,
 
         nocache_if => sub {
             my $response = shift;
-            return $response->code != 200;    # do not cache any bad response
+            return $response->code != 200;                                               # do not cache any bad response
         },
 
         recache_if => sub {
             my ($response, $path, $request) = @_;
             my $stat    = Mojo::File->new($path)->lstat;
             my $age     = time - $stat->mtime;
-            my $recache = ($age > $self->lwp_max_cache_age) ? 1 : 0;    # recache anything older than max age
+            my $recache = ($age > $self->lwp_max_cache_age) ? 1 : 0;                     # recache anything older than max age
             if ($recache) {
                 $self->app->log->info("Age($path)=$age secs => too old, will reload from the source");
             } else {
