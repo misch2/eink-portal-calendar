@@ -1,20 +1,44 @@
 % layout 'bootstrap5';
 
-<h3>Select your display</h3>
+<h3>Displays</h3>
 
-<ul>
+<table class="table FIXMEtable-striped table-hover">
+<thead>
+    <tr>
+        <th scope="col">id</th>
+        <th scope="col">name</th>
+        <th scope="col">mac</th>
+        <th scope="col">width</th>
+        <th scope="col">height</th>
+        <th scope="col">colortype</th>
+        <th scope="col">firmware</th>
+    </tr>
+</thead>
+<tbody>
 % foreach my $d (@{ $displays }) {
-    <li>
-        <%= "#" . $d->id %>) 
-        <a href="/home/<%= $d->id %>"><%= $d->name %></a>
-        <div style="font-size: 0.8em; margin-left: 1em;">
-            MAC <%= $d->mac %>, 
-            resolution <%= $d->width %> &times; <%= $d->height %>, 
-            rotate <%= $d->rotation %>, 
-            gamma <%= $d->gamma %>,
-            type <%= $d->colortype %>,
-            firmware "<%= $d->firmware %>".
-        </div>
-    </li>
+    <tr>
+        <td>
+            <%= $d->id %> 
+        </td>
+        <td>
+            <a href="/home/<%= $d->id %>"><%= $d->name %></a>
+        </td>
+        <td>
+            <%= $d->mac %>
+        </td>
+        <td>
+            <%= $d->virtual_width %>
+        </td>
+        <td>
+            <%= $d->virtual_height %>
+        </td>
+        <td>
+            <%= $d->colortype %>
+        </td>
+        <td>
+            <%= $d->firmware %>
+        </td>
+    </tr>
 % }
-</ul>
+</tbody>
+</table>
