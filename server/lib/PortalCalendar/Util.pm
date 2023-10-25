@@ -413,7 +413,7 @@ sub generate_bitmap {
     my $args = shift;
 
     $self->app->log->info("Producing bitmap");
-    $self->app->log->info(np($args));
+    # $self->app->log->info(np($args));
 
     my $img = Imager->new(file => $self->app->app->home->child("generated_images/current_calendar_" . $self->display->id . ".png")) or die Imager->errstr;
 
