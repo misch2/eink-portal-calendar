@@ -7,15 +7,11 @@ use Test::MockModule;
 use PortalCalendar::Integration::SvatkyAPI;
 use DateTime;
 
-my $t   = Test::Mojo->new('PortalCalendar');
-my $api = PortalCalendar::Integration::SvatkyAPI->new(app => $t->app);
+my $t        = Test::Mojo->new('PortalCalendar');
+my $db_cache = PortalCalendar::DatabaseCache->new(app => $t->app, creator => 'mock tests');
 
-my $mock_used = 0;
-my $module    = Test::MockModule->new('PortalCalendar::DatabaseCache');
-$module->mock('get_or_set', sub { $mock_used = 1; return $_[1]->() });    # run the callback directly, don't cache
-
+my $api  = PortalCalendar::Integration::SvatkyAPI->new(app => $t->app, db_cache => $db_cache);
 my $data = $api->get_today_details(DateTime->new(year => 2023, month => 1, day => 1));
-is($mock_used, 1, "Cache mock OK");
 is_deeply(
     $data,
     {

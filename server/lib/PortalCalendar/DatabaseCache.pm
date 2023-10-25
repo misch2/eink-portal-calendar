@@ -18,12 +18,12 @@ has 'max_age' => sub { 5 * ONE_MINUTE };
 sub get_or_set {
     my $self         = shift;
     my $callback     = shift;
-    my $db_cache_key = shift;    # structure with all the parameters on which the cache depends, e.g. {lat => 1.234, lon => 5.678}
+    my $db_cache_key = shift;    # hash with all the parameters on which the cache depends, e.g. {lat => 1.234, lon => 5.678}
 
     my $cache_key_as_string = encode_json($db_cache_key);
     my $cache_key_as_digext = sha1_sum($cache_key_as_string);
 
-    my $log_prefix = "[" . $self->creator . "][key=" . $cache_key_as_string . "/$cache_key_as_digext] ";
+    my $log_prefix = "[" . $self->creator . "][key_json=" . $cache_key_as_string . "] ";
     my $now        = DateTime->now(time_zone => 'UTC');
     my $dtf        = $self->app->schema->storage->datetime_parser;
 

@@ -1,15 +1,14 @@
 package PortalCalendar;
 use Mojo::Base 'Mojolicious';
-
 use Mojo::SQLite;
+use Mojo::JSON;
+use Mojo::Log;
+
 use DateTime;
 use DateTime::Format::Strptime;
 use DateTime::Format::ISO8601;
 use DDP;
 use Time::HiRes;
-
-use Mojo::JSON;
-use Mojo::Log;
 
 use PortalCalendar;
 use PortalCalendar::Config;

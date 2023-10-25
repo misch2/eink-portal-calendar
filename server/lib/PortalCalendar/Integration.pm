@@ -4,6 +4,7 @@ use Mojo::Base -base;
 use Mojo::File;
 use Mojo::JSON qw(decode_json encode_json);
 
+use HTTP::Caching::DeprecationWarning ':hide';
 use DDP;
 use Try::Tiny;
 use Time::Seconds;
