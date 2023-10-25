@@ -227,8 +227,7 @@ sub voltage {
     my $adc_resolution        = 4095;
 
     my $voltage = $raw_adc_reading * $adc_reference_voltage / $adc_resolution * $voltage_divider_ratio;
-
-    return $voltage;
+    return sprintf("%.3f", $voltage);
 }
 
 sub battery_percent {
@@ -239,7 +238,9 @@ sub battery_percent {
     my $cur = $self->voltage;
     return unless $min && $max && $cur;
     my $percentage = 100 * ($cur - $min) / ($max - $min);
-    return min(100, max(0, $percentage));    # clip to 0-100
+    $percentage = min(100, max(0, $percentage));    # clip to 0-100
+
+    return sprintf("%.1f", $percentage);
 }
 
 sub colortype_formatted {
