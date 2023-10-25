@@ -224,7 +224,7 @@ sub html_for_date {
 
         next unless $url;
 
-        my $calendar = PortalCalendar::Integration::iCal->new(app => $self->app, display => $self->display, db_cache_key => 'calendar' . $calendar_no, ics_url => $url);
+        my $calendar = PortalCalendar::Integration::iCal->new(app => $self->app, display => $self->display, ics_url => $url);
         try {
             push @today_events, $calendar->get_today_events($dt);    # cached if possible
                                                                      #p @today_events;

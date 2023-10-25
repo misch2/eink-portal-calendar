@@ -10,13 +10,12 @@ use Time::Seconds;
 use LWP::UserAgent::Caching;
 use CHI;
 
-use LWP::ConsoleLogger::Everywhere;    # uncomment to debug LWP to STDOUT
+# use LWP::ConsoleLogger::Everywhere;    # uncomment to debug LWP to STDOUT
 
 use PortalCalendar::DatabaseCache;
 
 has 'app' => sub { die "app is not defined " };
-has 'display';               # not needed in some of the methods
-has 'db_cache_key' => '';    # optional, needed only when the integration uses multiple cache rows for different parts
+has 'display';    # optional, only for some of the methods
 
 has 'lwp_cache_dir' => sub {
     my $self = shift;
@@ -34,7 +33,7 @@ has 'config' => sub {
 
 has 'db_cache' => sub {
     my $self = shift;
-    return PortalCalendar::DatabaseCache->new(app => $self->app, creator => ref($self), display_id => ($self->display && $self->display->id));
+    return PortalCalendar::DatabaseCache->new(app => $self->app, creator => ref($self));
 };
 
 has chi_cache => sub {

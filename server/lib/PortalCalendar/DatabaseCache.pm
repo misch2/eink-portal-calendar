@@ -2,24 +2,28 @@ package PortalCalendar::DatabaseCache;
 
 use Mojo::Base -base;
 
+use Mojo::Util qw(b64_decode b64_encode sha1_sum);
+use Mojo::JSON qw(encode_json);
+
 use DDP;
-use Mojo::Util qw(b64_decode b64_encode);
 use Storable;
 use DateTime;
 use Time::Seconds;
 
-has 'app'        => sub { die "app not set" };
-has 'creator'    => sub { die "creator not set" };
-has 'display_id' => sub { die "display_id not set" };
+has 'app'     => sub { die "app not set" };
+has 'creator' => sub { die "creator not set" };
 
 has 'max_age' => sub { 5 * ONE_MINUTE };
 
 sub get_or_set {
     my $self         = shift;
     my $callback     = shift;
-    my $db_cache_key = shift;
+    my $db_cache_key = shift;    # structure with all the parameters on which the cache depends, e.g. {lat => 1.234, lon => 5.678}
 
-    my $log_prefix = "[" . $self->creator . "][" . $self->display_id . "][key=" . $db_cache_key . "] ";
+    my $cache_key_as_string = encode_json($db_cache_key);
+    my $cache_key_as_digext = sha1_sum($cache_key_as_string);
+
+    my $log_prefix = "[" . $self->creator . "][key=" . $cache_key_as_string . "/$cache_key_as_digext] ";
     my $now        = DateTime->now(time_zone => 'UTC');
     my $dtf        = $self->app->schema->storage->datetime_parser;
 
@@ -27,8 +31,7 @@ sub get_or_set {
         my $row = $self->app->schema->resultset('Cache')->search(
             {
                 creator    => $self->creator,
-                display_id => $self->display_id,
-                key        => $db_cache_key,
+                key        => $cache_key_as_digext,
                 expires_at => { '>' => $dtf->format_datetime($now) }
             }
         )->single
@@ -46,9 +49,8 @@ sub get_or_set {
     $self->app->schema->resultset('Cache')->update_or_create(
         {
             # filter keys
-            creator    => $self->creator,
-            display_id => $self->display_id,
-            key        => $db_cache_key,
+            creator => $self->creator,
+            key     => $cache_key_as_digext,
 
             # stored data
             data       => $serialized_data,
@@ -56,7 +58,7 @@ sub get_or_set {
             expires_at => $now->clone->add(seconds => $self->max_age),
         },
         {
-            key => 'creator_key_display_id_unique',
+            key => 'creator_key_unique',
         }
     );
 
@@ -66,13 +68,8 @@ sub get_or_set {
 sub clear {
     my $self = shift;
 
-    my %search_args = (creator => $self->creator);
-    if ($self->display_id) {
-        $search_args{display_id} = $self->display_id;
-    }
-
     $self->app->log->info("clearing cached data for " . $self->creator);
-    $self->app->schema->resultset('Cache')->search(\%search_args)->delete;
+    $self->app->schema->resultset('Cache')->search({ creator => $self->creator })->delete;
 
     return;
 }

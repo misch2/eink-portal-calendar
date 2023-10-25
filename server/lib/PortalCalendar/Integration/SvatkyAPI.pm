@@ -66,7 +66,7 @@ sub get_today_details {
             my $processed = $self->transform_details($raw);
             return $processed;
         },
-        $self->db_cache_key . '/date-' . $date->ymd('-')
+        { date => $date }
     );
 }
 
