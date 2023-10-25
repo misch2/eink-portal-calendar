@@ -120,7 +120,7 @@ sub fetch_from_web {
 
             return $global_json;
         },
-        { start => $global_dt_start, end => $global_dt_end }
+        { start => $global_dt_start, end => $global_dt_end->clone->truncate(to => 'day') }
     );
 }
 
