@@ -11,6 +11,7 @@
         <th scope="col">Width &times; height</th>
         <th scope="col">Color type</th>
         <th scope="col">Firmware</th>
+        <th scope="col">Next wakeup</th>
     </tr>
 </thead>
 <tbody>
@@ -35,6 +36,10 @@
         </td>
         <td>
             <%= $d->firmware %>
+        </td>
+        <td>
+            % my ($next_wakeup, $sleep_in_seconds, $schedule) = $d->next_wakeup_time();
+            <%= $next_wakeup->format_cldr('dd.MM.YYYY HH:mm') %> (in <%= $sleep_in_seconds %> seconds)
         </td>
     </tr>
 % }

@@ -197,6 +197,8 @@ __PACKAGE__->has_many(
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:kgiKx3iTTsrJjeElMI/tgw
 
 use List::Util qw(min max);
+use DateTime;
+use Schedule::Cron::Events;
 
 sub virtual_width {
     my $self = shift;
@@ -250,6 +252,27 @@ sub colortype_formatted {
     return 'Grayscale, 4 levels'                   if $colortype eq '4G';
     return 'Black & White & Color (red or yellow)' if $colortype eq '3C';
     return $colortype;
+}
+
+sub next_wakeup_time {
+    my $self = shift;
+
+    # crontab definitions are in SERVER LOCAL time zone, not display dependent
+    my $local_timezone = DateTime::TimeZone->new(name => 'local');
+
+    # Parse the crontab-like schedule
+    my $schedule = $self->get_config('wakeup_schedule');
+
+    my $now  = DateTime->now(time_zone => $local_timezone);
+    my $cron = Schedule::Cron::Events->new($schedule, Seconds => $now->epoch) or die "Invalid crontab schedule";
+
+    my ($seconds, $minutes, $hours, $dayOfMonth, $month, $year) = $cron->nextEvent;
+    my $next_time = DateTime->new(year => 1900 + $year, month => 1 + $month, day => $dayOfMonth, hour => $hours, minute => $minutes, second => $seconds, time_zone => $local_timezone);
+
+    my $sleep_in_seconds = $next_time->epoch - $now->epoch;
+
+    # warn "($next_time [$local_timezone], $sleep_in_seconds, $schedule)";
+    return ($next_time, $sleep_in_seconds, $schedule);
 }
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
