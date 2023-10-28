@@ -1,4 +1,5 @@
 requires 'DateTime::Event::Sunrise';
+requires 'DateTime::Format::Duration';
 requires 'DateTime::Format::ISO8601';
 requires 'DateTime::Format::SQLite';
 requires 'DateTime::Format::Strptime';

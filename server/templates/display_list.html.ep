@@ -12,6 +12,7 @@
         <th scope="col">Color type</th>
         <th scope="col">Firmware</th>
         <th scope="col">Next wakeup</th>
+        <th scope="col">Last image</th>
     </tr>
 </thead>
 <tbody>
@@ -39,7 +40,14 @@
         </td>
         <td>
             % my ($next_wakeup, $sleep_in_seconds, $schedule) = $d->next_wakeup_time();
-            <%= $next_wakeup->format_cldr('dd.MM.YYYY HH:mm') %> (in <%= $sleep_in_seconds %> seconds)
+            % my $minutes = int($sleep_in_seconds / 60);
+            % my $seconds = $sleep_in_seconds % 60;
+            <%= $next_wakeup->format_cldr('dd.MM.YYYY HH:mm') %> (in <%= $minutes %> minutes and <%= $seconds %> seconds)
+        </td>
+        <td>
+            <a href="/home/<%= $d->id %>">
+            <img src="/calendar/bitmap?mac=<%= $d->mac %>" style="max-height: 6rem; width: auto; border: 1px solid gray" />
+            </a>
         </td>
     </tr>
 % }

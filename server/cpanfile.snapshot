@@ -716,6 +716,20 @@ DISTRIBUTIONS
       parent 0
       strict 0
       warnings 0
+  DateTime-Format-Duration-1.04
+    pathname: E/ET/ETHER/DateTime-Format-Duration-1.04.tar.gz
+    provides:
+      DateTime::Format::Duration 1.04
+    requirements:
+      Carp 0
+      Data::Dumper 0
+      DateTime::Duration 0
+      Exporter 0
+      ExtUtils::MakeMaker 0
+      Params::Validate 0
+      constant 0
+      perl 5.006
+      strict 0
   DateTime-Format-ICal-0.09
     pathname: D/DR/DROLSKY/DateTime-Format-ICal-0.09.tar.gz
     provides:

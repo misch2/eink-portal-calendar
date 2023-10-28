@@ -26,7 +26,7 @@ sub select_display {
         nav_link => 'index',
 
         display    => undef,
-        config_obj => $self->config_obj,
+        config_obj => undef,
         displays   => [ $displays->all ],
     );
 }
