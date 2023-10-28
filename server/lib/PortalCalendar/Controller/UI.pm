@@ -107,7 +107,6 @@ sub config_ui_save {
     $util->update_mqtt('max_voltage',           $self->get_config('max_voltage'));
     $util->update_mqtt('alert_voltage',         $self->get_config('alert_voltage'));
     $util->update_mqtt('voltage_divider_ratio', $self->get_config('voltage_divider_ratio'));
-    $util->update_mqtt('sleep_time',            $self->get_config('sleep_time'));
 
     $self->app->log->debug("Clearing database cache");
     PortalCalendar::Integration::iCal->new(app => $self->app)->clear_db_cache;

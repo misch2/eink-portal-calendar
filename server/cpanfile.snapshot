@@ -2646,6 +2646,22 @@ DISTRIBUTIONS
     requirements:
       ExtUtils::MakeMaker 0
       perl 5.006
+  Schedule-Cron-1.05
+    pathname: N/NH/NHUBBARD/Schedule-Cron-1.05.tar.gz
+    provides:
+      Schedule::Cron 1.05
+    requirements:
+      Data::Dumper 0
+      ExtUtils::MakeMaker 0
+      Time::ParseDate 2011.0505
+  Schedule-Cron-Events-1.96
+    pathname: A/AT/ATOOMIC/Schedule-Cron-Events-1.96.tar.gz
+    provides:
+      Schedule::Cron::Events 1.96
+    requirements:
+      ExtUtils::MakeMaker 0
+      Set::Crontab 0
+      Time::Local 0
   Scope-Guard-0.21
     pathname: C/CH/CHOCOLATE/Scope-Guard-0.21.tar.gz
     provides:
@@ -2654,6 +2670,12 @@ DISTRIBUTIONS
       ExtUtils::MakeMaker 0
       Test::More 0
       perl 5.006001
+  Set-Crontab-1.03
+    pathname: A/AM/AMS/Set-Crontab-1.03.tar.gz
+    provides:
+      Set::Crontab 1.03
+    requirements:
+      ExtUtils::MakeMaker 0
   Set-Infinite-0.65
     pathname: F/FG/FGLOCK/Set-Infinite-0.65.tar.gz
     provides:
@@ -3065,6 +3087,17 @@ DISTRIBUTIONS
       perl 5.006
       strict 0
       warnings 0
+  Time-ParseDate-2015.103
+    pathname: M/MU/MUIR/modules/Time-ParseDate-2015.103.tar.gz
+    provides:
+      Time::CTime 2011.0505
+      Time::DaysInMonth 99.1117
+      Time::JulianDay 2011.0505
+      Time::ParseDate 2015.103
+      Time::Timezone 2015.0925
+    requirements:
+      ExtUtils::MakeMaker 0
+      Time::Piece 0
   Time-timegm-0.01
     pathname: P/PE/PEVANS/Time-timegm-0.01.tar.gz
     provides:

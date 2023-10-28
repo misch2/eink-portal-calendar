@@ -3,6 +3,7 @@ package PortalCalendar::Controller::Data;
 use Mojo::Base 'PortalCalendar::Controller';
 
 use DateTime;
+use Schedule::Cron::Events;
 
 has mac => sub {
     my $self = shift;
@@ -19,6 +20,27 @@ has display => sub {
 sub ping {
     my $self = shift;
     return $self->render(json => { status => 'ok' });
+}
+
+sub _next_wakeup_time {
+    my $self = shift;
+
+    # crontab definitions are in local time zone
+    my $local_timezone = $self->get_config('timezone');
+
+    # Parse the crontab-like schedule
+    my $schedule = $self->get_config('wakeup_schedule');
+
+    my $now  = DateTime->now(time_zone => $local_timezone);
+    my $cron = Schedule::Cron::Events->new($schedule, Seconds => $now->epoch) or die "Invalid crontab schedule";
+
+    my ($seconds, $minutes, $hours, $dayOfMonth, $month, $year) = $cron->nextEvent;
+    my $next_time = DateTime->new(year => 1900 + $year, month => 1 + $month, day => $dayOfMonth, hour => $hours, minute => $minutes, second => $seconds, time_zone => $local_timezone);
+
+    my $sleep_in_seconds = $next_time->epoch - $now->epoch;
+    $self->app->log->info("Next wakeup at $next_time (in $sleep_in_seconds seconds) according to crontab schedule '$schedule'");
+
+    return ($next_time, $sleep_in_seconds);
 }
 
 # Return configuration data to client (ePaper display):
@@ -51,16 +73,18 @@ sub config {
         );
     }
 
-    $self->set_config('_last_visit', DateTime->now()->iso8601);
-
+    $self->set_config('_last_visit',       DateTime->now()->iso8601);
     $self->set_config('_last_voltage_raw', $self->req->param('adc') // $self->req->param('voltage_raw') // '');    # value has NOT NULL restriction
 
     my $util = PortalCalendar::Util->new(app => $self, display => $display);
+    my ($next_wakeup, $sleep_in_seconds) = $self->_next_wakeup_time();
+
     $util->update_mqtt('voltage',         $display->voltage + 0.001);                                              # to force grafana to store changed values
     $util->update_mqtt('battery_percent', $display->battery_percent() + 0.001);                                    # to force grafana to store changed values
     $util->update_mqtt('voltage_raw',     $self->get_config('_last_voltage_raw') + 0.001);                         # to force grafana to store changed values
     $util->update_mqtt('firmware',        $display->firmware);
     $util->update_mqtt('last_visit',      DateTime->now()->rfc3339);
+    $util->update_mqtt('sleep_time',      $sleep_in_seconds);
 
     $util->update_mqtt('voltage',         $display->voltage);
     $util->update_mqtt('battery_percent', $display->battery_percent());
@@ -69,7 +93,7 @@ sub config {
     my $ret = {
 
         # {// undef} to force scalars
-        sleep               => $self->get_config('sleep_time') // undef,
+        sleep               => $sleep_in_seconds,
         is_critical_voltage => (($display->voltage < $self->get_config('alert_voltage')) ? \1 : \0),    # JSON true/false
         battery_percent     => $display->battery_percent() // undef,
         ota_mode            => ($self->get_config('ota_mode') ? \1 : \0),                               # JSON true/false

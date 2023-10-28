@@ -31,6 +31,8 @@ requires 'Mojolicious::Plugin::RenderFile';
 requires 'Mojolicious::Plugin::TagHelpers';
 requires 'Net::MQTT::Simple';
 requires 'Readonly';
+requires 'Schedule::Cron';
+requires 'Schedule::Cron::Events';
 requires 'Test::Mojo';
 requires 'Test::More';
 requires 'Text::Unidecode';

@@ -127,8 +127,8 @@
 
             <fieldset class="mt-4 row">
                 <div class="col-md-12">
-                    <label for="sleep_time">Sleep time (seconds)</label>
-                    <input id="sleep_time" name="sleep_time" type="number" class="form-control" value="<%= $values->{sleep_time} %>">
+                    <label for="wakeup_schedule">Wake up (redraw) schedule in <a href="https://crontab.guru/">crontab format</a></label>
+                    <input id="wakeup_schedule" name="wakeup_schedule" type="text" class="form-control" value="<%= $values->{wakeup_schedule} %>">
                 </div>
                 <div class="col-md-3">
                     <label for="min_voltage">0 % battery [V]</label>
