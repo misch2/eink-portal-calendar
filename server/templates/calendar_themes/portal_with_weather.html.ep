@@ -156,7 +156,9 @@
         <div id="bottom-signature">
             % my $data_from = DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone($app->get_config('timezone'));
             % my $now = DateTime->now->set_time_zone($app->get_config('timezone'));
-            Aktualizováno v <%= $now->format_cldr('H:mm') %>,
+            % my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
+
+            Aktualizováno v <%= $now->format_cldr('H:mm') %> (příště za <%= int(0.5 + $sleep_in_seconds / 60) %> minut),
             data z 
             % if ($data_from->ymd eq $now->ymd) {
                 <%= $data_from->format_cldr('H:mm') %>.
