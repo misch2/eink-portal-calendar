@@ -36,3 +36,11 @@ div.day-of-week-block {
 div.icons-container {
     margin-top: 1rem;
 }
+
+div#bottom-signature {
+    position: absolute;
+    width: 100%;
+    top: 710;
+    left: 240;
+    font-size: 0.7rem;
+}

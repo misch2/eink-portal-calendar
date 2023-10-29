@@ -137,6 +137,11 @@ function drawBasic() {
 
         <img id="aperture-logo" src="/images/Aperture_Laboratories_Logo.png">
 
+        <div id="bottom-signature">
+            % my $data_from = DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone($app->get_config('timezone'));
+            Data z <%= $data_from->format_cldr('H:mm') %>.
+        </div>
+
         <div id="battery-status">
             % my $pct = $display->battery_percent();
             % if ($pct >= 90) {

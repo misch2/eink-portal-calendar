@@ -154,7 +154,15 @@
         </div>
 
         <div id="bottom-signature">
-            Poslední aktualizace dat: <%= DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone($app->get_config('timezone'))->strftime('%c') %>
+            % my $data_from = DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone($app->get_config('timezone'));
+            % my $now = DateTime->now->set_time_zone($app->get_config('timezone'));
+            Aktualizováno v <%= $now->format_cldr('H:mm') %>,
+            data z 
+            % if ($data_from->ymd eq $now->ymd) {
+                <%= $data_from->format_cldr('H:mm') %>.
+            % } else {
+                <%= $data_from->format_cldr('d. MMMM H:mm') %>.
+            % }
         </div>
 
         <div id="battery-status">
