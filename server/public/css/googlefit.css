@@ -39,8 +39,9 @@ div.icons-container {
 
 div#bottom-signature {
     position: absolute;
-    width: 100%;
+    width: 200;
     top: 710;
-    left: 240;
+    left: 130;
     font-size: 0.7rem;
+    text-align: right;
 }

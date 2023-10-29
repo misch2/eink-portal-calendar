@@ -139,7 +139,7 @@ function drawBasic() {
 
         <div id="bottom-signature">
             % my $data_from = DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone($app->get_config('timezone'));
-            Data z <%= $data_from->format_cldr('H:mm') %>.
+            Aktualizováno v <%= $data_from->format_cldr('H:mm') %>.
         </div>
 
         <div id="battery-status">
