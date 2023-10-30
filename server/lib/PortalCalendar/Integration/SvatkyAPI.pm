@@ -66,7 +66,7 @@ sub get_today_details {
             my $processed = $self->transform_details($raw);
             return $processed;
         },
-        { date => $date }
+        { date => $date->ymd('-') }    # date only, ignore the time
     );
 }
 

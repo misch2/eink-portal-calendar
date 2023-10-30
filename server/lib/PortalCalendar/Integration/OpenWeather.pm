@@ -23,8 +23,8 @@ sub fetch_current_from_web {
     $cache->max_age(30 * ONE_MINUTE);
 
     my $url = Mojo::URL->new('https://api.openweathermap.org/data/2.5/weather')->query(
-        lat   => $self->config->get('lat'),
-        lon   => $self->config->get('lon'),
+        lat   => sprintf("%.3f", $self->config->get('lat')),
+        lon   => sprintf("%.3f", $self->config->get('lon')),
         units => 'metric',
         appid => $self->api_key,
         lang  => $self->config->get('openweather_lang'),
