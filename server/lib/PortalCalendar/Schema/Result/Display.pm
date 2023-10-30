@@ -196,9 +196,10 @@ __PACKAGE__->has_many(
 # Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-10-25 11:30:07
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:kgiKx3iTTsrJjeElMI/tgw
 
-use List::Util qw(min max);
 use DateTime;
+use List::Util qw(min max);
 use Schedule::Cron::Events;
+use Time::Seconds;
 
 sub virtual_width {
     my $self = shift;
@@ -268,6 +269,26 @@ sub next_wakeup_time {
 
     my ($seconds, $minutes, $hours, $dayOfMonth, $month, $year) = $cron->nextEvent;
     my $next_time = DateTime->new(year => 1900 + $year, month => 1 + $month, day => $dayOfMonth, hour => $hours, minute => $minutes, second => $seconds, time_zone => $local_timezone);
+
+    # If nextEvent is too close to now, it should return the next-next event.
+    # E.g. consider this sequence of actions:
+    #   1. server asks display to wake up at 7:00
+    #   2. display wakes up at 6:58 due to an inaccurate clock
+    #   3. !!! server sends the content to display but it AGAIN suggests to wake up at 7:00
+    #   4. !!! display unnecessarily wakes up at approx. 7:00 and displays the content. Or it wakes at 6:59:45 and the whole loop repeats (see point 2)
+    #
+    # Fixed here by accepting a small (~5 minutes) time difference:
+    my $diff_seconds = $next_time->epoch - $now->epoch;
+    # warn "diff_seconds: $diff_seconds";
+    if ($diff_seconds <= 5 * ONE_MINUTE) {
+        warn "wakeup time ($next_time) too close to now ($now), moving to next event";
+        $cron = Schedule::Cron::Events->new($schedule, Seconds => $next_time->epoch) or die "Invalid crontab schedule";
+
+        ($seconds, $minutes, $hours, $dayOfMonth, $month, $year) = $cron->nextEvent;
+        $next_time = DateTime->new(year => 1900 + $year, month => 1 + $month, day => $dayOfMonth, hour => $hours, minute => $minutes, second => $seconds, time_zone => $local_timezone);
+
+        warn " -> updated next: $next_time";
+    }
 
     my $sleep_in_seconds = $next_time->epoch - $now->epoch;
 
