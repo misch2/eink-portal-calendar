@@ -71,6 +71,7 @@ div.date-row {
     font-size: 1.5rem;
 
     display: flex;
+    flex-wrap: wrap;    /* for the case when the date or name is too long */
     justify-content: space-between;
     position: absolute;
     width: 100%;
