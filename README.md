@@ -1,5 +1,8 @@
 # "Portal" calendar for e-ink display
 
+<img src="https://github.com/misch2/eink-portal-calendar/assets/16558674/b2b185de-a960-480c-99a1-aa7d521ed9d6" width="250">
+<img src="https://github.com/misch2/eink-portal-calendar/assets/16558674/66098158-f8c2-456c-95e3-673dab4ea655" width="250">
+
 Inspired by https://github.com/wuspy/portal_calendar. Hardware is exactly the same here, only the software (mainly the server part, but client too) is different here.
 
 The software is divided into two parts:
