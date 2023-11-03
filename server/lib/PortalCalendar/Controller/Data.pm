@@ -90,64 +90,41 @@ sub bitmap {
 
     my $rotate        = $self->req->param('rotate')        // 0;
     my $flip          = $self->req->param('flip')          // '';
-    my $colors        = $self->req->param('colors')        // 256;
-    my $gamma         = $self->req->param('gamma')         // 1.0;
-    my $format        = $self->req->param('format')        // 'png';
-    my $colormap_name = $self->req->param('colormap_name') // 'webmap';
+    my $gamma         = $self->req->param('gamma')         // $self->display->gamma;
+    my $numcolors     = $self->req->param('colors')        // $self->display->num_colors;
+    my $colormap_name = $self->req->param('colormap_name') // 'none';
+    my $color_palette = $self->display->color_palette($self->req->param('preview_colors'));
+    my $format        = $self->req->param('format') // 'png';
+
+    $colormap_name = 'webmap' if scalar(@$color_palette) == 0;
 
     my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
     return $util->generate_bitmap(
         {
-            rotate        => $rotate,
-            flip          => $flip,
-            numcolors     => $colors,
-            gamma         => $gamma,
-            format        => $format,
-            colormap_name => $colormap_name,
+            rotate          => $rotate,
+            flip            => $flip,
+            gamma           => $gamma,
+            numcolors       => $numcolors,
+            colormap_name   => $colormap_name,
+            colormap_colors => $color_palette,
+            format          => $format,
+            display_type    => $self->display->colortype,
         }
     );
 }
 
-# Return bitmap to client (ePaper display, special format of bitmnap):
+# Return bitmap to client (ePaper display, special format of bitmnap) and update last_visit timestamp:
 sub bitmap_epaper {
     my $self = shift;
 
     $self->set_config('_last_visit', DateTime->now()->iso8601);
 
-    my $numcolors;
-    my $colormap_name;                                # see Imager::ImageTypes
-    my $colormap_colors = [];                         # only for the 'none' colormap_name
-    my $format          = 'epaper_native';
-    my $rotate          = $self->display->rotation;
+    my $rotate    = $self->display->rotation;
+    my $numcolors = $self->display->num_colors;
+    my $format    = 'epaper_native';
 
-    my $util   = PortalCalendar::Util->new(app => $self, display => $self->display);
-    my $colors = {};
-    foreach my $key (%{ $util->colors }) {
-        if ($self->req->param('preview_colors')) {
-            $colors->{$key} = $util->colors->{$key}->{preview};
-        } else {
-            $colors->{$key} = $util->colors->{$key}->{pure};
-        }
-    }
-
-    if ($self->display->colortype eq 'BW') {
-        $numcolors       = 2;
-        $colormap_name   = 'none';
-        $colormap_colors = [ $colors->{epd_black}, $colors->{epd_white} ];
-    } elsif ($self->display->colortype eq '4G') {
-        $numcolors       = 4;
-        $colormap_name   = 'none';
-        $colormap_colors = [ '#000000', '#555555', '#aaaaaa', '#ffffff' ];
-    } elsif ($self->display->colortype eq '16G') {
-        $numcolors     = 16;
-        $colormap_name = 'gray16';
-    } elsif ($self->display->colortype eq '3C') {
-        $numcolors       = 3;
-        $colormap_name   = 'none';
-        $colormap_colors = [ $colors->{epd_black}, $colors->{epd_white}, $colors->{epd_red}, $colors->{epd_yellow} ];
-    } else {
-        die "unknown display type: " . $self->display->colortype;
-    }
+    my $color_palette = $self->display->color_palette($self->req->param('preview_colors'));
+    my $colormap_name = (scalar(@$color_palette) > 0 ? 'none' : 'webmap');
 
     if ($self->req->param('web_format')) {
         $format = 'png';
@@ -158,10 +135,11 @@ sub bitmap_epaper {
     return $util->generate_bitmap(
         {
             rotate          => $rotate,
+            flip            => 0,
             gamma           => $self->display->gamma,
             numcolors       => $numcolors,
             colormap_name   => $colormap_name,
-            colormap_colors => $colormap_colors,
+            colormap_colors => $color_palette,
             format          => $format,
             display_type    => $self->display->colortype,
         }

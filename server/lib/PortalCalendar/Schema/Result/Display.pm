@@ -193,8 +193,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-10-25 11:30:07
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:kgiKx3iTTsrJjeElMI/tgw
+# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-11-03 13:47:01
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:8BL4is9PUsnLmXjWgntcOQ
 
 use DateTime;
 use List::Util qw(min max);
@@ -246,6 +246,33 @@ sub battery_percent {
     return sprintf("%.1f", $percentage);
 }
 
+sub color_variants {
+    my $self = shift;
+
+    return {
+        epd_black  => { preview => '#111111', pure => '#000000' },
+        epd_white  => { preview => '#dddddd', pure => '#ffffff' },
+        epd_red    => { preview => '#aa0000', pure => '#ff0000' },
+        epd_yellow => { preview => '#dddd00', pure => '#ffff00' },
+    };
+}
+
+sub css_color_map {
+    my $self        = shift;
+    my $for_preview = shift // 0;
+
+    my $colors = {};
+    foreach my $key (%{ $self->color_variants }) {
+        if ($for_preview) {
+            $colors->{$key} = $self->color_variants->{$key}->{preview};
+        } else {
+            $colors->{$key} = $self->color_variants->{$key}->{pure};
+        }
+    }
+
+    return $colors;
+}
+
 sub colortype_formatted {
     my $self      = shift;
     my $colortype = $self->colortype;
@@ -253,6 +280,35 @@ sub colortype_formatted {
     return 'Grayscale, 4 levels'                   if $colortype eq '4G';
     return 'Black & White & Color (red or yellow)' if $colortype eq '3C';
     return $colortype;
+}
+
+sub num_colors {
+    my $self      = shift;
+    my $colortype = $self->colortype;
+    return 2  if $colortype eq 'BW';
+    return 4  if $colortype eq '4G';
+    return 3  if $colortype eq '3C';
+    return 16 if $colortype eq '16G';
+    return 256;
+}
+
+sub color_palette {
+    my $self        = shift;
+    my $for_preview = shift // 0;
+
+    my $colortype = $self->colortype;
+    my $colors    = $self->css_color_map($for_preview);
+
+    if ($colortype eq 'BW') {
+        return [ $colors->{epd_black}, $colors->{epd_white} ];
+    } elsif ($colortype eq '4G') {
+        return [ '#000000', '#555555', '#aaaaaa', '#ffffff' ];    # FIXME
+    } elsif ($colortype eq '16G') {
+        return [ '#000000', '#111111', '#222222', '#333333', '#444444', '#555555', '#666666', '#777777', '#888888', '#999999', '#aaaaaa', '#bbbbbb', '#cccccc', '#dddddd', '#eeeeee', '#ffffff' ];
+    } elsif ($colortype eq '3C') {
+        return [ $colors->{epd_black}, $colors->{epd_white}, $colors->{epd_red}, $colors->{epd_yellow} ];
+    }
+    return [];                                                    # FIXME
 }
 
 sub next_wakeup_time {
@@ -279,6 +335,7 @@ sub next_wakeup_time {
     #
     # Fixed here by accepting a small (~5 minutes) time difference:
     my $diff_seconds = $next_time->epoch - $now->epoch;
+
     # warn "diff_seconds: $diff_seconds";
     if ($diff_seconds <= 5 * ONE_MINUTE) {
         warn "wakeup time ($next_time) too close to now ($now), moving to next event";

@@ -28,15 +28,6 @@ use PortalCalendar::Integration::SvatkyAPI;
 has 'app';
 has 'display';
 
-has colors => sub {
-    {
-        epd_black  => { preview => '#111111', pure => '#000000' },
-        epd_white  => { preview => '#dddddd', pure => '#ffffff' },
-        epd_red    => { preview => '#aa0000', pure => '#ff0000' },
-        epd_yellow => { preview => '#dddd00', pure => '#ffff00' },
-    }
-};
-
 Readonly my @PORTAL_ICONS => qw(a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 b11 b14 c3 c4 c7 d2 d3 d4 d5 e1 e2 e4);
 Readonly my %ICON_NAME_TO_FILENAME => (
     CUBE_DISPENSER    => 'a1',
@@ -338,22 +329,13 @@ sub html_for_date {
         $last_weight   = $api->get_last_known_weight;
     }
 
-    my $colors = {};
-    foreach my $key (%{ $self->colors }) {
-        if ($args->{preview_colors}) {
-            $colors->{$key} = $self->colors->{$key}->{preview};
-        } else {
-            $colors->{$key} = $self->colors->{$key}->{pure};
-        }
-    }
-
     my $svatky_api = PortalCalendar::Integration::SvatkyAPI->new(app => $self->app, display => $self->display);
     return $self->app->render(
         template => 'calendar_themes/' . $self->app->get_config('theme'),
         format   => 'html',
         app      => $self->app,
         display  => $self->display,
-        colors   => $colors,
+        colors   => $self->display->css_color_map($args->{preview_colors}),
 
         # other variables
         date                 => $dt,
