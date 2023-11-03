@@ -120,10 +120,20 @@ sub bitmap_epaper {
     my $format          = 'epaper_native';
     my $rotate          = $self->display->rotation;
 
+    my $util   = PortalCalendar::Util->new(app => $self, display => $self->display);
+    my $colors = {};
+    foreach my $key (%{ $util->colors }) {
+        if ($self->req->param('preview_colors')) {
+            $colors->{$key} = $util->colors->{$key}->{preview};
+        } else {
+            $colors->{$key} = $util->colors->{$key}->{pure};
+        }
+    }
+
     if ($self->display->colortype eq 'BW') {
         $numcolors       = 2;
         $colormap_name   = 'none';
-        $colormap_colors = [ '#000000', '#ffffff' ];
+        $colormap_colors = [ $colors->{epd_black}, $colors->{epd_white} ];
     } elsif ($self->display->colortype eq '4G') {
         $numcolors       = 4;
         $colormap_name   = 'none';
@@ -132,15 +142,9 @@ sub bitmap_epaper {
         $numcolors     = 16;
         $colormap_name = 'gray16';
     } elsif ($self->display->colortype eq '3C') {
-        $numcolors     = 3;
-        $colormap_name = 'none';
-
-        # colors here must be as clear as possible, do not use simulated/preview colors here
-        if ($self->req->param('preview_colors')) {
-            $colormap_colors = [ '#111111', '#dddddd', '#aa0000', '#dddd00' ];
-        } else {
-            $colormap_colors = [ '#000000', '#ffffff', '#ff0000', '#ffff00' ];
-        }
+        $numcolors       = 3;
+        $colormap_name   = 'none';
+        $colormap_colors = [ $colors->{epd_black}, $colors->{epd_white}, $colors->{epd_red}, $colors->{epd_yellow} ];
     } else {
         die "unknown display type: " . $self->display->colortype;
     }

@@ -6,17 +6,10 @@
 
 <style type="text/css">
 :root {
-    % if ($preview_colors) {
-        --epd-black:  #111;
-        --epd-white:  #ddd;
-        --epd-red:    #a00;
-        --epd-yellow: #dd0;
-    % } else {
-        --epd-black:  #000;
-        --epd-white:  #fff;
-        --epd-red:    #f00;
-        --epd-yellow: #ff0;
-    % };
+    --epd-black:  <%= $colors->{epd_black} %>;
+    --epd-white:  <%= $colors->{epd_white} %>;
+    --epd-red:    <%= $colors->{epd_red} %>;
+    --epd-yellow: <%= $colors->{epd_yellow} %>;
 }
 </style>
 
