@@ -10,243 +10,303 @@
 
 <form action="/config_ui/<%= $display->id %>" method="post">
 
-    <fieldset class="mt-4 row">
-        <legend class="w-auto">OTA mode</legend>
+    <nav>
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <button class="nav-link active" id="nav-main-tab" data-bs-toggle="tab" data-bs-target="#nav-main" type="button" role="tab">Main</button>
+        <button class="nav-link" id="nav-client-tab" data-bs-toggle="tab" data-bs-target="#nav-client" type="button" role="tab">ePaper display (client)</button>
+        <button class="nav-link" id="nav-calendar-tab" data-bs-toggle="tab" data-bs-target="#nav-calendar" type="button" role="tab">Calendar</button>
+        <button class="nav-link" id="nav-openweather-tab" data-bs-toggle="tab" data-bs-target="#nav-openweather" type="button" role="tab">OpenWeather</button>
+        <button class="nav-link" id="nav-mqtt-tab" data-bs-toggle="tab" data-bs-target="#nav-mqtt" type="button" role="tab">MQTT</button>
+        <button class="nav-link" id="nav-fit-tab" data-bs-toggle="tab" data-bs-target="#nav-fit" type="button" role="tab">Google Fit</button>
+    </div>
+    </nav>
+    <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane show active" id="nav-main" role="tabpanel">
+            <fieldset class="row">
+                <legend class="w-auto">Theme</legend>
 
-        <div class="col-md-12">
-            <div class="form-check form-switch">
-                <label class="form-check-label">
-                    <input class="form-check-input" type="checkbox" id="ota_mode" name="ota_mode" value="1" <%= $values->{ota_mode} ? "checked" : "" %>>
-                    OTA mode on
-                </label>
-            </div>
-            <div>
-                <i>(Required for firmware update. ⚠️ It disables standard functionality and waits for OTA update indefinitely!)</i>
-            </div>
-        </div>
-    </fieldset>
-    <fieldset class="mt-4 row">
-        <legend class="w-auto">Main theme</legend>
+                <div class="col-md-12">
+                    <!-- <label for="theme">Theme</label> -->
+                    <select id="theme" name="theme" class="form-select">
+                        <option value="portal_with_icons" <%= 'selected' if $values->{theme} eq 'portal_with_icons' %>>Portal calendar (default)</option>
+                        <option value="portal_with_weather" <%= 'selected' if $values->{theme} eq 'portal_with_weather' %>>Weather forecast</option>
+                        <option value="portal_with_googlefit" <%= 'selected' if $values->{theme} eq 'portal_with_googlefit' %>>Google Fit statistics</option>
+                    </select>
+                </div>
+            </fieldset>
 
-        <div class="col-md-12">
-            <!-- <label for="theme">Theme</label> -->
-            <select id="theme" name="theme" class="form-select">
-                <option value="portal_with_icons" <%= 'selected' if $values->{theme} eq 'portal_with_icons' %>>Portal calendar (default)</option>
-                <option value="portal_with_weather" <%= 'selected' if $values->{theme} eq 'portal_with_weather' %>>Weather forecast</option>
-                <option value="portal_with_googlefit" <%= 'selected' if $values->{theme} eq 'portal_with_googlefit' %>>Google Fit statistics</option>
-            </select>
-        </div>
-    </fieldset>
+            <fieldset class="mt-4 row">
+                <legend class="w-auto">Other customizations</legend>
 
-    <fieldset class="mt-4 row">
-        <legend class="col-md-12">ePaper client</legend>
-        <div class="col-md-12">
-            <label for="sleep_time">Sleep time (seconds)</label>
-            <input id="sleep_time" name="sleep_time" type="number" class="form-control" value="<%= $values->{sleep_time} %>">
-        </div>
-        <div class="col-md-3">
-            <label for="min_voltage">0 % battery [V]</label>
-            <input id="min_voltage" name="min_voltage" type="number" step="0.01" class="form-control" value="<%= $values->{min_voltage} %>">
-        </div>
-        <div class="col-md-3">
-            <label for="max_voltage">100 % battery [V]</label>
-            <input id="max_voltage" name="max_voltage" type="number" step="0.01" class="form-control" value="<%= $values->{max_voltage} %>">
-        </div>
-        <div class="col-md-3">
-            <label for="alert_voltage">Critical (alert) [V]</label>
-            <input id="alert_voltage" name="alert_voltage" type="number" step="0.01" class="form-control" value="<%= $values->{alert_voltage} %>">
-        </div>
-        <div class="col-md-3">
-            <label for="voltage_divider_ratio">Voltage divider ratio ((R1+R2)/R1) [>1.0]</label>
-            <input id="voltage_divider_ratio" name="voltage_divider_ratio" type="number" step="0.0001" class="form-control" value="<%= $values->{voltage_divider_ratio} %>">
-        </div>
-        <div class="col-md-12">
-            Hint: To iteratively fine-tune voltage divider ratio use this formula:
+                <div class="col-12">
+                    <div class="form-check form-switch">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="checkbox" id="broken_glass" name="broken_glass" value="1" <%= $values->{broken_glass} ? "checked" : "" %>>
+                            "Broken glass" overlay
+                        </label>
+                    </div>
+                </div>
 
-<input type="hidden" name="calc_V_cur" value="<%= $last_voltage %>">
-<input type="hidden" name="calc_ADC_cur_raw" value="<%= $last_voltage_raw %>">
-            <pre>
-    V_real = <input type="text" name="calc_V_real" size="6" value="<%= sprintf("%4.2f", $last_voltage) %>"> V   # real voltage on battery, measured by multimeter
-    Ratio_cur = <%= sprintf("%6.4f", $values->{voltage_divider_ratio}) %>    # current voltage divider ratio
+                <div class="col-12 mb-3">
+                    <div class="form-check form-switch">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="checkbox" id="totally_random_icon" name="totally_random_icon" value="1"
+                                <%= $values->{totally_random_icon} ? "checked" : "" %>>
+                            Random icons instead of chamber-by-day
+                        </label>
+                    </div>
+                </div>
 
-    ADC_cur_raw = <%= sprintf("%4d", $last_voltage_raw) %>    # last reported raw ADC reading
-    V_cur = <%= sprintf("%4.2f", $last_voltage) %>          # last calculated voltage
-
-    Ratio_new = Ratio_cur * V_real / V_cur = <span id="calc_Ratio_new" class="font-weight: bold"></span>    # new voltage divider ratio
-            </pre>
-        </div>
-    </fieldset>
-
-    <fieldset class="mt-4 row">
-        <legend class="w-auto">Other customizations</legend>
-
-        <div class="col-12">
-            <div class="form-check form-switch">
-                <label class="form-check-label">
-                    <input class="form-check-input" type="checkbox" id="broken_glass" name="broken_glass" value="1" <%= $values->{broken_glass} ? "checked" : "" %>>
-                    "Broken glass" overlay
-                </label>
-            </div>
+                <div class="col-md-4">
+                    <label for="min_random_icons">Min random icons count</label>
+                    <input id="min_random_icons" name="min_random_icons" type="number" class="form-control" value="<%= $values->{min_random_icons} %>">
+                </div>
+                <div class="col-md-4">
+                    <label for="max_random_icons">Max random icons count</label>
+                    <input id="max_random_icons" name="max_random_icons" type="number" class="form-control" value="<%= $values->{max_random_icons} %>">
+                </div>
+                <div class="col-md-4">
+                    <label for="max_icons_with_calendar">Max icons count for calendar event</label>
+                    <input id="max_icons_with_calendar" name="max_icons_with_calendar" type="number" class="form-control" value="<%= $values->{max_icons_with_calendar} %>">
+                </div>
+            </fieldset>
         </div>
 
-        <div class="col-12 mb-3">
-            <div class="form-check form-switch">
-                <label class="form-check-label">
-                    <input class="form-check-input" type="checkbox" id="totally_random_icon" name="totally_random_icon" value="1"
-                        <%= $values->{totally_random_icon} ? "checked" : "" %>>
-                    Random icons instead of chamber-by-day
-                </label>
-            </div>
+        <div class="tab-pane" id="nav-client" role="tabpanel">
+            <fieldset class="row">
+                <div class="col-md-12">
+                    <div class="form-check form-switch">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="checkbox" id="ota_mode" name="ota_mode" value="1" <%= $values->{ota_mode} ? "checked" : "" %>>
+                            OTA mode on
+                        </label>
+                    </div>
+                    <div>
+                        <i>(Required for firmware update. ⚠️ It disables standard functionality and waits for OTA update indefinitely!)</i>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="mt-4 row">
+                <div class="col-md-12">
+                    <label for="display_name">Name</label>
+                    <input id="display_name" name="display_name" type="text" class="form-control" value="<%= $display->name %>">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="display_rotation">Rotation</label>
+                    <select id="display_rotation" name="display_rotation" class="form-select">
+                        <option value="0" <%= 'selected' if $display->rotation == 0 %>> 0° (<%= $display->width %> &times; <%= $display->height %>)</option>
+                        <option value="1" <%= 'selected' if $display->rotation == 1 %>> 90° (<%= $display->height %> &times; <%= $display->width %>)</option>
+                        <option value="2" <%= 'selected' if $display->rotation == 2 %>> 180° (<%= $display->width %> &times; <%= $display->height %> but upside down)</option>
+                        <option value="3" <%= 'selected' if $display->rotation == 3 %>> 270° (<%= $display->height %> &times; <%= $display->width %>)</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="display_gamma">Gamma</label>
+                    <input id="display_gamma" name="display_gamma" type="number" step="0.01" class="form-control" value="<%= $display->gamma %>">
+                </div>
+
+                <div class="col-md-3">
+                    <label for="display_border_top">Frame border top</label>
+                    <input id="display_border_top" name="display_border_top" type="number" step="1" class="form-control" value="<%= $display->border_top %>">
+                </div>
+                <div class="col-md-3">
+                    <label for="display_border_right">Frame border right</label>
+                    <input id="display_border_right" name="display_border_right" type="number" step="1" class="form-control" value="<%= $display->border_right %>">
+                </div>
+                <div class="col-md-3">
+                    <label for="display_border_bottom">Frame border bottom</label>
+                    <input id="display_border_bottom" name="display_border_bottom" type="number" step="1" class="form-control" value="<%= $display->border_bottom %>">
+                </div>
+                <div class="col-md-3">
+                    <label for="display_border_left">Frame border left</label>
+                    <input id="display_border_left" name="display_border_left" type="number" step="1" class="form-control" value="<%= $display->border_left %>">
+                </div>
+            </fieldset>
+
+            <fieldset class="mt-4 row">
+                <div class="col-md-12">
+                    <label for="wakeup_schedule">Wake up (redraw) schedule in <a href="https://crontab.guru/">crontab format</a></label>
+                    <input id="wakeup_schedule" name="wakeup_schedule" type="text" class="form-control" value="<%= $values->{wakeup_schedule} %>">
+                </div>
+                <div class="col-md-3">
+                    <label for="min_voltage">0 % battery [V]</label>
+                    <input id="min_voltage" name="min_voltage" type="number" step="0.01" class="form-control" value="<%= $values->{min_voltage} %>">
+                </div>
+                <div class="col-md-3">
+                    <label for="max_voltage">100 % battery [V]</label>
+                    <input id="max_voltage" name="max_voltage" type="number" step="0.01" class="form-control" value="<%= $values->{max_voltage} %>">
+                </div>
+                <div class="col-md-3">
+                    <label for="alert_voltage">Critical (alert) [V]</label>
+                    <input id="alert_voltage" name="alert_voltage" type="number" step="0.01" class="form-control" value="<%= $values->{alert_voltage} %>">
+                </div>
+                <div class="col-md-3">
+                    <label for="voltage_divider_ratio">Voltage divider ratio ((R1+R2)/R1) [>1.0]</label>
+                    <input id="voltage_divider_ratio" name="voltage_divider_ratio" type="number" step="0.0001" class="form-control" value="<%= $values->{voltage_divider_ratio} %>">
+                </div>
+                <div class="col-md-12 mt-4">
+                    Hint: To iteratively fine-tune voltage divider ratio use this formula:
+
+                    <input type="hidden" name="calc_V_cur" value="<%= $last_voltage %>">
+                    <input type="hidden" name="calc_ADC_cur_raw" value="<%= $last_voltage_raw %>">
+                    <pre>
+V_real = <input type="text" name="calc_V_real" size="6" value="<%= sprintf("%4.2f", $last_voltage) %>"> V   # real voltage on battery, measured by multimeter
+Ratio_cur = <%= sprintf("%6.4f", $values->{voltage_divider_ratio}) %>    # current voltage divider ratio
+
+ADC_cur_raw = <%= sprintf("%4d", $last_voltage_raw) %>    # last reported raw ADC reading
+V_cur = <%= sprintf("%4.2f", $last_voltage) %>          # last calculated voltage
+
+Ratio_new = Ratio_cur * V_real / V_cur = <span id="calc_Ratio_new" class="font-weight: bold"></span>    # new voltage divider ratio</pre>
+                </div>
+            </fieldset>
         </div>
 
-        <div class="col-md-4">
-            <label for="min_random_icons">Min random icons count</label>
-            <input id="min_random_icons" name="min_random_icons" type="number" class="form-control" value="<%= $values->{min_random_icons} %>">
-        </div>
-        <div class="col-md-4">
-            <label for="max_random_icons">Max random icons count</label>
-            <input id="max_random_icons" name="max_random_icons" type="number" class="form-control" value="<%= $values->{max_random_icons} %>">
-        </div>
-        <div class="col-md-4">
-            <label for="max_icons_with_calendar">Max icons count for calendar event</label>
-            <input id="max_icons_with_calendar" name="max_icons_with_calendar" type="number" class="form-control" value="<%= $values->{max_icons_with_calendar} %>">
-        </div>
-    </fieldset>
+        <div class="tab-pane" id="nav-calendar" role="tabpanel">
+            <fieldset class="row">
+                <div class="form-group col-12">
+                    <div class="form-check form-switch">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="checkbox" id="web_calendar1" name="web_calendar1" value="1" <%=$ values->{web_calendar1} ? "checked" : "" %>>
+                            ICS calendar #1 enabled
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group col-12">
+                    <label for="web_calendar_ics_url1">URL</label>
+                    <input id="web_calendar_ics_url1" name="web_calendar_ics_url1" type="text" class="form-control" value="<%= $values->{web_calendar_ics_url1} %>">
 
-    <fieldset class="mt-4 row">
-        <legend class="w-auto">Calendar integration</legend>
-        <div class="form-group col-12">
-            <label for="web_calendar_ics_url1">ICS calendar URL #1</label>
-            <input id="web_calendar_ics_url1" name="web_calendar_ics_url1" type="text" class="form-control" value="<%= $values->{web_calendar_ics_url1} %>">
+                </div>
 
-            <div class="form-check form-switch">
-                <label class="form-check-label">
-                    <input class="form-check-input" type="checkbox" id="web_calendar1" name="web_calendar1" value="1" <%=$ values->{web_calendar1} ? "checked" : "" %>>
-                    enabled
-                </label>
-            </div>
-        </div>
+                <div class="form-group col-12 mt-3">
+                    <div class="form-check form-switch">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="checkbox" id="web_calendar2" name="web_calendar2" value="1" <%= $values->{web_calendar2} ? "checked" : "" %>>
+                            ICS calendar #2 enabled
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group col-12">
+                    <label for="web_calendar_ics_url2">URL</label>
+                    <input id="web_calendar_ics_url2" name="web_calendar_ics_url2" type="text" class="form-control" value="<%= $values->{web_calendar_ics_url2} %>">
+                </div>
 
-        <div class="form-group col-12 mt-3">
-            <label for="web_calendar_ics_url2">ICS calendar URL #2</label>
-            <input id="web_calendar_ics_url2" name="web_calendar_ics_url2" type="text" class="form-control" value="<%= $values->{web_calendar_ics_url2} %>">
-            <div class="form-check form-switch">
-                <label class="form-check-label">
-                    <input class="form-check-input" type="checkbox" id="web_calendar2" name="web_calendar2" value="1" <%= $values->{web_calendar2} ? "checked" : "" %>>
-                    enabled
-                </label>
-            </div>
-        </div>
-
-        <div class="form-group col-12 mt-3">
-            <label for="web_calendar_ics_url3">ICS calendar URL #3</label>
-            <input id="web_calendar_ics_url3" name="web_calendar_ics_url3" type="text" class="form-control" value="<%= $values->{web_calendar_ics_url3} %>">
-            <div class="form-check form-switch">
-                <label class="form-check-label">
-                    <input class="form-check-input" type="checkbox" id="web_calendar3" name="web_calendar3" value="1" <%= $values->{web_calendar3} ? "checked" : "" %>>
-                    enabled
-                </label>
-            </div>
-        </div>
-    </fieldset>
-
-    <fieldset class="mt-4 row">
-        <legend class="w-auto">OpenWeather integration</legend>
-
-        <div class="form-group col-12">
-            <label for="openweather_api_key">API key</label>
-            <input id="openweather_api_key" name="openweather_api_key" type="text" class="form-control" value="<%= $values->{openweather_api_key} %>">
-            <div class="form-check form-switch">
-                <label class="form-check-label">
-                    <input class="form-check-input" type="checkbox" id="openweather" name="openweather" value="1" <%= $values->{openweather} ? "checked" : "" %>>
-                    enabled
-                </label>
-            </div>
+                <div class="form-group col-12 mt-3">
+                    <div class="form-check form-switch">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="checkbox" id="web_calendar3" name="web_calendar3" value="1" <%= $values->{web_calendar3} ? "checked" : "" %>>
+                            ICS calendar #3 enabled
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group col-12">
+                    <label for="web_calendar_ics_url3">URL</label>
+                    <input id="web_calendar_ics_url3" name="web_calendar_ics_url3" type="text" class="form-control" value="<%= $values->{web_calendar_ics_url3} %>">
+                </div>
+            </fieldset>
         </div>
 
-        <div class="form-group row mt-3">
-        <div class="col-md-3">
-            <label for="lat">Latitude (+N/-S)</label>
-            <input id="lat" name="lat" type="text" placeholder="49.000000" class="form-control" value="<%= $values->{lat} %>">
-        </div>
-        <div class="col-md-3">
-            <label for="lon">Longitude (+E/-W)</label>
-            <input id="lon" name="lon" type="text" placeholder="16.000000" class="form-control" value="<%= $values->{lon} %>">
-        </div>
-        <div class="col-md-3">
-            <label for="openweather_lang">Lang</label>
-            <input id="openweather_lang" name="openweather_lang" type="text" placeholder="en, cz, ..." class="form-control" value="<%= $values->{openweather_lang} %>">
-        </div>
-        <div class="col-md-3">
-            <label for="timezone">Time zone</label>
-            <input id="timezone" name="timezone" type="text" placeholder="UTC" class="form-control" value="<%= $values->{timezone} %>">
-        </div>
-        </div>
-    </fieldset>
+        <div class="tab-pane" id="nav-openweather" role="tabpanel">
+            <fieldset class="row">
+                <div class="form-group col-12">
+                    <div class="form-check form-switch">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="checkbox" id="openweather" name="openweather" value="1" <%= $values->{openweather} ? "checked" : "" %>>
+                            OpenWeather enabled
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group col-12 mt-3">
+                    <label for="openweather_api_key">API key</label>
+                    <input id="openweather_api_key" name="openweather_api_key" type="text" class="form-control" value="<%= $values->{openweather_api_key} %>">
+                </div>
 
-    <fieldset class="mt-4 row">
-        <legend class="w-auto">MQTT integration</legend>
-
-        <div class="form-group row">
-            <div class="form-group col-3">
-                <label for="mqtt_server">Server</label>
-                <input id="mqtt_server" name="mqtt_server" type="text" class="form-control" value="<%= $values->{mqtt_server} %>">
-            </div>
-            <div class="form-group col-3">
-                <label for="mqtt_username">Username</label>
-                <input id="mqtt_username" name="mqtt_username" type="text" class="form-control" value="<%= $values->{mqtt_username} %>">
-            </div>
-            <div class="form-group col-3">
-                <label for="mqtt_password">Password</label>
-                <input id="mqtt_password" name="mqtt_password" type="text" class="form-control" value="<%= $values->{mqtt_password} %>">
-            </div>
-            <div class="form-group col-3">
-                <label for="mqtt_topic">Device topic</label>
-                <input id="mqtt_topic" name="mqtt_topic" type="text" class="form-control" value="<%= $values->{mqtt_topic} %>">
-            </div>
-        </div>
-        <div class="form-group col-12">
-            <div class="form-check form-switch">
-                <label class="form-check-label">
-                    <input class="form-check-input" type="checkbox" id="mqtt" name="mqtt" value="1" <%=$ values->{mqtt} ? "checked" : "" %>>
-                    enabled
-                </label>
-            </div>
-        </div>
-    </fieldset>
-
-    <fieldset class="mt-4 row">
-        <legend class="w-auto">Google Fit integration</legend>
-
-        <div class="form-group col-12">
-            <a href="/auth/googlefit/<%= $display->id %>">Authorize</a>
+                <div class="form-group row mt-3">
+                    <div class="col-md-3">
+                        <label for="lat">Latitude (+N/-S)</label>
+                        <input id="lat" name="lat" type="text" placeholder="49.000000" class="form-control" value="<%= $values->{lat} %>">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="lon">Longitude (+E/-W)</label>
+                        <input id="lon" name="lon" type="text" placeholder="16.000000" class="form-control" value="<%= $values->{lon} %>">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="openweather_lang">Lang</label>
+                        <input id="openweather_lang" name="openweather_lang" type="text" placeholder="en, cz, ..." class="form-control" value="<%= $values->{openweather_lang} %>">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="timezone">Time zone</label>
+                        <input id="timezone" name="timezone" type="text" placeholder="UTC" class="form-control" value="<%= $values->{timezone} %>">
+                    </div>
+                </div>
+            </fieldset>
         </div>
 
-        <div class="form-group col-12">
-            See <a href="https://console.cloud.google.com/apis/">https://console.cloud.google.com/apis/</a> to get client ID and secret values:
+        <div class="tab-pane" id="nav-mqtt" role="tabpanel">
+            <fieldset class="row">
+                <div class="form-group col-12">
+                    <div class="form-check form-switch">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="checkbox" id="mqtt" name="mqtt" value="1" <%=$ values->{mqtt} ? "checked" : "" %>>
+                            MQTT enabled
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group row mt-3">
+                    <div class="col-md-3">
+                        <label for="mqtt_server">Server</label>
+                        <input id="mqtt_server" name="mqtt_server" type="text" class="form-control" value="<%= $values->{mqtt_server} %>">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="mqtt_username">Username</label>
+                        <input id="mqtt_username" name="mqtt_username" type="text" class="form-control" value="<%= $values->{mqtt_username} %>">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="mqtt_password">Password</label>
+                        <input id="mqtt_password" name="mqtt_password" type="text" class="form-control" value="<%= $values->{mqtt_password} %>">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="mqtt_topic">Device topic</label>
+                        <input id="mqtt_topic" name="mqtt_topic" type="text" class="form-control" value="<%= $values->{mqtt_topic} %>">
+                    </div>
+                </div>
+            </fieldset>
         </div>
-        <div class="col-md-12">
-            <label for="googlefit_client_id">Client ID</label>
-            <input id="googlefit_client_id" name="googlefit_client_id" type="text" class="form-control" value="<%= $values->{googlefit_client_id} %>">
+
+        <div class="tab-pane" id="nav-fit" role="tabpanel">
+            <fieldset class="row">
+                <div class="form-group col-12 mb-3">
+                    <a class="btn btn-primary" href="/auth/googlefit/<%= $display->id %>">Authorize calendar to use Google Fit with the values below</a>
+                </div>
+
+                <div class="form-group col-12">
+                    See <a href="https://console.cloud.google.com/apis/">https://console.cloud.google.com/apis/</a> to get client ID and secret values:
+                </div>
+                <div class="col-md-12">
+                    <label for="googlefit_client_id">Client ID</label>
+                    <input id="googlefit_client_id" name="googlefit_client_id" type="text" class="form-control" value="<%= $values->{googlefit_client_id} %>">
+                </div>
+                <div class="col-md-12">
+                    <label for="googlefit_client_secret">Client secret</label>
+                    <input id="googlefit_client_secret" name="googlefit_client_secret" type="text" class="form-control" value="<%= $values->{googlefit_client_secret} %>">
+                </div>
+                <div class="col-md-12">
+                    <label for="">Callback URL</label>
+                    <input id="googlefit_auth_callback" name="googlefit_auth_callback" type="text" class="form-control" value="<%= $values->{googlefit_auth_callback} %>">
+                </div>
+                <hr>
+                <div class="col-md-12">
+                    <label for="">Auth token</label>
+                    <input id="_googlefit_access_token" name="_googlefit_access_token" type="text" class="form-control" value="<%= $values->{_googlefit_access_token} %>">
+                </div>
+                <div class="col-md-12">
+                    <label for="">Refresh token</label>
+                    <input id="_googlefit_refresh_token" name="_googlefit_refresh_token" type="text" class="form-control" value="<%= $values->{_googlefit_refresh_token} %>">
+                </div>
+            </fieldset>
         </div>
-        <div class="col-md-12">
-            <label for="googlefit_client_secret">Client secret</label>
-            <input id="googlefit_client_secret" name="googlefit_client_secret" type="text" class="form-control" value="<%= $values->{googlefit_client_secret} %>">
-        </div>
-        <div class="col-md-12">
-            <label for="">Callback URL</label>
-            <input id="googlefit_auth_callback" name="googlefit_auth_callback" type="text" class="form-control" value="<%= $values->{googlefit_auth_callback} %>">
-        </div>
-        <hr>
-        <div class="col-md-12">
-            <label for="">Auth token</label>
-            <input id="_googlefit_access_token" name="_googlefit_access_token" type="text" class="form-control" value="<%= $values->{_googlefit_access_token} %>">
-        </div>
-        <div class="col-md-12">
-            <label for="">Refresh token</label>
-            <input id="_googlefit_refresh_token" name="_googlefit_refresh_token" type="text" class="form-control" value="<%= $values->{_googlefit_refresh_token} %>">
-        </div>
-    </fieldset>
+    </div>
 
     <div class="col-12 mt-3">
         <input type="submit" class="btn btn-primary" value="Submit">

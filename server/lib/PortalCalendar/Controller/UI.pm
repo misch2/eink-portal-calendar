@@ -25,22 +25,14 @@ sub select_display {
         format   => 'html',
         nav_link => 'index',
 
-        display  => undef,
-        displays => [ $displays->all ],
+        display    => undef,
+        config_obj => undef,
+        displays   => [ $displays->all ],
     );
 }
 
 sub home {
     my $self = shift;
-
-    my $last_contact_ago;
-    my $last_visit_dt;
-
-    if (my $last_visit_raw = $self->get_config('_last_visit')) {
-        $last_visit_dt = DateTime::Format::ISO8601->parse_datetime($last_visit_raw);
-
-        $last_contact_ago = DateTime->now()->subtract_datetime($last_visit_dt);
-    }
 
     return $self->render(
         template => 'index',
@@ -49,13 +41,6 @@ sub home {
 
         display    => $self->display,
         config_obj => $self->config_obj,
-
-        waiting_tasks    => $self->app->minion->jobs({ states => [ 'inactive', 'active' ] })->total,
-        last_contact_ago => $last_contact_ago,
-        last_visit_dt    => $last_visit_dt,
-        last_voltage     => $self->get_calculated_voltage          // undef,
-        battery_percent  => $self->calculate_battery_percent       // undef,
-        last_voltage_raw => $self->get_config('_last_voltage_raw') // undef,
     );
 }
 
@@ -67,7 +52,8 @@ sub test {
         format   => 'html',
         nav_link => 'compare',
 
-        display => $self->display,
+        display    => $self->display,
+        config_obj => $self->config_obj,
     );
 }
 
@@ -85,11 +71,12 @@ sub config_ui_show {
         format   => 'html',
         values   => $values,
 
-        last_voltage     => $self->get_calculated_voltage,
+        last_voltage     => $self->display->voltage,
         last_voltage_raw => $self->get_config('_last_voltage_raw'),
         nav_link         => 'config_ui',
 
-        display => $self->display,
+        display    => $self->display,
+        config_obj => $self->config_obj,
     );
 }
 
@@ -98,10 +85,21 @@ sub config_ui_save {
 
     my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
 
+    # Generic config parameters
     foreach my $name (@{ $self->config_obj->parameters }) {
         my $value = $self->req->param($name);
         $self->set_config($name, $value);
     }
+
+    # Parameters stored in the 'displays' table
+    $self->display->name($self->req->param('display_name'));
+    $self->display->rotation($self->req->param('display_rotation'));
+    $self->display->gamma($self->req->param('display_gamma'));
+    $self->display->border_top($self->req->param('display_border_top'));
+    $self->display->border_right($self->req->param('display_border_right'));
+    $self->display->border_bottom($self->req->param('display_border_bottom'));
+    $self->display->border_left($self->req->param('display_border_left'));
+    $self->display->update;
 
     $self->flash(message => "Parameters saved.");
 
@@ -109,7 +107,6 @@ sub config_ui_save {
     $util->update_mqtt('max_voltage',           $self->get_config('max_voltage'));
     $util->update_mqtt('alert_voltage',         $self->get_config('alert_voltage'));
     $util->update_mqtt('voltage_divider_ratio', $self->get_config('voltage_divider_ratio'));
-    $util->update_mqtt('sleep_time',            $self->get_config('sleep_time'));
 
     $self->app->log->debug("Clearing database cache");
     PortalCalendar::Integration::iCal->new(app => $self->app)->clear_db_cache;
@@ -124,14 +121,24 @@ sub config_ui_save {
 sub calendar_html_default_date {
     my $self = shift;
     my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
-    return $util->html_for_date(DateTime->now());
+    return $util->html_for_date(
+        DateTime->now(),
+        {
+            preview_colors => ($self->req->param('preview_colors') // 0)
+        }
+    );
 }
 
 sub calendar_html_specific_date {
     my $self = shift;
     my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
     my $dt   = DateTime::Format::Strptime->new(pattern => '%Y-%m-%d')->parse_datetime($self->stash('date'));
-    return $util->html_for_date($dt);
+    return $util->html_for_date(
+        $dt,
+        {
+            preview_colors => ($self->req->param('preview_colors') // 0)
+        }
+    );
 }
 
 sub googlefit_redirect {
@@ -165,7 +172,8 @@ sub googlefit_success {
         format   => 'html',
         nav_link => 'config_ui',
 
-        display => $self->display,
+        display    => $self->display,
+        config_obj => $self->config_obj,
 
         # page-specific variables
         a_token    => $self->get_config('_googlefit_access_token'),

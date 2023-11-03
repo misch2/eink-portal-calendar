@@ -1,5 +1,6 @@
 #!/bin/bash
 
+HTTP_CACHING_DEPRECATION_WARNING_HIDE=1
 dir=$(dirname $0)
 if [ "$1" == "--without-carton" ]; then
     cd $dir/.. && ./scripts/portal_calendar minion worker -j 1

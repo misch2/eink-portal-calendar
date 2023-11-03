@@ -212,6 +212,7 @@ Readonly my @CHAMBER_ICONS_BY_DAY_NUMBER => (
 sub html_for_date {
     my $self = shift;
     my $dt   = shift;
+    my $args = shift;
 
     # keep the calendar random, but consistent for any given day
     srand($dt->ymd(''));
@@ -224,7 +225,7 @@ sub html_for_date {
 
         next unless $url;
 
-        my $calendar = PortalCalendar::Integration::iCal->new(app => $self->app, display => $self->display, db_cache_key => 'calendar' . $calendar_no, ics_url => $url);
+        my $calendar = PortalCalendar::Integration::iCal->new(app => $self->app, display => $self->display, ics_url => $url);
         try {
             push @today_events, $calendar->get_today_events($dt);    # cached if possible
                                                                      #p @today_events;
@@ -333,6 +334,8 @@ sub html_for_date {
         template => 'calendar_themes/' . $self->app->get_config('theme'),
         format   => 'html',
         app      => $self->app,
+        display  => $self->display,
+        colors   => $self->display->css_color_map($args->{preview_colors}),
 
         # other variables
         date                 => $dt,
@@ -413,11 +416,13 @@ sub generate_bitmap {
 
     $self->app->log->info("Producing bitmap");
 
+    # $self->app->log->info(np($args));
+
     my $img = Imager->new(file => $self->app->app->home->child("generated_images/current_calendar_" . $self->display->id . ".png")) or die Imager->errstr;
 
     # If the generated image is larger (probably due to invalid CSS), crop it so that it display at least something:
-    if ($img->getheight > $self->display->height) {
-        my $tmp = $img->crop(left => 0, top => 0, width => $self->display->width, height => $self->display->height);
+    if ($img->getheight > $self->display->virtual_height) {
+        my $tmp = $img->crop(left => 0, top => 0, width => $self->display->virtual_width, height => $self->display->virtual_height);
         die $img->errstr unless $tmp;
         $img = $tmp;
     }
@@ -458,14 +463,14 @@ sub generate_bitmap {
     }
 
     if ($args->{numcolors} && $args->{numcolors} < 256) {
-        my $tmp = $img->to_paletted(
-            {
-                make_colors => $args->{colormap_name},
-                translate   => 'closest',                                                               # closest, errdiff
-                                                                                                        # errdiff     => 'jarvis',      # floyd, jarvis, stucki, ...
-                colors      => [ map { Imager::Color->new($_) } @{ $args->{colormap_colors} || [] } ]
-            }
-        );
+        my $imager_args = {
+            make_colors => $args->{colormap_name},
+            translate   => 'closest',                                                               # closest, errdiff
+                                                                                                    # errdiff     => 'jarvis',      # floyd, jarvis, stucki, ...
+            colors      => [ map { Imager::Color->new($_) } @{ $args->{colormap_colors} || [] } ]
+        };
+        my $tmp = $img->to_paletted($imager_args);
+
         die $img->errstr unless $tmp;
         $img = $tmp;
     }

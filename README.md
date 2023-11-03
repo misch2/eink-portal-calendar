@@ -1,5 +1,8 @@
 # "Portal" calendar for e-ink display
 
+<img src="https://github.com/misch2/eink-portal-calendar/assets/16558674/b2b185de-a960-480c-99a1-aa7d521ed9d6" width="250">
+<img src="https://github.com/misch2/eink-portal-calendar/assets/16558674/66098158-f8c2-456c-95e3-673dab4ea655" width="250">
+
 Inspired by https://github.com/wuspy/portal_calendar. Hardware is exactly the same here, only the software (mainly the server part, but client too) is different here.
 
 The software is divided into two parts:
@@ -31,7 +34,7 @@ I also added a voltage monitorig because with ePaper it's not easily detactable 
 
 ## Installation 
 
-Edit the `server/app.conf` and update settings there. See the `server/examples/app*.conf` for an example.
+Edit the `server/portal_calendar.conf` and update settings there. See the `server/examples/portal_calendar8.conf` for an example.
 
 ```
 $ sudo apt install perl libimlib2-dev libimlib2
@@ -93,11 +96,7 @@ B&W bitmap with modified gamma for more blacks ( `/calendar/bitmap?colors=2&gamm
 ![image](https://user-images.githubusercontent.com/16558674/214617604-5f2b534c-2f68-4d9c-8866-10e8eeeff591.png)
 
 Configuration UI:
-![image](https://user-images.githubusercontent.com/16558674/219482420-b5643deb-5625-4562-82ca-60fa25804da6.png)
-
-"Broken display" variant:
- 
-![image](https://user-images.githubusercontent.com/16558674/218329554-1cf13b36-d0ab-4a0a-9ead-7b298c4bb202.png)
+![image](https://github.com/misch2/eink-portal-calendar/assets/16558674/c6f1d8bc-9d4d-44d4-83df-628a64559bb5)
 
 ## TODO
 
@@ -120,71 +119,3 @@ Configuration UI:
 1. ~~Better battery voltage monitoring + move more things from client to the server~~
 
 [^1]: I didn't consider the need for ESP board with very low power consumption. I therefore bought one that was available immediately (ESP8266 with integrated e-Paper driver). But while it's perfectly usable when powered through USB, it wouldn't keep working sufficiently long with AAA batteries. I therefore switched to low power ESP32 board.
-
-## Timing
-
-### Timing on ESP8266:
-
-```
-with DEBUG_VISIBLE on:
- 0:00 boot
- 1:77 try to display 'starting...'
- 5:15  - fully displayed
- 6:92 fully displayed 'connecting to wifi...'
-11:50 fully displayed 'connecting to webserver...'
-13:27 fully displayed 'downloading...'
-19:82 refreshing display
-23:64  - finished
-
-with DEBUG_VISIBLE off:
- 0:00 boot
-10:40 refreshing display
-13:60  - finished
-
-dtto but optimized backend
- 0:00 boot
- 9:42  - finished
-```
-
-### Timing on ESP32
-```
- 0:00 boot
- 2:30 finished reading image checksum data
- 9:10 finished all
-```
- 
-### Example of the client->server communication
-
-Approximately one second to wake up, download config and image info, and sleep again if nothing has changed:
-```
-Feb 12 15:16:39 esp32 portal-calendar ---
-Feb 12 15:16:39 esp32 portal-calendar Connected to WiFi in 655ms
-Feb 12 15:16:39 esp32 portal-calendar IP address: w.x.y.z
-Feb 12 15:16:39 esp32 portal-calendar Wakeup cause: 4, reset cause: 8
-Feb 12 15:16:39 esp32 portal-calendar ESP_RST_DEEPSLEEP
-Feb 12 15:16:39 esp32 portal-calendar ESP_SLEEP_WAKEUP_TIMER
-Feb 12 15:16:39 esp32 portal-calendar Boot count: 20, last image checksum: 22ed4f4309df31d396cd83214a40e77816367ab6
-Feb 12 15:16:39 esp32 portal-calendar Loading config from web
-Feb 12 15:16:39 esp32 portal-calendar connecting to http://u.v.w.x/config
-Feb 12 15:16:39 esp32 portal-calendar calling GET
-Feb 12 15:16:39 esp32 portal-calendar end, response=200
-Feb 12 15:16:39 esp32 portal-calendar sleepTime set to 3600
-Feb 12 15:16:39 esp32 portal-calendar Downloading http://u.v.w.x/calendar/bitmap/epapermono
-Feb 12 15:16:40 esp32 portal-calendar  read line: [HTTP/1.1 200 OK#015#012]
-Feb 12 15:16:40 esp32 portal-calendar Waiting for OK response from server. Current line: HTTP/1.1 200 OK#015
-Feb 12 15:16:40 esp32 portal-calendar  read line: [Server: nginx/1.18.0#015#012]
-Feb 12 15:16:40 esp32 portal-calendar  read line: [Date: Sun, 12 Feb 2023 14:16:40 GMT#015#012]
-Feb 12 15:16:40 esp32 portal-calendar  read line: [Content-Type: text/html;charset=UTF-8#015#012]
-Feb 12 15:16:40 esp32 portal-calendar  read line: [Content-Length: 48044#015#012]
-Feb 12 15:16:40 esp32 portal-calendar  read line: [Connection: close#015#012]
-Feb 12 15:16:40 esp32 portal-calendar  read line: [Vary: Accept-Encoding#015#012]
-Feb 12 15:16:40 esp32 portal-calendar  read line: [#015#012]
-Feb 12 15:16:40 esp32 portal-calendar All headers received
-Feb 12 15:16:40 esp32 portal-calendar Reading bitmap header
-Feb 12 15:16:40 esp32 portal-calendar Reading checksum
-Feb 12 15:16:40 esp32 portal-calendar Last checksum was: 22ed4f4309df31d396cd83214a40e77816367ab6
-Feb 12 15:16:40 esp32 portal-calendar New checksum is: 22ed4f4309df31d396cd83214a40e77816367ab6
-Feb 12 15:16:40 esp32 portal-calendar Not refreshing, image is unchanged
-Feb 12 15:16:40 esp32 portal-calendar Total execution time: 1253ms
-Feb 12 15:16:40 esp32 portal-calendar Going to hibernate for 3600 seconds
-```

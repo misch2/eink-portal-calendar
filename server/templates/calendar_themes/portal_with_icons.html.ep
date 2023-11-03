@@ -2,6 +2,14 @@
 %# see https://icon-sets.iconify.design/material-symbols
 %= javascript 'https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js'
 %= stylesheet '/css/calendar.css'
+
+<style type="text/css">
+:root {
+    --epd-black:  <%= $colors->{epd_black} %>;
+    --epd-white:  <%= $colors->{epd_white} %>;
+}
+</style>
+
 % my $decorator = sub { shift };        # returns input as-is
 % $decorator = sub { uc(shift) };       # UPPERCASE
 %# $decorator = sub { ucfirst(shift) }; # Uppercase
@@ -66,7 +74,7 @@
         <img id="aperture-logo" src="/images/Aperture_Laboratories_Logo.png">
 
         <div id="battery-status">
-            % my $pct = $app->calculate_battery_percent();
+            % my $pct = $display->battery_percent();
             % if ($pct >= 90) {
                 <iconify-icon icon="material-symbols:battery-20-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
             % } elsif ($pct >= 70) {

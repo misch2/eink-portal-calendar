@@ -1,7 +1,7 @@
 % layout 'bootstrap5';
 
-% my $width  = $display->width;
-% my $height = $display->height;
+% my $width  = $display->virtual_width;
+% my $height = $display->virtual_height;
 
 % my $border_size           = 50;
 % my $border_overlay_top    = $display->border_top;    # -3;
@@ -34,32 +34,14 @@
 }
 % end
 
-<p class="row-fluid">
-    Last contact from display: 
-    % if ($last_contact_ago) {
-        % my ($hours, $minutes) = $last_contact_ago->in_units('hours', 'minutes');
-        % if ($hours > 0) {
-            <%= $hours %> hours
-        % }
-        <%= $minutes %> minutes ago
-        (<%= $last_visit_dt ? $last_visit_dt->strftime('%c') : '' %>).
-    % } else {
-        never.
-    % }
-    <%= $waiting_tasks %> waiting tasks.
-</p>
-<p class="row-fluid">
-    Last voltage: <%= defined($last_voltage) ? sprintf("%.1f", $last_voltage) : '(unknown)' %> V (<%= defined($battery_percent) ? sprintf("%.0f", $battery_percent) : 'unknown' %> %). 
-    OTA mode: <%= $config_obj->get('ota_mode') ? 'on' : 'off' %>.
-</p>
-
 <p class="row-fluid pb-3">
-    Underlying image for the ePaper display.
-    It's used almost as-is by the display (it only gets quantized and gamma-corrected).
+    Image for the ePaper display
+    (if you'd like to see the original image generated from HTML+CSS template then look at the <a href="/test/<%= $display->id %>">test page</a>).
+    
 </p>
 
 <p class="row-fluid">
     <div class="preview-image">
-        <img src="/calendar/bitmap?format=png&mac=<%= $display->mac %>">
+        <img src="/calendar/bitmap/epaper?web_format=1&preview_colors=1&mac=<%= $display->mac %>">
     </div>
 </p>

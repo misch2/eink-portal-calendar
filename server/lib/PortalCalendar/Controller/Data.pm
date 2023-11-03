@@ -32,13 +32,16 @@ sub config {
     } else {
         $display = $self->schema->resultset('Display')->create(
             {
-                mac           => $self->mac,
-                name          => "New display with MAC " . uc($self->mac) . " added on " . DateTime->now->stringify,
-                width         => $self->req->param('w')  // 100,
-                height        => $self->req->param('h')  // 200,
-                rotation      => $self->req->param('r')  // 0,
-                colortype     => $self->req->param('c')  // 'BW',
-                firmware      => $self->req->param('fw') // '',
+                # Physical properties, not to be changed by the user:
+                mac       => $self->mac,
+                name      => "New display with MAC " . uc($self->mac) . " added on " . DateTime->now->stringify,
+                width     => $self->req->param('w'),
+                height    => $self->req->param('h'),
+                colortype => $self->req->param('c'),
+                firmware  => $self->req->param('fw') // '',
+
+                # Logical properties, updatable by the user:
+                rotation      => 0,
                 gamma         => 2.2,
                 border_top    => 0,
                 border_right  => 0,
@@ -48,28 +51,31 @@ sub config {
         );
     }
 
-    $self->set_config('_last_visit', DateTime->now()->iso8601);
-
+    $self->set_config('_last_visit',       DateTime->now()->iso8601);
     $self->set_config('_last_voltage_raw', $self->req->param('adc') // $self->req->param('voltage_raw') // '');    # value has NOT NULL restriction
 
     my $util = PortalCalendar::Util->new(app => $self, display => $display);
-    $util->update_mqtt('voltage',         $self->get_calculated_voltage + 0.001);                                  # to force grafana to store changed values
-    $util->update_mqtt('voltage_raw',     $self->get_config('_last_voltage_raw') + 0.001);                         # to force grafana to store changed values
-    $util->update_mqtt('battery_percent', $self->calculate_battery_percent() + 0.001);                             # to force grafana to store changed values
-    $util->update_mqtt('last_visit',      DateTime->now()->rfc3339);
-    $util->update_mqtt('firmware',        $display->firmware);
+    my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
+    $self->app->log->info("Next wakeup at $next_wakeup (in $sleep_in_seconds seconds) according to crontab schedule '$schedule'");
 
-    $util->update_mqtt('voltage',         $self->get_calculated_voltage);
+    $util->update_mqtt('voltage',         $display->voltage + 0.001);                                              # to force grafana to store changed values
+    $util->update_mqtt('battery_percent', $display->battery_percent() + 0.001);                                    # to force grafana to store changed values
+    $util->update_mqtt('voltage_raw',     $self->get_config('_last_voltage_raw') + 0.001);                         # to force grafana to store changed values
+    $util->update_mqtt('firmware',        $display->firmware);
+    $util->update_mqtt('last_visit',      DateTime->now()->rfc3339);
+    $util->update_mqtt('sleep_time',      $sleep_in_seconds);
+
+    $util->update_mqtt('voltage',         $display->voltage);
+    $util->update_mqtt('battery_percent', $display->battery_percent());
     $util->update_mqtt('voltage_raw',     $self->get_config('_last_voltage_raw'));
-    $util->update_mqtt('battery_percent', $self->calculate_battery_percent());
 
     my $ret = {
 
         # {// undef} to force scalars
-        sleep               => $self->get_config('sleep_time') // undef,
-        is_critical_voltage => (($self->get_calculated_voltage < $self->get_config('alert_voltage')) ? \1 : \0),    # JSON true/false
-        battery_percent     => $self->calculate_battery_percent() // undef,
-        ota_mode            => ($self->get_config('ota_mode') ? \1 : \0),                                           # JSON true/false
+        sleep               => $sleep_in_seconds,
+        is_critical_voltage => (($display->voltage < $self->get_config('alert_voltage')) ? \1 : \0),    # JSON true/false
+        battery_percent     => $display->battery_percent() // undef,
+        ota_mode            => ($self->get_config('ota_mode') ? \1 : \0),                               # JSON true/false
     };
 
     $self->render(json => $ret);
@@ -84,58 +90,57 @@ sub bitmap {
 
     my $rotate        = $self->req->param('rotate')        // 0;
     my $flip          = $self->req->param('flip')          // '';
-    my $colors        = $self->req->param('colors')        // 256;
-    my $gamma         = $self->req->param('gamma')         // 1.0;
-    my $format        = $self->req->param('format')        // 'png';
-    my $colormap_name = $self->req->param('colormap_name') // 'webmap';
+    my $gamma         = $self->req->param('gamma')         // $self->display->gamma;
+    my $numcolors     = $self->req->param('colors')        // $self->display->num_colors;
+    my $colormap_name = $self->req->param('colormap_name') // 'none';
+    my $color_palette = $self->display->color_palette($self->req->param('preview_colors'));
+    my $format        = $self->req->param('format') // 'png';
+
+    $colormap_name = 'webmap' if scalar(@$color_palette) == 0;
 
     my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
     return $util->generate_bitmap(
         {
-            rotate        => $rotate,
-            flip          => $flip,
-            numcolors     => $colors,
-            gamma         => $gamma,
-            format        => $format,
-            colormap_name => $colormap_name,
+            rotate          => $rotate,
+            flip            => $flip,
+            gamma           => $gamma,
+            numcolors       => $numcolors,
+            colormap_name   => $colormap_name,
+            colormap_colors => $color_palette,
+            format          => $format,
+            display_type    => $self->display->colortype,
         }
     );
 }
 
-# Return bitmap to client (ePaper display, special format of bitmnap):
+# Return bitmap to client (ePaper display, special format of bitmnap) and update last_visit timestamp:
 sub bitmap_epaper {
     my $self = shift;
 
     $self->set_config('_last_visit', DateTime->now()->iso8601);
 
-    my $numcolors;
-    my $colormap_name;           # see Imager::ImageTypes
-    my $colormap_colors = [];    # only for the 'none' colormap_name
-    if ($self->display->colortype eq 'BW') {
-        $numcolors     = 2;
-        $colormap_name = 'mono';
-    } elsif ($self->display->colortype eq '4G') {
-        $numcolors     = 4;
-        $colormap_name = 'gray4';
-    } elsif ($self->display->colortype eq '16G') {
-        $numcolors     = 16;
-        $colormap_name = 'gray16';
-    } elsif ($self->display->colortype eq '3C') {
-        $numcolors     = 3;
-        $colormap_name = 'webmap';
-    } else {
-        die "unknown display type: " . $self->display->colortype;
+    my $rotate    = $self->display->rotation;
+    my $numcolors = $self->display->num_colors;
+    my $format    = 'epaper_native';
+
+    my $color_palette = $self->display->color_palette($self->req->param('preview_colors'));
+    my $colormap_name = (scalar(@$color_palette) > 0 ? 'none' : 'webmap');
+
+    if ($self->req->param('web_format')) {
+        $format = 'png';
+        $rotate = 0;
     }
 
     my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
     return $util->generate_bitmap(
         {
-            rotate          => $self->display->rotation,
+            rotate          => $rotate,
+            flip            => 0,
             gamma           => $self->display->gamma,
             numcolors       => $numcolors,
             colormap_name   => $colormap_name,
-            colormap_colors => $colormap_colors,
-            format          => 'epaper_native',
+            colormap_colors => $color_palette,
+            format          => $format,
             display_type    => $self->display->colortype,
         }
     );

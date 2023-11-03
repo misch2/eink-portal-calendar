@@ -57,10 +57,11 @@ sub fetch_from_web {
     my $cache = $self->db_cache;
     $cache->max_age(1 * ONE_HOUR);
 
+    my $global_dt_start = DateTime->now()->subtract(days => ($self->fetch_days - 1))->truncate(to => 'day');
+    my $global_dt_end   = DateTime->now();
+
     return $cache->get_or_set(
         sub {
-            my $global_dt_start = DateTime->now()->subtract(days => ($self->fetch_days - 1))->truncate(to => 'day');
-            my $global_dt_end   = DateTime->now();
 
             $self->app->log->debug("requesting globally $global_dt_start - $global_dt_end for " . $self->fetch_days . " days");
 
@@ -119,7 +120,7 @@ sub fetch_from_web {
 
             return $global_json;
         },
-        $self->db_cache_key . '/weight_aggregated'
+        { start => $global_dt_start, end => $global_dt_end->clone->truncate(to => 'day') }
     );
 }
 

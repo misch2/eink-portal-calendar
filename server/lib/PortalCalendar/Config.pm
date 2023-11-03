@@ -11,7 +11,7 @@ has 'display';
 has 'defaults' => sub {
     my $self = shift;
     return {
-        sleep_time               => 3600,
+        wakeup_schedule          => '0 * * * *',                                     # every hour
         min_voltage              => 3.6,
         max_voltage              => 6.0,
         alert_voltage            => 4.0,

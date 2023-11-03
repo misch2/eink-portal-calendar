@@ -56,7 +56,7 @@ sub get_all {
             my $processed = $self->transform_details($raw);
             return $processed;
         },
-        $self->db_cache_key . '/ical'
+        { url => $self->ics_url }
     );
 
     return $cal_data;

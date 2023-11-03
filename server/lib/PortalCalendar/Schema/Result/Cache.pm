@@ -1,3 +1,4 @@
+#<<< skip perltidy formatting
 use utf8;
 package PortalCalendar::Schema::Result::Cache;
 
@@ -47,12 +48,6 @@ __PACKAGE__->table("cache");
   is_nullable: 0
   size: 255
 
-=head2 display_id
-
-  data_type: 'integer'
-  is_foreign_key: 1
-  is_nullable: 1
-
 =head2 key
 
   data_type: 'varchar'
@@ -83,8 +78,6 @@ __PACKAGE__->add_columns(
   { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
   "creator",
   { data_type => "varchar", is_nullable => 0, size => 255 },
-  "display_id",
-  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
   "key",
   { data_type => "varchar", is_nullable => 0, size => 255 },
   "created_at",
@@ -109,7 +102,7 @@ __PACKAGE__->set_primary_key("id");
 
 =head1 UNIQUE CONSTRAINTS
 
-=head2 C<creator_key_display_id_unique>
+=head2 C<creator_key_unique>
 
 =over 4
 
@@ -117,42 +110,16 @@ __PACKAGE__->set_primary_key("id");
 
 =item * L</key>
 
-=item * L</display_id>
-
 =back
 
 =cut
 
-__PACKAGE__->add_unique_constraint(
-  "creator_key_display_id_unique",
-  ["creator", "key", "display_id"],
-);
+__PACKAGE__->add_unique_constraint("creator_key_unique", ["creator", "key"]);
 
-=head1 RELATIONS
+#>>> end of perltidy skipped block
 
-=head2 display
-
-Type: belongs_to
-
-Related object: L<PortalCalendar::Schema::Result::Display>
-
-=cut
-
-__PACKAGE__->belongs_to(
-  "display",
-  "PortalCalendar::Schema::Result::Display",
-  { id => "display_id" },
-  {
-    is_deferrable => 0,
-    join_type     => "LEFT",
-    on_delete     => "NO ACTION",
-    on_update     => "NO ACTION",
-  },
-);
-
-
-# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-10-22 15:58:36
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:bUq/JCyns5FE7gXnCStiQw
+# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-11-03 13:53:17
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:QPQYmSqgT4J2ntfTWanYmA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

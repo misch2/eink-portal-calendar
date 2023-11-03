@@ -2,5 +2,6 @@
 dbicdump \
     -o dump_directory=lib/ \
     -o components='["InflateColumn::DateTime"]' \
+    -o filter_generated_code='sub { return "#<<< skip perltidy formatting\n$_[2]\n#>>> end of perltidy skipped block"};' \
     PortalCalendar::Schema \
     dbi:SQLite:local/calendar.db

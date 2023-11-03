@@ -1,20 +1,55 @@
 % layout 'bootstrap5';
 
-<h3>Select your display</h3>
+<h3>Displays</h3>
 
-<ul>
+<table class="table FIXMEtable-striped table-hover">
+<thead>
+    <tr>
+        <th scope="col">Id</th>
+        <th scope="col">Name</th>
+        <th scope="col">MAC address</th>
+        <th scope="col">Width &times; height</th>
+        <th scope="col">Color type</th>
+        <th scope="col">Firmware</th>
+        <th scope="col">Next wakeup</th>
+        <th scope="col">Last image</th>
+    </tr>
+</thead>
+<tbody>
 % foreach my $d (@{ $displays }) {
-    <li>
-        <%= "#" . $d->id %>) 
-        <a href="/home/<%= $d->id %>"><%= $d->name %></a>
-        <div style="font-size: 0.8em; margin-left: 1em;">
-            MAC <%= $d->mac %>, 
-            resolution <%= $d->width %> &times; <%= $d->height %>, 
-            rotate <%= $d->rotation %>, 
-            gamma <%= $d->gamma %>,
-            type <%= $d->colortype %>,
-            firmware "<%= $d->firmware %>".
-        </div>
-    </li>
+    <tr>
+        <td>
+            <%= $d->id %> 
+        </td>
+        <td>
+            <a href="/home/<%= $d->id %>"><%= $d->name %></a>
+        </td>
+        <td>
+            <%= $d->mac %>
+        </td>
+        <td>
+            <%= $d->virtual_width %>
+            &times;
+            <%= $d->virtual_height %>
+        </td>
+        <td>
+            <%= $d->colortype_formatted %>
+        </td>
+        <td>
+            <%= $d->firmware %>
+        </td>
+        <td>
+            % my ($next_wakeup, $sleep_in_seconds, $schedule) = $d->next_wakeup_time();
+            % my $minutes = int($sleep_in_seconds / 60);
+            % my $seconds = $sleep_in_seconds % 60;
+            <%= $next_wakeup->format_cldr('dd.MM.YYYY HH:mm') %> (in <%= $minutes %> minutes and <%= $seconds %> seconds)
+        </td>
+        <td>
+            <a href="/home/<%= $d->id %>">
+            <img src="/calendar/bitmap?preview_colors=1&mac=<%= $d->mac %>" style="max-height: 6rem; width: auto; border: 1px solid gray" />
+            </a>
+        </td>
+    </tr>
 % }
-</ul>
+</tbody>
+</table>
