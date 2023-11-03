@@ -10,8 +10,8 @@
 
     </div>
     <div>
-        Calendar page <a href="/calendar/bitmap?format=png&mac=<%= $display->mac %>">as IMG</a> with fixed size:
+        Calendar page <a href="/calendar/bitmap?preview_colors=1&format=png&mac=<%= $display->mac %>">as IMG</a> with fixed size:
         <br>
-        <img src="/calendar/bitmap?format=png&mac=<%= $display->mac %>" style="border: 1px solid black">
+        <img src="/calendar/bitmap?preview_colors=1&format=png&mac=<%= $display->mac %>" style="border: 1px solid black">
     </div>
 </div>
