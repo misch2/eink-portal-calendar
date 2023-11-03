@@ -6,31 +6,32 @@ use DDP;
 use File::pushd;
 use File::Copy;
 
-#use File::Temp;
-
-has 'pageres_command';
+has 'app';
 
 sub convert_url {
-    my $self    = shift;
-    my $url     = shift;
-    my $width   = shift;
-    my $height  = shift;
-    my $dstfile = shift;
+    my $self      = shift;
+    my $image_url = shift;
+    my $width     = shift;
+    my $height    = shift;
 
-    # Pageres generates file relative to cwd(), always. It doesn't support absolute paths
-    my $tmpfile = "web2png.tmp";                                                                                                  # only filename, NEVER with a path
-    my @cmd     = ($self->pageres_command, $url, "${width}x${height}", "--filename=${tmpfile}", "--overwrite", "--format=png");
+    my $ua = Mojo::UserAgent->new;
 
-    {   my $dir = tempd();
-        system(@cmd) == 0
-            or die "system() failed: $?";
+    my $service_url = Mojo::URL->new("http://localhost:" . $self->app->config->{screenshot_service_port} . '/screenshot');
+    $service_url->query->merge(
+        url => $image_url,
+        w   => $width,
+        h   => $height,
+    );
 
-        copy("$dir/${tmpfile}.png", $dstfile) || die "Can't copy file: $!";
+    $self->app->log->info("Converting $service_url to PNG");
+    my $tx = $ua->get($service_url);
 
-        unlink "$dir/${tmpfile}.png";
+    if (!$tx->res->is_success) {
+        $self->app->log->error("Error: " . $tx->res->to_string);
+        die $tx->res->to_string;
     }
 
-    return;
+    return $tx->res->body;
 }
 
 1;
