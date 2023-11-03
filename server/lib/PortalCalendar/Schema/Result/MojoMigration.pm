@@ -1,3 +1,4 @@
+#<<< skip perltidy formatting
 use utf8;
 package PortalCalendar::Schema::Result::MojoMigration;
 
@@ -66,9 +67,10 @@ __PACKAGE__->add_columns(
 
 __PACKAGE__->set_primary_key("name");
 
+#>>> end of perltidy skipped block
 
-# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-10-22 15:57:29
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:wf7atOhAxa4eBCD94QkkjQ
+# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-11-03 13:53:17
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:XiRNHNmcGw41ZDGZe4sZrg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

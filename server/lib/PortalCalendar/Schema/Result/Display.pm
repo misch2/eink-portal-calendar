@@ -1,3 +1,4 @@
+#<<< skip perltidy formatting
 use utf8;
 package PortalCalendar::Schema::Result::Display;
 
@@ -192,9 +193,10 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+#>>> end of perltidy skipped block
 
-# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-11-03 13:47:01
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:8BL4is9PUsnLmXjWgntcOQ
+# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-11-03 13:53:17
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:NawCW2RWvO1ctLRInv1Cow
 
 use DateTime;
 use List::Util qw(min max);

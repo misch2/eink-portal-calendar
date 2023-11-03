@@ -1,3 +1,4 @@
+#<<< skip perltidy formatting
 use utf8;
 package PortalCalendar::Schema::Result::Cache;
 
@@ -115,9 +116,10 @@ __PACKAGE__->set_primary_key("id");
 
 __PACKAGE__->add_unique_constraint("creator_key_unique", ["creator", "key"]);
 
+#>>> end of perltidy skipped block
 
-# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-10-25 11:30:07
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:GuQb+aTufj80D+z9dw+oSQ
+# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-11-03 13:53:17
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:QPQYmSqgT4J2ntfTWanYmA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

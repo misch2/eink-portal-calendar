@@ -1,3 +1,4 @@
+#<<< skip perltidy formatting
 use utf8;
 package PortalCalendar::Schema::Result::Config;
 
@@ -120,9 +121,10 @@ __PACKAGE__->belongs_to(
   },
 );
 
+#>>> end of perltidy skipped block
 
-# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-10-22 15:57:29
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:qA0MNRx9WM2kiwAze/eCJQ
+# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-11-03 13:53:17
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:nZ5J2bKFOAS83OC18PkHDA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
