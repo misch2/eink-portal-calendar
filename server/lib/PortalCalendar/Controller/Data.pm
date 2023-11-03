@@ -132,14 +132,20 @@ sub bitmap_epaper {
         $numcolors     = 16;
         $colormap_name = 'gray16';
     } elsif ($self->display->colortype eq '3C') {
-        $numcolors       = 3;
-        $colormap_name   = 'none';
-        $colormap_colors = [ '#000000', '#ffffff', '#ff0000', '#ffff00' ];
+        $numcolors     = 3;
+        $colormap_name = 'none';
+
+        # colors here must be as clear as possible, do not use simulated/preview colors here
+        if ($self->req->param('preview_colors')) {
+            $colormap_colors = [ '#111111', '#dddddd', '#aa0000', '#dddd00' ];
+        } else {
+            $colormap_colors = [ '#000000', '#ffffff', '#ff0000', '#ffff00' ];
+        }
     } else {
         die "unknown display type: " . $self->display->colortype;
     }
 
-    if ($self->req->param('ui_preview')) {
+    if ($self->req->param('web_format')) {
         $format = 'png';
         $rotate = 0;
     }

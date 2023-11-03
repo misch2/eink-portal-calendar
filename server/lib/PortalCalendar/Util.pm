@@ -212,6 +212,7 @@ Readonly my @CHAMBER_ICONS_BY_DAY_NUMBER => (
 sub html_for_date {
     my $self = shift;
     my $dt   = shift;
+    my $args = shift;
 
     # keep the calendar random, but consistent for any given day
     srand($dt->ymd(''));
@@ -330,10 +331,11 @@ sub html_for_date {
 
     my $svatky_api = PortalCalendar::Integration::SvatkyAPI->new(app => $self->app, display => $self->display);
     return $self->app->render(
-        template => 'calendar_themes/' . $self->app->get_config('theme'),
-        format   => 'html',
-        app      => $self->app,
-        display  => $self->display,
+        template       => 'calendar_themes/' . $self->app->get_config('theme'),
+        format         => 'html',
+        app            => $self->app,
+        display        => $self->display,
+        preview_colors => $args->{preview_colors} // 0,
 
         # other variables
         date                 => $dt,
@@ -413,6 +415,7 @@ sub generate_bitmap {
     my $args = shift;
 
     $self->app->log->info("Producing bitmap");
+
     # $self->app->log->info(np($args));
 
     my $img = Imager->new(file => $self->app->app->home->child("generated_images/current_calendar_" . $self->display->id . ".png")) or die Imager->errstr;

@@ -4,9 +4,9 @@
 <div style="display: flex; flex-flow: row wrap; justify-content: space-around;">
 
     <div>
-        Calendar page <a href="/calendar/<%= $display->id %>/html">as HTML</a>:
+        Calendar page <a href="/calendar/<%= $display->id %>/html?preview_colors=1">as HTML</a>:
         <br>
-        <iframe src="/calendar/<%= $display->id %>/html" width="<%= $display->virtual_width %>" height="<%= $display->virtual_height %>" style="border: 1px solid black"></iframe>
+        <iframe src="/calendar/<%= $display->id %>/html?preview_colors=1" width="<%= $display->virtual_width %>" height="<%= $display->virtual_height %>" style="border: 1px solid black"></iframe>
 
     </div>
     <div>

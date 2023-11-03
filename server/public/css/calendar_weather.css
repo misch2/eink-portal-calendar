@@ -53,9 +53,11 @@ div div div div {
 }
 
 :root {
-    --epd-black: #111;
-    --epd-white: #ddd;
-    --epd-red: #a00;
+    /* only for VSCode editor, real colors are overriden in the template based on the purpose (preview or real EPD) */
+    --epd-black: #000;
+    --epd-white: #fff;
+    --epd-red: #f00;
+    --epd-yellow: #ff0;
 }
 
 body {
@@ -153,26 +155,23 @@ div.weather-item {
     padding: 0.2em;
 }
 
-.weather-item-night {
+div.weather-item-night {
     color: var(--epd-white);
-
     background-color: var(--epd-black);
-    /* background-image: url("/images/checkered_mask_black.png"); */
-
+    /* to compensate for the seemingly "thin" white text: */
     font-weight: bold;
-    /* to compensate for the seemingly "thin" white text */
 }
 
-.weather-is-rain-or-snow {
+div.weather-is-rain-or-snow {
     color: var(--epd-red);
 }
 
-.weather-item-night.weather-is-rain-or-snow {
+div.weather-item-night.weather-is-rain-or-snow {
     color: var(--epd-white);
     background-color: var(--epd-red);
 }
 
-div.weather-item.weather-item-night.weather-is-rain-or-snow {
+div.weather-item.weather-is-rain-or-snow {
     border-color: var(--epd-red);
 }
 

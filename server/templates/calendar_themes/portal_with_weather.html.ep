@@ -3,6 +3,23 @@
 %= javascript 'https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js'
 %= stylesheet '/css/calendar_weather.css'
 %= stylesheet '/css/weather-icons.min.css'
+
+<style type="text/css">
+:root {
+    % if ($preview_colors) {
+        --epd-black:  #111;
+        --epd-white:  #ddd;
+        --epd-red:    #a00;
+        --epd-yellow: #dd0;
+    % } else {
+        --epd-black:  #000;
+        --epd-white:  #fff;
+        --epd-red:    #f00;
+        --epd-yellow: #ff0;
+    % };
+}
+</style>
+
 % my $decorator = sub { shift };        # returns input as-is
 % $decorator = sub { uc(shift) };       # UPPERCASE
 %# $decorator = sub { ucfirst(shift) }; # Uppercase
@@ -11,6 +28,8 @@
 % use DateTime::Event::Sunrise;
 % my $sunrise = DateTime::Event::Sunrise->new(longitude => $app->get_config('lon'), latitude => $app->get_config('lat'));
 % my $now = DateTime->now;
+
+% my $precipitation_limit = 0.5; # mm
 
 <body>
     <div id="visible-area">
@@ -24,7 +43,7 @@
             % my $dt = DateTime->from_epoch(epoch => $current_weather->{dt}, time_zone => 'UTC');
             
             % my $day_or_night = $sunrise->sunrise_sunset_span($dt)->contains($dt) ? 'day' : 'night';
-            % my $class_rain_or_snow = $total_precip >= 1.0 ? 'weather-is-rain-or-snow' : '';
+            % my $class_rain_or_snow = $total_precip >= $precipitation_limit ? 'weather-is-rain-or-snow' : '';
 
             <div style="position: absolute; top: 25; left: 0; margin: auto; width: 100%; text-align: center; font-size: 5rem" class="<%= $class_rain_or_snow %>">
                 <!-- <i class="wi wi-thermometer-exterior" style="font-size: 1rem; margin-top: 0.4rem"></i> -->
@@ -103,7 +122,7 @@
             %    $day_description = $dt->day_name;
             % }
 
-            <div class="weather-item weather-item-<%= $day_or_night %> <%= $total_precip >= 1.0 ? 'weather-is-rain-or-snow' : '' %> weather-single-day-container-grid">
+            <div class="weather-item weather-item-<%= $day_or_night %> <%= $total_precip >= $precipitation_limit ? 'weather-is-rain-or-snow' : '' %> weather-single-day-container-grid">
                 <div>
                     <%= $day_description %>
                     <br>
