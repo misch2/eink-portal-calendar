@@ -218,7 +218,9 @@ sub virtual_height {
 sub get_config {
     my $self = shift;
     my $name = shift;
-    return $self->configs->search({ name => $name })->first->value // undef;
+    my $row  = $self->configs->search({ name => $name })->first;
+    return $row->value if $row;
+    return undef;
 }
 
 sub voltage {
