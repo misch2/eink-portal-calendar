@@ -320,11 +320,12 @@ sub next_wakeup_time {
 
     # crontab definitions are in SERVER LOCAL time zone, not display dependent
     my $local_timezone = DateTime::TimeZone->new(name => 'local');
+    my $now            = DateTime->now(time_zone => $local_timezone);
 
     # Parse the crontab-like schedule
     my $schedule = $self->get_config('wakeup_schedule');
+    return $now->clone->truncate(to => 'day')->add(days => 1) unless $schedule;    # no schedule, wake up tomorrow
 
-    my $now  = DateTime->now(time_zone => $local_timezone);
     my $cron = Schedule::Cron::Events->new($schedule, Seconds => $now->epoch) or die "Invalid crontab schedule";
 
     my ($seconds, $minutes, $hours, $dayOfMonth, $month, $year) = $cron->nextEvent;
