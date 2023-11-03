@@ -192,6 +192,7 @@ void disconnectAndHibernate() {
   // ^ last syslog message before the WiFi disconnects
   stopDisplay();
   stopWiFi();
+  boardSpecificDone();
   espDeepSleep(sleepTime);
 }
 
@@ -497,17 +498,20 @@ void initDisplay() {
   DEBUG_PRINT("CS=%d, DC=%d, RST=%d, BUSY=%d", CS_PIN, DC_PIN, RST_PIN, BUSY_PIN);
 
   delay(100);
-  SPIClass *spi = new SPIClass(SPI_BUS);
 
 #ifdef REMAP_SPI
+  SPIClass *spi = new SPIClass(SPI_BUS);
   Serial.println("remapping SPI");
   // only CLK and MOSI are important for EPD
   spi->begin(PIN_SPI_CLK, PIN_SPI_MISO, PIN_SPI_MOSI, PIN_SPI_SS);  // swap pins
   Serial.println("remapped");
-#endif
-
   /* 2ms reset for waveshare board */
   display.init(115200, false, 2, false, *spi, SPISettings(7000000, MSBFIRST, SPI_MODE0));
+#else
+  /* 2ms reset for waveshare board */
+  display.init(115200, false, 2, false);
+#endif
+
   DEBUG_PRINT("Display setup finished");
 }
 
@@ -523,11 +527,7 @@ void logRuntimeStats() {
 
 void setup() {
   basicInit();
-
-  DEBUG_PRINT("boardSpecificInit() start");
   boardSpecificInit();
-  DEBUG_PRINT("boardSpecificInit() end");
-
   readVoltage();  // only once, because it discharges the 100nF capacitor
   wakeupAndConnect();
 

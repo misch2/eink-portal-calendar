@@ -1,12 +1,13 @@
 // #define DEBUG
 // #define USE_GRAYSCALE_BW_DISPLAY
 
+#define MYHOSTNAME "esp32-a"
+
 #define CALENDAR_URL_HOST "192.168.0.100"
 #define CALENDAR_URL_PORT 8000
 
 #define SYSLOG_SERVER "192.168.0.101"
 #define SYSLOG_PORT 514
-#define SYSLOG_MYHOSTNAME "esp32"
 #define SYSLOG_MYAPPNAME "portal-calendar-client"
 
 // Display is 800x480 B/W
@@ -27,10 +28,10 @@
 #define BITMAP_BPP 1
 
 // Uncomment correct color capability of your ePaper display
-#define DISPLAY_TYPE_BW // black and white
+#define DISPLAY_TYPE_BW  // black and white
 // #define TYPE_3C // 3 colors - black, white and red/yellow
-//#define TYPE_GRAYSCALE // grayscale - 4 colors
-//#define TYPE_7C // 7 colors
+// #define TYPE_GRAYSCALE // grayscale - 4 colors
+// #define TYPE_7C // 7 colors
 
 /*
 WaveShare ePaper Driver HAT connector (from top to bottom):
@@ -45,12 +46,29 @@ GND  - brown  #844 - to GND
 VCC  - gray   #888 - to +3.3V
 */
 
-// EzSBC ESP32 breakout board
-#define SPI_BUS HSPI
+// #define REMAP_SPI
+// #define SPI_BUS HSPI
+// #define PIN_SPI_CLK 18   // CLK
+// #define PIN_SPI_MISO -1  // unused
+// #define PIN_SPI_MOSI 23  // DIN
+// #define PIN_SPI_SS -1    // unused (FIXME or the same as CS_PIN)
+
 #define CS_PIN 15
 #define DC_PIN 23
 #define RST_PIN 33
 #define BUSY_PIN 27
 #define VOLTAGE_ADC_PIN 32
 
-#define DISPLAY_INSTANCE  GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN));
+#define DISPLAY_INSTANCE GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN));
+
+void boardSpecificInit() {
+  // power on the ePaper and I2C
+  //   pinMode(2, OUTPUT);
+  //   digitalWrite(2, HIGH);
+  //   delay(50);
+}
+
+void boardSpecificDone() {
+  // power off the ePaper and I2C
+  //   digitalWrite(2, LOW);
+}
