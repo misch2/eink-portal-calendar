@@ -52,9 +52,17 @@ div div div div {
     src: url('/fonts/D-DINCondensed.otf') format('opentype');
 }
 
+:root {
+    --epd-black: #111;
+    --epd-white: #ddd;
+    --epd-red: #a00;
+}
+
 body {
     /* background-color: burlywood; */
     font-family: 'DIN';
+    background-color: var(--epd-white);
+    color: var(--epd-black);
 }
 
 div#visible-area {
@@ -71,7 +79,8 @@ div.date-row {
     font-size: 1.5rem;
 
     display: flex;
-    flex-wrap: wrap;    /* for the case when the date or name is too long */
+    flex-wrap: wrap;
+    /* for the case when the date or name is too long */
     justify-content: space-between;
     position: absolute;
     width: 100%;
@@ -92,7 +101,7 @@ div.horizontal-separator {
     width: 100%;
     top: 0;
     left: 0;
-    border-bottom: 2px solid black;
+    border-bottom: 2px solid var(--epd-black);
 }
 
 div.day-number-big {
@@ -140,14 +149,14 @@ div.weather-single-day-container-grid {
 
 div.weather-item {
     font-size: 1.0rem;
-    border: 1px solid black;
+    border: 1px solid var(--epd-black);
     padding: 0.2em;
 }
 
 .weather-item-night {
-    color: white;
+    color: var(--epd-white);
 
-    background-color: #000;
+    background-color: var(--epd-black);
     /* background-image: url("/images/checkered_mask_black.png"); */
 
     font-weight: bold;
@@ -155,16 +164,16 @@ div.weather-item {
 }
 
 .weather-is-rain-or-snow {
-    color: red;
+    color: var(--epd-red);
 }
 
 .weather-item-night.weather-is-rain-or-snow {
-    color: white;
-    background-color: red;
+    color: var(--epd-white);
+    background-color: var(--epd-red);
 }
 
 div.weather-item.weather-item-night.weather-is-rain-or-snow {
-    border-color: red;
+    border-color: var(--epd-red);
 }
 
 div#bottom-signature {
