@@ -9,14 +9,6 @@ server/*.conf
 server/log/*.log
 server/generated_images/*.png
 
-# ESP8266 side:
-client/.pio
-client/.vscode/.browse.c_cpp.db*
-client/.vscode/c_cpp_properties.json
-client/.vscode/launch.json
-client/.vscode/ipch
-client/.vscode/extensions.json
-client/.vscode/settings.json
-
+.pio/
 .vstags
 .vscode/

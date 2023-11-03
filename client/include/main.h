@@ -4,6 +4,7 @@
 #include "DejaVu_Sans_Mono_16.h"
 
 void basicInit();
+void boardSpecificInit();
 void wakeupAndConnect();
 
 bool startWiFi();
