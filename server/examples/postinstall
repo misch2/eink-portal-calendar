@@ -5,7 +5,6 @@
 cd server
 carton install --deployment --cached
 npm install
-sudo systemctl reload portal_calendar-ui.service
-sudo systemctl reload portal_calendar-puppeteer.service
-#sudo systemctl restart portal_calendar-minion.service
+sudo systemctl reload portal_calendar-web.service
+sudo systemctl restart portal_calendar-minion.service
 scripts/generate_img_from_web
