@@ -121,14 +121,24 @@ sub config_ui_save {
 sub calendar_html_default_date {
     my $self = shift;
     my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
-    return $util->html_for_date(DateTime->now());
+    return $util->html_for_date(
+        DateTime->now(),
+        {
+            preview_colors => ($self->req->param('preview_colors') // 0)
+        }
+    );
 }
 
 sub calendar_html_specific_date {
     my $self = shift;
     my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
     my $dt   = DateTime::Format::Strptime->new(pattern => '%Y-%m-%d')->parse_datetime($self->stash('date'));
-    return $util->html_for_date($dt);
+    return $util->html_for_date(
+        $dt,
+        {
+            preview_colors => ($self->req->param('preview_colors') // 0)
+        }
+    );
 }
 
 sub googlefit_redirect {

@@ -46,7 +46,7 @@
         </td>
         <td>
             <a href="/home/<%= $d->id %>">
-            <img src="/calendar/bitmap?mac=<%= $d->mac %>" style="max-height: 6rem; width: auto; border: 1px solid gray" />
+            <img src="/calendar/bitmap?preview_colors=1&mac=<%= $d->mac %>" style="max-height: 6rem; width: auto; border: 1px solid gray" />
             </a>
         </td>
     </tr>

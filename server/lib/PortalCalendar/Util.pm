@@ -211,6 +211,7 @@ Readonly my @CHAMBER_ICONS_BY_DAY_NUMBER => (
 sub html_for_date {
     my $self = shift;
     my $dt   = shift;
+    my $args = shift;
 
     # keep the calendar random, but consistent for any given day
     srand($dt->ymd(''));
@@ -333,6 +334,7 @@ sub html_for_date {
         format   => 'html',
         app      => $self->app,
         display  => $self->display,
+        colors   => $self->display->css_color_map($args->{preview_colors}),
 
         # other variables
         date                 => $dt,

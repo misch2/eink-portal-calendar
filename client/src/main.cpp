@@ -6,7 +6,9 @@
 #include <HTTPClient.h>
 #include <SPI.h>
 #include <Syslog.h>
+#ifdef USE_WIFI_MANAGER
 #include <WiFiManager.h>
+#endif
 #include <WiFiUdp.h>
 
 // dynamically include board-specific config
@@ -56,12 +58,14 @@ RTC_DATA_ATTR int wakeupCount = 0;
 RTC_DATA_ATTR char lastChecksum[64 + 1] = "<not_defined_yet>";  // TODO check the length in read loop to prevent overflow
 
 // remotely configurable variables (via JSON)
-uint64_t sleepTime = SECONDS_PER_HOUR;
+int sleepTime = SECONDS_PER_HOUR;
 bool voltageIsCritical = 0;
 bool otaMode = false;
 
 // ordinary vars
+#ifdef USE_WIFI_MANAGER
 WiFiManager wifiManager;
+#endif
 WiFiClient wifiClient;
 HTTPClient http;
 uint32_t fullStartTime;
@@ -77,12 +81,15 @@ void readVoltage() {
 #endif
 };
 
-void checkVoltage() {
-#ifdef VOLTAGE_ADC_PIN
-  if (voltageIsCritical) {
-    error(String("Voltage critical as reported by server"));
-  };
-#endif
+void checkVoltage(){
+    // It's always better to just display an "empty battery" icon and continue.
+    // Because, for example when powering the board from USB, the voltage is always read as 0.
+
+    // #ifdef VOLTAGE_ADC_PIN
+    //   if (voltageIsCritical) {
+    //     error(String("Voltage critical as reported by server"));
+    //   };
+    // #endif
 };
 
 void loadConfigFromWeb() {
@@ -185,6 +192,7 @@ void disconnectAndHibernate() {
   // ^ last syslog message before the WiFi disconnects
   stopDisplay();
   stopWiFi();
+  boardSpecificDone();
   espDeepSleep(sleepTime);
 }
 
@@ -237,7 +245,8 @@ void showRawBitmapFrom_HTTP(const char *host, int port, const char *path, int16_
   if (!connection_ok) {
     error(
         "Unexpected HTTP response, didn't found '200 OK'.\n"
-        "Last line was:\n" + line + "\n");
+        "Last line was:\n" +
+        line + "\n");
     return;
   }
 
@@ -316,12 +325,16 @@ String httpGETRequestAsString(const char *url) {
   if (httpResponseCode == 200) {
     payload = http.getString();
   } else {
-        error("Unexpected HTTP response, didn't found '200 OK'.\n"
-          "URL: " + String(url) + "\n"
-          "Response code: " + String(httpResponseCode) + "\n"
-          "Response body:\n" + 
-          http.getString() + "\n"
-        );
+    error(
+        "Unexpected HTTP response, didn't found '200 OK'.\n"
+        "URL: " +
+        String(url) +
+        "\n"
+        "Response code: " +
+        String(httpResponseCode) +
+        "\n"
+        "Response body:\n" +
+        http.getString() + "\n");
   }
 
   DEBUG_PRINT("end, response=%d", httpResponseCode);
@@ -355,13 +368,22 @@ bool startWiFi() {
   unsigned long start = millis();
 
   // wifiManager.setFastConnectMode(true); // no difference
+#ifdef USE_WIFI_MANAGER
   res = wifiManager.autoConnect();
-
   if (!res) {
     DEBUG_PRINT("Failed to connect");
     stopWiFi();
     return false;
   }
+#else
+  WiFi.setHostname(HOSTNAME);
+  WiFi.config(NETWORK_IP_ADDRESS, NETWORK_IP_GATEWAY, NETWORK_IP_SUBNET, NETWORK_IP_DNS);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(100);
+  }
+#endif
+
   DEBUG_PRINT("---");
   // DEBUG_PRINT("Build date: %s %s", __DATE__, __TIME__);
   DEBUG_PRINT("Firmware version: %s", firmware.c_str());
@@ -420,7 +442,7 @@ void displayText(String message, const GFXfont *font) {
 }
 
 void initOTA() {
-  ArduinoOTA.setHostname(SYSLOG_MYHOSTNAME);
+  ArduinoOTA.setHostname(HOSTNAME);
   ArduinoOTA
       .onStart([]() {
         String type;
@@ -453,7 +475,7 @@ void initOTA() {
         }
       });
   ArduinoOTA.begin();
-  DEBUG_PRINT("OTA: Ready on %s.local", SYSLOG_MYHOSTNAME);
+  DEBUG_PRINT("OTA: Ready on %s.local", HOSTNAME);
 }
 
 void error(String message) {
@@ -466,7 +488,7 @@ void error(String message) {
 void errorNoWifi() { error("WiFi connect/login unsuccessful."); }
 
 void espDeepSleep(uint64_t seconds) {
-  DEBUG_PRINT("Sleeping for %l s", seconds);
+  DEBUG_PRINT("Sleeping for %lu s", seconds);
   esp_sleep_enable_timer_wakeup(seconds * uS_PER_S);
   esp_deep_sleep_start();
 }
@@ -476,17 +498,20 @@ void initDisplay() {
   DEBUG_PRINT("CS=%d, DC=%d, RST=%d, BUSY=%d", CS_PIN, DC_PIN, RST_PIN, BUSY_PIN);
 
   delay(100);
-  SPIClass *spi = new SPIClass(SPI_BUS);
 
 #ifdef REMAP_SPI
+  SPIClass *spi = new SPIClass(SPI_BUS);
   Serial.println("remapping SPI");
   // only CLK and MOSI are important for EPD
   spi->begin(PIN_SPI_CLK, PIN_SPI_MISO, PIN_SPI_MOSI, PIN_SPI_SS);  // swap pins
   Serial.println("remapped");
-#endif
-
   /* 2ms reset for waveshare board */
   display.init(115200, false, 2, false, *spi, SPISettings(7000000, MSBFIRST, SPI_MODE0));
+#else
+  /* 2ms reset for waveshare board */
+  display.init(115200, false, 2, false);
+#endif
+
   DEBUG_PRINT("Display setup finished");
 }
 
@@ -497,11 +522,12 @@ void stopDisplay() {
 
 void logRuntimeStats() {
   DEBUG_PRINT("Total execution time: %lu ms", millis() - fullStartTime);
-  DEBUG_PRINT("Going to hibernate for %l seconds", sleepTime);
+  DEBUG_PRINT("Going to hibernate for %d seconds", sleepTime);
 }
 
 void setup() {
   basicInit();
+  boardSpecificInit();
   readVoltage();  // only once, because it discharges the 100nF capacitor
   wakeupAndConnect();
 
@@ -509,7 +535,7 @@ void setup() {
     DEBUG_PRINT("Running OTA loop");
     while (true) {
       ArduinoOTA.handle();
-      delay(500);
+      delay(5);  // msec
     }
   };
 

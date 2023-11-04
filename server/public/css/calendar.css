@@ -54,6 +54,8 @@ div div div div {
 body {
     /* background-color: burlywood; */
     font-family: 'DIN';
+    background-color: var(--epd-white);
+    color: var(--epd-black);
 }
 
 .flex-break {
@@ -90,7 +92,7 @@ div.top-month-header {
     font-family: 'DIN';
     font-size: 1rem;
     padding-bottom: 0.1rem;
-    border-bottom: 2px solid black;
+    border-bottom: 2px solid var(--epd-black);
 }
 
 div.day-number-big {
@@ -109,7 +111,7 @@ div.day-of-week-block {
 
 div.day-of-week-block div.separator {
     margin-top: 0.3rem;
-    border-bottom: 2px solid black;
+    border-bottom: 2px solid var(--epd-black);
     margin-bottom: 0.3rem;
 }
 
@@ -127,7 +129,7 @@ div.bunch-of-bars {
 div.bunch-of-bars div.bar {
     width: 6px;
     height: 35px;
-    background-color: black;
+    background-color: var(--epd-black);
 }
 
 div.icons-container {
@@ -136,14 +138,14 @@ div.icons-container {
     margin-top: 3rem;
     gap: 9px;
     padding-top: 9px;
-    border-top: 2px solid black;
+    border-top: 2px solid var(--epd-black);
 }
 
 .icon {
     /* sizes must be in 'px', otherwise the 'grayed' overlay gets slightly stretched and doesn't translate well into the black&white */
     height: 57px;
     width: 57px;
-    border: 2px solid black;
+    border: 2px solid var(--epd-black);
     padding: 2px;
     margin: 0;
 }
@@ -167,27 +169,6 @@ div.calendar-container div {
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
-}
-
-div.weather-container {
-    display: flex;
-    flex-flow: row nowrap;
-    justify-content: flex-start;
-    margin-top: 3rem;
-    padding-top: 0.5rem;
-    gap: 1rem;
-    /* padding-top: 9px; */
-    border-top: 2px solid black;
-    background-color: azure;
-}
-
-div.weather-daily-data {
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: space-between;
-    align-content: space-between;
-    align-items: flex-start;
-    background-color: cadetblue;
 }
 
 img#aperture-logo {

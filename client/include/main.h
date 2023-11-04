@@ -1,9 +1,11 @@
 // fonts
+#include "DejaVu_Sans_Mono_16.h"
 #include "Open_Sans_Regular_16.h"
 #include "Open_Sans_Regular_24.h"
-#include "DejaVu_Sans_Mono_16.h"
 
 void basicInit();
+void boardSpecificInit();
+void boardSpecificDone();
 void wakeupAndConnect();
 
 bool startWiFi();
@@ -13,7 +15,7 @@ void stopDisplay();
 void initOTA();
 void disconnectAndHibernate();
 
-void displayText(String message, const GFXfont *font);
+void displayText(String message, const GFXfont* font);
 void error(String message);
 void errorNoWifi();
 

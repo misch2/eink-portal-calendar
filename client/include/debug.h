@@ -3,12 +3,7 @@
 // A UDP instance to let us send and receive packets over UDP
 WiFiUDP udpClient;
 // Create a new syslog instance with LOG_KERN facility
-Syslog syslog(udpClient,
-              SYSLOG_SERVER,
-              SYSLOG_PORT,
-              SYSLOG_MYHOSTNAME,
-              SYSLOG_MYAPPNAME,
-              LOG_KERN);
+Syslog syslog(udpClient, SYSLOG_SERVER, SYSLOG_PORT, HOSTNAME, SYSLOG_MYAPPNAME, LOG_KERN);
 #define DEBUG_PRINT(...)                                \
   Serial.printf(__VA_ARGS__);                           \
   Serial.print('\n');                                   \
