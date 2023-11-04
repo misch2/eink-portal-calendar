@@ -4,7 +4,6 @@ const express = require("express");
 (async () => {
     const app = express();
     const port = process.env.PORT || 9876;
-    var browser;
 
     // create a browser instance
     app.listen(port, "localhost", () => {
@@ -16,41 +15,31 @@ const express = require("express");
 
     app.get("/", (req, res) => res.send("Hello World!"));
     app.get("/screenshot", async (req, res) => {
-        try {
-            if (!browser) {
-                console.log("launching browser");
-                browser = await puppeteer.launch({
-                    headless: "new",
-                });
-                console.log("browser launched");
-            } else {
-                console.log("reusing browser");
-            }
+        console.log("launching browser");
+        const browser = await puppeteer.launch({
+            headless: "new",
+        });
+        console.log("browser launched");
 
-            const page = await browser.newPage();
-            await page.setViewport({
-                width: parseInt(req.query.w),
-                height: parseInt(req.query.h),
-            });
-            console.log(
-                `Generating screenshot for ${req.query.url} with ${req.query.w}x${req.query.h}`
-            );
-            await page.goto(req.query.url);
+        const page = await browser.newPage();
+        await page.setViewport({
+            width: parseInt(req.query.w),
+            height: parseInt(req.query.h),
+        });
+        console.log(
+            `Generating screenshot for ${req.query.url} with ${req.query.w}x${req.query.h}`
+        );
+        await page.goto(req.query.url);
+        
+        const imageBuffer = await page.screenshot();
+        await browser.close();
 
-            const imageBuffer = await page.screenshot();
+        console.log(
+            `Screenshot generated, image size is ${imageBuffer.length} bytes.`
+        );
 
-            console.log(
-                `Screenshot generated, image size is ${imageBuffer.length} bytes.`
-            );
-
-            res.set("Content-Type", "image/png");
-            res.set("Content-Length", imageBuffer.length);
-            res.send(imageBuffer);
-        } catch (e) {
-            console.log(`Exception when fetching ${req.query.url}: ${e}`);
-            await browser.close();
-            browser = null;
-            res.status(500).send(e.toString());
-        }
+        res.set("Content-Type", "image/png");
+        res.set("Content-Length", imageBuffer.length);
+        res.send(imageBuffer);
     });
 })();

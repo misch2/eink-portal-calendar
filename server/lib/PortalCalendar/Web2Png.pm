@@ -16,14 +16,14 @@ sub convert_url {
 
     my $ua = Mojo::UserAgent->new;
 
-    my $service_url = Mojo::URL->new($self->app->config->{puppeteer}->{nodejs_server} . '/screenshot');
+    my $service_url = Mojo::URL->new("http://localhost:" . $self->app->config->{screenshot_service_port} . '/screenshot');
     $service_url->query->merge(
         url => $image_url,
         w   => $width,
         h   => $height,
     );
 
-    $self->app->log->info("Calling $service_url to get PNG image");
+    $self->app->log->info("Converting $service_url to PNG");
     my $tx = $ua->get($service_url);
 
     if (!$tx->res->is_success) {
