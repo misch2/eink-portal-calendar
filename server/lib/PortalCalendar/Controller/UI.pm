@@ -112,6 +112,7 @@ sub config_ui_save {
     PortalCalendar::Integration::iCal->new(app => $self->app)->clear_db_cache;
     PortalCalendar::Integration::OpenWeather->new(app => $self->app)->clear_db_cache;
     PortalCalendar::Integration::Google::Fit->new(app => $self->app)->clear_db_cache;
+    PortalCalendar::Util->new(app => $self)->clear_db_cache;
 
     $self->app->enqueue_task_only_once('generate_image');
     $self->redirect_to('/config_ui/' . $self->display->id);
