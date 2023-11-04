@@ -447,7 +447,6 @@ sub generate_bitmap {
         }
     );
 
-    $self->app->log->info("Bitmap generated, size: " . length($data->{png_blob}));
     my $io  = IO::String->new($data->{png_blob});
     my $img = Imager->new(fh => $io) or die Imager->errstr;
 
