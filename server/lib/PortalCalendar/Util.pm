@@ -16,13 +16,13 @@ use Try::Tiny;
 
 use PortalCalendar;
 use PortalCalendar::Config;
-use PortalCalendar::Minion;
 use PortalCalendar::Schema;
 use PortalCalendar::Integration::iCal;
 use PortalCalendar::Integration::OpenWeather;
 use PortalCalendar::Integration::MQTT;
 use PortalCalendar::Integration::Google::Fit;
 use PortalCalendar::Integration::SvatkyAPI;
+use PortalCalendar::Web2Png;
 
 has 'app';
 has 'display';
@@ -418,7 +418,12 @@ sub generate_bitmap {
     # $self->app->log->info(np($args));
 
     my $converter = PortalCalendar::Web2Png->new(app => $self->app->app);
-    my $png_blob  = $converter->convert_url($self->app->app->config->{url_start} . '/calendar/' . $self->display->id . '/html', $self->display->virtual_width, $self->display->virtual_height);
+
+    my $png_blob = $converter->convert_url(
+        $self->app->app->config->{puppeteer}->{portal_calendar_web} . '/calendar/' . $self->display->id . '/html',
+        #
+        $self->display->virtual_width, $self->display->virtual_height
+    );
 
     my $io  = IO::String->new($png_blob);
     my $img = Imager->new(fh => $io) or die Imager->errstr;

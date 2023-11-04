@@ -11,7 +11,6 @@ use Mojo::Log;
 
 use PortalCalendar;
 use PortalCalendar::Config;
-use PortalCalendar::Minion;
 use PortalCalendar::Schema;
 use PortalCalendar::Util;
 
