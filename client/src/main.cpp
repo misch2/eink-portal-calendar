@@ -1,10 +1,12 @@
 // generic libraries
 #include <Adafruit_GFX.h>
 #include <Arduino.h>
+#include <ArduinoHttpClient.h>
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
-#include <HTTPClient.h>
+#ifdef REMAP_SPI
 #include <SPI.h>
+#endif
 #include <Syslog.h>
 #ifdef USE_WIFI_MANAGER
 #include <WiFiManager.h>
@@ -51,7 +53,6 @@ DISPLAY_INSTANCE
 
 // String firmware = xstr(AUTO_VERSION); // FIXME doesn't work, produces "AUTO_VERSION" instea
 String firmware = __DATE__ " " __TIME__;
-String serverURLBase = String("http://") + CALENDAR_URL_HOST + ":" + CALENDAR_URL_PORT;
 
 /* RTC vars (survives deep sleep) */
 RTC_DATA_ATTR int wakeupCount = 0;
@@ -67,7 +68,7 @@ bool otaMode = false;
 WiFiManager wifiManager;
 #endif
 WiFiClient wifiClient;
-HTTPClient http;
+HttpClient httpClient = HttpClient(wifiClient, CALENDAR_URL_HOST, CALENDAR_URL_PORT);
 uint32_t fullStartTime;
 int voltageLastReadRaw = 0;
 
@@ -97,11 +98,28 @@ void loadConfigFromWeb() {
   fw_escaped.replace(" ", "_");
   fw_escaped.replace(":", "_");
 
-  String jsonURL = serverURLBase + "/config?mac=" + WiFi.macAddress() + "&adc=" + voltageLastReadRaw + "&w=" + String(DISPLAY_WIDTH) +
-                   "&h=" + String(DISPLAY_HEIGHT) + "&c=" + String(defined_color_type) + "&fw=" + fw_escaped;
   DEBUG_PRINT("Loading config from web");
+  httpClient.beginRequest();
+  httpClient.get("/config?mac=" + WiFi.macAddress() + "&adc=" + voltageLastReadRaw + "&w=" + String(DISPLAY_WIDTH) + "&h=" + String(DISPLAY_HEIGHT) +
+                 "&c=" + String(defined_color_type) + "&fw=" + fw_escaped);
+  httpClient.endRequest();
 
-  String jsonText = httpGETRequestAsString(jsonURL.c_str());
+  int statusCode = httpClient.responseStatusCode();
+  DEBUG_PRINT("HTTP response code: %d", statusCode);
+
+  httpClient.skipResponseHeaders();
+  String jsonText = httpClient.responseBody();
+  if (statusCode != 200) {
+    error(String("Unexpected HTTP response.\n"
+                 "URL: ") +
+          String(CALENDAR_URL_HOST) + ":" + String(CALENDAR_URL_PORT) + "/config?...\n" +
+          "\n"
+          "Response code: " +
+          String(statusCode) +
+          "\n"
+          "Response body:\n" +
+          jsonText + "\n");
+  };
 
   DynamicJsonDocument response(1000);
   DeserializationError errorStr = deserializeJson(response, jsonText);
@@ -196,69 +214,70 @@ void disconnectAndHibernate() {
   espDeepSleep(sleepTime);
 }
 
-void fetchAndDrawImageIfNeeded() {
-  showRawBitmapFrom_HTTP(CALENDAR_URL_HOST, CALENDAR_URL_PORT, "/calendar/bitmap/epaper", 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+void fetchAndDrawImageIfNeeded() { showRawBitmapFrom_HTTP("/calendar/bitmap/epaper", 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT); }
+
+String httpReadStringUntil(char terminator) {
+  String result = "";
+
+  while (true) {
+    int c = httpClient.read();
+    if (c < 0) {
+      DEBUG("Premature end of HTTP response");
+      break;
+    }
+    if (c == terminator) {
+      break;
+    }
+    result += (char)c;
+  }
+  return result;
 }
 
-void showRawBitmapFrom_HTTP(const char *host, int port, const char *path, int16_t x, int16_t y, int16_t w, int16_t h) {
+void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, int16_t h) {
   static const int input_buffer_pixels = DISPLAY_HEIGHT;
   static unsigned char input_row_mono_buffer[input_buffer_pixels];   // at most 1 byte per pixel
   static unsigned char input_row_color_buffer[input_buffer_pixels];  // at most 1 byte per pixel
 
-  bool connection_ok = false;
   uint32_t startTime = millis();
   if ((x >= display.epd2.WIDTH) || (y >= display.epd2.HEIGHT)) {
     return;
   }
 
   String partial_uri = String(path) + "?mac=" + WiFi.macAddress();
-  DEBUG_PRINT("Downloading http://%s:%d%s", host, port, partial_uri.c_str());
-  if (!wifiClient.connect(host, port)) {
-    DEBUG_PRINT("HTTP connection failed");
-    error("Connection to HTTP server failed.");
-    return;
-  }
+  DEBUG_PRINT("Downloading %s", partial_uri.c_str());
 
-  wifiClient.print(String("GET ") + partial_uri + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "User-Agent: Portal_Calendar_on_ESP\r\n" +
-                   "Connection: close\r\n\r\n");
-  String line = "<not read anything yet>";
-  while (wifiClient.connected()) {
-    line = wifiClient.readStringUntil('\n');
-    DEBUG_PRINT(" read line: [%s\n]\n", line.c_str());
-    if (!connection_ok) {
-      DEBUG_PRINT("Waiting for OK response from server. Current line: %s", line.c_str());
-      connection_ok = line.startsWith("HTTP/1.1 200 OK");
-      //   if (connection_ok)
-      //     DEBUG_PRINT("line: %s", line.c_str());
-      //   // if (!connection_ok) Serial.println(line);
-    }
-    if (!connection_ok) {
-      DEBUG_PRINT("Unexpected first line: %s", line.c_str());
-      // break;
-    }
-    if ((line == "\r") || (line == "")) {
-      DEBUG_PRINT("All headers received");
-      break;
-    }
+  httpClient.beginRequest();
+  httpClient.get(partial_uri);
+  httpClient.endRequest();
+
+  int statusCode = httpClient.responseStatusCode();
+  DEBUG_PRINT("HTTP response code: %d", statusCode);
+
+  // while (httpClient.headerAvailable()) {
+  //   String headerName = httpClient.readHeaderName();
+  //   String headerValue = httpClient.readHeaderValue();
+  //   DEBUG_PRINT("HTTP header: %s: %s", headerName.c_str(), headerValue.c_str());
+  // };
+  httpClient.skipResponseHeaders();
+
+  if (statusCode != 200) {
+    error(String("Unexpected HTTP response.\n"
+                 "URL: ") +
+          String(CALENDAR_URL_HOST) + ":" + String(CALENDAR_URL_PORT) + "/path?...\n" +
+          "\n"
+          "Response code: " +
+          String(statusCode) + "\n");
   };
 
-  if (!connection_ok) {
-    error(
-        "Unexpected HTTP response, didn't found '200 OK'.\n"
-        "Last line was:\n" +
-        line + "\n");
-    return;
-  }
-
   DEBUG_PRINT("Reading bitmap header");
-  line = wifiClient.readStringUntil('\n');
+  String line = httpReadStringUntil('\n');
   if (line != "MM")  // signature
   {
-    error("Invalid bitmap received, doesn't start with a magic sequence.");
+    error(String("Invalid bitmap received, doesn't start with a magic sequence:\n") + "Line: " + line + "\n");
   }
 
   DEBUG_PRINT("Reading checksum");
-  line = wifiClient.readStringUntil('\n');  // checksum
+  line = httpReadStringUntil('\n');  // checksum
   DEBUG_PRINT("Last checksum was: %s", lastChecksum);
   DEBUG_PRINT("New checksum is: %s", line.c_str());
   if (line == String(lastChecksum)) {
@@ -273,23 +292,16 @@ void showRawBitmapFrom_HTTP(const char *host, int port, const char *path, int16_
 
   uint32_t bytes_read = 0;
   for (uint16_t row = 0; row < h; row++) {
-    if (!connection_ok || !(wifiClient.connected() || wifiClient.available())) break;
     yield();  // prevent WDT
 
 #ifdef DISPLAY_TYPE_BW
-    bytes_read += read8n(wifiClient, input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
+    bytes_read += httpClient.read(input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
 #endif
 #ifdef DISPLAY_TYPE_3C
-    bytes_read += read8n(wifiClient, input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
-    bytes_read += read8n(wifiClient, input_row_color_buffer, DISPLAY_BUFFER_SIZE);
+    bytes_read += httpClient.read(input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
+    bytes_read += httpClient.read(input_row_color_buffer, DISPLAY_BUFFER_SIZE);
 #endif
     // TODO add other display types too
-
-    if (!connection_ok) {
-      DEBUG_PRINT("Bytes read so far: %d", bytes_read);
-      error("Read from HTTP server failed.");
-      break;
-    }
 
 // #ifdef USE_GRAYSCALE_DISPLAY
 //     // https://github.com/ZinggJM/GxEPD2_4G/blob/master/src/epd/GxEPD2_750_T7.cpp
@@ -309,38 +321,6 @@ void showRawBitmapFrom_HTTP(const char *host, int port, const char *path, int16_
 
   display.refresh();  // full refresh
   DEBUG_PRINT("downloaded and displayed in %lu ms", millis() - startTime);
-  wifiClient.stop();
-}
-
-String httpGETRequestAsString(const char *url) {
-  // Your IP address with path or Domain name with URL path
-  DEBUG_PRINT("connecting to %s", url);
-  http.setConnectTimeout(10000);
-  http.begin(wifiClient, url);
-
-  DEBUG_PRINT("calling GET");
-  int httpResponseCode = http.GET();
-
-  String payload = "";
-  if (httpResponseCode == 200) {
-    payload = http.getString();
-  } else {
-    error(
-        "Unexpected HTTP response, didn't found '200 OK'.\n"
-        "URL: " +
-        String(url) +
-        "\n"
-        "Response code: " +
-        String(httpResponseCode) +
-        "\n"
-        "Response body:\n" +
-        http.getString() + "\n");
-  }
-
-  DEBUG_PRINT("end, response=%d", httpResponseCode);
-  http.end();
-
-  return payload;
 }
 
 void stopWiFi() {
@@ -394,21 +374,6 @@ bool startWiFi() {
   return true;
 }
 
-uint32_t read8n(WiFiClient &client, uint8_t *buffer, int32_t bytes) {
-  int32_t remain = bytes;
-  uint32_t start = millis();
-  while ((client.connected() || client.available()) && (remain > 0)) {
-    if (client.available()) {
-      int16_t v = client.read();
-      *buffer++ = uint8_t(v);
-      remain--;
-    } else
-      delay(1);
-    if (millis() - start > 2000) break;  // don't hang forever
-  }
-  return bytes - remain;
-}
-
 void displayText(String message, const GFXfont *font) {
   display.setRotation(3);
 
@@ -423,7 +388,7 @@ void displayText(String message, const GFXfont *font) {
   // center bounding box by transposition of origin:
   uint16_t x = ((display.width() - tbw) / 2) - tbx;
   uint16_t y = ((display.height() - tbh) / 2) - tby;  // y is base line!
-  DEBUG_PRINT("Text bounds for:\n\"%s\"\n are: [x=%d, y=%d][w=+%d,h=+%d]", message.c_str(), x, y, tbw, tbh);
+  // DEBUG_PRINT("Text bounds for:\n\"%s\"\n are: [x=%d, y=%d][w=+%d,h=+%d]", message.c_str(), x, y, tbw, tbh);
 
   // rectangle make the window big enough to cover (overwrite) previous text
   // uint16_t wh = Open_Sans_Regular_24.yAdvance;
