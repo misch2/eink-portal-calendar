@@ -1,10 +1,11 @@
 [Unit]
-Description=Portal calendar web server
+Description=Portal calendar web server for UI
 After=network-online.target
 
 [Service]
 WorkingDirectory=/<PATH>/portal_calendar
-PIDFile=/<PATH>/portal_calendar/server/hypnotoad.pid
+Environment="MOJO_MODE=production-ui"
+PIDFile=/<PATH>/portal_calendar/server/hypnotoad-ui.pid
 ExecStart=/<PATH>/portal_calendar/server/scripts/run_webserver
 ExecReload=/<PATH>/portal_calendar/server/scripts/run_webserver
 Type=forking

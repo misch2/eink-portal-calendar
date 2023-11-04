@@ -6,24 +6,25 @@ use DDP;
 use DateTime;
 use DateTime::Format::Strptime;
 use DateTime::Format::ISO8601;
-use DDP;
 use Digest;
 use Imager;
 use List::Util;
 use Readonly;
 use Text::Unidecode;
 use Time::HiRes;
+use Time::Seconds;
 use Try::Tiny;
 
 use PortalCalendar;
 use PortalCalendar::Config;
-use PortalCalendar::Minion;
+use PortalCalendar::DatabaseCache;
 use PortalCalendar::Schema;
 use PortalCalendar::Integration::iCal;
 use PortalCalendar::Integration::OpenWeather;
 use PortalCalendar::Integration::MQTT;
 use PortalCalendar::Integration::Google::Fit;
 use PortalCalendar::Integration::SvatkyAPI;
+use PortalCalendar::Web2Png;
 
 has 'app';
 has 'display';
@@ -410,6 +411,13 @@ sub find_nearest_forecast {
     return $ret;
 }
 
+sub clear_db_cache {
+    my $self = shift;
+
+    my $db_cache = PortalCalendar::DatabaseCache->new(app => $self->app->app, creator => 'BitmapGeneratorAnywhere');
+    $db_cache->clear;
+}
+
 sub generate_bitmap {
     my $self = shift;
     my $args = shift;
@@ -418,7 +426,30 @@ sub generate_bitmap {
 
     # $self->app->log->info(np($args));
 
-    my $img = Imager->new(file => $self->app->app->home->child("generated_images/current_calendar_" . $self->display->id . ".png")) or die Imager->errstr;
+    my $db_cache = PortalCalendar::DatabaseCache->new(app => $self->app->app, creator => 'BitmapGeneratorAnywhere');
+    $db_cache->max_age(2 * ONE_MINUTE);
+
+    my $data = $db_cache->get_or_set(
+        sub {
+            my $converter = PortalCalendar::Web2Png->new(app => $self->app->app);
+            my $png_blob  = $converter->convert_url(
+                $self->app->app->config->{puppeteer}->{portal_calendar_web} . '/calendar/' . $self->display->id . '/html',
+                #
+                $self->display->virtual_width, $self->display->virtual_height
+            );
+            return { png_blob => $png_blob };
+        },
+        {
+            type    => 'calendar_as_bitmap',
+            display => $self->display->id,
+            w       => $self->display->virtual_width,
+            h       => $self->display->virtual_height,
+        }
+    );
+
+    $self->app->log->info("Bitmap generated, size: " . length($data->{png_blob}));
+    my $io  = IO::String->new($data->{png_blob});
+    my $img = Imager->new(fh => $io) or die Imager->errstr;
 
     # If the generated image is larger (probably due to invalid CSS), crop it so that it display at least something:
     if ($img->getheight > $self->display->virtual_height) {
@@ -620,6 +651,13 @@ sub update_mqtt {
             device_class        => "voltage",       # see https://www.home-assistant.io/integrations/sensor/#device-class
             state_class         => 'measurement',
             unit_of_measurement => 'V',
+            icon                => 'mdi:battery',
+        },
+        voltage_raw => {
+            component           => 'sensor',
+            entity_category     => "diagnostic",
+            state_class         => 'measurement',
+            unit_of_measurement => 'ADC_raw_units',
             icon                => 'mdi:battery',
         },
         alert_voltage => {

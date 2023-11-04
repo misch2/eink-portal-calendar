@@ -42,7 +42,7 @@ sub get_or_set {
     }
 
     $self->app->log->info("${log_prefix}recalculating fresh data");
-    my $data = $callback->();
+    my $data = $callback->();    # callback must always return a reference (hashref, arrayref, scalarref) due to Storable::freeze limitations
 
     $self->app->log->debug("${log_prefix}storing serialized data into the DB");
     my $serialized_data = b64_encode(Storable::freeze $data);
