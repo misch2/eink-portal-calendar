@@ -3,9 +3,9 @@ Description=Portal calendar puppeteer server
 After=network-online.target
 
 [Service]
-WorkingDirectory=/<PATH>/portal_calendar
+WorkingDirectory=/<PATH>/portal_calendar/server
 Environment="PORT=8083"
-ExecStart="node puppeteer_server.js "
+ExecStart="/usr/bin/node puppeteer_server.js"
 Type=simple
 Restart=always
 TimeoutStartSec=infinity

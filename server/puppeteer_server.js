@@ -21,6 +21,7 @@ const express = require("express");
                 console.log("launching browser");
                 browser = await puppeteer.launch({
                     headless: "new",
+                    executablePath: "/usr/bin/chromium-browser",
                 });
                 console.log("browser launched");
             } else {
