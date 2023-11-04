@@ -4,7 +4,7 @@
 #include <ArduinoHttpClient.h>
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
-#ifdef REMAP_SPI
+#ifdef SPI_BUS
 #include <SPI.h>
 #endif
 #include <Syslog.h>
@@ -93,33 +93,44 @@ void checkVoltage(){
     // #endif
 };
 
+void startHttpGetRequest(String path) {
+  DEBUG_PRINT(">>> GET %s", path.c_str());
+  httpClient.beginRequest();
+  httpClient.get(path);
+  httpClient.endRequest();
+
+  int statusCode = httpClient.responseStatusCode();
+  DEBUG_PRINT("<<< HTTP response code: %d", statusCode);
+
+  while (httpClient.headerAvailable()) {
+    String headerName = httpClient.readHeaderName();
+    String headerValue = httpClient.readHeaderValue();
+    DEBUG_PRINT("<<< HTTP header: %s: %s", headerName.c_str(), headerValue.c_str());
+  };
+  // httpClient.skipResponseHeaders();
+
+  if (statusCode != 200) {
+    error(String("Unexpected HTTP response.\n"
+                 "URL: ") +
+          String(CALENDAR_URL_HOST) + ":" + String(CALENDAR_URL_PORT) + path + "\n" +
+          "\n"
+          "Response code: " +
+          String(statusCode) + "\n");
+  };
+}
+
 void loadConfigFromWeb() {
   String fw_escaped = firmware;
   fw_escaped.replace(" ", "_");
   fw_escaped.replace(":", "_");
 
-  DEBUG_PRINT("Loading config from web");
-  httpClient.beginRequest();
-  httpClient.get("/config?mac=" + WiFi.macAddress() + "&adc=" + voltageLastReadRaw + "&w=" + String(DISPLAY_WIDTH) + "&h=" + String(DISPLAY_HEIGHT) +
-                 "&c=" + String(defined_color_type) + "&fw=" + fw_escaped);
-  httpClient.endRequest();
-
-  int statusCode = httpClient.responseStatusCode();
-  DEBUG_PRINT("HTTP response code: %d", statusCode);
-
-  httpClient.skipResponseHeaders();
+  String path = "/config?mac=" + WiFi.macAddress()                                //
+                + "&adc=" + voltageLastReadRaw                                    //
+                + "&w=" + String(DISPLAY_WIDTH) + "&h=" + String(DISPLAY_HEIGHT)  //
+                + "&c=" + String(defined_color_type)                              //
+                + "&fw=" + fw_escaped;                                            //
+  startHttpGetRequest(path);
   String jsonText = httpClient.responseBody();
-  if (statusCode != 200) {
-    error(String("Unexpected HTTP response.\n"
-                 "URL: ") +
-          String(CALENDAR_URL_HOST) + ":" + String(CALENDAR_URL_PORT) + "/config?...\n" +
-          "\n"
-          "Response code: " +
-          String(statusCode) +
-          "\n"
-          "Response body:\n" +
-          jsonText + "\n");
-  };
 
   DynamicJsonDocument response(1000);
   DeserializationError errorStr = deserializeJson(response, jsonText);
@@ -244,30 +255,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
   }
 
   String partial_uri = String(path) + "?mac=" + WiFi.macAddress();
-  DEBUG_PRINT("Downloading %s", partial_uri.c_str());
-
-  httpClient.beginRequest();
-  httpClient.get(partial_uri);
-  httpClient.endRequest();
-
-  int statusCode = httpClient.responseStatusCode();
-  DEBUG_PRINT("HTTP response code: %d", statusCode);
-
-  // while (httpClient.headerAvailable()) {
-  //   String headerName = httpClient.readHeaderName();
-  //   String headerValue = httpClient.readHeaderValue();
-  //   DEBUG_PRINT("HTTP header: %s: %s", headerName.c_str(), headerValue.c_str());
-  // };
-  httpClient.skipResponseHeaders();
-
-  if (statusCode != 200) {
-    error(String("Unexpected HTTP response.\n"
-                 "URL: ") +
-          String(CALENDAR_URL_HOST) + ":" + String(CALENDAR_URL_PORT) + "/path?...\n" +
-          "\n"
-          "Response code: " +
-          String(statusCode) + "\n");
-  };
+  startHttpGetRequest(partial_uri);
 
   DEBUG_PRINT("Expected content length (from headers): %d", httpClient.contentLength());
   DEBUG_PRINT("Reading bitmap header");
@@ -279,6 +267,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
 
   DEBUG_PRINT("Reading checksum");
   line = httpReadStringUntil('\n');  // checksum
+
   DEBUG_PRINT("Last checksum was: %s", lastChecksum);
   DEBUG_PRINT("New checksum is: %s", line.c_str());
   if (line == String(lastChecksum)) {
@@ -294,7 +283,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
   uint32_t bytes_read = 0;
   for (uint16_t row = 0; row < h; row++) {
     yield();  // prevent WDT
-    // DEBUG_PRINT("Reading row %d, bytes_read=%d", row, bytes_read);
+              // DEBUG_PRINT("Reading row %d, bytes_read=%d", row, bytes_read);
 
 #ifdef DISPLAY_TYPE_BW
     bytes_read += httpClient.read(input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
@@ -464,11 +453,13 @@ void initDisplay() {
 
   delay(100);
 
-#ifdef REMAP_SPI
+#ifdef SPI_BUS
   SPIClass *spi = new SPIClass(SPI_BUS);
+#ifdef REMAP_SPI
   Serial.println("remapping SPI");
   // only CLK and MOSI are important for EPD
   spi->begin(PIN_SPI_CLK, PIN_SPI_MISO, PIN_SPI_MOSI, PIN_SPI_SS);  // swap pins
+#endif
   Serial.println("remapped");
   /* 2ms reset for waveshare board */
   display.init(115200, false, 2, false, *spi, SPISettings(7000000, MSBFIRST, SPI_MODE0));
@@ -502,9 +493,6 @@ void setup() {
       ArduinoOTA.handle();
       delay(5);  // msec
     }
-  } else {
-    // 1x
-    ArduinoOTA.handle();
   };
 
   checkVoltage();
