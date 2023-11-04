@@ -17,7 +17,6 @@ void disconnectAndHibernate();
 
 void displayText(String message, const GFXfont* font);
 void error(String message);
-void errorNoWifi();
 
 void readVoltage();
 void logResetReason();

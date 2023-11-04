@@ -159,7 +159,7 @@ void basicInit() {
 void wakeupAndConnect() {
   initDisplay();
   if (!startWiFi()) {
-    errorNoWifi();
+    error("WiFi connect/login unsuccessful.");
   }
   logResetReason();
   initOTA();
@@ -408,37 +408,37 @@ void displayText(String message, const GFXfont *font) {
 
 void initOTA() {
   ArduinoOTA.setHostname(HOSTNAME);
-  ArduinoOTA
-      .onStart([]() {
-        String type;
-        DEBUG_PRINT("OTA: command %s", ArduinoOTA.getCommand())
-        if (ArduinoOTA.getCommand() == U_FLASH)
-          type = "sketch";
-        else  // U_SPIFFS
-          type = "filesystem";
+  // ArduinoOTA
+  //     .onStart([]() {
+  //       String type;
+  //       DEBUG_PRINT("OTA: command %s", ArduinoOTA.getCommand())
+  //       if (ArduinoOTA.getCommand() == U_FLASH)
+  //         type = "sketch";
+  //       else  // U_SPIFFS
+  //         type = "filesystem";
 
-        // NOTE: if updating SPIFFS this would be the place to unmount
-        // SPIFFS using SPIFFS.end()
-        DEBUG_PRINT("OTA: Start updating %s", type.c_str());
-      })
-      .onEnd([]() { DEBUG_PRINT("OTA: End"); })
-      .onProgress([](unsigned int progress, unsigned int total) {
-        Serial.printf("Progress: %u%%\r", (progress / (total / 100)));  // FIXME
-      })
-      .onError([](ota_error_t error) {
-        DEBUG_PRINT("OTA: Error %u", error);
-        if (error == OTA_AUTH_ERROR) {
-          DEBUG_PRINT("OTA: Auth Failed");
-        } else if (error == OTA_BEGIN_ERROR) {
-          DEBUG_PRINT("OTA: Begin Failed");
-        } else if (error == OTA_CONNECT_ERROR) {
-          DEBUG_PRINT("OTA: Connect Failed");
-        } else if (error == OTA_RECEIVE_ERROR) {
-          DEBUG_PRINT("OTA: Receive Failed");
-        } else if (error == OTA_END_ERROR) {
-          DEBUG_PRINT("OTA: End Failed");
-        }
-      });
+  //       // NOTE: if updating SPIFFS this would be the place to unmount
+  //       // SPIFFS using SPIFFS.end()
+  //       DEBUG_PRINT("OTA: Start updating %s", type.c_str());
+  //     })
+  //     .onEnd([]() { DEBUG_PRINT("OTA: End"); })
+  //     .onProgress([](unsigned int progress, unsigned int total) {
+  //       Serial.printf("Progress: %u%%\r", (progress / (total / 100)));  // FIXME
+  //     })
+  //     .onError([](ota_error_t error) {
+  //       DEBUG_PRINT("OTA: Error %u", error);
+  //       if (error == OTA_AUTH_ERROR) {
+  //         DEBUG_PRINT("OTA: Auth Failed");
+  //       } else if (error == OTA_BEGIN_ERROR) {
+  //         DEBUG_PRINT("OTA: Begin Failed");
+  //       } else if (error == OTA_CONNECT_ERROR) {
+  //         DEBUG_PRINT("OTA: Connect Failed");
+  //       } else if (error == OTA_RECEIVE_ERROR) {
+  //         DEBUG_PRINT("OTA: Receive Failed");
+  //       } else if (error == OTA_END_ERROR) {
+  //         DEBUG_PRINT("OTA: End Failed");
+  //       }
+  //     });
   ArduinoOTA.begin();
   DEBUG_PRINT("OTA: Ready on %s.local", HOSTNAME);
 }
@@ -449,8 +449,6 @@ void error(String message) {
   displayText(message, &DejaVu_Sans_Mono_16);
   disconnectAndHibernate();
 }
-
-void errorNoWifi() { error("WiFi connect/login unsuccessful."); }
 
 void espDeepSleep(uint64_t seconds) {
   DEBUG_PRINT("Sleeping for %lu s", seconds);
@@ -502,6 +500,9 @@ void setup() {
       ArduinoOTA.handle();
       delay(5);  // msec
     }
+  } else {
+    // 1x
+    ArduinoOTA.handle();
   };
 
   checkVoltage();
