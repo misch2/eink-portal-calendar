@@ -4,7 +4,6 @@ use Mojo::SQLite;
 use Mojo::JSON;
 use Mojo::Log;
 
-use Carp;
 use DateTime;
 use DateTime::Format::Strptime;
 use DateTime::Format::ISO8601;
@@ -13,6 +12,7 @@ use Time::HiRes;
 
 use PortalCalendar;
 use PortalCalendar::Config;
+use PortalCalendar::Minion;
 use PortalCalendar::Schema;
 use PortalCalendar::Routes;
 
@@ -57,10 +57,7 @@ sub setup_helpers {
             my $id   = shift;
 
             my $display = $self->schema->resultset('Display')->find({ id => $id });
-            if (!$display) {
-                $self->log->warn("Display with ID $id not found");
-                Carp::cluck("trace");
-            }
+            $self->log->warn("Display with ID $id not found") unless $display;
             return $display;
         }
     );
@@ -93,16 +90,15 @@ sub setup_plugins {
             route => $app->routes->any('/admin'),
         }
     );
+    $app->plugin(
+        'Cron' => {
 
-    # $app->plugin(
-    #     'Cron' => {
-
-    #         # every 15 minutes
-    #         '*/15 * * * *' => sub {
-    #             $app->minion->enqueue('generate_image', []);
-    #         },
-    #     }
-    # );
+            # every 15 minutes
+            '*/15 * * * *' => sub {
+                $app->minion->enqueue('generate_image', []);
+            },
+        }
+    );
 
     return;
 }
@@ -121,6 +117,14 @@ sub startup {
     $app->run_migrations();
 
     PortalCalendar::Routes->new(app => $app)->setup();
+
+    # define minion tasks
+    $app->minion->add_task(
+        #
+        generate_image => sub {
+            PortalCalendar::Minion::regenerate_image(@_);
+        }
+    );
 
     $app->renderer->cache->max_keys(0) if $app->config->{disable_renderer_cache};    # do not cache CSS etc. in devel mode
     $app->secrets([ $app->config->{mojo_passphrase} ]);
