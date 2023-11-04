@@ -269,6 +269,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
           String(statusCode) + "\n");
   };
 
+  DEBUG_PRINT("Expected content length (from headers): %d", httpClient.contentLength());
   DEBUG_PRINT("Reading bitmap header");
   String line = httpReadStringUntil('\n');
   if (line != "MM")  // signature
@@ -293,6 +294,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
   uint32_t bytes_read = 0;
   for (uint16_t row = 0; row < h; row++) {
     yield();  // prevent WDT
+    // DEBUG_PRINT("Reading row %d, bytes_read=%d", row, bytes_read);
 
 #ifdef DISPLAY_TYPE_BW
     bytes_read += httpClient.read(input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
