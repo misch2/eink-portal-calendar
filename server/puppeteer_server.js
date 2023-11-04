@@ -49,11 +49,7 @@ const express = require("express");
             res.send(imageBuffer);
         } catch (e) {
             console.log(`Exception when fetching ${req.query.url}: ${e}`);
-            try {
-                await browser.close();
-            } catch (e2) {
-                console.log(`Exception when closing browser: ${e2}`);
-            }
+            await browser.close();
             browser = null;
             res.status(500).send(e.toString());
         }
