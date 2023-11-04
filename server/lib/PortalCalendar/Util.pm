@@ -6,6 +6,7 @@ use DDP;
 use DateTime;
 use DateTime::Format::Strptime;
 use DateTime::Format::ISO8601;
+use DDP;
 use Digest;
 use Imager;
 use List::Util;
@@ -414,14 +415,9 @@ sub generate_bitmap {
     my $args = shift;
 
     $self->app->log->info("Producing bitmap");
-
     # $self->app->log->info(np($args));
 
-    my $converter = PortalCalendar::Web2Png->new(app => $self->app->app);
-    my $png_blob  = $converter->convert_url($self->app->app->config->{url_start} . '/calendar/' . $self->display->id . '/html', $self->display->virtual_width, $self->display->virtual_height);
-
-    my $io  = IO::String->new($png_blob);
-    my $img = Imager->new(fh => $io) or die Imager->errstr;
+    my $img = Imager->new(file => $self->app->app->home->child("generated_images/current_calendar_" . $self->display->id . ".png")) or die Imager->errstr;
 
     # If the generated image is larger (probably due to invalid CSS), crop it so that it display at least something:
     if ($img->getheight > $self->display->virtual_height) {
