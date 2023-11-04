@@ -652,6 +652,13 @@ sub update_mqtt {
             unit_of_measurement => 'V',
             icon                => 'mdi:battery',
         },
+        voltage_raw => {
+            component           => 'sensor',
+            entity_category     => "diagnostic",
+            state_class         => 'measurement',
+            unit_of_measurement => 'ADC_raw_units',
+            icon                => 'mdi:battery',
+        },
         alert_voltage => {
             component           => 'sensor',
             entity_category     => "diagnostic",
