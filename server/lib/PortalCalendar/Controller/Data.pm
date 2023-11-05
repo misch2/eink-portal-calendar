@@ -58,16 +58,20 @@ sub config {
     my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
     $self->app->log->info("Next wakeup at $next_wakeup (in $sleep_in_seconds seconds) according to crontab schedule '$schedule'");
 
-    $util->update_mqtt('voltage',         $display->voltage + 0.001);                                              # to force grafana to store changed values
-    $util->update_mqtt('battery_percent', $display->battery_percent() + 0.001);                                    # to force grafana to store changed values
-    $util->update_mqtt('voltage_raw',     $self->get_config('_last_voltage_raw') + 0.001);                         # to force grafana to store changed values
-    $util->update_mqtt('firmware',        $display->firmware);
-    $util->update_mqtt('last_visit',      DateTime->now()->rfc3339);
-    $util->update_mqtt('sleep_time',      $sleep_in_seconds);
+    unless ($display->battery_percent() <= 0) {
+        $util->update_mqtt('voltage',         $display->voltage + 0.001);              # to force grafana to store changed values
+        $util->update_mqtt('battery_percent', $display->battery_percent() + 0.001);    # to force grafana to store changed values
+    }
+    $util->update_mqtt('voltage_raw', $self->get_config('_last_voltage_raw') + 0.001);    # to force grafana to store changed values
+    $util->update_mqtt('firmware',    $display->firmware);
+    $util->update_mqtt('last_visit',  DateTime->now()->rfc3339);
+    $util->update_mqtt('sleep_time',  $sleep_in_seconds);
 
-    $util->update_mqtt('voltage',         $display->voltage);
-    $util->update_mqtt('battery_percent', $display->battery_percent());
-    $util->update_mqtt('voltage_raw',     $self->get_config('_last_voltage_raw'));
+    unless ($display->battery_percent() <= 0) {
+        $util->update_mqtt('voltage',         $display->voltage);
+        $util->update_mqtt('battery_percent', $display->battery_percent());
+    }
+    $util->update_mqtt('voltage_raw', $self->get_config('_last_voltage_raw'));
 
     my $ret = {
 
