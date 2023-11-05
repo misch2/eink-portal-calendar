@@ -58,7 +58,6 @@ RTC_DATA_ATTR char lastChecksum[64 + 1] = "<not_defined_yet>";  // TODO check th
 
 // remotely configurable variables (via JSON)
 int sleepTime = SECONDS_PER_HOUR;
-bool voltageIsCritical = 0;
 bool otaMode = false;
 
 // ordinary vars
@@ -67,28 +66,19 @@ WiFiManager wifiManager;
 #endif
 WiFiClient wifiClient;
 HttpClient httpClient = HttpClient(wifiClient, CALENDAR_URL_HOST, CALENDAR_URL_PORT);
-uint32_t fullStartTime;
-int voltageLastReadRaw = 0;
 
-void readVoltage() {
+uint32_t fullStartTime;
+
+int readVoltage() {
+  int rawVoltageADCReading;
 #ifdef VOLTAGE_ADC_PIN
-  voltageLastReadRaw = analogRead(VOLTAGE_ADC_PIN);
-  DEBUG_PRINT("Voltage raw read (pin %d): %d", VOLTAGE_ADC_PIN, voltageLastReadRaw);
+  rawVoltageADCReading = analogRead(VOLTAGE_ADC_PIN);
+  DEBUG_PRINT("Voltage raw read (pin %d): %d", VOLTAGE_ADC_PIN, rawVoltageADCReading);
 #else
-  voltageLastReadRaw = 0;
+  rawVoltageADCReading = 0;
   DEBUG_PRINT("Voltage not measured, no pin defined");
 #endif
-};
-
-void checkVoltage(){
-    // It's always better to just display an "empty battery" icon and continue.
-    // Because, for example when powering the board from USB, the voltage is always read as 0.
-
-    // #ifdef VOLTAGE_ADC_PIN
-    //   if (voltageIsCritical) {
-    //     error(String("Voltage critical as reported by server"));
-    //   };
-    // #endif
+  return rawVoltageADCReading;
 };
 
 void startHttpGetRequest(String path) {
@@ -100,7 +90,7 @@ void startHttpGetRequest(String path) {
   int statusCode = httpClient.responseStatusCode();
   DEBUG_PRINT("<<< HTTP response code: %d", statusCode);
 
-  while (httpClient.headerAvailable()) {
+  while (httpClient.connected() && httpClient.available() && httpClient.headerAvailable()) {
     String headerName = httpClient.readHeaderName();
     String headerValue = httpClient.readHeaderValue();
     DEBUG_PRINT("<<< HTTP header: %s: %s", headerName.c_str(), headerValue.c_str());
@@ -119,7 +109,7 @@ void startHttpGetRequest(String path) {
 
 void loadConfigFromWeb() {
   String path = "/config?mac=" + WiFi.macAddress()                                //
-                + "&adc=" + voltageLastReadRaw                                    //
+                + "&adc=" + readVoltage()                                         // read only once, because it discharges the 100nF capacitor
                 + "&w=" + String(DISPLAY_WIDTH) + "&h=" + String(DISPLAY_HEIGHT)  //
                 + "&c=" + String(defined_color_type)                              //
                 + "&fw=" + String(FIRMWARE_VERSION);                              //
@@ -150,9 +140,6 @@ void loadConfigFromWeb() {
       otaMode = false;
     }
   };
-
-  tmpb = response["is_critical_voltage"];
-  voltageIsCritical = tmpb;
 }
 
 void basicInit() {
@@ -219,13 +206,11 @@ void disconnectAndHibernate() {
   espDeepSleep(sleepTime);
 }
 
-void fetchAndDrawImageIfNeeded() { showRawBitmapFrom_HTTP("/calendar/bitmap/epaper", 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT); }
-
 int httpReadStringUntil(char terminator, String &result) {
   result = "";
 
   int bytes = 0;
-  while (true) {
+  while (httpClient.connected() && httpClient.available()) {
     int c = httpClient.read();
     if (c < 0) {
       DEBUG("Premature end of HTTP response");
@@ -276,7 +261,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
   };
   strcpy(lastChecksum, line.c_str());  // to survive a deep sleep
 
-  DEBUG_PRINT("Reading image data");
+  DEBUG_PRINT("Reading image data for %d rows", h);
 
   for (uint16_t row = 0; row < h; row++) {
     // DEBUG_PRINT("Reading row %d, bytes_read=%d", row, bytes_read);
@@ -482,19 +467,17 @@ void logRuntimeStats() {
 void setup() {
   basicInit();
   boardSpecificInit();
-  readVoltage();  // only once, because it discharges the 100nF capacitor
   wakeupAndConnect();
 
   if (otaMode) {
-    DEBUG_PRINT("Running OTA loop");
+    DEBUG_PRINT("Running OTA loop on %s", WiFi.localIP().toString().c_str());
     while (true) {
       ArduinoOTA.handle();
       delay(5);  // msec
     }
   };
 
-  checkVoltage();
-  fetchAndDrawImageIfNeeded();
+  showRawBitmapFrom_HTTP("/calendar/bitmap/epaper", 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
   disconnectAndHibernate();
 }
 

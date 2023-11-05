@@ -18,14 +18,10 @@ void disconnectAndHibernate();
 void displayText(String message, const GFXfont* font);
 void error(String message);
 
-void readVoltage();
+int readVoltage();
 void logResetReason();
 void logRuntimeStats();
-void checkVoltage();
 void loadConfigFromWeb();
-
-void testDisplayMessage();
-void fetchAndDrawImageIfNeeded();
 
 void showRawBitmapFrom_HTTP(const char* path, int16_t x, int16_t y, int16_t w, int16_t h);
 void espDeepSleep(uint64_t seconds);
