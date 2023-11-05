@@ -470,7 +470,7 @@ void setup() {
   wakeupAndConnect();
 
   if (otaMode) {
-    DEBUG_PRINT("Running OTA loop on %s", WiFi.localIP().toString().c_str());
+    DEBUG_PRINT("Running OTA loop on %s (%s.local)", WiFi.localIP().toString().c_str(), HOSTNAME);
     while (true) {
       ArduinoOTA.handle();
       delay(5);  // msec
