@@ -47,12 +47,10 @@ const char *defined_color_type = "3C";
 
 #include "debug.h"
 #include "main.h"
+#include "version.h"
 
 // macro to define "display" variable dynamically with the right type
 DISPLAY_INSTANCE
-
-// String firmware = xstr(AUTO_VERSION); // FIXME doesn't work, produces "AUTO_VERSION" instea
-String firmware = __DATE__ " " __TIME__;
 
 /* RTC vars (survives deep sleep) */
 RTC_DATA_ATTR int wakeupCount = 0;
@@ -120,15 +118,11 @@ void startHttpGetRequest(String path) {
 }
 
 void loadConfigFromWeb() {
-  String fw_escaped = firmware;
-  fw_escaped.replace(" ", "_");
-  fw_escaped.replace(":", "_");
-
   String path = "/config?mac=" + WiFi.macAddress()                                //
                 + "&adc=" + voltageLastReadRaw                                    //
                 + "&w=" + String(DISPLAY_WIDTH) + "&h=" + String(DISPLAY_HEIGHT)  //
                 + "&c=" + String(defined_color_type)                              //
-                + "&fw=" + fw_escaped;                                            //
+                + "&fw=" + String(FIRMWARE_VERSION);                              //
   startHttpGetRequest(path);
   String jsonText = httpClient.responseBody();
 
@@ -149,8 +143,8 @@ void loadConfigFromWeb() {
   bool tmpb = response["ota_mode"];
   otaMode = tmpb;
   if (otaMode) {
-    DEBUG_PRINT("Permament OTA mode enabled in remote config");
-    if (esp_reset_reason() == ESP_RST_SW) {
+    DEBUG_PRINT("Permanent OTA mode enabled in remote config");
+    if (esp_reset_reason() == ESP_RST_SW || esp_reset_reason() == ESP_RST_DEEPSLEEP) {
       DEBUG_PRINT("^ but last reset was a software one => not running OTA loop.");
       DEBUG_PRINT("To force OTA mode again, reset the device manually.");
       otaMode = false;
@@ -227,21 +221,23 @@ void disconnectAndHibernate() {
 
 void fetchAndDrawImageIfNeeded() { showRawBitmapFrom_HTTP("/calendar/bitmap/epaper", 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT); }
 
-String httpReadStringUntil(char terminator) {
-  String result = "";
+int httpReadStringUntil(char terminator, String &result) {
+  result = "";
 
+  int bytes = 0;
   while (true) {
     int c = httpClient.read();
     if (c < 0) {
       DEBUG("Premature end of HTTP response");
       break;
     }
+    bytes++;
     if (c == terminator) {
       break;
     }
     result += (char)c;
   }
-  return result;
+  return bytes;
 }
 
 void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, int16_t h) {
@@ -258,16 +254,18 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
   startHttpGetRequest(partial_uri);
 
   DEBUG_PRINT("Expected content length (from headers): %d", httpClient.contentLength());
+
+  uint32_t bytes_read = 0;
   DEBUG_PRINT("Reading bitmap header");
-  String line = httpReadStringUntil('\n');
+  String line;
+  bytes_read += httpReadStringUntil('\n', line);
   if (line != "MM")  // signature
   {
     error(String("Invalid bitmap received, doesn't start with a magic sequence:\n") + "Line: " + line + "\n");
   }
 
   DEBUG_PRINT("Reading checksum");
-  line = httpReadStringUntil('\n');  // checksum
-
+  bytes_read += httpReadStringUntil('\n', line);
   DEBUG_PRINT("Last checksum was: %s", lastChecksum);
   DEBUG_PRINT("New checksum is: %s", line.c_str());
   if (line == String(lastChecksum)) {
@@ -280,10 +278,8 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
 
   DEBUG_PRINT("Reading image data");
 
-  uint32_t bytes_read = 0;
   for (uint16_t row = 0; row < h; row++) {
-    yield();  // prevent WDT
-              // DEBUG_PRINT("Reading row %d, bytes_read=%d", row, bytes_read);
+    // DEBUG_PRINT("Reading row %d, bytes_read=%d", row, bytes_read);
 
 #ifdef DISPLAY_TYPE_BW
     bytes_read += httpClient.read(input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
@@ -308,7 +304,10 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
     // TODO add other display types too
 
   }  // end line
-  DEBUG_PRINT("Bytes read: %d", bytes_read);
+  DEBUG_PRINT("Bytes read: %d, bytes expected: %d, %s", bytes_read, httpClient.contentLength(), bytes_read == httpClient.contentLength() ? "OK" : "ERROR");
+  if (bytes_read != httpClient.contentLength()) {
+    DEBUG_PRINT("WARNING: bytes read != bytes expected, skipped %d bytes", httpClient.contentLength() - bytes_read);
+  }
 
   display.refresh();  // full refresh
   DEBUG_PRINT("downloaded and displayed in %lu ms", millis() - startTime);
@@ -325,7 +324,6 @@ void stopWiFi() {
 
   // this is sufficient to disconnect
   WiFi.mode(WIFI_OFF);
-
   WiFi.persistent(true);
 
   DEBUG_PRINT("WiFi shutdown took %lu ms", millis() - start);
@@ -357,7 +355,7 @@ bool startWiFi() {
 
   DEBUG_PRINT("---");
   // DEBUG_PRINT("Build date: %s %s", __DATE__, __TIME__);
-  DEBUG_PRINT("Firmware version: %s", firmware.c_str());
+  DEBUG_PRINT("Firmware version: %s", String(FIRMWARE_VERSION));
   DEBUG_PRINT("Connected to WiFi in %lu ms", millis() - start);
   DEBUG_PRINT("IP address: %s", WiFi.localIP().toString().c_str());
   DEBUG_PRINT("MAC address: %s", WiFi.macAddress().c_str());
