@@ -236,44 +236,54 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
   }
 
   String partial_uri = String(path) + "?mac=" + WiFi.macAddress();
-  startHttpGetRequest(partial_uri);
 
-  DEBUG_PRINT("Expected content length (from headers): %d", httpClient.contentLength());
+  for (int attempt = 0; attempt < 3; attempt++) {
+    if (attempt > 0) {
+      DEBUG_PRINT("Retrying download, attempt #%d", attempt);
+    };
 
-  uint32_t bytes_read = 0;
-  DEBUG_PRINT("Reading bitmap header");
-  String line;
-  bytes_read += httpReadStringUntil('\n', line);
-  if (line != "MM")  // signature
-  {
-    error(String("Invalid bitmap received, doesn't start with a magic sequence:\n") + "Line: " + line + "\n");
-  }
+    startHttpGetRequest(partial_uri);
+    ArduinoOTA.handle();
 
-  DEBUG_PRINT("Reading checksum");
-  bytes_read += httpReadStringUntil('\n', line);
-  DEBUG_PRINT("Last checksum was: %s", lastChecksum);
-  DEBUG_PRINT("New checksum is: %s", line.c_str());
-  if (line == String(lastChecksum)) {
-    DEBUG_PRINT("Not refreshing, image is unchanged");
-    return;
-  } else {
-    DEBUG_PRINT("Checksum has changed, reading image and refreshing the display");
-  };
-  strcpy(lastChecksum, line.c_str());  // to survive a deep sleep
+    DEBUG_PRINT("Expected content length (from headers): %d", httpClient.contentLength());
 
-  DEBUG_PRINT("Reading image data for %d rows", h);
+    uint32_t bytes_read = 0;
+    DEBUG_PRINT("Reading bitmap header");
+    String line;
+    bytes_read += httpReadStringUntil('\n', line);
+    if (line != "MM")  // signature
+    {
+      error(String("Invalid bitmap received, doesn't start with a magic sequence:\n") + "Line: " + line + "\n");
+    }
+    ArduinoOTA.handle();
 
-  for (uint16_t row = 0; row < h; row++) {
-    // DEBUG_PRINT("Reading row %d, bytes_read=%d", row, bytes_read);
+    DEBUG_PRINT("Reading checksum");
+    bytes_read += httpReadStringUntil('\n', line);
+    DEBUG_PRINT("Last checksum was: %s", lastChecksum);
+    DEBUG_PRINT("New checksum is: %s", line.c_str());
+    if (line == String(lastChecksum)) {
+      DEBUG_PRINT("Not refreshing, image is unchanged");
+      return;
+    } else {
+      DEBUG_PRINT("Checksum has changed, reading image and refreshing the display");
+    };
+    strcpy(lastChecksum, line.c_str());  // to survive a deep sleep
+    ArduinoOTA.handle();
+
+    DEBUG_PRINT("Reading image data for %d rows", h);
+
+    for (uint16_t row = 0; row < h; row++) {
+      // DEBUG_PRINT("Reading row %d, bytes_read=%d", row, bytes_read);
+      ArduinoOTA.handle();
 
 #ifdef DISPLAY_TYPE_BW
-    bytes_read += httpClient.read(input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
+      bytes_read += httpClient.read(input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
 #endif
 #ifdef DISPLAY_TYPE_3C
-    bytes_read += httpClient.read(input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
-    bytes_read += httpClient.read(input_row_color_buffer, DISPLAY_BUFFER_SIZE);
+      bytes_read += httpClient.read(input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
+      bytes_read += httpClient.read(input_row_color_buffer, DISPLAY_BUFFER_SIZE);
 #endif
-    // TODO add other display types too
+      // TODO add other display types too
 
 // #ifdef USE_GRAYSCALE_DISPLAY
 //     // https://github.com/ZinggJM/GxEPD2_4G/blob/master/src/epd/GxEPD2_750_T7.cpp
@@ -281,17 +291,21 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
 //                           false, false);
 // #endif
 #ifdef DISPLAY_TYPE_BW
-    display.writeImage(input_row_mono_buffer, x, y + row, w, 1);
+      display.writeImage(input_row_mono_buffer, x, y + row, w, 1);
 #endif
 #ifdef DISPLAY_TYPE_3C
-    display.writeImage(input_row_mono_buffer, input_row_color_buffer, x, y + row, w, 1);
+      display.writeImage(input_row_mono_buffer, input_row_color_buffer, x, y + row, w, 1);
 #endif
-    // TODO add other display types too
+      // TODO add other display types too
 
-  }  // end line
-  DEBUG_PRINT("Bytes read: %d, bytes expected: %d, %s", bytes_read, httpClient.contentLength(), bytes_read == httpClient.contentLength() ? "OK" : "ERROR");
-  if (bytes_read != httpClient.contentLength()) {
-    DEBUG_PRINT("WARNING: bytes read != bytes expected, skipped %d bytes", httpClient.contentLength() - bytes_read);
+    }  // end line
+    DEBUG_PRINT("Bytes read: %d, bytes expected: %d, %s", bytes_read, httpClient.contentLength(), bytes_read == httpClient.contentLength() ? "OK" : "ERROR");
+    if (bytes_read == httpClient.contentLength()) {
+      break;
+    } else {
+      DEBUG_PRINT("WARNING: bytes read != bytes expected, skipped %d bytes", httpClient.contentLength() - bytes_read);
+      // delay(1000);
+    }
   }
 
   display.refresh();  // full refresh
