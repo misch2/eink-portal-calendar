@@ -73,12 +73,26 @@ int readVoltage() {
   int rawVoltageADCReading;
 #ifdef VOLTAGE_ADC_PIN
   rawVoltageADCReading = analogRead(VOLTAGE_ADC_PIN);
-  DEBUG_PRINT("Voltage raw read (pin %d): %d", VOLTAGE_ADC_PIN, rawVoltageADCReading);
+  // DEBUG_PRINT("Voltage raw read (pin %d): %d", VOLTAGE_ADC_PIN, rawVoltageADCReading);
 #else
   rawVoltageADCReading = 0;
   DEBUG_PRINT("Voltage not measured, no pin defined");
 #endif
   return rawVoltageADCReading;
+};
+
+String textStatusCode(int statusCode) {
+  if (statusCode == HTTP_ERROR_CONNECTION_FAILED) {
+    return "HTTP_ERROR_CONNECTION_FAILED - Could not connect to the server";
+  } else if (statusCode == HTTP_ERROR_API) {
+    return "HTTP_ERROR_API -  Usually indicates your code is using the class incorrectly";
+  } else if (statusCode == HTTP_ERROR_TIMED_OUT) {
+    return "HTTP_ERROR_TIMED_OUT - Spent too long waiting for a reply";
+  } else if (statusCode == HTTP_ERROR_INVALID_RESPONSE) {
+    return "HTTP_ERROR_INVALID_RESPONSE - The response from the server is invalid, is it definitely an HTTP server?";
+  } else {
+    return "";
+  }
 };
 
 void startHttpGetRequest(String path) {
@@ -88,7 +102,7 @@ void startHttpGetRequest(String path) {
   httpClient.endRequest();
 
   int statusCode = httpClient.responseStatusCode();
-  DEBUG_PRINT("<<< HTTP response code: %d", statusCode);
+  DEBUG_PRINT("<<< HTTP response code: %d (%s)", statusCode, textStatusCode(statusCode));
 
   while (httpClient.connected() && httpClient.available() && httpClient.headerAvailable()) {
     String headerName = httpClient.readHeaderName();
@@ -127,7 +141,7 @@ void loadConfigFromWeb() {
   int tmpi = response["sleep"];
   if (tmpi != 0) {
     sleepTime = tmpi;
-    DEBUG_PRINT("sleepTime set to %d seconds", tmpi);
+    // DEBUG_PRINT("sleepTime set to %d seconds", tmpi);
   }
 
   bool tmpb = response["ota_mode"];
@@ -194,7 +208,7 @@ void logResetReason() {
     DEBUG_PRINT("Wakeup reason: ? (%d)", wakeup_reason);
   }
 
-  DEBUG_PRINT("Boot count: %d, last image checksum: %s", wakeupCount, lastChecksum);
+  DEBUG_PRINT("Wakeup count: %d, last image checksum: %s", wakeupCount, lastChecksum);
 }
 
 void disconnectAndHibernate() {
@@ -237,8 +251,8 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
 
   String partial_uri = String(path) + "?mac=" + WiFi.macAddress();
 
-  for (int attempt = 0; attempt < 3; attempt++) {
-    if (attempt > 0) {
+  for (int attempt = 1; attempt <= 3; attempt++) {
+    if (attempt > 1) {
       DEBUG_PRINT("Retrying download, attempt #%d", attempt);
     };
 
@@ -249,6 +263,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
 
     uint32_t bytes_read = 0;
     DEBUG_PRINT("Reading bitmap header");
+    // FIXME from HTTP headers would be ideal
     String line;
     bytes_read += httpReadStringUntil('\n', line);
     if (line != "MM")  // signature
@@ -258,6 +273,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
     ArduinoOTA.handle();
 
     DEBUG_PRINT("Reading checksum");
+    // FIXME from HTTP headers would be ideal
     bytes_read += httpReadStringUntil('\n', line);
     DEBUG_PRINT("Last checksum was: %s", lastChecksum);
     DEBUG_PRINT("New checksum is: %s", line.c_str());
@@ -307,9 +323,11 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
       // delay(1000);
     }
   }
+  DEBUG_PRINT("Download time: %lu ms", millis() - startTime);
 
+  startTime = millis();
   display.refresh();  // full refresh
-  DEBUG_PRINT("downloaded and displayed in %lu ms", millis() - startTime);
+  DEBUG_PRINT("Display refresh time: %lu ms", millis() - startTime);
 }
 
 void stopWiFi() {
