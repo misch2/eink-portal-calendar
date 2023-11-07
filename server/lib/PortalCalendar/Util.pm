@@ -410,14 +410,20 @@ sub find_nearest_forecast {
     return $ret;
 }
 
+sub image_name {
+    my $self = shift;
+    return "generated_images/current_calendar_" . $self->display->id . ".png";
+}
+
 sub generate_bitmap {
     my $self = shift;
     my $args = shift;
 
     $self->app->log->info("Producing bitmap");
+
     # $self->app->log->info(np($args));
 
-    my $img = Imager->new(file => $self->app->app->home->child("generated_images/current_calendar_" . $self->display->id . ".png")) or die Imager->errstr;
+    my $img = Imager->new(file => $self->app->app->home->child($self->image_name)) or die Imager->errstr;
 
     # If the generated image is larger (probably due to invalid CSS), crop it so that it display at least something:
     if ($img->getheight > $self->display->virtual_height) {
