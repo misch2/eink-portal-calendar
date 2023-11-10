@@ -4,6 +4,7 @@
 #include <ArduinoHttpClient.h>
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
+#include <ESP32AnalogRead.h>
 #ifdef SPI_BUS
 #include <SPI.h>
 #endif
@@ -66,19 +67,34 @@ WiFiManager wifiManager;
 #endif
 WiFiClient wifiClient;
 HttpClient httpClient = HttpClient(wifiClient, CALENDAR_URL_HOST, CALENDAR_URL_PORT);
+#ifdef VOLTAGE_ADC_PIN
+ESP32AnalogRead adc;
+#endif
 
 uint32_t fullStartTime;
 
-int readVoltage() {
+int voltage_adc_raw;
+float voltage_real;
+void readVoltage() {
   int rawVoltageADCReading;
 #ifdef VOLTAGE_ADC_PIN
-  rawVoltageADCReading = analogRead(VOLTAGE_ADC_PIN);
+  adc.attach(VOLTAGE_ADC_PIN);
+  delay(5);
+  float voltage = adc.readVoltage();
+  DEBUG_PRINT("voltage read: %f V", voltage);
+  voltage = voltage * VOLTAGE_MULTIPLICATION_COEFFICIENT;
+  voltage_real = voltage;
+  DEBUG_PRINT("voltage corrected: %f V", voltage);
+
+  rawVoltageADCReading = adc.readRaw();
+  voltage_adc_raw = rawVoltageADCReading;
+  DEBUG_PRINT("RAW via adc: %d", rawVoltageADCReading);
   // DEBUG_PRINT("Voltage raw read (pin %d): %d", VOLTAGE_ADC_PIN, rawVoltageADCReading);
 #else
-  rawVoltageADCReading = 0;
+  voltage_real = -1;
+  voltage_adc_raw = -1;
   DEBUG_PRINT("Voltage not measured, no pin defined");
 #endif
-  return rawVoltageADCReading;
 };
 
 String textStatusCode(int statusCode) {
@@ -123,7 +139,8 @@ void startHttpGetRequest(String path) {
 
 void loadConfigFromWeb() {
   String path = "/config?mac=" + WiFi.macAddress()                                //
-                + "&adc=" + readVoltage()                                         // read only once, because it discharges the 100nF capacitor
+                + "&adc=" + String(voltage_adc_raw)                               //
+                + "&v=" + String(voltage_real)                                    //
                 + "&w=" + String(DISPLAY_WIDTH) + "&h=" + String(DISPLAY_HEIGHT)  //
                 + "&c=" + String(defined_color_type)                              //
                 + "&fw=" + String(FIRMWARE_VERSION);                              //
@@ -164,6 +181,11 @@ void basicInit() {
 
 void wakeupAndConnect() {
   initDisplay();
+  readVoltage();
+  if (voltage_real > 0 && voltage_real < VOLTAGE_MIN) {
+    error(String("Battery voltage too low: ") + String(voltage_real) + " V\n" + "Minimum is: " + String(VOLTAGE_MIN) + " V\n" +
+          "Please charge the battery and try again.");
+  }
   if (!startWiFi()) {
     error("WiFi connect/login unsuccessful.");
   }
@@ -464,7 +486,7 @@ void espDeepSleep(uint64_t seconds) {
 
 void initDisplay() {
   DEBUG_PRINT("Display setup start");
-  DEBUG_PRINT("CS=%d, DC=%d, RST=%d, BUSY=%d", CS_PIN, DC_PIN, RST_PIN, BUSY_PIN);
+  DEBUG_PRINT("CS=%d, DC=%d, RST=%d, BUSY=%d", CS_PIN, DC_PIN, RST_PIN, BUSY_PIN);  // RST and BUSY are used directly in the board specific header file
 
   delay(100);
 

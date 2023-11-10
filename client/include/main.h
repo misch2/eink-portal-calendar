@@ -18,7 +18,7 @@ void disconnectAndHibernate();
 void displayText(String message, const GFXfont* font);
 void error(String message);
 
-int readVoltage();
+void readVoltage();
 void logResetReason();
 void logRuntimeStats();
 void loadConfigFromWeb();
