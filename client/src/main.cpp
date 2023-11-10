@@ -82,9 +82,8 @@ void readVoltage() {
   delay(5);
   float voltage = adc.readVoltage();
   DEBUG_PRINT("voltage read: %f V", voltage);
-  voltage = voltage * VOLTAGE_MULTIPLICATION_COEFFICIENT;
-  voltage_real = voltage;
-  DEBUG_PRINT("voltage corrected: %f V", voltage);
+  voltage_real = voltage * VOLTAGE_MULTIPLICATION_COEFFICIENT;
+  DEBUG_PRINT("voltage corrected: %f V", voltage_real);
 
   rawVoltageADCReading = adc.readRaw();
   voltage_adc_raw = rawVoltageADCReading;
@@ -181,17 +180,18 @@ void basicInit() {
 
 void wakeupAndConnect() {
   initDisplay();
-  readVoltage();
-  if (voltage_real > 0 && voltage_real < VOLTAGE_MIN) {
-    error(String("Battery voltage too low: ") + String(voltage_real) + " V\n" + "Minimum is: " + String(VOLTAGE_MIN) + " V\n" +
-          "Please charge the battery and try again.");
-  }
   if (!startWiFi()) {
     error("WiFi connect/login unsuccessful.");
   }
   logResetReason();
   initOTA();
+
+  readVoltage();
   loadConfigFromWeb();
+  if (voltage_real > 0 && voltage_real < VOLTAGE_MIN) {
+    error(String("Battery voltage too low: ") + String(voltage_real) + " V\n" + "Minimum is: " + String(VOLTAGE_MIN) + " V\n" +
+          "Please charge the battery and try again.");
+  }
 }
 
 void logResetReason() {
