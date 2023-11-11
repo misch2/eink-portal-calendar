@@ -4,6 +4,7 @@
 #include <ArduinoHttpClient.h>
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
+#include <ESP32AnalogRead.h>
 #ifdef SPI_BUS
 #include <SPI.h>
 #endif
@@ -66,19 +67,47 @@ WiFiManager wifiManager;
 #endif
 WiFiClient wifiClient;
 HttpClient httpClient = HttpClient(wifiClient, CALENDAR_URL_HOST, CALENDAR_URL_PORT);
+#ifdef VOLTAGE_ADC_PIN
+ESP32AnalogRead adc;
+#endif
 
 uint32_t fullStartTime;
 
-int readVoltage() {
+int voltage_adc_raw;
+float voltage_real;
+void readVoltage() {
   int rawVoltageADCReading;
 #ifdef VOLTAGE_ADC_PIN
-  rawVoltageADCReading = analogRead(VOLTAGE_ADC_PIN);
-  DEBUG_PRINT("Voltage raw read (pin %d): %d", VOLTAGE_ADC_PIN, rawVoltageADCReading);
+  adc.attach(VOLTAGE_ADC_PIN);
+  delay(5);
+  float voltage = adc.readVoltage();
+  DEBUG_PRINT("voltage read: %f V", voltage);
+  voltage_real = voltage * VOLTAGE_MULTIPLICATION_COEFFICIENT;
+  DEBUG_PRINT("voltage corrected: %f V", voltage_real);
+
+  rawVoltageADCReading = adc.readRaw();
+  voltage_adc_raw = rawVoltageADCReading;
+  DEBUG_PRINT("RAW via adc: %d", rawVoltageADCReading);
+  // DEBUG_PRINT("Voltage raw read (pin %d): %d", VOLTAGE_ADC_PIN, rawVoltageADCReading);
 #else
-  rawVoltageADCReading = 0;
+  voltage_real = -1;
+  voltage_adc_raw = -1;
   DEBUG_PRINT("Voltage not measured, no pin defined");
 #endif
-  return rawVoltageADCReading;
+};
+
+String textStatusCode(int statusCode) {
+  if (statusCode == HTTP_ERROR_CONNECTION_FAILED) {
+    return "HTTP_ERROR_CONNECTION_FAILED - Could not connect to the server";
+  } else if (statusCode == HTTP_ERROR_API) {
+    return "HTTP_ERROR_API -  Usually indicates your code is using the class incorrectly";
+  } else if (statusCode == HTTP_ERROR_TIMED_OUT) {
+    return "HTTP_ERROR_TIMED_OUT - Spent too long waiting for a reply";
+  } else if (statusCode == HTTP_ERROR_INVALID_RESPONSE) {
+    return "HTTP_ERROR_INVALID_RESPONSE - The response from the server is invalid, is it definitely an HTTP server?";
+  } else {
+    return "";
+  }
 };
 
 void startHttpGetRequest(String path) {
@@ -88,7 +117,7 @@ void startHttpGetRequest(String path) {
   httpClient.endRequest();
 
   int statusCode = httpClient.responseStatusCode();
-  DEBUG_PRINT("<<< HTTP response code: %d", statusCode);
+  DEBUG_PRINT("<<< HTTP response code: %d (%s)", statusCode, textStatusCode(statusCode));
 
   while (httpClient.connected() && httpClient.available() && httpClient.headerAvailable()) {
     String headerName = httpClient.readHeaderName();
@@ -109,7 +138,8 @@ void startHttpGetRequest(String path) {
 
 void loadConfigFromWeb() {
   String path = "/config?mac=" + WiFi.macAddress()                                //
-                + "&adc=" + readVoltage()                                         // read only once, because it discharges the 100nF capacitor
+                + "&adc=" + String(voltage_adc_raw)                               //
+                + "&v=" + String(voltage_real)                                    //
                 + "&w=" + String(DISPLAY_WIDTH) + "&h=" + String(DISPLAY_HEIGHT)  //
                 + "&c=" + String(defined_color_type)                              //
                 + "&fw=" + String(FIRMWARE_VERSION);                              //
@@ -127,7 +157,7 @@ void loadConfigFromWeb() {
   int tmpi = response["sleep"];
   if (tmpi != 0) {
     sleepTime = tmpi;
-    DEBUG_PRINT("sleepTime set to %d seconds", tmpi);
+    // DEBUG_PRINT("sleepTime set to %d seconds", tmpi);
   }
 
   bool tmpb = response["ota_mode"];
@@ -155,7 +185,13 @@ void wakeupAndConnect() {
   }
   logResetReason();
   initOTA();
+
+  readVoltage();
   loadConfigFromWeb();
+  if (voltage_real > 0 && voltage_real < VOLTAGE_MIN) {
+    error(String("Battery voltage too low: ") + String(voltage_real) + " V\n" + "Minimum is: " + String(VOLTAGE_MIN) + " V\n" +
+          "Please charge the battery and try again.");
+  }
 }
 
 void logResetReason() {
@@ -194,7 +230,7 @@ void logResetReason() {
     DEBUG_PRINT("Wakeup reason: ? (%d)", wakeup_reason);
   }
 
-  DEBUG_PRINT("Boot count: %d, last image checksum: %s", wakeupCount, lastChecksum);
+  DEBUG_PRINT("Wakeup count: %d, last image checksum: %s", wakeupCount, lastChecksum);
 }
 
 void disconnectAndHibernate() {
@@ -237,8 +273,8 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
 
   String partial_uri = String(path) + "?mac=" + WiFi.macAddress();
 
-  for (int attempt = 0; attempt < 3; attempt++) {
-    if (attempt > 0) {
+  for (int attempt = 1; attempt <= 3; attempt++) {
+    if (attempt > 1) {
       DEBUG_PRINT("Retrying download, attempt #%d", attempt);
     };
 
@@ -249,6 +285,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
 
     uint32_t bytes_read = 0;
     DEBUG_PRINT("Reading bitmap header");
+    // FIXME from HTTP headers would be ideal
     String line;
     bytes_read += httpReadStringUntil('\n', line);
     if (line != "MM")  // signature
@@ -258,6 +295,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
     ArduinoOTA.handle();
 
     DEBUG_PRINT("Reading checksum");
+    // FIXME from HTTP headers would be ideal
     bytes_read += httpReadStringUntil('\n', line);
     DEBUG_PRINT("Last checksum was: %s", lastChecksum);
     DEBUG_PRINT("New checksum is: %s", line.c_str());
@@ -307,9 +345,11 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
       // delay(1000);
     }
   }
+  DEBUG_PRINT("Download time: %lu ms", millis() - startTime);
 
+  startTime = millis();
   display.refresh();  // full refresh
-  DEBUG_PRINT("downloaded and displayed in %lu ms", millis() - startTime);
+  DEBUG_PRINT("Display refresh time: %lu ms", millis() - startTime);
 }
 
 void stopWiFi() {
@@ -446,7 +486,7 @@ void espDeepSleep(uint64_t seconds) {
 
 void initDisplay() {
   DEBUG_PRINT("Display setup start");
-  DEBUG_PRINT("CS=%d, DC=%d, RST=%d, BUSY=%d", CS_PIN, DC_PIN, RST_PIN, BUSY_PIN);
+  DEBUG_PRINT("CS=%d, DC=%d, RST=%d, BUSY=%d", CS_PIN, DC_PIN, RST_PIN, BUSY_PIN);  // RST and BUSY are used directly in the board specific header file
 
   delay(100);
 
