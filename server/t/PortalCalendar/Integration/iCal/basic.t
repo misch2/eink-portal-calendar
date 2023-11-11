@@ -48,10 +48,10 @@ is(exists($y->{cals}),   1);
 is(exists($y->{events}), 1);
 is(exists($y->{todos}),  1);
 
-my @events = $api->get_today_events();
+my @events = $api->get_events_for(DateTime->now);
 is_deeply(\@events, [], "No events today");
 
-@events = $api->get_today_events(DateTime->new(year => 2023, month => 6, day => 29));
+@events = $api->get_events_for(DateTime->new(year => 2023, month => 6, day => 29));
 is($events[0]->{SUMMARY}, 'Summary 2', "Event name OK");
 
 done_testing();

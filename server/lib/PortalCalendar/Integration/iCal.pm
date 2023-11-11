@@ -68,9 +68,9 @@ sub get_events_only {
     return $self->get_all()->{events};
 }
 
-sub get_today_events {
+sub get_events_for {
     my $self = shift;
-    my $date = shift // DateTime->now();
+    my $date = shift;
 
     my $all_events = $self->get_events_only();
     my $events     = $all_events->{ $date->year }->{ $date->month }->{ $date->day } || {};

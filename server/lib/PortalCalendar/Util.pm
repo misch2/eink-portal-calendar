@@ -218,6 +218,7 @@ sub html_for_date {
     srand($dt->ymd(''));
 
     my @today_events;
+    my @nearest_events;
     foreach my $calendar_no (1 .. 3) {
         next unless $self->app->get_config("web_calendar${calendar_no}");
 
@@ -227,13 +228,18 @@ sub html_for_date {
 
         my $calendar = PortalCalendar::Integration::iCal->new(app => $self->app, display => $self->display, ics_url => $url);
         try {
-            push @today_events, $calendar->get_today_events($dt);    # cached if possible
-                                                                     #p @today_events;
+            push @today_events, $calendar->get_events_for($dt);    # cached if possible
+                                                                   #p @today_events;
+            foreach my $add_days (0 .. 15) {
+                my $tmp_dt = $dt->clone->add(days => $add_days)->truncate(to => 'day');
+                push @nearest_events, $calendar->get_events_for($tmp_dt);    # cached if possible
+            }
         } catch {
             warn "Error: $_";
         };
     }
-    @today_events = sort { $a->{DTSTART} cmp $b->{DTSTART} } @today_events;
+    @today_events   = sort { $a->{DTSTART} cmp $b->{DTSTART} } @today_events;
+    @nearest_events = sort { $a->{DTSTART} cmp $b->{DTSTART} } @nearest_events;
 
     my $has_calendar_entries = (scalar @today_events ? 1 : 0);
 
@@ -340,7 +346,8 @@ sub html_for_date {
         # other variables
         date                 => $dt,
         icons                => \@icons,
-        calendar_events      => \@today_events,
+        calendar_events      => \@today_events,          # FIXME rename
+        nearest_events       => \@nearest_events,
         has_calendar_entries => $has_calendar_entries,
 
         # name day:
@@ -503,6 +510,8 @@ sub generate_bitmap {
         my $bitmap = '';
         if ($args->{display_type} eq '256G') {
             foreach my $y (0 .. $img->getheight - 1) {
+
+                # FIXME $bitmap .= $img->getsamples(...) ? It returns raw data in scalar context.
                 foreach my $gray ($img->getsamples(y => $y, format => '8bit', channels => [0])) {
                     $bitmap .= chr($gray);
                 }
