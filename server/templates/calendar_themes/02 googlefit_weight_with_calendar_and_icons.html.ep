@@ -2,7 +2,7 @@
 %# see https://icon-sets.iconify.design/material-symbols
 %= javascript 'https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js'
 %= stylesheet '/css/calendar.css'
-%= stylesheet '/css/googlefit.css'
+%= stylesheet '/css/calendar_themes/googlefit.css'
 
 <style type="text/css">
 :root {

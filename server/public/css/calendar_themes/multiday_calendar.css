@@ -1,0 +1,122 @@
+/* resets */
+
+html,
+body {
+    /* background-color: aqua; */
+    font-size: 17pt;
+    font-family: 'Times New Roman', Times, serif;
+}
+
+html,
+body,
+div,
+p {
+    padding: 0;
+    margin: 0;
+}
+
+
+/* debug */
+
+div,
+p {
+    /* border: 3px dotted gray; */
+}
+
+div {
+    /* background-color: cadetblue; */
+}
+
+div div {
+    /* background-color: coral; */
+}
+
+div div div {
+    /* background-color: bisque; */
+}
+
+div div div div {
+    /* background-color: darkolivegreen; */
+    /* background-color: #eee; */
+}
+
+@font-face {
+    font-family: 'DIN';
+    /* src: url('/fonts/D-DIN.otf') format('opentype'); */
+    /* test cestiny: */
+    src: url('/fonts/651-font.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'DINCondensed';
+    src: url('/fonts/D-DINCondensed.otf') format('opentype');
+}
+
+:root {
+    /* only for VSCode editor, real colors are overriden in the template based on the purpose (preview or real EPD) */
+    --epd-black: #000;
+    --epd-white: #fff;
+    --epd-red: #f00;
+    --epd-yellow: #ff0;
+}
+
+body {
+    /* background-color: burlywood; */
+    font-family: 'DIN';
+    background-color: var(--epd-white);
+    color: var(--epd-black);
+}
+
+div#visible-area {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    height: 780px;
+    width: 460px;
+    overflow: hidden;
+    /* background-color: gainsboro; */
+}
+
+div.top-date-row {
+    position: absolute;
+    width: 100%;
+    top: 0;
+    left: 0;
+    padding-bottom: 0.2em;
+    border-bottom: 2px solid var(--epd-black);
+}
+
+div.calendar-container {
+    position: absolute;
+    width: 100%;
+    top: 2rem;
+    left: 0;
+}
+
+div.calendar-day-title {
+    font-weight: bold;
+    /* font-size: 1.5rem; */
+    padding-top: 1em;
+    padding-bottom: 0.5em;
+}
+
+div.calendar-event {
+
+}
+
+div#bottom-signature {
+    position: absolute;
+    width: 100%;
+    top: 760;
+    left: 0;
+    font-size: 0.7rem;
+}
+
+div#battery-status {
+    position: absolute;
+    width: 100%;
+    text-align: right;
+    top: 755;
+    left: 0;
+    font-size: 1.3rem;
+}
