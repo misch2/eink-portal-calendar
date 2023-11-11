@@ -68,7 +68,7 @@
 
         %# screen displayed at
         <iconify-icon icon="material-symbols:add-to-home-screen-sharp"></iconify-icon>
-        <%= $next_wakeup->format_cldr('H:mm') %>,
+        <%= $next_wakeup->format_cldr('H:mm') %>.
 
     </div>
 
