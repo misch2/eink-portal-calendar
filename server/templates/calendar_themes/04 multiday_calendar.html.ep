@@ -23,7 +23,10 @@
     <div class="calendar-container">
         % my $now = DateTime->now->truncate(to => 'day');
         % my $last_title = '';
+        % my $cnt = 0;
         % foreach my $event (@{ $nearest_events }) {
+            % $cnt++;
+            % last if $cnt > 50;
             % my $dt = $event->{DTSTART};
             % my $day_description = '';
             % if ($dt->ymd eq $now->ymd) {

@@ -228,12 +228,10 @@ sub html_for_date {
 
         my $calendar = PortalCalendar::Integration::iCal->new(app => $self->app, display => $self->display, ics_url => $url);
         try {
-            push @today_events, $calendar->get_events_for($dt);    # cached if possible
-                                                                   #p @today_events;
-            foreach my $add_days (0 .. 15) {
-                my $tmp_dt = $dt->clone->add(days => $add_days)->truncate(to => 'day');
-                push @nearest_events, $calendar->get_events_for($tmp_dt);    # cached if possible
-            }
+            push @today_events, $calendar->get_events_for($dt);
+
+            push @nearest_events, @today_events;
+            push @nearest_events, $calendar->get_events_after($dt);
         } catch {
             warn "Error: $_";
         };
@@ -346,7 +344,7 @@ sub html_for_date {
         # other variables
         date                 => $dt,
         icons                => \@icons,
-        calendar_events      => \@today_events,          # FIXME rename
+        today_events         => \@today_events,
         nearest_events       => \@nearest_events,
         has_calendar_entries => $has_calendar_entries,
 

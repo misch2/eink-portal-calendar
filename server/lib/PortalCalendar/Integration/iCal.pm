@@ -85,4 +85,29 @@ sub get_events_for {
     return @events;
 }
 
+sub get_events_after {
+    my $self = shift;
+    my $date = shift;
+
+    $date = $date->clone()->truncate(to => 'day')->set_time_zone($self->config->get('timezone'));
+
+    my $all_events = $self->get_events_only();
+
+    my @ret = ();
+    foreach my $year (keys %{$all_events}) {
+        foreach my $month (keys %{ $all_events->{$year} }) {
+            foreach my $day (keys %{ $all_events->{$year}->{$month} }) {
+                next if DateTime->new(year => $year, month => $month, day => $day) < $date;
+
+                my @events = values %{ $all_events->{$year}->{$month}->{$day} };
+                map { $_->{SUMMARY} =~ s/\\,/,/g } @events;    # fix "AA\,BB" situation
+
+                push @ret, @events;
+            }
+        }
+    }
+
+    return @ret;
+}
+
 1;
