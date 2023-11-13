@@ -28,9 +28,10 @@
                 <div class="col-md-12">
                     <!-- <label for="theme">Theme</label> -->
                     <select id="theme" name="theme" class="form-select">
-                        <option value="portal_with_icons" <%= 'selected' if $values->{theme} eq 'portal_with_icons' %>>Portal calendar (default)</option>
-                        <option value="portal_with_weather" <%= 'selected' if $values->{theme} eq 'portal_with_weather' %>>Weather forecast</option>
-                        <option value="portal_with_googlefit" <%= 'selected' if $values->{theme} eq 'portal_with_googlefit' %>>Google Fit statistics</option>
+                        <option value=""></option>
+                        % foreach my $theme (@{ $template_names }) {
+                            <option value="<%= $theme %>" <%= 'selected' if $values->{theme} eq $theme %>><%= $theme %></option>
+                        % }
                     </select>
                 </div>
             </fieldset>

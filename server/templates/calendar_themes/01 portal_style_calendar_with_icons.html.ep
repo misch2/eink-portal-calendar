@@ -56,7 +56,7 @@
 
         % if ($has_calendar_entries) {
             <div class="calendar-container">
-                % foreach my $event (@{ $calendar_events }) {
+                % foreach my $event (@{ $today_events }) {
                     <div>
                         % if ($event->{allday}) {
                             <%= $event->{SUMMARY} %>

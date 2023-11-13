@@ -51,16 +51,32 @@ sub config {
         );
     }
 
-    $self->set_config('_last_visit',       DateTime->now()->iso8601);
+    $self->set_config('_last_visit', DateTime->now()->iso8601);
+
     $self->set_config('_last_voltage_raw', $self->req->param('adc') // $self->req->param('voltage_raw') // '');    # value has NOT NULL restriction
+    if ($self->req->param('v')) {
+        $self->set_config('_last_voltage', $self->req->param('v'));
+    } else {
+
+        # FIXME remove in future versions:
+        my $raw_adc_reading       = $self->get_config('_last_voltage_raw');
+        my $voltage_divider_ratio = $self->get_config('voltage_divider_ratio');
+        if ($raw_adc_reading && $voltage_divider_ratio) {
+            my $adc_reference_voltage = 3.3;
+            my $adc_resolution        = 4095;
+
+            my $voltage = $raw_adc_reading * $adc_reference_voltage / $adc_resolution * $voltage_divider_ratio;
+            $self->set_config('_last_voltage', $voltage);
+        }
+    }
 
     my $util = PortalCalendar::Util->new(app => $self, display => $display);
     my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
     $self->app->log->info("Next wakeup at $next_wakeup (in $sleep_in_seconds seconds) according to crontab schedule '$schedule'");
 
-    $util->update_mqtt('voltage',         $display->voltage + 0.001);                                              # to force grafana to store changed values
-    $util->update_mqtt('battery_percent', $display->battery_percent() + 0.001);                                    # to force grafana to store changed values
-    $util->update_mqtt('voltage_raw',     $self->get_config('_last_voltage_raw') + 0.001);                         # to force grafana to store changed values
+    $util->update_mqtt('voltage',         $display->voltage + 0.001);                         # to force grafana to store changed values
+    $util->update_mqtt('battery_percent', $display->battery_percent() + 0.001);               # to force grafana to store changed values
+    $util->update_mqtt('voltage_raw',     $self->get_config('_last_voltage_raw') + 0.001);    # to force grafana to store changed values
     $util->update_mqtt('firmware',        $display->firmware);
     $util->update_mqtt('last_visit',      DateTime->now()->rfc3339);
     $util->update_mqtt('sleep_time',      $sleep_in_seconds);

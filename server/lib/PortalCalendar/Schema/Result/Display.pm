@@ -226,14 +226,15 @@ sub get_config {
 sub voltage {
     my $self = shift;
 
-    my $raw_adc_reading       = $self->get_config('_last_voltage_raw');
-    my $voltage_divider_ratio = $self->get_config('voltage_divider_ratio');
-    return undef unless $raw_adc_reading && $voltage_divider_ratio;
+    # my $raw_adc_reading       = $self->get_config('_last_voltage_raw');
+    # my $voltage_divider_ratio = $self->get_config('voltage_divider_ratio');
+    # return undef unless $raw_adc_reading && $voltage_divider_ratio;
 
-    my $adc_reference_voltage = 3.3;
-    my $adc_resolution        = 4095;
+    # my $adc_reference_voltage = 3.3;
+    # my $adc_resolution        = 4095;
 
-    my $voltage = $raw_adc_reading * $adc_reference_voltage / $adc_resolution * $voltage_divider_ratio;
+    # my $voltage = $raw_adc_reading * $adc_reference_voltage / $adc_resolution * $voltage_divider_ratio;
+    my $voltage = $self->get_config('_last_voltage');
     return sprintf("%.3f", $voltage);
 }
 
@@ -243,6 +244,7 @@ sub battery_percent {
     my $max  = $self->get_config('max_voltage');
 
     my $cur = $self->voltage;
+    warn "min: $min, max: $max, cur: $cur";
     return unless $min && $max && $cur;
     my $percentage = 100 * ($cur - $min) / ($max - $min);
     $percentage = min(100, max(0, $percentage));    # clip to 0-100

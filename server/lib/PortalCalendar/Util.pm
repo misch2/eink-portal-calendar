@@ -218,6 +218,7 @@ sub html_for_date {
     srand($dt->ymd(''));
 
     my @today_events;
+    my @nearest_events;
     foreach my $calendar_no (1 .. 3) {
         next unless $self->app->get_config("web_calendar${calendar_no}");
 
@@ -227,13 +228,16 @@ sub html_for_date {
 
         my $calendar = PortalCalendar::Integration::iCal->new(app => $self->app, display => $self->display, ics_url => $url);
         try {
-            push @today_events, $calendar->get_today_events($dt);    # cached if possible
-                                                                     #p @today_events;
+            push @today_events, $calendar->get_events_for($dt);
+
+            push @nearest_events, @today_events;
+            push @nearest_events, $calendar->get_events_after($dt);
         } catch {
             warn "Error: $_";
         };
     }
-    @today_events = sort { $a->{DTSTART} cmp $b->{DTSTART} } @today_events;
+    @today_events   = sort { $a->{DTSTART} cmp $b->{DTSTART} } @today_events;
+    @nearest_events = sort { $a->{DTSTART} cmp $b->{DTSTART} } @nearest_events;
 
     my $has_calendar_entries = (scalar @today_events ? 1 : 0);
 
@@ -340,7 +344,8 @@ sub html_for_date {
         # other variables
         date                 => $dt,
         icons                => \@icons,
-        calendar_events      => \@today_events,
+        today_events         => \@today_events,
+        nearest_events       => \@nearest_events,
         has_calendar_entries => $has_calendar_entries,
 
         # name day:
@@ -410,14 +415,20 @@ sub find_nearest_forecast {
     return $ret;
 }
 
+sub image_name {
+    my $self = shift;
+    return "generated_images/current_calendar_" . $self->display->id . ".png";
+}
+
 sub generate_bitmap {
     my $self = shift;
     my $args = shift;
 
     $self->app->log->info("Producing bitmap");
+
     # $self->app->log->info(np($args));
 
-    my $img = Imager->new(file => $self->app->app->home->child("generated_images/current_calendar_" . $self->display->id . ".png")) or die Imager->errstr;
+    my $img = Imager->new(file => $self->app->app->home->child($self->image_name)) or die Imager->errstr;
 
     # If the generated image is larger (probably due to invalid CSS), crop it so that it display at least something:
     if ($img->getheight > $self->display->virtual_height) {
@@ -497,6 +508,8 @@ sub generate_bitmap {
         my $bitmap = '';
         if ($args->{display_type} eq '256G') {
             foreach my $y (0 .. $img->getheight - 1) {
+
+                # FIXME $bitmap .= $img->getsamples(...) ? It returns raw data in scalar context.
                 foreach my $gray ($img->getsamples(y => $y, format => '8bit', channels => [0])) {
                     $bitmap .= chr($gray);
                 }

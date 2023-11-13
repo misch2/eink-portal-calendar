@@ -66,10 +66,14 @@ sub config_ui_show {
         $values->{$name} = $value;
     }
 
+    my @template_files = $self->app->home->child('templates/calendar_themes')->list->map(sub { $_->basename })->each;
+
     return $self->render(
         template => 'config_ui',
         format   => 'html',
         values   => $values,
+
+        template_names => [ map { s/\.html\.ep$//; $_ } @template_files ],
 
         last_voltage     => $self->display->voltage,
         last_voltage_raw => $self->get_config('_last_voltage_raw'),
