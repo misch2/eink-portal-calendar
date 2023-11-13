@@ -3,8 +3,8 @@
 html,
 body {
     /* background-color: aqua; */
-    font-size: 17pt;
-    font-family: 'Times New Roman', Times, serif;
+    font-size: 18pt;
+    font-family: 'DIN';
 }
 
 html,
@@ -62,7 +62,6 @@ div div div div {
 
 body {
     /* background-color: burlywood; */
-    font-family: 'DIN';
     background-color: var(--epd-white);
     color: var(--epd-black);
 }
@@ -78,47 +77,66 @@ div#visible-area {
 }
 
 div.top-date-row {
-    position: absolute;
-    width: 100%;
-    top: 0;
-    left: 0;
+    display: flex;
+    flex-wrap: wrap;
+    /* for the case when the date or name is too long */
+    justify-content: space-between;
+
     padding-bottom: 0.2em;
     border-bottom: 2px solid var(--epd-black);
 }
 
 div.calendar-container {
-    position: absolute;
-    top: 2rem;
-    left: 0;
-    width: 100%;
-    height: 31rem;
     overflow: hidden;
+}
+
+div.calendar-nearest-events,
+div.calendar-later-events {
+    font-weight: bold;
+    margin-top: 0.5rem;
+    padding: 0.2rem 0.5rem;
+    width: 100%;
+    background-color: var(--epd-black);
+    color: var(--epd-white);
+}
+
+div.calendar-later-events {
+    margin-top: 1rem;
 }
 
 div.calendar-day-title {
     font-weight: bold;
-    /* font-size: 1.5rem; */
-    padding-top: 1em;
-    padding-bottom: 0.5em;
+    padding-top: 0.5rem;
+    padding-bottom: 0.25rem;
 }
 
-div.calendar-event {
+div.calendar-nearest-events+div.calendar-day-title,
+div.calendar-later-events+div.calendar-day-title {
+    padding-top: 0.25rem;
+}
 
+div.calendar-event {}
+
+div#bottom-row {
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+    left: 0;
+    height: 1.5rem;
+    background-color: var(--epd-white);
 }
 
 div#bottom-signature {
     position: absolute;
-    width: 100%;
-    top: 760;
+    bottom: 0rem;
     left: 0;
     font-size: 0.7rem;
 }
 
 div#battery-status {
     position: absolute;
-    width: 100%;
+    bottom: -0.2rem;
+    right: 0;
     text-align: right;
-    top: 755;
-    left: 0;
     font-size: 1.3rem;
 }
