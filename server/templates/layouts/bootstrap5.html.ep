@@ -20,10 +20,8 @@
 
         % if ($display) {
             % my $last_contact_ago;
-            % my $last_visit_dt;
-            % if (my $last_visit_raw = $config_obj->get('_last_visit')) {
-            %     $last_visit_dt = DateTime::Format::ISO8601->parse_datetime($last_visit_raw);
-            %     $last_contact_ago = DateTime->now()->subtract_datetime($last_visit_dt);
+            % if ($display->last_visit) {
+            %     $last_contact_ago = DateTime->now()->subtract_datetime($display->last_visit);
             % }
 
             % my $waiting_tasks  = $config_obj->app->minion->jobs({ states => [ 'inactive', 'active' ] })->total;

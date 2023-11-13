@@ -13,7 +13,7 @@
         <th scope="col">Firmware</th>
         <th scope="col">Battery</th>
         <th scope="col">Next wakeup</th>
-        <th scope="col">Missed wakeups</th>
+        <th scope="col">Status</th>
         <th scope="col">Last image</th>
     </tr>
 </thead>
@@ -49,8 +49,12 @@
             % my $seconds = $sleep_in_seconds % 60;
             <%= $next_wakeup->format_cldr('dd.MM.YYYY HH:mm') %> (in <%= $minutes %> minutes and <%= $seconds %> seconds)
         </td>
-        <td class="text-center">
-            <%= $d->missed_connects %>
+        <td>
+            % if ($d->missed_connects > 0) {
+                <span class="badge bg-danger">frozen since <%= $d->last_visit->set_time_zone('local')->format_cldr('d. MMMM H:mm') %></span>
+            % } else {
+                <span class="badge bg-success">OK</span>
+            % }
         </td>
         <td>
             <a href="/home/<%= $d->id %>">

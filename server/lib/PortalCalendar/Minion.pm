@@ -45,17 +45,15 @@ sub check_missed_connects {
 
     foreach my $display ($job->app->schema->resultset('Display')->all_displays) {
         try {
-            my $last_visit = DateTime::Format::ISO8601->parse_datetime($display->get_config('_last_visit'));
+            my $last_visit = $display->last_visit;
             if ($last_visit) {
                 my ($next, undef, undef) = $display->next_wakeup_time($last_visit);
-                $next->set_time_zone('UTC');
 
                 if ($next < $now) {
                     my $diff_seconds = $now->epoch - $last_visit->epoch;
 
                     $last_visit->set_time_zone('local');
                     $next->set_time_zone('local');
-
                     $job->app->log->warn("Display #" . $display->id . " is frozen for " . $diff_seconds . " seconds, last contact was at $last_visit, should have connected at $next");
                     $display->set_missed_connects(1 + $display->missed_connects);
                 }

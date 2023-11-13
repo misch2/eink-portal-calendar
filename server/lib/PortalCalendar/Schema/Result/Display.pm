@@ -202,6 +202,8 @@ use DateTime;
 use List::Util qw(min max);
 use Schedule::Cron::Events;
 use Time::Seconds;
+use DateTime::Format::ISO8601;
+use Try::Tiny;
 
 sub virtual_width {
     my $self = shift;
@@ -265,6 +267,19 @@ sub set_missed_connects {
 sub missed_connects {
     my $self = shift;
     return $self->get_config('_missed_connects') // 0;
+}
+
+sub last_visit {
+    my $self = shift;
+
+    my $last_visit = undef;
+    try {
+        $last_visit = DateTime::Format::ISO8601->parse_datetime($self->get_config('_last_visit'));
+        $last_visit->set_time_zone('UTC');
+    } catch {
+        warn "Error while parsing last_visit: $_";
+    };
+    return $last_visit;
 }
 
 sub color_variants {
@@ -337,7 +352,8 @@ sub _next_wakeup_time_for_datetime {
     my $schedule = shift;
     my $dt       = shift;
 
-    return $dt->clone->truncate(to => 'day')->add(days => 1) unless $schedule;    # no schedule, wake up tomorrow
+    # crontab definitions are in SERVER LOCAL time zone, not display dependent
+    return $dt->clone->set_time_zone('local')->truncate(to => 'day')->add(days => 1) unless $schedule;    # no schedule, wake up tomorrow
     my $cron = Schedule::Cron::Events->new($schedule, Seconds => $dt->epoch) or die "Invalid crontab schedule";
 
     my ($seconds, $minutes, $hours, $dayOfMonth, $month, $year) = $cron->nextEvent;
@@ -348,7 +364,7 @@ sub _next_wakeup_time_for_datetime {
 
 sub next_wakeup_time {
     my $self = shift;
-    my $now  = shift // DateTime->now(time_zone => 'local');                      # crontab definitions are in SERVER LOCAL time zone, not display dependent
+    my $now  = shift // DateTime->now(time_zone => 'local');
 
     my $schedule  = $self->get_config('wakeup_schedule');
     my $next_time = $self->_next_wakeup_time_for_datetime($schedule, $now);
