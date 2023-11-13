@@ -97,6 +97,11 @@ sub setup_plugins {
             '*/15 * * * *' => sub {
                 $app->minion->enqueue('generate_image', []);
             },
+
+            # every 5 minutes
+            '*/5 * * * *' => sub {
+                $app->minion->enqueue('check_missed_connects', []);
+            },
         }
     );
 
@@ -120,10 +125,14 @@ sub startup {
 
     # define minion tasks
     $app->minion->add_task(
-        #
         generate_image => sub {
             PortalCalendar::Minion::regenerate_image(@_);
         }
+    );
+    $app->minion->add_task(
+        check_missed_connects => sub {
+            PortalCalendar::Minion::check_missed_connects(@_);
+        },
     );
 
     $app->renderer->cache->max_keys(0) if $app->config->{disable_renderer_cache};    # do not cache CSS etc. in devel mode

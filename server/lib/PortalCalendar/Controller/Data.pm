@@ -51,12 +51,14 @@ sub config {
         );
     }
 
-    $self->set_config('_last_visit', DateTime->now()->iso8601);
+    $self->set_config('_last_visit', DateTime->now()->iso8601);    # UTC
 
     $self->set_config('_last_voltage_raw', $self->req->param('adc') // $self->req->param('voltage_raw') // '');    # value has NOT NULL restriction
     $self->set_config('_last_voltage',     $self->req->param('v'));
     $self->set_config('_min_voltage',      $self->req->param('vmin'));
     $self->set_config('_max_voltage',      $self->req->param('vmax'));
+
+    $display->set_missed_connects(0);
 
     my $util = PortalCalendar::Util->new(app => $self, display => $display);
     my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();

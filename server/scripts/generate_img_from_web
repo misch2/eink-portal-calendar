@@ -6,5 +6,6 @@ dir=$(dirname $0)
 # Expire all database caqches, then regenerate the images
 cd $dir/.. && carton exec -- ./scripts/portal_calendar nuke-caches --db-only
 cd $dir/.. && carton exec -- ./scripts/portal_calendar minion job --enqueue generate_image
+cd $dir/.. && carton exec -- ./scripts/portal_calendar minion job --enqueue check_missed_connects
 echo "Job enqueued"
 

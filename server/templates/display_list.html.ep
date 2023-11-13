@@ -11,7 +11,9 @@
         <th scope="col">Width &times; height</th>
         <th scope="col">Color type</th>
         <th scope="col">Firmware</th>
+        <th scope="col">Battery</th>
         <th scope="col">Next wakeup</th>
+        <th scope="col">Missed wakeups</th>
         <th scope="col">Last image</th>
     </tr>
 </thead>
@@ -38,11 +40,17 @@
         <td>
             <%= $d->firmware %>
         </td>
+        <td class="text-end">
+            <%= sprintf('%.0f', $d->battery_percent) %> %
+        </td>
         <td>
             % my ($next_wakeup, $sleep_in_seconds, $schedule) = $d->next_wakeup_time();
             % my $minutes = int($sleep_in_seconds / 60);
             % my $seconds = $sleep_in_seconds % 60;
             <%= $next_wakeup->format_cldr('dd.MM.YYYY HH:mm') %> (in <%= $minutes %> minutes and <%= $seconds %> seconds)
+        </td>
+        <td class="text-center">
+            <%= $d->missed_connects %>
         </td>
         <td>
             <a href="/home/<%= $d->id %>">

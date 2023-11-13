@@ -223,6 +223,18 @@ sub get_config {
     return undef;
 }
 
+sub set_config {
+    my $self  = shift;
+    my $name  = shift;
+    my $value = shift;
+    if (my $row = $self->configs->search({ name => $name })->first) {
+        $row->update({ value => $value });
+    } else {
+        $self->configs->create({ name => $name, value => $value });
+    }
+    return;
+}
+
 sub voltage {
     my $self    = shift;
     my $voltage = $self->get_config('_last_voltage');
@@ -235,12 +247,24 @@ sub battery_percent {
     my $max  = $self->get_config('_max_voltage');
 
     my $cur = $self->voltage;
+
     # warn "min: $min, max: $max, cur: $cur";
     return unless $min && $max && $cur;
     my $percentage = 100 * ($cur - $min) / ($max - $min);
     $percentage = min(100, max(0, $percentage));    # clip to 0-100
 
     return sprintf("%.1f", $percentage);
+}
+
+sub set_missed_connects {
+    my $self  = shift;
+    my $count = shift;
+    $self->set_config('_missed_connects', $count);
+}
+
+sub missed_connects {
+    my $self = shift;
+    return $self->get_config('_missed_connects') // 0;
 }
 
 sub color_variants {
@@ -308,21 +332,26 @@ sub color_palette {
     return [];                                                    # FIXME
 }
 
-sub next_wakeup_time {
-    my $self = shift;
+sub _next_wakeup_time_for_datetime {
+    my $self     = shift;
+    my $schedule = shift;
+    my $dt       = shift;
 
-    # crontab definitions are in SERVER LOCAL time zone, not display dependent
-    my $local_timezone = DateTime::TimeZone->new(name => 'local');
-    my $now            = DateTime->now(time_zone => $local_timezone);
-
-    # Parse the crontab-like schedule
-    my $schedule = $self->get_config('wakeup_schedule');
-    return $now->clone->truncate(to => 'day')->add(days => 1) unless $schedule;    # no schedule, wake up tomorrow
-
-    my $cron = Schedule::Cron::Events->new($schedule, Seconds => $now->epoch) or die "Invalid crontab schedule";
+    return $dt->clone->truncate(to => 'day')->add(days => 1) unless $schedule;    # no schedule, wake up tomorrow
+    my $cron = Schedule::Cron::Events->new($schedule, Seconds => $dt->epoch) or die "Invalid crontab schedule";
 
     my ($seconds, $minutes, $hours, $dayOfMonth, $month, $year) = $cron->nextEvent;
-    my $next_time = DateTime->new(year => 1900 + $year, month => 1 + $month, day => $dayOfMonth, hour => $hours, minute => $minutes, second => $seconds, time_zone => $local_timezone);
+    my $next_time = DateTime->new(year => 1900 + $year, month => 1 + $month, day => $dayOfMonth, hour => $hours, minute => $minutes, second => $seconds, time_zone => 'local');
+
+    return $next_time;
+}
+
+sub next_wakeup_time {
+    my $self = shift;
+    my $now  = shift // DateTime->now(time_zone => 'local');                      # crontab definitions are in SERVER LOCAL time zone, not display dependent
+
+    my $schedule  = $self->get_config('wakeup_schedule');
+    my $next_time = $self->_next_wakeup_time_for_datetime($schedule, $now);
 
     # If nextEvent is too close to now, it should return the next-next event.
     # E.g. consider this sequence of actions:
@@ -333,15 +362,9 @@ sub next_wakeup_time {
     #
     # Fixed here by accepting a small (~5 minutes) time difference:
     my $diff_seconds = $next_time->epoch - $now->epoch;
-
-    # warn "diff_seconds: $diff_seconds";
     if ($diff_seconds <= 5 * ONE_MINUTE) {
         warn "wakeup time ($next_time) too close to now ($now), moving to next event";
-        $cron = Schedule::Cron::Events->new($schedule, Seconds => $next_time->epoch) or die "Invalid crontab schedule";
-
-        ($seconds, $minutes, $hours, $dayOfMonth, $month, $year) = $cron->nextEvent;
-        $next_time = DateTime->new(year => 1900 + $year, month => 1 + $month, day => $dayOfMonth, hour => $hours, minute => $minutes, second => $seconds, time_zone => $local_timezone);
-
+        $next_time = $self->_next_wakeup_time_for_datetime($schedule, $next_time->clone->add(seconds => 1));
         warn " -> updated next: $next_time";
     }
 
