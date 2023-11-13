@@ -53,7 +53,7 @@
                 <i class="wi wi-strong-wind" style="font-size: 1rem; margin-top: 0.2rem"></i> <%= $wind %> m/s
             </div>
 
-            <div style="position: absolute; top: 170; left: 0; margin: auto; width: 100%; text-align: left">
+            <div style="position: absolute; top: 170; left: 0; margin: auto; text-align: left">
                 <i class="wi wi-cloud" style="font-size: 1rem; margin-top: 0.15rem"></i> <%= $current_weather->{clouds}->{all} %> %
             </div>
 
@@ -68,12 +68,15 @@
                 </div>
             % }
 
-            <div style="position: absolute; top: 10; left: 0; margin: auto; width: 100%; text-align: left">
+            <div style="position: absolute; top: 10; left: 0; margin: auto; text-align: left">
                 <p>
+                    %# debug:
+                    %# foreach my $condition ({id => 500, description => 'Slabý déšť'}, { id => 701, description => 'Mlha'}, { id => 616, description => 'Zataženo se sněžením'}) {
                     % foreach my $condition (@{ $current_weather->{weather} }) {
-                        %# https://erikflowers.github.io/weather-icons/api-list.html
-                        <i class="wi wi-owm-<%= $day_or_night %>-<%= $condition->{id} %>" FIXMEstyle="font-size: 3rem"></i>
-                        <span FIXMEstyle="font-weight: bold"><%= ucfirst($condition->{description}) %></span>
+                        <div>
+                            %# https://erikflowers.github.io/weather-icons/api-list.html
+                            <i class="wi wi-owm-<%= $day_or_night %>-<%= $condition->{id} %>"></i> <%= ucfirst($condition->{description}) %>
+                        </div>
                     % }
                 </p>
             </div>
