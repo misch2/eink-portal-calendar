@@ -12,12 +12,7 @@ has 'defaults' => sub {
     my $self = shift;
     return {
         wakeup_schedule          => '0 * * * *',                                     # every hour
-        min_voltage              => 3.6,    # FIXME remove
-        max_voltage              => 6.0,    # FIXME remove
-        alert_voltage            => 4.0,    # FIXME remove
-        voltage_divider_ratio    => 2.0,    # FIXME remove
         timezone                 => 'UTC',
-        broken_glass             => 0,
         web_calendar1            => 0,
         web_calendar2            => 0,
         web_calendar3            => 0,
@@ -52,7 +47,6 @@ has boolean_parameters => sub {
     return [
         qw/
             totally_random_icon
-            broken_glass
             web_calendar1
             web_calendar2
             web_calendar3

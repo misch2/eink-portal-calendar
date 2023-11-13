@@ -617,8 +617,7 @@ sub generate_bitmap {
 }
 
 sub update_mqtt {
-    my $self = shift;
-
+    my $self  = shift;
     my $key   = shift;
     my $value = shift;
 
@@ -640,14 +639,6 @@ sub update_mqtt {
             state_class         => 'measurement',
             unit_of_measurement => 'ADC_raw_units',
             icon                => 'mdi:battery',
-        },
-        alert_voltage => {
-            component           => 'sensor',
-            entity_category     => "diagnostic",
-            device_class        => "voltage",             # see https://www.home-assistant.io/integrations/sensor/#device-class
-            state_class         => 'measurement',
-            unit_of_measurement => 'V',
-            icon                => 'mdi:battery-alert',
         },
         min_voltage => {
             component           => 'sensor',
@@ -693,6 +684,19 @@ sub update_mqtt {
 
     my $ha_detail = $ha_details{$key};
     $api->publish_retained($key, $value, $ha_detail);
+
+    return;
+}
+
+# Force grafana to store updated values, or to accept the fact that the value has changed.
+sub update_mqtt_with_forced_jitter {
+    my $self   = shift;
+    my $key    = shift;
+    my $value  = shift;
+    my $jitter = shift // 0.001;
+
+    $self->update_mqtt($key, $value + $jitter);
+    $self->update_mqtt($key, $value);
 
     return;
 }

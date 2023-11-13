@@ -282,3 +282,6 @@ CREATE TABLE cache (
 );
 CREATE UNIQUE INDEX cache_creator_key ON cache (creator, key);
 CREATE INDEX cache_expires_at ON cache (expires_at, creator);
+
+-- 17 up
+DELETE FROM config WHERE name IN ('broken glass', 'min_voltage', 'max_voltage', 'alert_voltage', 'voltage_divider_ratio');

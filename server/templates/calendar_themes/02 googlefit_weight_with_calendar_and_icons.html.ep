@@ -84,9 +84,6 @@ function drawBasic() {
 </script>
 
 <body>
-    %if ($app->get_config('broken_glass')) {
-        <div id="overlay-image"></div>
-    %}
     <div id="spacer">
         <div class="top-month-header">
             %# LLLL = standalone month name
