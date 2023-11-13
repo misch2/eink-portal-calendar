@@ -140,6 +140,8 @@ void loadConfigFromWeb() {
   String path = "/config?mac=" + WiFi.macAddress()                                //
                 + "&adc=" + String(voltage_adc_raw)                               //
                 + "&v=" + String(voltage_real)                                    //
+                + "&vmin=" + String(VOLTAGE_MIN)                                  //
+                + "&vmax=" + String(VOLTAGE_MAX)                                  //
                 + "&w=" + String(DISPLAY_WIDTH) + "&h=" + String(DISPLAY_HEIGHT)  //
                 + "&c=" + String(defined_color_type)                              //
                 + "&fw=" + String(FIRMWARE_VERSION);                              //
