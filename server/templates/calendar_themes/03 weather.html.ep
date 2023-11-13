@@ -38,37 +38,11 @@
             % my $day_or_night = $sunrise->sunrise_sunset_span($dt)->contains($dt) ? 'day' : 'night';
             % my $class_rain_or_snow = $total_precip >= $precipitation_limit ? 'weather-is-rain-or-snow' : '';
 
-            <div style="position: absolute; top: 25; left: 0; margin: auto; width: 100%; text-align: center; font-size: 5rem" class="<%= $class_rain_or_snow %>">
-                <!-- <i class="wi wi-thermometer-exterior" style="font-size: 1rem; margin-top: 0.4rem"></i> -->
-                <p>
-                    <%= $temp %>
-                    %# % if (abs($temp - $feel_temp) > 1) {
-                    %#     (<%= $feel_temp %>)
-                    %# % }
-                    °C
-                </p>
+            <div style="position: absolute; top: 0.25em; left: 0; margin: auto; width: 100%; text-align: center; font-size: 5rem" class="<%= $class_rain_or_snow %>">
+                <%= $temp %> °C
             </div>
 
-            <div style="position: absolute; top: 10; left: 0; margin: auto; width: 100%; text-align: right">
-                <i class="wi wi-strong-wind" style="font-size: 1rem; margin-top: 0.2rem"></i> <%= $wind %> m/s
-            </div>
-
-            <div style="position: absolute; top: 170; left: 0; margin: auto; text-align: left">
-                <i class="wi wi-cloud" style="font-size: 1rem; margin-top: 0.15rem"></i> <%= $current_weather->{clouds}->{all} %> %
-            </div>
-
-            % if ($total_precip > 0) {
-                <div style="position: absolute; top: 170; left: 0; margin: auto; width: 100%; text-align: right" class="<%= $class_rain_or_snow %>">
-                    % if ($rain > 0) {
-                        <i class="wi wi-rain" style="font-size: 1rem"></i> <%= $rain %> mm
-                    % }
-                    % if ($snow > 0) {
-                        <i class="wi wi-snow" style="font-size: 1rem"></i> <%= $snow %> mm
-                    % }
-                </div>
-            % }
-
-            <div style="position: absolute; top: 10; left: 0; margin: auto; text-align: left">
+            <div style="position: absolute; top: 0.5rem; left: 0; text-align: left">
                 <p>
                     %# debug:
                     %# foreach my $condition ({id => 500, description => 'Slabý déšť'}, { id => 701, description => 'Mlha'}, { id => 616, description => 'Zataženo se sněžením'}) {
@@ -80,6 +54,23 @@
                     % }
                 </p>
             </div>
+            <div style="position: absolute; top: 0.5rem; right: 0; text-align: right">
+                <i class="wi wi-strong-wind" style="font-size: 1rem; margin-top: 0.2rem"></i> <%= $wind %> m/s
+            </div>
+
+            <div style="position: absolute; bottom: 0; left: 0; text-align: left">
+                <i class="wi wi-cloud" style="font-size: 1rem; margin-top: 0.15rem"></i> <%= $current_weather->{clouds}->{all} %> %
+            </div>
+            % if ($total_precip > 0) {
+                <div style="position: absolute; bottom: 0; right: 0; text-align: right" class="<%= $class_rain_or_snow %>">
+                    % if ($rain > 0) {
+                        <i class="wi wi-rain" style="font-size: 1rem"></i> <%= $rain %> mm
+                    % }
+                    % if ($snow > 0) {
+                        <i class="wi wi-snow" style="font-size: 1rem"></i> <%= $snow %> mm
+                    % }
+                </div>
+            % }
         </div>
 
         <div class="date-row top-date-row">
@@ -91,10 +82,10 @@
             </div>
         </div>
 
-        <div class="horizontal-separator" style="top: 45"></div>
+        <div class="horizontal-separator" style="top: 2rem"></div>
 
-        <div class="horizontal-separator" style="top: 260"></div>
-        <div class="weather-forecast-container-grid" style="top: 270">
+        <div class="horizontal-separator" style="top: 11.5rem"></div>
+        <div class="weather-forecast-container-grid" style="top: 11.9rem">
 
         %# See https://openweathermap.org/forecast5#fields_JSON
         % my $cnt = 0;

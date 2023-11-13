@@ -4,7 +4,6 @@ html,
 body {
     /* background-color: aqua; */
     font-size: 17pt;
-    font-family: 'Times New Roman', Times, serif;
 }
 
 html,
@@ -93,11 +92,6 @@ div.top-date-row {
     left: 0;
 }
 
-div.bottom-date-row {
-    top: 225;
-    left: 0;
-}
-
 div.horizontal-separator {
     position: absolute;
     width: 100%;
@@ -106,30 +100,12 @@ div.horizontal-separator {
     border-bottom: 2px solid var(--epd-black);
 }
 
-div.day-number-big {
-    position: absolute;
-    width: 100%;
-    top: 20;
-    left: 0;
-    font-size: 6rem;
-    text-align: center;
-}
-
 div.weather-current-big {
     position: absolute;
     width: 100%;
-    top: 50;
+    top: 2.15rem;
     left: 0;
-}
-
-div.name-day-name {
-    position: absolute;
-    width: 100%;
-    top: 170;
-    left: 0;
-
-    font-size: 1.5rem;
-    text-align: center;
+    height: 8.8rem;
 }
 
 div.weather-forecast-container-grid {
@@ -178,16 +154,15 @@ div.weather-item.weather-is-rain-or-snow {
 div#bottom-signature {
     position: absolute;
     width: 100%;
-    top: 760;
+    bottom: 0;
     left: 0;
     font-size: 0.7rem;
 }
 
 div#battery-status {
     position: absolute;
-    width: 100%;
+    bottom: -0.1em;
+    right: 0;
     text-align: right;
-    top: 755;
-    left: 0;
     font-size: 1.3rem;
 }
