@@ -88,18 +88,7 @@
         </div>
 
         <div id="battery-status">
-            % my $pct = $display->battery_percent();
-            % if ($pct >= 90) {
-                <iconify-icon icon="material-symbols:battery-20-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
-            % } elsif ($pct >= 70) {
-                <iconify-icon icon="material-symbols:battery-6-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
-            % } elsif ($pct >= 40) {
-                <iconify-icon icon="material-symbols:battery-4-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
-            % } elsif ($pct >= 10) {
-                <iconify-icon icon="material-symbols:battery-2-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
-            % } else {
-                <iconify-icon icon="material-symbols:battery-0-bar-sharp" rotate="90deg" class="battery-icon"></iconify-icon>
-            % }
+            %= include 'calendar_themes/includes/battery_status_icon', display => $display
         </div>
     </div>
 </body>
