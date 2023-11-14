@@ -53,7 +53,7 @@
             % if ($d->missed_connects > 0) {
                 <span class="badge bg-danger">frozen since 
                     <%= $d->last_visit->set_time_zone('local')->format_cldr('dd.MM.YYYY HH:mm') %> 
-                    (<%= DateTime->now()->subtract_datetime($d->last_visit)->in_units('hours') %> hours)
+                    (<%= int((DateTime->now()->epoch - $d->last_visit->epoch) / (60 * 60) + 0.5) %> hours)
                 </span>
             % } else {
                 <span class="badge bg-success">OK</span>
