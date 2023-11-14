@@ -3,6 +3,7 @@ package PortalCalendar::Controller::Data;
 use Mojo::Base 'PortalCalendar::Controller';
 
 use DateTime;
+use DateTime::Format::ISO8601;
 
 has mac => sub {
     my $self = shift;
@@ -51,13 +52,14 @@ sub config {
         );
     }
 
-    $self->set_config('_last_visit', DateTime->now()->iso8601);    # UTC
+    $self->set_config('_last_visit', DateTime::Format::ISO8601->format_datetime(DateTime->now(time_zone => 'UTC')));
     $display->set_missed_connects(0);
 
-    $self->set_config('_last_voltage_raw', $self->req->param('adc') // $self->req->param('voltage_raw') // '');    # value has NOT NULL restriction
-    $self->set_config('_last_voltage',     $self->req->param('v'));
-    $self->set_config('_min_voltage',      $self->req->param('vmin'));
-    $self->set_config('_max_voltage',      $self->req->param('vmax'));
+    # config values have a NOT NULL restriction
+    $self->set_config('_last_voltage_raw', $self->req->param('adc')  // $self->req->param('voltage_raw') // '');
+    $self->set_config('_last_voltage',     $self->req->param('v')    // '');
+    $self->set_config('_min_voltage',      $self->req->param('vmin') // '');
+    $self->set_config('_max_voltage',      $self->req->param('vmax') // '');
 
     my $util = PortalCalendar::Util->new(app => $self, display => $display);
     my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
