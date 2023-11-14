@@ -51,7 +51,10 @@
         </td>
         <td>
             % if ($d->missed_connects > 0) {
-                <span class="badge bg-danger">frozen since <%= $d->last_visit->set_time_zone('local')->format_cldr('d. MMMM H:mm') %></span>
+                <span class="badge bg-danger">frozen since 
+                    <%= $d->last_visit->set_time_zone('local')->format_cldr('dd.MM.YYYY HH:mm') %> 
+                    (<%= DateTime->now()->subtract_datetime($d->last_visit)->in_units('hours') %> hours)
+                </span>
             % } else {
                 <span class="badge bg-success">OK</span>
             % }
