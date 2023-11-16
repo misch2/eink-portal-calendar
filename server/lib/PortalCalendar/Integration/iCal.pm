@@ -86,7 +86,8 @@ sub get_events_between {
     my $start = shift;
     my $end   = shift;
 
-    my $all_events = $self->get_events_only($start, $end);
+    # All-day events are not filterable here using iCal::Parser if the $start time is not 00:00:00. So we need to filter them manually later in the loop.
+    my $all_events = $self->get_events_only($start->clone->truncate(to => 'day'), $end);
 
     my @ret = ();
     foreach my $year (keys %{$all_events}) {
@@ -94,8 +95,7 @@ sub get_events_between {
             foreach my $day (keys %{ $all_events->{$year}->{$month} }) {
                 my @events = values %{ $all_events->{$year}->{$month}->{$day} };
 
-                # warn "$year-$month-$day: " . scalar(@events) . " events\n";
-                # @events = grep { $_->{DTSTART} > $date || $_->{allday} } @events;
+                @events = grep { $_->{DTSTART} > $start || $_->{allday} } @events;
                 map { $_->{SUMMARY} =~ s/\\,/,/g } @events;    # fix "AA\,BB" situation
 
                 push @ret, @events;
