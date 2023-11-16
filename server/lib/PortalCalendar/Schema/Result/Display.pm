@@ -240,6 +240,7 @@ sub set_config {
 sub voltage {
     my $self    = shift;
     my $voltage = $self->get_config('_last_voltage');
+    return undef if $voltage eq '';
     return sprintf("%.3f", $voltage);
 }
 

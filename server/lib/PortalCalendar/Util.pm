@@ -228,16 +228,22 @@ sub html_for_date {
 
         my $calendar = PortalCalendar::Integration::iCal->new(app => $self->app, display => $self->display, ics_url => $url);
         try {
-            push @today_events, $calendar->get_events_for($dt);
-
-            push @nearest_events, @today_events;
-            push @nearest_events, $calendar->get_events_after($dt);
+            push @today_events,   $calendar->get_events_between($dt->clone()->truncate(to => 'hour'), $dt->clone()->truncate(to => 'day')->add(days   => 1)->subtract(seconds => 1));
+            push @nearest_events, $calendar->get_events_between($dt->clone()->truncate(to => 'day'),  $dt->clone()->truncate(to => 'day')->add(months => 12));
         } catch {
             warn "Error: $_";
         };
     }
     @today_events   = sort { $a->{DTSTART} cmp $b->{DTSTART} } @today_events;
     @nearest_events = sort { $a->{DTSTART} cmp $b->{DTSTART} } @nearest_events;
+
+    my %nearest_events_grouped = ();
+    foreach my $event (@nearest_events) {
+        my $dt   = $event->{DTSTART};
+        my $date = $dt->ymd('-');
+        $nearest_events_grouped{$date} ||= [];
+        push @{ $nearest_events_grouped{$date} }, $event;
+    }
 
     my $has_calendar_entries = (scalar @today_events ? 1 : 0);
 
@@ -342,11 +348,12 @@ sub html_for_date {
         colors   => $self->display->css_color_map($args->{preview_colors}),
 
         # other variables
-        date                 => $dt,
-        icons                => \@icons,
-        today_events         => \@today_events,
-        nearest_events       => \@nearest_events,
-        has_calendar_entries => $has_calendar_entries,
+        date                   => $dt,
+        icons                  => \@icons,
+        today_events           => \@today_events,
+        nearest_events         => \@nearest_events,
+        nearest_events_grouped => \%nearest_events_grouped,
+        has_calendar_entries   => $has_calendar_entries,
 
         # name day:
         name_day_details => $svatky_api->get_today_details,
