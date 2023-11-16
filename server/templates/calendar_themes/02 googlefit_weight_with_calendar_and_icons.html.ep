@@ -117,11 +117,13 @@ function drawBasic() {
             </div>
         </div>
 
-        <div class="icons-container">
-            % foreach my $icon (@{ $icons }) {
-                <img src="/images/portal_icons/<%= $icon->{name} %>.png" class="icon<%= $icon->{grayed} ? ' grayed' : '' %>">
-            % }
-        </div>
+        % if (scalar @{ $icons }) {
+            <div class="icons-container">
+                % foreach my $icon (@{ $icons }) {
+                    <img src="/images/portal_icons/<%= $icon->{name} %>.png" class="icon<%= $icon->{grayed} ? ' grayed' : '' %>">
+                % }
+            </div>
+        % }
 
         % if ($has_calendar_entries) {
             <div class="calendar-container">
