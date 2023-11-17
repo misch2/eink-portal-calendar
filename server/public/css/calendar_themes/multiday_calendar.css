@@ -90,8 +90,7 @@ div.calendar-container {
     overflow: hidden;
 }
 
-div.calendar-nearest-events,
-div.calendar-later-events {
+div.calendar-event-block-title {
     font-weight: bold;
     margin-top: 0.5rem;
     padding: 0.2rem 0.5rem;
@@ -100,8 +99,13 @@ div.calendar-later-events {
     color: var(--epd-white);
 }
 
-div.calendar-later-events {
-    margin-top: 1rem;
+div.calendar-event-block-title-today {
+    background-color: var(--epd-red);
+    color: var(--epd-white);
+}
+
+div.calendar-event-block-content-today {
+    color: var(--epd-red);
 }
 
 div.calendar-day-title {
