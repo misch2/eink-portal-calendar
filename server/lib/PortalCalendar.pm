@@ -92,15 +92,17 @@ sub setup_plugins {
     );
     $app->plugin(
         'Cron' => {
-
-            # every 15 minutes
-            '*/15 * * * *' => sub {
-                $app->minion->enqueue('generate_image', []);
+            sched1 => {
+                crontab => '*/15 * * * *',    # every 15 minutes
+                code    => sub {
+                    $app->minion->enqueue('generate_image', []);
+                },
             },
-
-            # every 5 minutes
-            '*/5 * * * *' => sub {
-                $app->minion->enqueue('check_missed_connects', []);
+            sched2 => {
+                crontab => '*/5 * * * *',
+                code    => sub {              # every 5 minutes
+                    $app->minion->enqueue('check_missed_connects', []);
+                },
             },
         }
     );
