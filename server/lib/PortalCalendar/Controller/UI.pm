@@ -74,6 +74,7 @@ sub config_ui_show {
         values   => $values,
 
         template_names => [ map { s/\.html\.ep$//; $_ } @template_files ],
+        current_theme  => $self->display->get_config('theme'),
 
         last_voltage     => $self->display->voltage,
         last_voltage_raw => $self->get_config('_last_voltage_raw'),
@@ -92,7 +93,7 @@ sub config_ui_save {
     # Generic config parameters
     foreach my $name (@{ $self->config_obj->parameters }) {
         my $value = $self->req->param($name);
-        $self->set_config($name, $value);
+        $self->set_config($name, $value // '');
     }
 
     # Parameters stored in the 'displays' table

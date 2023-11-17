@@ -24,6 +24,7 @@ has 'defaults' => sub {
         max_random_icons         => 10,
         max_icons_with_calendar  => 5,
         theme                    => 'portal_with_icons',
+        googlefit                => 0,
         openweather              => 0,
         openweather_api_key      => '',
         openweather_lang         => 'en',
@@ -51,8 +52,20 @@ has boolean_parameters => sub {
             web_calendar2
             web_calendar3
             mqtt
+            googlefit
             openweather
             ota_mode
+            /
+    ];
+};
+
+has theme_dependent_parameters => sub {
+    return [
+        qw/
+            totally_random_icon
+            min_random_icons
+            max_random_icons
+            max_icons_with_calendar
             /
     ];
 };

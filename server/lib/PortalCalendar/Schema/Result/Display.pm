@@ -380,9 +380,9 @@ sub next_wakeup_time {
     # Fixed here by accepting a small (~5 minutes) time difference:
     my $diff_seconds = $next_time->epoch - $now->epoch;
     if ($diff_seconds <= 5 * ONE_MINUTE) {
-        warn "wakeup time ($next_time) too close to now ($now), moving to next event";
+        # warn "wakeup time ($next_time) too close to now ($now), moving to next event";
         $next_time = $self->_next_wakeup_time_for_datetime($schedule, $next_time->clone->add(seconds => 1));
-        warn " -> updated next: $next_time";
+        # warn " -> updated next: $next_time";
     }
 
     my $sleep_in_seconds = $next_time->epoch - $now->epoch;
