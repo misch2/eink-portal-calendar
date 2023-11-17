@@ -24,7 +24,7 @@ sub enqueue_task_only_once {
     if (my $total = $app->minion->jobs({ states => ['inactive'], tasks => [$name] })->total) {
         $app->log->warn("Task '$name' already enqueued, skipping it");
     } else {
-        $app->log->info("Enqueuing task '$name'");
+        $app->log->info("Enqueueing task '$name'");
         $new_id = $app->minion->enqueue($name, []);
     }
     return $new_id;
