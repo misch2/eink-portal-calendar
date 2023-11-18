@@ -90,6 +90,14 @@ div.calendar-container {
     overflow: hidden;
 }
 
+div.calendar-event-block {
+    margin-top: 1rem;
+}
+
+div.calendar-event-block-today {
+    color: var(--epd-red);
+}
+
 div.calendar-event-block-title {
     font-weight: bold;
     margin-top: 0.5rem;
@@ -99,27 +107,24 @@ div.calendar-event-block-title {
     color: var(--epd-white);
 }
 
-div.calendar-event-block-title-today {
+div.calendar-event-block-today div.calendar-event-block-title {
     background-color: var(--epd-red);
     color: var(--epd-white);
 }
 
-div.calendar-event-block-content-today {
-    color: var(--epd-red);
-}
+div.calendar-event-block-content {}
 
 div.calendar-day-title {
     font-weight: bold;
-    padding-top: 0.5rem;
-    padding-bottom: 0.25rem;
-}
-
-div.calendar-nearest-events+div.calendar-day-title,
-div.calendar-later-events+div.calendar-day-title {
-    padding-top: 0.25rem;
+    margin-top: 0.5rem;
 }
 
 div.calendar-event {}
+
+div.calendar-event-block-title+div.calendar-event-block-content>div.calendar-day-title,
+div.calendar-event-block-title+div.calendar-event-block-content>div.calendar-event {
+    padding-top: 0.5rem;
+}
 
 div#bottom-row {
     position: absolute;

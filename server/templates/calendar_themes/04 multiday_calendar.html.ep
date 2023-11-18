@@ -2,13 +2,7 @@
 %# see https://icon-sets.iconify.design/material-symbols
 %= javascript 'https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js'
 %= stylesheet '/css/calendar_themes/multiday_calendar.css'
-
-<style type="text/css">
-:root {
-    --epd-black:  <%= $colors->{epd_black} %>;
-    --epd-white:  <%= $colors->{epd_white} %>;
-}
-</style>
+%= include 'calendar_themes/includes/epd_colors', colors => $colors
 
 <body>
 <div id="visible-area">
@@ -23,68 +17,83 @@
         </div>
     </div>
 
-    <div class="calendar-container">
-    % my $cnt = 0;
-    % my $last_title = '';
-    % my %block_header_printed = ();
-    % foreach my $event (@{ $nearest_events }) {
-        % $cnt++;
-        % last if $cnt > 50;
-        % my $dt = $event->{DTSTART};
-        % my $day_description = $dt->day_name;
-        %# if ($dt->ymd eq $now->ymd) {
-        %#    $day_description = 'dnes';
-        %# } elsif ($dt->ymd eq $now->clone->add(days => 1)->ymd) {
-        %#    $day_description = 'zítra';
-        %# } elsif ($dt->ymd eq $now->clone->add(days => 2)->ymd) {
-        %#    $day_description = 'pozítří';
-        %# }
-        % my $now = DateTime->now->truncate(to => 'day');
-        % my $delta_days = $dt->delta_days($now)->in_units('days');
+    <h3 id="calendar-title" style="text-align: center; font-size: 1.2rem; margin-top: 1.1rem; margin-bottom: 0.4rem">
+       Rodinný kalendář
+    </h3>
 
-        % my $title = $day_description . ', ' . $event->{DTSTART}->format_cldr('d. M. y');
+    % my $now = DateTime->now->truncate(to => 'day');
+    <div class="calendar-container">
+        % my $cnt = 0;
+        % my $last_title = '';
         % foreach my $block ('today', 'week', 'rest') {
-            % if ($block eq 'today') {
-                % next unless $delta_days == 0;
-                % unless ($block_header_printed{$block}) {
-                    % $block_header_printed{$block} = 1;
-                    <div class="calendar-event-block-title calendar-event-block-title-today">Dnes</div>
+            % my @events_for_block = ();
+            % foreach my $event (@{ $nearest_events }) {
+                % my $dt = $event->{DTSTART};
+                % my $delta_days = $dt->delta_days($now)->in_units('days');
+
+                % if ($block eq 'today') {
+                    % next unless $delta_days == 0;
+                % } elsif ($block eq 'week') {
+                    % next unless $delta_days > 0 && $delta_days <= 7;
+                % } else {
+                    % next unless $delta_days > 7;
                 % }
-            % } elsif ($block eq 'week') {
-                % next unless $delta_days > 0 && $delta_days <= 7;
-                % unless ($block_header_printed{$block}) {
-                    % $block_header_printed{$block} = 1;
-                    <div class="calendar-event-block-title calendar-event-block-title-week">Nejbližších 7 dní</div>
-                % }
-            % } else {
-                % next unless $delta_days > 7;
-                % unless ($block_header_printed{$block}) {
-                    % $block_header_printed{$block} = 1;
-                    <div class="calendar-event-block-title calendar-event-block-title-rest">Pozdější události</div>
-                % }
+
+                % push @events_for_block, $event;
             % }
 
-            <div class="calendar-event-block-content-<%= $block %>">
-                % $title .= ' (+' . $delta_days .  ')' if $delta_days > 0;
-                % if ($title ne $last_title) {
-                    % $last_title = $title;
-                    <div class="calendar-day-title">
-                        <%= $title %>
+            % if ($block eq 'today') {
+                <div class="calendar-event-block calendar-event-block-today">
+                    <div class="calendar-event-block-title">Dnes</div>
+            % } elsif ($block eq 'week') {
+                <div class="calendar-event-block calendar-event-block-week">
+                    <div class="calendar-event-block-title">Nejbližších 7 dní</div>
+            % } else {
+                <div class="calendar-event-block calendar-event-block-rest">
+                    <div class="calendar-event-block-title">Pozdější události</div>
+            % }
+
+            <div class="calendar-event-block-content">
+                % if (@events_for_block) {
+                    % foreach my $event (@events_for_block) {
+                        % my $dt = $event->{DTSTART};
+                        % my $delta_days = $dt->delta_days($now)->in_units('days');
+                        % my $day_description = $dt->day_name;
+                        %# if ($dt->ymd eq $now->ymd) {
+                        %#    $day_description = 'dnes';
+                        %# } elsif ($dt->ymd eq $now->clone->add(days => 1)->ymd) {
+                        %#    $day_description = 'zítra';
+                        %# } elsif ($dt->ymd eq $now->clone->add(days => 2)->ymd) {
+                        %#    $day_description = 'pozítří';
+                        %# }
+                        % my $title = $day_description . ', ' . $dt->format_cldr('d. M. y');
+
+                        % $title .= ' (+' . $delta_days .  ')' if $delta_days > 0;
+                        % if ($title ne $last_title) {
+                            % $last_title = $title;
+                            <div class="calendar-day-title">
+                                <%= $title %>
+                            </div>
+                        % }
+                        <div class="calendar-event">
+                            % if ($event->{allday}) {
+                                <%= $event->{SUMMARY} %>
+                                <!-- (celý den) -->
+                            % } else {
+                                <%= $dt->format_cldr('H:mm') %>
+                                <%= $event->{SUMMARY} %>
+                                (~<%= int($event->{hours} + 0.5) %> hod.)
+                            % }
+                        </div>
+                    % }
+                % } else {
+                    <div class="calendar-event">
+                        (žádné události)
                     </div>
                 % }
-                <div class="calendar-event">
-                    % if ($event->{allday}) {
-                        <%= $event->{SUMMARY} %>
-                        <!-- (celý den) -->
-                    % } else {
-                        <%= $event->{DTSTART}->format_cldr('H:mm') %>
-                        <%= $event->{SUMMARY} %>
-                        (~<%= int($event->{hours} + 0.5) %> hod.)
-                    % }
-                </div>
-            </div>
+            </div>  <!-- class="calendar-event-block-content" -->
+            </div>  <!-- class="calendar-event-block-..." -->
         % }
-    % }
     </div>
 
     <div id="bottom-row">

@@ -3,15 +3,7 @@
 %= javascript 'https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js'
 %= stylesheet '/css/calendar_themes/weather.css'
 %= stylesheet '/css/weather-icons.min.css'
-
-<style type="text/css">
-:root {
-    --epd-black:  <%= $colors->{epd_black} %>;
-    --epd-white:  <%= $colors->{epd_white} %>;
-    --epd-red:    <%= $colors->{epd_red} %>;
-    --epd-yellow: <%= $colors->{epd_yellow} %>;
-}
-</style>
+%= include 'calendar_themes/includes/epd_colors', colors => $colors
 
 % my $decorator = sub { shift };        # returns input as-is
 % $decorator = sub { uc(shift) };       # UPPERCASE
