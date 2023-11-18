@@ -8,6 +8,14 @@
 
 [<img height="100" src="screenshots/googlefit_weight.png"> <img height="100" src="screenshots/weather_raining.png"> <img height="100" src="screenshots/weather_mixed.png"> <img height="100" src="screenshots/compare_source_and_output2.png"> <img height="100" src="screenshots/config_epaper.png"> <img height="100" src="screenshots/displays_overview.png"> <img height="100" src="screenshots/compare_source_and_output.png">](screenshots/README.md)
 
+## ⚠️ Important notice!
+
+If you are interested in building this, please **consider using the [ZivyObraz](https://zivyobraz.eu/) service instead**. 
+It's very reasonably priced (and first year free, IIRC), comes with a precompiled firmware for LaskaKit board and it is incredibly easy to use and set up.
+
+Getting a copy of my project to work requires some non-trivial knowledge and I would only recommend it to people who like experimenting and who are willing to take this project as an inspiration for their own work. 
+I *can't guarantee* that any of READMEs is up to date and that there are not hidden obstacles in getting the client or server part running. This repository contains almost all the source files for my calendars, but there are configuration files specific for my environment (e.g. WiFi password, server IP addresses etc.) and while I tried to put an equivalent of these filed to the "examples" folder, I can't guarantee it's directly usable without any modifications.
+
 ## Summary
 
 Inspired by https://github.com/wuspy/portal_calendar. Hardware is mostly the same but the software is different.
