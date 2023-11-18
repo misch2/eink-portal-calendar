@@ -119,11 +119,12 @@ div.calendar-day-title {
     margin-top: 0.5rem;
 }
 
-div.calendar-event {}
+div.calendar-event {
+    padding-top: 0.25rem;
+}
 
-div.calendar-event-block-title+div.calendar-event-block-content>div.calendar-day-title,
-div.calendar-event-block-title+div.calendar-event-block-content>div.calendar-event {
-    padding-top: 0.5rem;
+div.calendar-event-block-title+div.calendar-event-block-content>div.calendar-day-title {
+    padding-top: 0.25rem;
 }
 
 div#bottom-row {

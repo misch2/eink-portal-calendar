@@ -42,30 +42,23 @@
                 % push @events_for_block, $event;
             % }
 
-            % if ($block eq 'today') {
+            % if (@events_for_block) {
+                % if ($block eq 'today') {
                 <div class="calendar-event-block calendar-event-block-today">
-                    <div class="calendar-event-block-title">Dnes</div>
-            % } elsif ($block eq 'week') {
+                <div class="calendar-event-block-title">Dnes</div>
+                % } elsif ($block eq 'week') {
                 <div class="calendar-event-block calendar-event-block-week">
-                    <div class="calendar-event-block-title">Nejbližších 7 dní</div>
-            % } else {
+                <div class="calendar-event-block-title">Nejbližších 7 dní</div>
+                % } else {
                 <div class="calendar-event-block calendar-event-block-rest">
-                    <div class="calendar-event-block-title">Pozdější události</div>
-            % }
+                <div class="calendar-event-block-title">Pozdější události</div>
+                % }
 
-            <div class="calendar-event-block-content">
-                % if (@events_for_block) {
+                <div class="calendar-event-block-content">
                     % foreach my $event (@events_for_block) {
                         % my $dt = $event->{DTSTART};
                         % my $delta_days = $dt->delta_days($now)->in_units('days');
                         % my $day_description = $dt->day_name;
-                        %# if ($dt->ymd eq $now->ymd) {
-                        %#    $day_description = 'dnes';
-                        %# } elsif ($dt->ymd eq $now->clone->add(days => 1)->ymd) {
-                        %#    $day_description = 'zítra';
-                        %# } elsif ($dt->ymd eq $now->clone->add(days => 2)->ymd) {
-                        %#    $day_description = 'pozítří';
-                        %# }
                         % my $title = $day_description . ', ' . $dt->format_cldr('d. M. y');
 
                         % $title .= ' (+' . $delta_days .  ')' if $delta_days > 0;
@@ -86,13 +79,9 @@
                             % }
                         </div>
                     % }
-                % } else {
-                    <div class="calendar-event">
-                        (žádné události)
-                    </div>
-                % }
-            </div>  <!-- class="calendar-event-block-content" -->
-            </div>  <!-- class="calendar-event-block-..." -->
+                </div>  <!-- class="calendar-event-block-content" -->
+                </div>  <!-- class="calendar-event-block-..." -->
+            % }
         % }
     </div>
 
