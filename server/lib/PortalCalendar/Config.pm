@@ -35,6 +35,7 @@ has 'defaults' => sub {
         mqtt_topic               => 'portal_calendar01',
         lat                      => '',
         lon                      => '',
+        alt                      => '',
         ota_mode                 => 0,
         googlefit_client_id      => '',
         googlefit_client_secret  => '',

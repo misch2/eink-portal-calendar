@@ -1,15 +1,14 @@
-package PortalCalendar::Integration::OpenWeather;
+package PortalCalendar::Integration::Weather::OpenWeather;
 
 use Mojo::Base qw/PortalCalendar::Integration/;
 
-use Mojo::Base -base;
 use Mojo::JSON qw(decode_json encode_json);
 use Mojo::URL;
 
-use PortalCalendar::DatabaseCache;
-
 use DDP;
 use Time::Seconds;
+
+use PortalCalendar::DatabaseCache;
 
 has 'api_key' => sub {
     my $self = shift;

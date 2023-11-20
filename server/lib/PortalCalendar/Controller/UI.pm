@@ -7,7 +7,8 @@ use Mojo::JSON qw(decode_json encode_json);
 use Try::Tiny;
 
 use PortalCalendar::Integration::iCal;
-use PortalCalendar::Integration::OpenWeather;
+use PortalCalendar::Integration::Weather::OpenWeather;
+use PortalCalendar::Integration::Weather::MetNo;
 use PortalCalendar::Integration::Google::Fit;
 
 has display => sub {
@@ -110,7 +111,8 @@ sub config_ui_save {
 
     $self->app->log->debug("Clearing database cache");
     PortalCalendar::Integration::iCal->new(app => $self->app)->clear_db_cache;
-    PortalCalendar::Integration::OpenWeather->new(app => $self->app)->clear_db_cache;
+    PortalCalendar::Integration::Weather::OpenWeather->new(app => $self->app)->clear_db_cache;
+    PortalCalendar::Integration::Weather::MetNo->new(app => $self->app)->clear_db_cache;
     PortalCalendar::Integration::Google::Fit->new(app => $self->app)->clear_db_cache;
 
     $self->app->enqueue_task_only_once('generate_image');

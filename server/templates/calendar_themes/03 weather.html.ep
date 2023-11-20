@@ -10,8 +10,6 @@
 %# $decorator = sub { ucfirst(shift) }; # Uppercase
 %# $decorator = sub { Text::Unidecode::unidecode(uc(shift)) }; # UPPERCASE with accents removed
 
-% use DateTime::Event::Sunrise;
-% my $sunrise = DateTime::Event::Sunrise->new(longitude => $app->get_config('lon'), latitude => $app->get_config('lat'));
 % my $now = DateTime->now;
 
 % my $precipitation_limit = 0.5; # mm
@@ -19,15 +17,12 @@
 <body>
     <div id="visible-area">
         <div class="weather-current-big">
-            % my $temp = int($current_weather->{main}->{temp} + 0.5);
-            % my $feel_temp = int($current_weather->{main}->{feels_like} + 0.5);
-            % my $wind = int($current_weather->{wind}->{speed} + 0.5);
-            % my $rain = $current_weather->{rain}->{'1h'};
-            % my $snow = $current_weather->{snow}->{'1h'};
-            % my $total_precip = $rain + $snow;
-            % my $dt = DateTime->from_epoch(epoch => $current_weather->{dt}, time_zone => 'UTC');
+            % my $temp = int($current_weather->{temperature_avg} + 0.5);
+            % my $wind = int($current_weather->{wind_speed_avg} + 0.5);
+            % my $total_precip = $current_weather->{precipitation_avg};
+            % my $dt = $current_weather->{time_start};
             
-            % my $day_or_night = $sunrise->sunrise_sunset_span($dt)->contains($dt) ? 'day' : 'night';
+            % my $day_or_night = $current_weather->{time_is_day} ? 'day' : 'night';
             % my $class_rain_or_snow = $total_precip >= $precipitation_limit ? 'weather-is-rain-or-snow' : '';
 
             <div style="position: absolute; top: 0.25em; left: 0; margin: auto; width: 100%; text-align: center; font-size: 5rem" class="<%= $class_rain_or_snow %>">
@@ -38,29 +33,32 @@
                 <p>
                     %# debug:
                     %# foreach my $condition ({id => 500, description => 'Slabý déšť'}, { id => 701, description => 'Mlha'}, { id => 616, description => 'Zataženo se sněžením'}) {
-                    % foreach my $condition (@{ $current_weather->{weather} }) {
+                    %# foreach my $condition (@{ $current_weather->{weather} }) {
                         <div>
                             %# https://erikflowers.github.io/weather-icons/api-list.html
-                            <i class="wi wi-owm-<%= $day_or_night %>-<%= $condition->{id} %>"></i> <%= ucfirst($condition->{description}) %>
+                            <i class="wi wi-owm-<%= $day_or_night %>-<%= $current_weather->{wi_symbol_codes}->[0] %>"></i> <%= ucfirst($current_weather->{descriptions}->[0]) %>
                         </div>
-                    % }
                 </p>
             </div>
             <div style="position: absolute; top: 0.5rem; right: 0; text-align: right">
                 <i class="wi wi-strong-wind" style="font-size: 1rem; margin-top: 0.2rem"></i> <%= $wind %> m/s
+                % my $wind_from = int($current_weather->{wind_from} / 45 + 0.5) % 8;    # 0 - 7, 0 = N, 1 = NE, ...
+                % my $wind_name_en = ('N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW')[$wind_from];
+                % my $wind_name_cz = ('S', 'SV', 'V', 'JV', 'J', 'JZ', 'Z', 'SZ')[$wind_from];
+                <br>
+                <%= $wind_name_cz %>
             </div>
 
             <div style="position: absolute; bottom: 0; left: 0; text-align: left">
-                <i class="wi wi-cloud" style="font-size: 1rem; margin-top: 0.15rem"></i> <%= $current_weather->{clouds}->{all} %> %
+                <i class="wi wi-cloud" style="font-size: 1rem; margin-top: 0.15rem"></i> <%= 5 * int($current_weather->{cloud_percent_avg}/5 + 0.5) %> %
+                % if ($current_weather->{fog_percent_avg} > 0) {
+                    <i class="wi wi-fog" style="font-size: 1rem; margin-top: 0.15rem"></i> <%= 5 * int($current_weather->{fog_percent_avg}/5 + 0.5) %> %
+                % }
             </div>
+
             % if ($total_precip > 0) {
                 <div style="position: absolute; bottom: 0; right: 0; text-align: right" class="<%= $class_rain_or_snow %>">
-                    % if ($rain > 0) {
-                        <i class="wi wi-rain" style="font-size: 1rem"></i> <%= $rain %> mm
-                    % }
-                    % if ($snow > 0) {
-                        <i class="wi wi-snow" style="font-size: 1rem"></i> <%= $snow %> mm
-                    % }
+                    <i class="wi wi-rain FIXME or snow?" style="font-size: 1rem"></i> <%= $total_precip %> mm
                 </div>
             % }
         </div>
@@ -81,17 +79,14 @@
 
         %# See https://openweathermap.org/forecast5#fields_JSON
         % my $cnt = 0;
-        % foreach my $item (@{ $forecast->{list} }) {
+        % foreach my $item (@{ $forecast }) {
             % $cnt++;
-            % last if $cnt > 6;
+            % last if $cnt > 6; # FIXME do it better, via flex wrap or so
 
-            % my $rain = 0+($item->{rain}->{'3h'} // 0); # mm in 3 hours
-            % my $snow = 0+($item->{snow}->{'3h'} // 0); # mm in 3 hours
-            % my $total_precip = $rain + $snow;
+            % my $total_precip = $item->{precipitation_max};    # FIXME?
+            % my $day_or_night = $item->{time_is_day} ? 'day' : 'night';
 
-            % my $dt = DateTime->from_epoch(epoch => $item->{dt}, time_zone => 'UTC');
-            % my $day_or_night = $sunrise->sunrise_sunset_span($dt)->contains($dt) ? 'day' : 'night';
-
+            % my $dt = $item->{time_start};
             % my $day_description = '';
             % if ($dt->ymd eq $now->ymd) {
             %    $day_description = 'dnes';
@@ -108,51 +103,56 @@
                     <%= sprintf("%02d:00", $dt->hour) %>
                 </div>
                 <div>
-                    % foreach my $condition (@{ $item->{weather} }) {
-                        <div style="font-weight: bold"><%= $condition->{description} %></div>
+                    % foreach my $description (@{ $item->{descriptions} }[0]) { # FIXME only the first one?
+                        <div style="font-weight: bold"><%= lc($description) %></div>
                     % }
                 </div>
                 <div>
-                    % foreach my $condition (@{ $item->{weather} }) {
+                    % foreach my $wi_symbol_code (@{ $item->{wi_symbol_codes} }[0]) { # FIXME only the first one?
                         %# https://erikflowers.github.io/weather-icons/api-list.html
-                        <i class="wi wi-owm-<%= $day_or_night %>-<%= $condition->{id} %>" style="font-size: 2rem; margin-top: 0.5rem; margin-left: 0.5rem"></i>
+                        <i class="wi wi-owm-<%= $day_or_night %>-<%= $wi_symbol_code %>" style="font-size: 2rem; margin-top: 0.5rem; margin-left: 0.5rem"></i>
                     % }
                 </div>
                 <div style="text-align: center">
                     <div>
-                        <%= sprintf('%.1f', $item->{main}->{temp_min}) %> &deg;C
+                        <%= sprintf('%.0f', int($item->{temperature_max} + 0.5)) %> &deg;C
                     </div>
                     <div style="line-height: 40%">
-                        - 
+                        &nbsp; <!-- - -->
                     </div>
                     <div>
-                        <%= sprintf('%.1f', $item->{main}->{temp_max}) %> &deg;C
+                        <%= sprintf('%.0f', int($item->{temperature_min} - 0.5)) %> &deg;C
                     </div>
                 </div>
                 <div style="text-align: center">
-                    % if ($rain > 0) {
+                    % if ($total_precip > 0) {
                         <div>
-                            <i class="wi wi-rain" style="font-size: 1rem"></i>
+                            % if (grep /rain/, @{ $item->{provider_symbol_codes} }) {    # FIXME ugly
+                                <i class="wi wi-rain" style="font-size: 1rem"></i>
+                            % }
+                            % if (grep /snow/, @{ $item->{provider_symbol_codes} }) {    # FIXME ugly
+                                <i class="wi wi-snow" style="font-size: 1rem"></i>
+                            % }
                         </div>
                         <div style="margin-top: 0.2rem">
-                            <%= sprintf('%.1f', $rain) %> mm
+                            <%= sprintf('%.1f', $total_precip) %> mm
                         </div>
                     % }
-                    % if ($snow > 0) {
-                        <div>
-                            <i class="wi wi-snow" style="font-size: 1rem"></i>
-                        </div>
-                        <div style="margin-top: 0.2rem">
-                            <%= sprintf('%.1f', $snow) %> mm
-                        </div>
-                    % }
+                    %# % if ($total_precip > 0) {
+                    %#     <div>
+                    %#         <i class="wi wi-snow" style="font-size: 1rem"></i>
+                    %#     </div>
+                    %#     <div style="margin-top: 0.2rem">
+                    %#         <%= sprintf('%.1f', $snow) %> mm
+                    %#     </div>
+                    %# % }
                 </div>
             </div>
         % }
         </div>
 
         <div id="bottom-signature">
-            % my $data_from = DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone($app->get_config('timezone'));
+            % my $data_from = $current_weather->{time_start}->clone()->set_time_zone($app->get_config('timezone'));
             % my $now = DateTime->now->set_time_zone($app->get_config('timezone'));
             % my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
 

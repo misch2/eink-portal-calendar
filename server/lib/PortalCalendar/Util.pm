@@ -20,7 +20,8 @@ use PortalCalendar::Config;
 use PortalCalendar::Minion;
 use PortalCalendar::Schema;
 use PortalCalendar::Integration::iCal;
-use PortalCalendar::Integration::OpenWeather;
+use PortalCalendar::Integration::Weather::OpenWeather;
+use PortalCalendar::Integration::Weather::MetNo;
 use PortalCalendar::Integration::MQTT;
 use PortalCalendar::Integration::Google::Fit;
 use PortalCalendar::Integration::SvatkyAPI;
@@ -289,46 +290,71 @@ sub html_for_date {
 
         my $icons_count = $min_icons_count + int(rand($max_icons_count - $min_icons_count + 1));
         @icons = @icons[ 0 .. $icons_count - 1 ];
-
     }
 
     my $current_weather;
     my $forecast;
-    my @forecast_5_days = ();
-    if ($self->app->get_config("openweather")) {
-        my $api = PortalCalendar::Integration::OpenWeather->new(app => $self->app, display => $self->display);
-        $current_weather = $api->fetch_current_from_web;
-        $forecast        = $api->fetch_forecast_from_web;
 
-        # p $forecast, as => 'forecast';
-        # p $current_weather, as => 'current_weather';
+    # # FIXME FIXME change to MetNo later
+    # if ($self->app->get_config("openweather")) {
+    #     my $api = PortalCalendar::Integration::Weather::OpenWeather->new(app => $self->app, display => $self->display);
+    #     $current_weather = $api->fetch_current_from_web;
+    #     $forecast        = $api->fetch_forecast_from_web;
 
-        foreach my $days_add (0 .. 4) {
-            my $dt = DateTime->now->truncate(to => 'day')->add(days => $days_add);
+    #     # p $forecast, as => 'forecast';
+    #     # p $current_weather, as => 'current_weather';
 
-            my %daily_details = ();
-            foreach my $hours_add (8, 12, 16) {
-                my $dt2         = $dt->clone->add(hours => $hours_add);
-                my $time_of_day = 'morning';
-                $time_of_day = 'noon'      if $hours_add == 12;
-                $time_of_day = 'afternoon' if $hours_add == 16;
+    #     foreach my $days_add (0 .. 4) {
+    #         my $dt = DateTime->now->truncate(to => 'day')->add(days => $days_add);
 
-                if (my $f = $self->find_nearest_forecast($forecast->{list}, $dt2)) {
-                    $daily_details{$time_of_day} = {
-                        required_dt => $dt2,
-                        forecast    => $f
-                    };
-                }
-            }
+    #         my %daily_details = ();
+    #         foreach my $hours_add (8, 12, 16) {
+    #             my $dt2         = $dt->clone->add(hours => $hours_add);
+    #             my $time_of_day = 'morning';
+    #             $time_of_day = 'noon'      if $hours_add == 12;
+    #             $time_of_day = 'afternoon' if $hours_add == 16;
 
-            push @forecast_5_days,
-                {
-                date    => $dt,
-                details => \%daily_details,
-                };
+    #             if (my $f = $self->find_nearest_forecast($forecast->{list}, $dt2)) {
+    #                 $daily_details{$time_of_day} = {
+    #                     required_dt => $dt2,
+    #                     forecast    => $f
+    #                 };
+    #             }
+    #         }
+
+    #         push @forecast_5_days,
+    #             {
+    #             date    => $dt,
+    #             details => \%daily_details,
+    #             };
+    #     }
+
+    #     # p @forecast_5_days;
+    # }
+
+    if ($self->app->get_config("lat") && $self->app->get_config("lon") && $self->app->get_config("alt")) {    # FIXME better check
+        my $api = PortalCalendar::Integration::Weather::MetNo->new(
+            app      => $self->app,
+            display  => $self->display,
+            lat      => $self->app->get_config("lat"),
+            lon      => $self->app->get_config("lon"),
+            altitude => $self->app->get_config("alt"),
+        );
+
+        my $dt_start = $dt->clone->truncate(to => 'hour');    # ->add(hours => 1);
+
+        my $detailed_forecast = $api->forecast;
+
+        #$current_weather = $api->current;
+        $current_weather = $api->aggregate($detailed_forecast, $dt_start, 1);
+        $dt_start->add(hours => 1);
+
+        my $aggregate_hours = 3;
+        $forecast = [];
+        for (1 .. 8) {
+            push @{$forecast}, $api->aggregate($detailed_forecast, $dt_start, $aggregate_hours);
+            $dt_start->add(hours => $aggregate_hours);
         }
-
-        # p @forecast_5_days;
     }
 
     my $weight_series;
@@ -338,6 +364,10 @@ sub html_for_date {
         $weight_series = $api->get_weight_series;
         $last_weight   = $api->get_last_known_weight;
     }
+
+    # use DDP;
+    #    p $current_weather, as => 'current_weather';
+    #p $forecast,        as => 'forecast';
 
     my $svatky_api = PortalCalendar::Integration::SvatkyAPI->new(app => $self->app, display => $self->display);
     return $self->app->render(
@@ -358,12 +388,8 @@ sub html_for_date {
         # name day:
         name_day_details => $svatky_api->get_today_details,
 
-        # raw weather values:
         current_weather => $current_weather,
         forecast        => $forecast,
-
-        # processed weather values:
-        forecast_5_days => \@forecast_5_days,
 
         # googlefit data:
         last_weight   => $last_weight,
@@ -372,55 +398,55 @@ sub html_for_date {
     );
 }
 
-# Finds a forecast with datetime nearest to the required one.
-# Returns nothing when there is no match.
-sub find_nearest_forecast {
-    my $self        = shift;
-    my $list        = shift;
-    my $dt_required = shift;
+# # Finds a forecast with datetime nearest to the required one.
+# # Returns nothing when there is no match.
+# sub find_nearest_forecast {
+#     my $self        = shift;
+#     my $list        = shift;
+#     my $dt_required = shift;
 
-    my $ret;
-    my $prev_weather;
-    my $dt_prev;
+#     my $ret;
+#     my $prev_weather;
+#     my $dt_prev;
 
-    # individual forecasts
-    foreach my $current_weather (@{$list}) {
-        my $dt_current = DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone($self->app->get_config('timezone'));
+#     # individual forecasts
+#     foreach my $current_weather (@{$list}) {
+#         my $dt_current = DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone($self->app->get_config('timezone'));
 
-        if (DateTime->compare($dt_current, $dt_required) == 0) {
+#         if (DateTime->compare($dt_current, $dt_required) == 0) {
 
-            # lucky guess, exact match
-            $ret = $current_weather;
-            last;
-        } elsif (DateTime->compare($dt_current, $dt_required) < 0) {
+#             # lucky guess, exact match
+#             $ret = $current_weather;
+#             last;
+#         } elsif (DateTime->compare($dt_current, $dt_required) < 0) {
 
-            # still searching
-            $prev_weather = $current_weather;
-            $dt_prev      = $dt_current->clone;
-            next;
-        } else {
+#             # still searching
+#             $prev_weather = $current_weather;
+#             $dt_prev      = $dt_current->clone;
+#             next;
+#         } else {
 
-            # what was closer?
-            if ($prev_weather) {
-                my $prev_diff = $dt_required->clone->subtract_datetime($dt_prev);
-                my $next_diff = $dt_current->clone->subtract_datetime($dt_required);
-                if (DateTime::Duration->compare($prev_diff, $next_diff) > 0) {
+#             # what was closer?
+#             if ($prev_weather) {
+#                 my $prev_diff = $dt_required->clone->subtract_datetime($dt_prev);
+#                 my $next_diff = $dt_current->clone->subtract_datetime($dt_required);
+#                 if (DateTime::Duration->compare($prev_diff, $next_diff) > 0) {
 
-                    # first interval is longer
-                    $ret = $current_weather;
-                    last;
-                } else {
+#                     # first interval is longer
+#                     $ret = $current_weather;
+#                     last;
+#                 } else {
 
-                    # 2nd interval is longer
-                    $ret = $prev_weather;
-                    last;
-                }
-            }
-        }
-    }
+#                     # 2nd interval is longer
+#                     $ret = $prev_weather;
+#                     last;
+#                 }
+#             }
+#         }
+#     }
 
-    return $ret;
-}
+#     return $ret;
+# }
 
 sub image_name {
     my $self = shift;
