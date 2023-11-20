@@ -349,7 +349,7 @@ sub html_for_date {
         $current_weather = $api->aggregate($detailed_forecast, $dt_start, 1);
         $dt_start->add(hours => 1);
 
-        my $aggregate_hours = 3;
+        my $aggregate_hours = 2;    # FIXME configurable
         $forecast = [];
         for (1 .. 8) {
             push @{$forecast}, $api->aggregate($detailed_forecast, $dt_start, $aggregate_hours);
