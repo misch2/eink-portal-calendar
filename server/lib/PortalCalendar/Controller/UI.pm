@@ -109,11 +109,11 @@ sub config_ui_save {
 
     $self->flash(message => "Parameters saved.");
 
-    $self->app->log->debug("Clearing database cache");
-    PortalCalendar::Integration::iCal->new(app => $self->app)->clear_db_cache;
-    PortalCalendar::Integration::Weather::OpenWeather->new(app => $self->app)->clear_db_cache;
-    PortalCalendar::Integration::Weather::MetNo->new(app => $self->app)->clear_db_cache;
-    PortalCalendar::Integration::Google::Fit->new(app => $self->app)->clear_db_cache;
+    # $self->app->log->debug("Clearing database cache");
+    # PortalCalendar::Integration::iCal->new(app => $self->app)->clear_db_cache;
+    # PortalCalendar::Integration::Weather::OpenWeather->new(app => $self->app)->clear_db_cache;
+    # PortalCalendar::Integration::Weather::MetNo->new(app => $self->app)->clear_db_cache;
+    # PortalCalendar::Integration::Google::Fit->new(app => $self->app)->clear_db_cache;
 
     $self->app->enqueue_task_only_once('generate_image');
     $self->redirect_to('/config_ui/' . $self->display->id);
