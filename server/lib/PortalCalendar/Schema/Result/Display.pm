@@ -274,12 +274,14 @@ sub last_visit {
     my $self = shift;
 
     my $last_visit = undef;
-    try {
-        $last_visit = DateTime::Format::ISO8601->parse_datetime($self->get_config('_last_visit'));
-        $last_visit->set_time_zone('UTC');
-    } catch {
-        warn "Error while parsing last_visit: $_";
-    };
+    if (my $raw = $self->get_config('_last_visit')) {
+        try {
+            $last_visit = DateTime::Format::ISO8601->parse_datetime($raw);
+            $last_visit->set_time_zone('UTC');
+        } catch {
+            warn "Error while parsing last_visit: $_";
+        };
+    }
     return $last_visit;
 }
 
@@ -380,8 +382,10 @@ sub next_wakeup_time {
     # Fixed here by accepting a small (~5 minutes) time difference:
     my $diff_seconds = $next_time->epoch - $now->epoch;
     if ($diff_seconds <= 5 * ONE_MINUTE) {
+
         # warn "wakeup time ($next_time) too close to now ($now), moving to next event";
         $next_time = $self->_next_wakeup_time_for_datetime($schedule, $next_time->clone->add(seconds => 1));
+
         # warn " -> updated next: $next_time";
     }
 

@@ -17,15 +17,13 @@ sub regenerate_image {
 
     $job->app->log->info("Regenerating calendar image");
 
-    # if (0) {
-    #     return $job->fail("error message");
-    # }
-
     my $converter = PortalCalendar::Web2Png->new(pageres_command => $job->app->home->child("node_modules/.bin/pageres"));
     foreach my $display ($job->app->schema->resultset('Display')->all_displays) {
         $job->app->log->info("Processing display #" . $display->id);
 
         $converter->convert_url($job->app->config->{url_start} . '/calendar/' . $display->id . '/html', $display->virtual_width, $display->virtual_height, $job->app->home->child("generated_images/current_calendar_" . $display->id . ".png"));
+
+        $job->app->minion->backend->register_worker;    # send heartbeat ping to minion supervisor
     }
     $job->app->log->info("Finished processing");
 
@@ -39,7 +37,7 @@ sub check_missed_connects {
 
     my $start = time;
 
-    $job->app->log->info("Checking missed connections (frozen or empty battery displays)");
+    $job->app->log->debug("Checking missed connections (frozen or empty battery displays)");
 
     my $now = DateTime->now(time_zone => 'UTC');    # the same timezone as _last_visit
 
@@ -54,7 +52,7 @@ sub check_missed_connects {
 
                     $last_visit->set_time_zone('local');
                     $next->set_time_zone('local');
-                    $job->app->log->warn("Display #" . $display->id . " is frozen for " . $diff_seconds . " seconds, last contact was at $last_visit, should have connected at $next");
+                    $job->app->log->warn("Display #" . $display->id . " is frozen for " . $diff_seconds . " seconds, last contact was at $last_visit, should have connected at $next") unless $display->missed_connects;
                     $display->set_missed_connects(1 + $display->missed_connects);
                 }
             }
