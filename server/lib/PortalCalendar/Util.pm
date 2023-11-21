@@ -221,10 +221,9 @@ sub html_for_date {
     my @today_events;
     my @nearest_events;
     foreach my $calendar_no (1 .. 3) {
-        next unless $self->app->get_config("web_calendar${calendar_no}");
+        next unless $self->display->get_config("web_calendar${calendar_no}");
 
-        my $url = $self->app->get_config("web_calendar_ics_url${calendar_no}");
-
+        my $url = $self->display->get_config("web_calendar_ics_url${calendar_no}");
         next unless $url;
 
         my $calendar = PortalCalendar::Integration::iCal->new(app => $self->app, display => $self->display, ics_url => $url);
@@ -237,6 +236,7 @@ sub html_for_date {
     }
     @today_events   = sort { $a->{DTSTART} cmp $b->{DTSTART} } @today_events;
     @nearest_events = sort { $a->{DTSTART} cmp $b->{DTSTART} } @nearest_events;
+    my $has_calendar_entries = (scalar @today_events ? 1 : 0);
 
     my %nearest_events_grouped = ();
     foreach my $event (@nearest_events) {
@@ -246,10 +246,8 @@ sub html_for_date {
         push @{ $nearest_events_grouped{$date} }, $event;
     }
 
-    my $has_calendar_entries = (scalar @today_events ? 1 : 0);
-
     my @icons;
-    if (!$self->app->get_config('totally_random_icon')) {
+    if (!$self->display->get_config('totally_random_icon')) {
 
         # true icon sets like wuspy has it
         my $set = $CHAMBER_ICONS_BY_DAY_NUMBER[ $dt->day - 1 ];
@@ -267,7 +265,7 @@ sub html_for_date {
         }
 
         if ($has_calendar_entries) {
-            pop @icons while (scalar @icons > $self->app->get_config('max_icons_with_calendar'));
+            pop @icons while (scalar @icons > $self->display->get_config('max_icons_with_calendar'));
         }
     } else {
 
@@ -284,8 +282,8 @@ sub html_for_date {
             push @icons, @icons;
         }
 
-        my $min_icons_count = $self->app->get_config('min_random_icons');
-        my $max_icons_count = $has_calendar_entries ? $self->app->get_config('max_icons_with_calendar') : $self->app->get_config('max_random_icons');
+        my $min_icons_count = $self->display->get_config('min_random_icons');
+        my $max_icons_count = $has_calendar_entries ? $self->display->get_config('max_icons_with_calendar') : $self->display->get_config('max_random_icons');
         $min_icons_count = $max_icons_count if $min_icons_count > $max_icons_count;
 
         my $icons_count = $min_icons_count + int(rand($max_icons_count - $min_icons_count + 1));
@@ -296,7 +294,7 @@ sub html_for_date {
     my $forecast;
 
     # # FIXME FIXME change to MetNo later
-    # if ($self->app->get_config("openweather")) {
+    # if ($self->display->get_config("openweather")) {
     #     my $api = PortalCalendar::Integration::Weather::OpenWeather->new(app => $self->app, display => $self->display);
     #     $current_weather = $api->fetch_current_from_web;
     #     $forecast        = $api->fetch_forecast_from_web;
@@ -332,13 +330,13 @@ sub html_for_date {
     #     # p @forecast_5_days;
     # }
 
-    if ($self->app->get_config("lat") && $self->app->get_config("lon") && $self->app->get_config("alt")) {    # FIXME better check
+    if ($self->display->get_config("lat") && $self->display->get_config("lon") && $self->display->get_config("alt")) {    # FIXME better check
         my $api = PortalCalendar::Integration::Weather::MetNo->new(
             app      => $self->app,
             display  => $self->display,
-            lat      => $self->app->get_config("lat"),
-            lon      => $self->app->get_config("lon"),
-            altitude => $self->app->get_config("alt"),
+            lat      => $self->display->get_config("lat"),
+            lon      => $self->display->get_config("lon"),
+            altitude => $self->display->get_config("alt"),
         );
 
         my $dt_start = $dt->clone->truncate(to => 'hour');    # ->add(hours => 1);
@@ -349,7 +347,7 @@ sub html_for_date {
         $current_weather = $api->aggregate($detailed_forecast, $dt_start, 1);
         $dt_start->add(hours => 1);
 
-        my $aggregate_hours = 2;    # FIXME configurable
+        my $aggregate_hours = 2;                              # FIXME configurable
         $forecast = [];
         for (1 .. 8) {
             push @{$forecast}, $api->aggregate($detailed_forecast, $dt_start, $aggregate_hours);
@@ -359,7 +357,7 @@ sub html_for_date {
 
     my $weight_series;
     my $last_weight;
-    if ($self->app->get_config("googlefit_client_id")) {
+    if ($self->display->get_config('googlefit') && $self->display->get_config("googlefit_client_id")) {
         my $api = PortalCalendar::Integration::Google::Fit->new(app => $self->app, display => $self->display);
         $weight_series = $api->get_weight_series;
         $last_weight   = $api->get_last_known_weight;
@@ -371,7 +369,7 @@ sub html_for_date {
 
     my $svatky_api = PortalCalendar::Integration::SvatkyAPI->new(app => $self->app, display => $self->display);
     return $self->app->render(
-        template => 'calendar_themes/' . $self->app->get_config('theme'),
+        template => 'calendar_themes/' . $self->display->get_config('theme'),
         format   => 'html',
         app      => $self->app,
         display  => $self->display,
@@ -411,7 +409,7 @@ sub html_for_date {
 
 #     # individual forecasts
 #     foreach my $current_weather (@{$list}) {
-#         my $dt_current = DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone($self->app->get_config('timezone'));
+#         my $dt_current = DateTime->from_epoch(epoch => $current_weather->{dt})->set_time_zone($self->display->get_config('timezone'));
 
 #         if (DateTime->compare($dt_current, $dt_required) == 0) {
 
@@ -654,7 +652,7 @@ sub update_mqtt {
     my $key   = shift;
     my $value = shift;
 
-    return unless $self->app->get_config('mqtt');
+    return unless $self->display->get_config('mqtt');
 
     my $api        = PortalCalendar::Integration::MQTT->new(app => $self->app);
     my %ha_details = (

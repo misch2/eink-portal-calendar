@@ -9,9 +9,7 @@
 % $decorator = sub { uc(shift) };       # UPPERCASE
 %# $decorator = sub { ucfirst(shift) }; # Uppercase
 %# $decorator = sub { Text::Unidecode::unidecode(uc(shift)) }; # UPPERCASE with accents removed
-
-% my $now = DateTime->now;
-
+% my $now = DateTime->now->set_time_zone($app->get_config('timezone'));
 % my $precipitation_limit = 0.5; # mm
 
 <body>
@@ -153,7 +151,6 @@
 
         <div id="bottom-signature">
             % my $data_from = $current_weather->{time_start}->clone()->set_time_zone($app->get_config('timezone'));
-            % my $now = DateTime->now->set_time_zone($app->get_config('timezone'));
             % my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
 
             %# weather data from
