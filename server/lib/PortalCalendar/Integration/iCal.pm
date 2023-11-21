@@ -24,6 +24,22 @@ sub raw_details_from_web {
     return $response->decoded_content;
 }
 
+sub cached_raw_details_from_web {
+    my $self = shift;
+
+    my $cache = $self->db_cache;
+    $cache->max_age(2 * ONE_HOUR);
+
+    return $cache->get_or_set(
+        sub {
+            return { content => $self->raw_details_from_web() };
+        },
+        {
+            url => $self->ics_url,
+        }
+    );
+}
+
 sub transform_details {
     my $self     = shift;
     my $raw_text = shift;
@@ -59,7 +75,7 @@ sub get_all_items {
 
     my $cal_data = $cache->get_or_set(
         sub {
-            my $raw       = $self->raw_details_from_web();
+            my $raw       = $self->cached_raw_details_from_web()->{content};
             my $processed = $self->transform_details($raw, $start, $end);
             return $processed;
         },
