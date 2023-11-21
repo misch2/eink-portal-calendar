@@ -75,7 +75,7 @@
         <div class="horizontal-separator" style="top: 2rem"></div>
 
         <div class="horizontal-separator" style="top: 11.5rem"></div>
-        <div class="weather-forecast-container-grid" style="top: 11.9rem">
+        <div class="weather-forecast-container-grid" style="top: 11.8rem">
 
         %# See https://openweathermap.org/forecast5#fields_JSON
         % my $cnt = 0;
@@ -115,13 +115,13 @@
                 </div>
                 <div style="text-align: center">
                     <div>
-                        <%= sprintf('%.0f', int($item->{temperature_max} + 0.5)) %> &deg;C
+                        <%= sprintf('%.0f', int($item->{temperature_min} - 0.5)) %> &deg;C
                     </div>
-                    <div style="line-height: 40%">
-                        &nbsp; <!-- - -->
+                    <div style="margin-top: -0.6em; margin-bottom: -0.3em">
+                        -
                     </div>
                     <div>
-                        <%= sprintf('%.0f', int($item->{temperature_min} - 0.5)) %> &deg;C
+                        <%= sprintf('%.0f', int($item->{temperature_max} + 0.5)) %> &deg;C
                     </div>
                 </div>
                 <div style="text-align: center">
