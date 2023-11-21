@@ -15,6 +15,7 @@
         <button class="nav-link active" id="nav-main-tab" data-bs-toggle="tab" data-bs-target="#nav-main" type="button" role="tab">Main</button>
         <button class="nav-link" id="nav-client-tab" data-bs-toggle="tab" data-bs-target="#nav-client" type="button" role="tab">ePaper display (client)</button>
         <button class="nav-link" id="nav-calendar-tab" data-bs-toggle="tab" data-bs-target="#nav-calendar" type="button" role="tab">Calendar (ICS)</button>
+        <button class="nav-link" id="nav-metnoweather-tab" data-bs-toggle="tab" data-bs-target="#nav-metnoweather" type="button" role="tab">Met.no weather</button>
         <button class="nav-link" id="nav-openweather-tab" data-bs-toggle="tab" data-bs-target="#nav-openweather" type="button" role="tab">OpenWeather</button>
         <button class="nav-link" id="nav-mqtt-tab" data-bs-toggle="tab" data-bs-target="#nav-mqtt" type="button" role="tab">MQTT</button>
         <button class="nav-link" id="nav-fit-tab" data-bs-toggle="tab" data-bs-target="#nav-fit" type="button" role="tab">Google Fit</button>
@@ -177,6 +178,24 @@
                 <div class="form-group col-12">
                     <label for="web_calendar_ics_url3">URL</label>
                     <input id="web_calendar_ics_url3" name="web_calendar_ics_url3" type="text" class="form-control" value="<%= $values->{web_calendar_ics_url3} %>">
+                </div>
+            </fieldset>
+        </div>
+        <div class="tab-pane" id="nav-metnoweather" role="tabpanel">
+            <fieldset class="row">
+                <div class="form-group col-12">
+                    <div class="form-check form-switch">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="checkbox" id="metnoweather" name="metnoweather" value="1" <%= $values->{metnoweather} ? "checked" : "" %>>
+                            Integration enabled
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group col-12 mt-3">
+                    <div class="col-md-4">
+                        <label for="metnoweather_granularity_hours">Aggregate forecast by how many hours:</label>
+                        <input id="metnoweather_granularity_hours" name="metnoweather_granularity_hours" type="text" class="form-control" value="<%= $values->{metnoweather_granularity_hours} %>">
+                    </div>
                 </div>
             </fieldset>
         </div>

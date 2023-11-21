@@ -330,7 +330,7 @@ sub html_for_date {
     #     # p @forecast_5_days;
     # }
 
-    if ($self->display->get_config("lat") && $self->display->get_config("lon") && $self->display->get_config("alt")) {    # FIXME better check
+    if ($self->display->get_config("metnoweather") && $self->display->get_config("lat") && $self->display->get_config("lon") && $self->display->get_config("alt")) {
         my $api = PortalCalendar::Integration::Weather::MetNo->new(
             app      => $self->app,
             display  => $self->display,
@@ -347,7 +347,7 @@ sub html_for_date {
         $current_weather = $api->aggregate($detailed_forecast, $dt_start, 1);
         $dt_start->add(hours => 1);
 
-        my $aggregate_hours = 2;                              # FIXME configurable
+        my $aggregate_hours = $self->display->get_config("metnoweather_granularity_hours") || 2;
         $forecast = [];
         for (1 .. 8) {
             push @{$forecast}, $api->aggregate($detailed_forecast, $dt_start, $aggregate_hours);

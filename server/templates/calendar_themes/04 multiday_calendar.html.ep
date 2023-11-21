@@ -4,6 +4,8 @@
 %= stylesheet '/css/calendar_themes/multiday_calendar.css'
 %= include 'calendar_themes/includes/epd_colors', colors => $colors
 
+% my $now = DateTime->now->set_time_zone($app->get_config('timezone'));
+
 <body>
 <div id="visible-area">
     <div class="top-date-row">
@@ -21,7 +23,6 @@
        Rodinný kalendář
     </h3>
 
-    % my $now = DateTime->now->truncate(to => 'day');
     <div class="calendar-container">
         % my $cnt = 0;
         % my $last_title = '';
@@ -87,7 +88,6 @@
 
     <div id="bottom-row">
         <div id="bottom-signature">
-            % my $now = DateTime->now->set_time_zone($app->get_config('timezone'));
             % my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
 
             %# screen generated at

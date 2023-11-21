@@ -11,37 +11,39 @@ has 'display';
 has 'defaults' => sub {
     my $self = shift;
     return {
-        wakeup_schedule          => '0 * * * *',                                     # every hour
-        timezone                 => 'UTC',
-        web_calendar1            => 0,
-        web_calendar2            => 0,
-        web_calendar3            => 0,
-        web_calendar_ics_url1    => '',
-        web_calendar_ics_url2    => '',
-        web_calendar_ics_url3    => '',
-        totally_random_icon      => 0,
-        min_random_icons         => 4,
-        max_random_icons         => 10,
-        max_icons_with_calendar  => 5,
-        theme                    => 'portal_with_icons',
-        googlefit                => 0,
-        openweather              => 0,
-        openweather_api_key      => '',
-        openweather_lang         => 'en',
-        mqtt                     => 0,
-        mqtt_server              => 'localhost',
-        mqtt_username            => '',
-        mqtt_password            => '',
-        mqtt_topic               => 'portal_calendar01',
-        lat                      => '',
-        lon                      => '',
-        alt                      => '',
-        ota_mode                 => 0,
-        googlefit_client_id      => '',
-        googlefit_client_secret  => '',
-        googlefit_auth_callback  => 'https://local-server-name/auth/googlefit/cb',
-        _googlefit_access_token  => '',
-        _googlefit_refresh_token => '',
+        wakeup_schedule                => '0 * * * *',                                     # every hour
+        timezone                       => 'UTC',
+        web_calendar1                  => 0,
+        web_calendar2                  => 0,
+        web_calendar3                  => 0,
+        web_calendar_ics_url1          => '',
+        web_calendar_ics_url2          => '',
+        web_calendar_ics_url3          => '',
+        totally_random_icon            => 0,
+        min_random_icons               => 4,
+        max_random_icons               => 10,
+        max_icons_with_calendar        => 5,
+        theme                          => 'portal_with_icons',
+        googlefit                      => 0,
+        metnoweather                   => 0,
+        metnoweather_granularity_hours => 2,
+        openweather                    => 0,
+        openweather_api_key            => '',
+        openweather_lang               => 'en',
+        mqtt                           => 0,
+        mqtt_server                    => 'localhost',
+        mqtt_username                  => '',
+        mqtt_password                  => '',
+        mqtt_topic                     => 'portal_calendar01',
+        lat                            => '',
+        lon                            => '',
+        alt                            => '',
+        ota_mode                       => 0,
+        googlefit_client_id            => '',
+        googlefit_client_secret        => '',
+        googlefit_auth_callback        => 'https://local-server-name/auth/googlefit/cb',
+        _googlefit_access_token        => '',
+        _googlefit_refresh_token       => '',
     };
 };
 
@@ -54,6 +56,7 @@ has boolean_parameters => sub {
             web_calendar3
             mqtt
             googlefit
+            metnoweather
             openweather
             ota_mode
             /
