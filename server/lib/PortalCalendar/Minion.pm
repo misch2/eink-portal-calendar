@@ -9,22 +9,30 @@ use DDP;
 use Time::Seconds;
 use Try::Tiny;
 
+sub regenerate_all_images {
+    my $job = shift;
+
+    foreach my $display ($job->app->schema->resultset('Display')->all_displays) {
+        $job->app->minion->enqueue('regenerate_image', [ $display->id ]);
+    }
+
+    return $job->finish();
+}
+
 sub regenerate_image {
-    my $job  = shift;
-    my @args = @_;
+    my $job = shift;
+
+    # my @args = @_;
+    my $display_id = shift;
 
     my $start = time;
 
-    $job->app->log->info("Regenerating calendar image");
+    my $display = $job->app->get_display_by_id($display_id);
+    $job->app->log->info("Regenerating calendar image for display #" . $display->id);
 
     my $converter = PortalCalendar::Web2Png->new(pageres_command => $job->app->home->child("node_modules/.bin/pageres"));
-    foreach my $display ($job->app->schema->resultset('Display')->all_displays) {
-        $job->app->log->info("Processing display #" . $display->id);
+    $converter->convert_url($job->app->config->{url_start} . '/calendar/' . $display->id . '/html', $display->virtual_width, $display->virtual_height, $job->app->home->child("generated_images/current_calendar_" . $display->id . ".png"));
 
-        $converter->convert_url($job->app->config->{url_start} . '/calendar/' . $display->id . '/html', $display->virtual_width, $display->virtual_height, $job->app->home->child("generated_images/current_calendar_" . $display->id . ".png"));
-
-        $job->app->minion->backend->register_worker;    # send heartbeat ping to minion supervisor
-    }
     $job->app->log->info("Finished processing");
 
     my $elapsed = time - $start;
@@ -52,7 +60,11 @@ sub check_missed_connects {
 
                     $last_visit->set_time_zone('local');
                     $next->set_time_zone('local');
-                    $job->app->log->warn("Display #" . $display->id . " is frozen for " . $diff_seconds . " seconds, last contact was at $last_visit, should have connected at $next") unless $display->missed_connects;
+                    if (!$display->missed_connects) {    # first time
+                        $job->app->log->warn("Display #" . $display->id . " is frozen for " . $diff_seconds . " seconds, last contact was at $last_visit, should have connected at $next");
+
+                        # FIXME send alert
+                    }
                     $display->set_missed_connects(1 + $display->missed_connects);
                 }
             }

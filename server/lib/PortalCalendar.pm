@@ -95,7 +95,7 @@ sub setup_plugins {
             sched1 => {
                 crontab => '*/15 * * * *',    # every 15 minutes
                 code    => sub {
-                    $app->minion->enqueue('generate_image', []);
+                    $app->minion->enqueue('regenerate_all_images', []);
                 },
             },
             sched2 => {
@@ -127,7 +127,12 @@ sub startup {
 
     # define minion tasks
     $app->minion->add_task(
-        generate_image => sub {
+        regenerate_all_images => sub {
+            PortalCalendar::Minion::regenerate_all_images(@_);
+        }
+    );
+    $app->minion->add_task(
+        regenerate_image => sub {
             PortalCalendar::Minion::regenerate_image(@_);
         }
     );
