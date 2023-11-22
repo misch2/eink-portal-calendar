@@ -9,15 +9,11 @@ use Time::HiRes;
 use List::Util qw(min max);
 use Mojo::Log;
 
-use PortalCalendar;
 use PortalCalendar::Config;
-use PortalCalendar::Minion;
-use PortalCalendar::Schema;
-use PortalCalendar::Util;
 
 has display => sub { die "override in subclass" };
 
-has config_obj => sub {
+has config_obj => sub { # FIXME remove, use display instead
     my $self = shift;
     return PortalCalendar::Config->new(app => $self->app, display => $self->display);
 };

@@ -1,13 +1,16 @@
-package PortalCalendar::Minion;
+package PortalCalendar::Task;
 
 use Mojo::Base 'Mojolicious';
-use PortalCalendar::Config;
-use PortalCalendar::Web2Png;
 
+use DateTime;
 use DateTime::Format::ISO8601;
 use DDP;
 use Time::Seconds;
 use Try::Tiny;
+
+use PortalCalendar::Config;
+use PortalCalendar::Web2Png;
+use PortalCalendar::Util;
 
 sub regenerate_all_images {
     my $job = shift;

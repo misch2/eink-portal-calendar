@@ -12,7 +12,7 @@ use Time::HiRes;
 
 use PortalCalendar;
 use PortalCalendar::Config;
-use PortalCalendar::Minion;
+use PortalCalendar::Task;
 use PortalCalendar::Schema;
 use PortalCalendar::Routes;
 
@@ -128,17 +128,17 @@ sub startup {
     # define minion tasks
     $app->minion->add_task(
         regenerate_all_images => sub {
-            PortalCalendar::Minion::regenerate_all_images(@_);
+            PortalCalendar::Task::regenerate_all_images(@_);
         }
     );
     $app->minion->add_task(
         regenerate_image => sub {
-            PortalCalendar::Minion::regenerate_image(@_);
+            PortalCalendar::Task::regenerate_image(@_);
         }
     );
     $app->minion->add_task(
         check_missed_connects => sub {
-            PortalCalendar::Minion::check_missed_connects(@_);
+            PortalCalendar::Task::check_missed_connects(@_);
         },
     );
 

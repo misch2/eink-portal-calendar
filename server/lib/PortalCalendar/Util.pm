@@ -17,7 +17,6 @@ use Try::Tiny;
 
 use PortalCalendar;
 use PortalCalendar::Config;
-use PortalCalendar::Minion;
 use PortalCalendar::Schema;
 use PortalCalendar::Integration::iCal;
 use PortalCalendar::Integration::Weather::OpenWeather;
