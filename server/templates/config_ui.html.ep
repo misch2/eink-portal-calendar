@@ -44,12 +44,14 @@
                 </div>
             </fieldset>
 
-            % if ($current_theme) {
-                <fieldset class="mt-4 row">
-                    <legend class="w-auto">Theme customization</legend>
-                    %= include "calendar_themes/configs/$current_theme"
-                </fieldset>
-            % }
+            <fieldset class="mt-4 row">
+                <legend class="w-auto">Theme customization</legend>
+                <div id="theme-customization" class="form-group row">
+                    % if ($current_theme) {
+                        %= include "calendar_themes/configs/$current_theme"
+                    % }
+                </div>
+            </fieldset>
 
             <fieldset class="mt-4 row">
                 <legend class="w-auto">Location and locale</legend>
@@ -302,3 +304,20 @@
     </div>
 
 </form>
+
+%= javascript begin
+$(document).ready(() => {
+    $('#theme').on('change', function() {
+        const theme = $(this).val();
+        var url = '/config_ui/theme/<%= $display->id %>';
+        url += '?theme=' + encodeURIComponent(theme);
+        console.log(url);
+        $.ajax({
+            url: url,
+            success: function(data) {
+                $('#theme-customization').html(data);
+            }
+        });
+    });
+});
+%= end

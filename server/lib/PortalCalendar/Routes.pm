@@ -25,6 +25,7 @@ sub setup {
     $r->get('/calendar/:display_number/html/:date')->to('UI#calendar_html_specific_date');
     $r->get('/config_ui/:display_number')->to('UI#config_ui_show');
     $r->post('/config_ui/:display_number')->to('UI#config_ui_save');
+    $r->get('/config_ui/theme/:display_number')->to('UI#config_ui_theme_show');
 
     # This MUST be first, to match sooner than the next route. Also it can't accept any parameters (Google OAuth restriction)
     $r->get('/auth/googlefit/cb')->to('Other#googlefit_callback');

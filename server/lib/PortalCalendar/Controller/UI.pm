@@ -119,6 +119,35 @@ sub config_ui_save {
     $self->redirect_to('/config_ui/' . $self->display->id);
 }
 
+sub config_ui_theme_show {
+    my $self = shift;
+
+    my $theme = $self->req->param('theme');
+
+    my $values = {};
+    foreach my $name (@{ $self->config_obj->parameters }) {
+        my $value = $self->get_config($name);
+        $values->{$name} = $value;
+    }
+
+    my $result;
+    try {
+        $result = $self->render(
+            template => "calendar_themes/configs/$theme",
+            format   => 'html',
+            values   => $values,
+
+            display    => $self->display,
+            config_obj => $self->config_obj,
+        );
+    } catch {
+        $self->app->log->error("Error rendering theme [$theme]: $_");
+        $result = $self->render(text => '');
+    };
+
+    return $result;
+}
+
 # main HTML page with calendar (either for current or for specific date)
 sub calendar_html_default_date {
     my $self = shift;
