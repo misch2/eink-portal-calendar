@@ -311,7 +311,6 @@ $(document).ready(() => {
         const theme = $(this).val();
         var url = '/config_ui/theme/<%= $display->id %>';
         url += '?theme=' + encodeURIComponent(theme);
-        console.log(url);
         $.ajax({
             url: url,
             success: function(data) {
