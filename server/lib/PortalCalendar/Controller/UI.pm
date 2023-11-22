@@ -123,6 +123,7 @@ sub config_ui_theme_show {
     my $self = shift;
 
     my $theme = $self->req->param('theme');
+    $theme =~ s/[^a-zA-Z0-9_\-\ ]//g;
 
     my $values = {};
     foreach my $name (@{ $self->config_obj->parameters }) {
@@ -131,19 +132,23 @@ sub config_ui_theme_show {
     }
 
     my $result;
-    try {
-        $result = $self->render(
-            template => "calendar_themes/configs/$theme",
-            format   => 'html',
-            values   => $values,
-
-            display    => $self->display,
-            config_obj => $self->config_obj,
-        );
-    } catch {
-        $self->app->log->error("Error rendering theme [$theme]: $_");
+    if ($theme eq '') {
         $result = $self->render(text => '');
-    };
+    } else {
+        try {
+            $result = $self->render(
+                template => "calendar_themes/configs/$theme",
+                format   => 'html',
+                values   => $values,
+
+                display    => $self->display,
+                config_obj => $self->config_obj,
+            );
+        } catch {
+            $self->app->log->error("Error rendering theme [$theme]: $_");
+            $result = $self->render(text => '');
+        };
+    }
 
     return $result;
 }
