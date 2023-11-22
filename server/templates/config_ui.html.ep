@@ -17,6 +17,7 @@
         <button class="nav-link" id="nav-calendar-tab" data-bs-toggle="tab" data-bs-target="#nav-calendar" type="button" role="tab">Calendar (ICS)</button>
         <button class="nav-link" id="nav-metnoweather-tab" data-bs-toggle="tab" data-bs-target="#nav-metnoweather" type="button" role="tab">Met.no weather</button>
         <button class="nav-link" id="nav-openweather-tab" data-bs-toggle="tab" data-bs-target="#nav-openweather" type="button" role="tab">OpenWeather</button>
+        <button class="nav-link" id="nav-telegram-tab" data-bs-toggle="tab" data-bs-target="#nav-telegram" type="button" role="tab">Telegram</button>
         <button class="nav-link" id="nav-mqtt-tab" data-bs-toggle="tab" data-bs-target="#nav-mqtt" type="button" role="tab">MQTT</button>
         <button class="nav-link" id="nav-fit-tab" data-bs-toggle="tab" data-bs-target="#nav-fit" type="button" role="tab">Google Fit</button>
     </div>
@@ -221,6 +222,28 @@
                         <label for="openweather_lang">Lang</label>
                         <input id="openweather_lang" name="openweather_lang" type="text" placeholder="en, cz, ..." class="form-control" value="<%= $values->{openweather_lang} %>">
                     </div>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="tab-pane" id="nav-telegram" role="tabpanel">
+            <fieldset class="row">
+                <div class="form-group col-12">
+                    <div class="form-check form-switch">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="checkbox" id="telegram" name="telegram" value="1" <%= $values->{telegram} ? "checked" : "" %>>
+                            Integration enabled
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group col-12 mt-3">
+                    <label for="telegram_api_key">API key</label>
+                    <input id="telegram_api_key" name="telegram_api_key" type="text" class="form-control" value="<%= $values->{telegram_api_key} %>">
+                </div>
+                <div class="form-group col-12 mt-3">
+                    <label for="telegram_chat_id">Chat ID</label>
+                    <input id="telegram_chat_id" name="telegram_chat_id" type="text" class="form-control" value="<%= $values->{telegram_chat_id} %>">
+                    <div class="form-text">See <a href="https://stackoverflow.com/questions/32423837/telegram-bot-how-to-get-a-group-chat-id">https://stackoverflow.com/questions/32423837/telegram-bot-how-to-get-a-group-chat-id</a> to get the id.</div>
                 </div>
             </fieldset>
         </div>

@@ -1,4 +1,3 @@
-%# only theme_dependent_parameters() can be used here
 <div class="col-12 mb-3">
     <div class="form-check form-switch">
         <label class="form-check-label">

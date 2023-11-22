@@ -30,6 +30,9 @@ has 'defaults' => sub {
         openweather                    => 0,
         openweather_api_key            => '',
         openweather_lang               => 'en',
+        telegram                       => 0,
+        telegram_api_key               => '',
+        telegram_chat_id               => '',
         mqtt                           => 0,
         mqtt_server                    => 'localhost',
         mqtt_username                  => '',
@@ -58,18 +61,8 @@ has boolean_parameters => sub {
             googlefit
             metnoweather
             openweather
+            telegram
             ota_mode
-            /
-    ];
-};
-
-has theme_dependent_parameters => sub {
-    return [
-        qw/
-            totally_random_icon
-            min_random_icons
-            max_random_icons
-            max_icons_with_calendar
             /
     ];
 };

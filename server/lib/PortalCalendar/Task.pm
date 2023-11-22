@@ -7,6 +7,7 @@ use DateTime::Format::ISO8601;
 use DDP;
 use Time::Seconds;
 use Try::Tiny;
+use WWW::Telegram::BotAPI;
 
 use PortalCalendar::Config;
 use PortalCalendar::Web2Png;
@@ -79,10 +80,20 @@ sub check_missed_connects {
 
                     $last_visit->set_time_zone('local');
                     $next->set_time_zone('local');
-                    if (!$display->missed_connects) {    # first time
+                    if (1 || !$display->missed_connects) {    # first time
                         $job->app->log->warn("Display #" . $display->id . " is frozen for " . $diff_seconds . " seconds, last contact was at $last_visit, should have connected at $next");
 
-                        # FIXME send alert
+                        my $token = $display->get_config('telegram_api_key');
+                        if ($token) {
+                            $job->app->log->debug("Sending telegram message to " . $display->get_config('telegram_chat_id'));
+                            my $telegram = WWW::Telegram::BotAPI->new(token => $token);
+                            $telegram->sendMessage(
+                                {
+                                    chat_id => $display->get_config('telegram_chat_id'),
+                                    text    => "Display #" . $display->id . " is frozen for " . $diff_seconds . " seconds, last contact was at $last_visit, should have connected at $next"
+                                }
+                            );
+                        }
                     }
                     $display->set_missed_connects(1 + $display->missed_connects);
                 }

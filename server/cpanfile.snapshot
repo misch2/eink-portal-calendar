@@ -1820,6 +1820,20 @@ DISTRIBUTIONS
       Scalar::Util 0
       perl 5.006002
       strict 0
+  LWP-Protocol-https-6.11
+    pathname: O/OA/OALDERS/LWP-Protocol-https-6.11.tar.gz
+    provides:
+      LWP::Protocol::https 6.11
+      LWP::Protocol::https::Socket 6.11
+    requirements:
+      ExtUtils::MakeMaker 0
+      IO::Socket::SSL 1.970
+      LWP::Protocol::http 0
+      LWP::UserAgent 6.06
+      Net::HTTPS 6
+      base 0
+      perl 5.008001
+      strict 0
   LWP-UserAgent-Cached-0.08
     pathname: O/OL/OLEG/LWP-UserAgent-Cached-0.08.tar.gz
     provides:
@@ -3417,6 +3431,17 @@ DISTRIBUTIONS
       Fcntl 0
       URI 1.10
       perl 5.008001
+  WWW-Telegram-BotAPI-0.12
+    pathname: R/RO/ROBERTOF/WWW-Telegram-BotAPI-0.12.tar.gz
+    provides:
+      WWW::Telegram::BotAPI 0.12
+    requirements:
+      Carp 0
+      Encode 0
+      ExtUtils::MakeMaker 0
+      JSON::MaybeXS 0
+      LWP::Protocol::https 0
+      LWP::UserAgent 0
   XML-NamespaceSupport-1.12
     pathname: P/PE/PERIGRIN/XML-NamespaceSupport-1.12.tar.gz
     provides:
