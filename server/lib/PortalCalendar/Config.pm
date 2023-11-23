@@ -103,7 +103,7 @@ sub get_from_schema {
 
     # 2. default value (modifiable)
     unless ($self->display->is_default) {
-        my $default_config = $self->new(app => $self->app, display => $schema->resultset('Config')->default_display);
+        my $default_config = $self->new(app => $self->app, display => $schema->resultset('Display')->default_display);
         my $value          = $default_config->get_from_schema_without_defaults($schema, $name);
         return $value if defined $value;
     }
