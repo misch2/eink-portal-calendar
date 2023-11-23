@@ -56,19 +56,11 @@ sub test {
 sub config_ui_show {
     my $self = shift;
 
-    my $config = PortalCalendar::Config->new(app => $self->app, display => $self->display);
-    my $values = {};
-    foreach my $name (@{ $config->parameters }) {
-        my $value = $self->display->get_config_without_defaults($name);
-        $values->{$name} = $value;
-    }
-
     my @template_files = $self->app->home->child('templates/calendar_themes')->list->map(sub { $_->basename })->each;
 
     return $self->render(
         template => 'config_ui',
         format   => 'html',
-        values   => $values,
 
         template_names => [ map { s/\.html\.ep$//; $_ } @template_files ],
         current_theme  => $self->display->get_config('theme'),
@@ -94,7 +86,7 @@ sub config_ui_save {
         $self->display->set_config($name, $value // '');
     }
 
-    # FIXME unify this too, add it to PortalCalendar::Config::parameters:
+    # Database columns in the 'displays' table
     $self->display->name($self->req->param('display_name'));
     $self->display->rotation($self->req->param('display_rotation'));
     $self->display->gamma($self->req->param('display_gamma'));
