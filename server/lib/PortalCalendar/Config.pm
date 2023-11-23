@@ -98,14 +98,14 @@ sub get_from_schema {
 
     my $value = $self->get_from_schema_without_defaults($schema, $name);    # undef = not found
 
-    # 1. real value
-    return $value if defined $value;
+    # 1. real value (it's NOT NULL in the database, but empty string usually means "unset" in HTML form)
+    return $value if defined $value && $value ne '';
 
     # 2. default value (modifiable)
     unless ($self->display->is_default) {
         my $default_config = $self->new(app => $self->app, display => $schema->resultset('Display')->default_display);
         my $value          = $default_config->get_from_schema_without_defaults($schema, $name);
-        return $value if defined $value;
+        return $value if defined $value && $value ne '';
     }
 
     # 3. default value (hardwired)
