@@ -98,7 +98,7 @@ sub config_ui_save {
 
     $self->flash(message => "Parameters saved.");
 
-    $self->app->enqueue_task_only_once('generate_image');
+    $self->app->enqueue_task_only_once('regenerate_all_images');    # FIXME regenerate_image and for this display only
     $self->redirect_to('/config_ui/' . $self->display->id);
 }
 
