@@ -30,34 +30,37 @@
             % my $battery_percent = $display->battery_percent();
 
             <h4>Selected display: <%= $display->name %></h4>
-            <p class="row-fluid">
-                Last contact: 
-                % if ($last_contact_ago) {
-                    % my ($hours, $minutes) = $last_contact_ago->in_units('hours', 'minutes');
-                    % if ($hours > 0) {
-                        <%= $hours %> hours
+
+            % unless ($display->is_default) {
+                <p class="row-fluid">
+                    Last contact: 
+                    % if ($last_contact_ago) {
+                        % my ($hours, $minutes) = $last_contact_ago->in_units('hours', 'minutes');
+                        % if ($hours > 0) {
+                            <%= $hours %> hours
+                        % }
+                        <%= $minutes %> minutes ago.
+                        %# (<%= $last_visit_dt ? $last_visit_dt->strftime('%c') : '' %>).
+                    % } else {
+                        never.
                     % }
-                    <%= $minutes %> minutes ago.
-                    %# (<%= $last_visit_dt ? $last_visit_dt->strftime('%c') : '' %>).
-                % } else {
-                    never.
-                % }
 
-                Next wakeup:
-                % my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
-                % my $minutes = int($sleep_in_seconds / 60);
-                % my $seconds = $sleep_in_seconds % 60;
-                in <%= $minutes %> minutes and <%= $seconds %> seconds.
+                    Next wakeup:
+                    % my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
+                    % my $minutes = int($sleep_in_seconds / 60);
+                    % my $seconds = $sleep_in_seconds % 60;
+                    in <%= $minutes %> minutes and <%= $seconds %> seconds.
 
-                Voltage:
-                <%= defined($last_voltage) ? sprintf("%.1f", $last_voltage) : '(unknown)' %> V (<%= defined($battery_percent) ? sprintf("%.0f", $battery_percent) : 'unknown' %> %). 
+                    Voltage:
+                    <%= defined($last_voltage) ? sprintf("%.1f", $last_voltage) : '(unknown)' %> V (<%= defined($battery_percent) ? sprintf("%.0f", $battery_percent) : 'unknown' %> %). 
 
-                OTA mode: 
-                <%= $display->get_config('ota_mode') ? 'on' : 'off' %>.
+                    OTA mode: 
+                    <%= $display->get_config('ota_mode') ? 'on' : 'off' %>.
 
-                %# Waiting tasks: 
-                %# <%= $waiting_tasks %>. 
-            </p>
+                    %# Waiting tasks: 
+                    %# <%= $waiting_tasks %>. 
+                </p>
+            % }
         % }
 
         <nav class="navbar navbar-expand-lg navbar-light bg-light">

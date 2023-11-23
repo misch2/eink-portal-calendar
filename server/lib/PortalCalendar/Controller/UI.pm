@@ -59,7 +59,7 @@ sub config_ui_show {
     my $config = PortalCalendar::Config->new(app => $self->app, display => $self->display);
     my $values = {};
     foreach my $name (@{ $config->parameters }) {
-        my $value = $self->display->get_config($name);
+        my $value = $self->display->get_config_without_defaults($name);
         $values->{$name} = $value;
     }
 
@@ -77,7 +77,8 @@ sub config_ui_show {
         last_voltage_raw => $self->display->get_config('_last_voltage_raw'),
         nav_link         => 'config_ui',
 
-        display => $self->display,
+        display         => $self->display,
+        default_display => $self->app->schema->resultset('Display')->default_display,
     );
 }
 

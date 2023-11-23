@@ -301,3 +301,6 @@ CREATE INDEX cache_expires_at ON cache (expires_at, creator);
 
 -- 17 up
 DELETE FROM config WHERE name IN ('broken glass', 'min_voltage', 'max_voltage', 'alert_voltage', 'voltage_divider_ratio');
+
+-- 18 up
+INSERT INTO displays (id, mac, name, width, height, rotation, colortype, gamma, border_top, border_right, border_bottom, border_left, firmware) VALUES (0, '', 'Default settings', 0, 0, 0, '', 1.8, 0, 0, 0, 0, '');

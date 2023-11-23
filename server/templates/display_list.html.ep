@@ -24,15 +24,21 @@
             <%= $d->id %> 
         </td>
         <td>
-            <a href="/home/<%= $d->id %>"><%= $d->name %></a>
+            % if ($d->is_default) {
+                <a href="/config_ui/<%= $d->id %>"><%= $d->name %></a>
+            % } else {
+                <a href="/home/<%= $d->id %>"><%= $d->name %></a>
+            % }
         </td>
         <td>
             <%= $d->mac %>
         </td>
         <td>
-            <%= $d->virtual_width %>
-            &times;
-            <%= $d->virtual_height %>
+            % unless ($d->is_default) {
+                <%= $d->virtual_width %>
+                &times;
+                <%= $d->virtual_height %>
+            % }
         </td>
         <td>
             <%= $d->colortype_formatted %>
@@ -41,28 +47,36 @@
             <%= $d->firmware %>
         </td>
         <td class="text-end">
-            <%= sprintf('%.0f', $d->battery_percent) %> %
-        </td>
-        <td>
-            % my ($next_wakeup, $sleep_in_seconds, $schedule) = $d->next_wakeup_time;
-            % my $minutes = int($sleep_in_seconds / 60);
-            % my $seconds = $sleep_in_seconds % 60;
-            <%= $next_wakeup->format_cldr('dd.MM.YYYY HH:mm') %> (in <%= $minutes %> minutes and <%= $seconds %> seconds)
-        </td>
-        <td>
-            % if ($d->missed_connects > 0) {
-                <span class="badge bg-danger">frozen since 
-                    <%= $d->last_visit->set_time_zone('local')->format_cldr('dd.MM.YYYY HH:mm') %> 
-                    (<%= int((DateTime->now()->epoch - $d->last_visit->epoch) / (60 * 60) + 0.5) %> hours)
-                </span>
-            % } else {
-                <span class="badge bg-success">OK</span>
+            % unless ($d->is_default) {
+                <%= sprintf('%.0f', $d->battery_percent) %> %
             % }
         </td>
         <td>
-            <a href="/home/<%= $d->id %>">
-            <img src="/calendar/bitmap?preview_colors=1&mac=<%= $d->mac %>" style="max-height: 6rem; width: auto; border: 1px solid gray" />
-            </a>
+            % unless ($d->is_default) {
+                % my ($next_wakeup, $sleep_in_seconds, $schedule) = $d->next_wakeup_time;
+                % my $minutes = int($sleep_in_seconds / 60);
+                % my $seconds = $sleep_in_seconds % 60;
+                <%= $next_wakeup->format_cldr('dd.MM.YYYY HH:mm') %> (in <%= $minutes %> minutes and <%= $seconds %> seconds)
+            % }
+        </td>
+        <td>
+            % unless ($d->is_default) {
+                % if ($d->missed_connects > 0) {
+                    <span class="badge bg-danger">frozen since 
+                        <%= $d->last_visit->set_time_zone('local')->format_cldr('dd.MM.YYYY HH:mm') %> 
+                        (<%= int((DateTime->now()->epoch - $d->last_visit->epoch) / (60 * 60) + 0.5) %> hours)
+                    </span>
+                % } else {
+                    <span class="badge bg-success">OK</span>
+                % }
+            % }
+        </td>
+        <td>
+            % unless ($d->is_default) {
+                <a href="/home/<%= $d->id %>">
+                <img src="/calendar/bitmap?preview_colors=1&mac=<%= $d->mac %>" style="max-height: 6rem; width: auto; border: 1px solid gray" />
+                </a>
+            % }
         </td>
     </tr>
 % }

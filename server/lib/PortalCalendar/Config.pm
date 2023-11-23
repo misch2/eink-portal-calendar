@@ -80,14 +80,35 @@ sub is_boolean_parameter {
     return 0;
 }
 
+sub get_from_schema_without_defaults {
+    my $self   = shift;
+    my $schema = shift;
+    my $name   = shift;
+
+    my $item = $schema->resultset('Config')->find({ name => $name, display_id => $self->display->id });
+
+    return $item->value if $item;
+    return undef;
+}
+
 sub get_from_schema {
     my $self   = shift;
     my $schema = shift;
     my $name   = shift;
 
-    my $item = $schema->resultset('Config')->find({ name => $name, display_id => ($self->display ? $self->display->id : undef) });
+    my $value = $self->get_from_schema_without_defaults($schema, $name);    # undef = not found
 
-    return $item->value if $item;
+    # 1. real value
+    return $value if defined $value;
+
+    # 2. default value (modifiable)
+    unless ($self->display->is_default) {
+        my $default_config = $self->new(app => $self->app, display => $schema->resultset('Config')->default_display);
+        my $value          = $default_config->get_from_schema_without_defaults($schema, $name);
+        return $value if defined $value;
+    }
+
+    # 3. default value (hardwired)
     return $self->defaults->{$name} // undef;
 }
 

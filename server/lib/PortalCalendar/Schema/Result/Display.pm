@@ -198,14 +198,18 @@ __PACKAGE__->has_many(
 # Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-11-03 13:53:17
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:NawCW2RWvO1ctLRInv1Cow
 
-use PortalCalendar::Config;
-
 use DateTime;
+use DateTime::Format::ISO8601;
 use List::Util qw(min max);
 use Schedule::Cron::Events;
 use Time::Seconds;
-use DateTime::Format::ISO8601;
 use Try::Tiny;
+
+use PortalCalendar::Config;
+
+sub is_default {
+    return shift->id == 0;
+}
 
 sub virtual_width {
     my $self = shift;
@@ -226,6 +230,15 @@ sub get_config {
     my $config = PortalCalendar::Config->new(display => $self);
 
     return $config->get_from_schema($self->result_source->schema, $name);
+}
+
+sub get_config_without_defaults {
+    my $self = shift;
+    my $name = shift;
+
+    my $config = PortalCalendar::Config->new(display => $self);
+
+    return $config->get_from_schema_without_defaults($self->result_source->schema, $name);
 }
 
 sub set_config {

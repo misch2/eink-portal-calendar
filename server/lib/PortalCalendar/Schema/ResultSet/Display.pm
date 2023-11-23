@@ -8,4 +8,9 @@ sub all_displays {
     return $self->search({}, { -order_by => ['id'] })->all;
 }
 
+sub default_display {
+    my $self = shift;
+    return $self->find({ id => 0 });
+}
+
 1;
