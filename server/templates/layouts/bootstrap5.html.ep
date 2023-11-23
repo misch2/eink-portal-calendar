@@ -74,12 +74,14 @@
                             <a class="nav-link <%= $nav_link eq 'index' ? 'active' : '' %>" href="/">Display select</a>
                         </li>
                         % if ($display) {
-                            <li class="nav-item">
-                                <a class="nav-link <%= $nav_link eq 'home' ? 'active' : '' %>" href="/home/<%= $display->id %>">Home</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link <%= $nav_link eq 'compare' ? 'active' : '' %>" href="/test/<%= $display->id %>">Test page</a>
-                            </li>
+                            % unless ($display->is_default) {
+                                <li class="nav-item">
+                                    <a class="nav-link <%= $nav_link eq 'home' ? 'active' : '' %>" href="/home/<%= $display->id %>">Home</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link <%= $nav_link eq 'compare' ? 'active' : '' %>" href="/test/<%= $display->id %>">Test page</a>
+                                </li>
+                            % }
                             <li class="nav-item">
                                 <a class="nav-link <%= $nav_link eq 'config_ui' ? 'active' : '' %>" href="/config_ui/<%= $display->id %>">Config</a>
                             </li>
