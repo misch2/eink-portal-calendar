@@ -652,7 +652,7 @@ sub update_mqtt {
 
     return unless $self->display->get_config('mqtt');
 
-    my $api        = PortalCalendar::Integration::MQTT->new(app => $self->app);
+    my $api        = PortalCalendar::Integration::MQTT->new(app => $self->app, display => $self->display);
     my %ha_details = (
         voltage => {
             component           => 'sensor',
