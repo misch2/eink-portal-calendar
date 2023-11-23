@@ -26,7 +26,7 @@
             % }
 
             %# my $waiting_tasks  = $config_obj->app->minion->jobs({ states => [ 'inactive', 'active' ] })->total;
-            % my $last_voltage = $display->get_config('voltage');
+            % my $last_voltage = $display->voltage;
             % my $battery_percent = $display->battery_percent();
 
             <h4>Selected display: <%= $display->name %></h4>

@@ -73,7 +73,7 @@ sub config_ui_show {
         template_names => [ map { s/\.html\.ep$//; $_ } @template_files ],
         current_theme  => $self->display->get_config('theme'),
 
-        last_voltage     => $self->display->get_config('voltage'),
+        last_voltage     => $self->display->voltage,
         last_voltage_raw => $self->display->get_config('_last_voltage_raw'),
         nav_link         => 'config_ui',
 
