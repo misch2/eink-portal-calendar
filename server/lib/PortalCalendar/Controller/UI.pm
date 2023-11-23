@@ -108,13 +108,6 @@ sub config_ui_theme_show {
     my $theme = $self->req->param('theme');
     $theme =~ s/[^a-zA-Z0-9_\-\ ]//g;
 
-    my $config = PortalCalendar::Config->new(app => $self->app, display => $self->display);
-    my $values = {};
-    foreach my $name (@{ $config->parameters }) {
-        my $value = $self->display->get_config($name);
-        $values->{$name} = $value;
-    }
-
     my $result;
     if ($theme eq '') {
         $result = $self->render(text => '');
@@ -123,9 +116,9 @@ sub config_ui_theme_show {
             $result = $self->render(
                 template => "calendar_themes/configs/$theme",
                 format   => 'html',
-                values   => $values,
 
-                display => $self->display,
+                display         => $self->display,
+                default_display => $self->app->schema->resultset('Display')->default_display,
             );
         } catch {
             $self->app->log->error("Error rendering theme [$theme]: $_");

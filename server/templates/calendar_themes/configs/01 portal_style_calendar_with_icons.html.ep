@@ -2,7 +2,7 @@
     <div class="form-check form-switch">
         <label class="form-check-label">
             <input class="form-check-input" type="checkbox" id="totally_random_icon" name="totally_random_icon" value="1"
-                <%= $values->{totally_random_icon} ? "checked" : "" %>>
+                <%= $display->get_config_without_defaults('totally_random_icon') ? "checked" : "" %>>
             Random icons instead of chamber-by-day
         </label>
     </div>
@@ -10,13 +10,13 @@
 
 <div class="col-md-4">
     <label for="min_random_icons">Min random icons count</label>
-    <input id="min_random_icons" name="min_random_icons" type="number" class="form-control" value="<%= $values->{min_random_icons} %>">
+    <input id="min_random_icons" name="min_random_icons" type="number" class="form-control" value="<%= $display->get_config_without_defaults('min_random_icons') %>">
 </div>
 <div class="col-md-4">
     <label for="max_random_icons">Max random icons count</label>
-    <input id="max_random_icons" name="max_random_icons" type="number" class="form-control" value="<%= $values->{max_random_icons} %>">
+    <input id="max_random_icons" name="max_random_icons" type="number" class="form-control" value="<%= $display->get_config_without_defaults('max_random_icons') %>">
 </div>
 <div class="col-md-4">
     <label for="max_icons_with_calendar">Max icons count for calendar event</label>
-    <input id="max_icons_with_calendar" name="max_icons_with_calendar" type="number" class="form-control" value="<%= $values->{max_icons_with_calendar} %>">
+    <input id="max_icons_with_calendar" name="max_icons_with_calendar" type="number" class="form-control" value="<%= $display->get_config_without_defaults('max_icons_with_calendar') %>">
 </div>
