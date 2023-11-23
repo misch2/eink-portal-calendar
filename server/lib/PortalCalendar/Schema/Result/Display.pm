@@ -198,6 +198,8 @@ __PACKAGE__->has_many(
 # Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-11-03 13:53:17
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:NawCW2RWvO1ctLRInv1Cow
 
+use PortalCalendar::Config;
+
 use DateTime;
 use List::Util qw(min max);
 use Schedule::Cron::Events;
@@ -220,21 +222,19 @@ sub virtual_height {
 sub get_config {
     my $self = shift;
     my $name = shift;
-    my $row  = $self->configs->search({ name => $name })->first;
-    return $row->value if $row;
-    return undef;
+
+    my $config = PortalCalendar::Config->new(display => $self);
+
+    return $config->get_from_schema($self->result_source->schema, $name);
 }
 
 sub set_config {
     my $self  = shift;
     my $name  = shift;
     my $value = shift;
-    if (my $row = $self->configs->search({ name => $name })->first) {
-        $row->update({ value => $value });
-    } else {
-        $self->configs->create({ name => $name, value => $value });
-    }
-    return;
+
+    my $config = PortalCalendar::Config->new(display => $self);
+    return $config->set_from_schema($self->result_source->schema, $name, $value);
 }
 
 sub voltage {

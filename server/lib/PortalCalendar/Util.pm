@@ -362,12 +362,8 @@ sub html_for_date {
         $last_weight   = $api->get_last_known_weight;
     }
 
-    # use DDP;
-    #    p $current_weather, as => 'current_weather';
-    #p $forecast,        as => 'forecast';
-
     my $svatky_api = PortalCalendar::Integration::SvatkyAPI->new(app => $self->app, display => $self->display);
-    return $self->app->render(
+    return (
         template => 'calendar_themes/' . $self->display->get_config('theme'),
         format   => 'html',
         app      => $self->app,
@@ -391,7 +387,6 @@ sub html_for_date {
         # googlefit data:
         last_weight   => $last_weight,
         weight_series => $weight_series,
-
     );
 }
 
@@ -458,7 +453,7 @@ sub generate_bitmap {
 
     # $self->app->log->info(np($args));
 
-    my $img = Imager->new(file => $self->app->app->home->child($self->image_name)) or die Imager->errstr;
+    my $img = Imager->new(file => $self->app->home->child($self->image_name)) or die Imager->errstr;
 
     # If the generated image is larger (probably due to invalid CSS), crop it so that it display at least something:
     if ($img->getheight > $self->display->virtual_height) {
@@ -518,7 +513,7 @@ sub generate_bitmap {
     if ($args->{format} eq 'png') {
         my $out;
         $img->write(data => \$out, type => 'png') or die;
-        return $self->app->render(data => $out, format => 'png');
+        return (data => $out, format => 'png');
     } elsif ($args->{format} eq 'png_gray') {
 
         # Convert to 1 gray channel only
@@ -531,7 +526,7 @@ sub generate_bitmap {
 
         my $out;
         $img->write(data => \$out, type => 'png') or die;
-        return $self->app->render(data => $out, format => 'png');
+        return (data => $out, format => 'png');
     } elsif ($args->{format} eq 'epaper_native') {
 
         # BW, 4G, 16G, 3C
@@ -638,9 +633,13 @@ sub generate_bitmap {
         $out .= Digest->new("SHA-1")->add($bitmap)->hexdigest . "\n";
         $out .= $bitmap;
 
-        $self->app->res->headers->content_type('application/octet-stream');
-        $self->app->res->headers->header('Content-Transfer-Encoding' => 'binary');
-        return $self->app->render(data => $out);
+        return (
+            data    => $out,
+            headers => {
+                'Content-Type'              => 'application/octet-stream',
+                'Content-Transfer-Encoding' => 'binary',
+            }
+        );
     } else {
         die "Unknown format requested: " . $args->{format};
     }

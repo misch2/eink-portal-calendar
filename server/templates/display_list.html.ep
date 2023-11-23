@@ -2,7 +2,7 @@
 
 <h3>Displays</h3>
 
-<table class="table FIXMEtable-striped table-hover">
+<table class="table table-hover">
 <thead>
     <tr>
         <th scope="col">Id</th>
@@ -44,7 +44,7 @@
             <%= sprintf('%.0f', $d->battery_percent) %> %
         </td>
         <td>
-            % my ($next_wakeup, $sleep_in_seconds, $schedule) = $d->next_wakeup_time();
+            % my ($next_wakeup, $sleep_in_seconds, $schedule) = $d->next_wakeup_time;
             % my $minutes = int($sleep_in_seconds / 60);
             % my $seconds = $sleep_in_seconds % 60;
             <%= $next_wakeup->format_cldr('dd.MM.YYYY HH:mm') %> (in <%= $minutes %> minutes and <%= $seconds %> seconds)

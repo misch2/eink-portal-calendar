@@ -32,6 +32,8 @@ sub regenerate_image {
     my $start = time;
 
     my $display = $job->app->get_display_by_id($display_id);
+    my $config  = PortalCalendar::Config->new(app => $job->app, display => $display);
+
     $job->app->log->info("Regenerating calendar image for display #" . $display->id);
 
     # FIXME don't just request "/calendar/id/html" via web, because that will trigger a refresh of the calendar IN THE WEBSERVER (UI thread) and not in this worker thread. And it causes errors like "Worker 1837132 has no heartbeat (50 seconds), restarting" when the UI thread is busy with getting calendar data etc..
@@ -71,7 +73,8 @@ sub check_missed_connects {
 
     foreach my $display ($job->app->schema->resultset('Display')->all_displays) {
         try {
-            my $last_visit = $display->last_visit;
+            my $config     = PortalCalendar::Config->new(app => $job->app, display => $display);
+            my $last_visit = $display->last_visit();
             if ($last_visit) {
                 my ($next, undef, undef) = $display->next_wakeup_time($last_visit);
 
@@ -80,7 +83,7 @@ sub check_missed_connects {
 
                     $last_visit->set_time_zone('local');
                     $next->set_time_zone('local');
-                    if (1 || !$display->missed_connects) {    # first time
+                    if (!$display->missed_connects) {    # first time
                         $job->app->log->warn("Display #" . $display->id . " is frozen for " . $diff_seconds . " seconds, last contact was at $last_visit, should have connected at $next");
 
                         my $token = $display->get_config('telegram_api_key');
@@ -95,7 +98,7 @@ sub check_missed_connects {
                             );
                         }
                     }
-                    $display->set_missed_connects(1 + $display->missed_connects);
+                    $display->set_missed_connects(1 + $display->missed_connects // 0);
                 }
             }
         } catch {

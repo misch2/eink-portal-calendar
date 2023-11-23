@@ -52,24 +52,24 @@ sub config {
         );
     }
 
-    $self->set_config('_last_visit', DateTime::Format::ISO8601->format_datetime(DateTime->now(time_zone => 'UTC')));
+    $display->set_config('_last_visit', DateTime::Format::ISO8601->format_datetime(DateTime->now(time_zone => 'UTC')));
     $display->set_missed_connects(0);
 
     # config values have a NOT NULL restriction
-    $self->set_config('_last_voltage_raw', $self->req->param('adc')  // $self->req->param('voltage_raw') // '');
-    $self->set_config('_last_voltage',     $self->req->param('v')    // '');
-    $self->set_config('_min_voltage',      $self->req->param('vmin') // '');
-    $self->set_config('_max_voltage',      $self->req->param('vmax') // '');
+    $display->set_config('_last_voltage_raw', $self->req->param('adc')  // $self->req->param('voltage_raw') // '');
+    $display->set_config('_last_voltage',     $self->req->param('v')    // '');
+    $display->set_config('_min_voltage',      $self->req->param('vmin') // '');
+    $display->set_config('_max_voltage',      $self->req->param('vmax') // '');
 
-    my $util = PortalCalendar::Util->new(app => $self, display => $display);
+    my $util = PortalCalendar::Util->new(app => $self->app, display => $display);
     my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
     $self->app->log->info("Next wakeup at $next_wakeup (in $sleep_in_seconds seconds) according to crontab schedule '$schedule'");
 
-    $util->update_mqtt_with_forced_jitter('voltage',         $display->voltage,                      0.001);
-    $util->update_mqtt_with_forced_jitter('battery_percent', $display->battery_percent(),            0.001);
-    $util->update_mqtt_with_forced_jitter('voltage_raw',     $self->get_config('_last_voltage_raw'), 0.001);
-    $util->update_mqtt_with_forced_jitter('min_voltage',     $self->get_config('_min_voltage'),      0.001);
-    $util->update_mqtt_with_forced_jitter('max_voltage',     $self->get_config('_max_voltage'),      0.001);
+    $util->update_mqtt_with_forced_jitter('voltage',         $display->get_config('voltage'),           0.001);
+    $util->update_mqtt_with_forced_jitter('battery_percent', $display->battery_percent(),               0.001);
+    $util->update_mqtt_with_forced_jitter('voltage_raw',     $display->get_config('_last_voltage_raw'), 0.001);
+    $util->update_mqtt_with_forced_jitter('min_voltage',     $display->get_config('_min_voltage'),      0.001);
+    $util->update_mqtt_with_forced_jitter('max_voltage',     $display->get_config('_max_voltage'),      0.001);
     $util->update_mqtt('firmware',   $display->firmware);
     $util->update_mqtt('last_visit', DateTime->now()->rfc3339);
     $util->update_mqtt_with_forced_jitter('sleep_time', $sleep_in_seconds, 1);
@@ -79,7 +79,7 @@ sub config {
         # {// undef} to force scalars
         sleep           => $sleep_in_seconds,
         battery_percent => $display->battery_percent() // undef,
-        ota_mode        => ($self->get_config('ota_mode') ? \1 : \0),    # JSON true/false
+        ota_mode        => ($display->get_config('ota_mode') ? \1 : \0),    # JSON true/false
     };
 
     $self->render(json => $ret);
@@ -102,18 +102,20 @@ sub bitmap {
 
     $colormap_name = 'webmap' if scalar(@$color_palette) == 0;
 
-    my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
-    return $util->generate_bitmap(
-        {
-            rotate          => $rotate,
-            flip            => $flip,
-            gamma           => $gamma,
-            numcolors       => $numcolors,
-            colormap_name   => $colormap_name,
-            colormap_colors => $color_palette,
-            format          => $format,
-            display_type    => $self->display->colortype,
-        }
+    my $util = PortalCalendar::Util->new(app => $self->app, display => $self->display);
+    return $self->render(
+        $util->generate_bitmap(
+            {
+                rotate          => $rotate,
+                flip            => $flip,
+                gamma           => $gamma,
+                numcolors       => $numcolors,
+                colormap_name   => $colormap_name,
+                colormap_colors => $color_palette,
+                format          => $format,
+                display_type    => $self->display->colortype,
+            }
+        )
     );
 }
 
@@ -122,7 +124,7 @@ sub bitmap_epaper {
     my $self = shift;
 
     # No, don't update last_visit here, because this is called by the UI itself too, and it would reset the missed_connects counter:when looking at a preview image
-    #$self->set_config('_last_visit', DateTime->now()->iso8601);
+    #$display->set_config('_last_visit', DateTime->now()->iso8601);
 
     my $rotate    = $self->display->rotation;
     my $numcolors = $self->display->num_colors;
@@ -136,18 +138,24 @@ sub bitmap_epaper {
         $rotate = 0;
     }
 
-    my $util = PortalCalendar::Util->new(app => $self, display => $self->display);
-    return $util->generate_bitmap(
-        {
-            rotate          => $rotate,
-            flip            => 0,
-            gamma           => $self->display->gamma,
-            numcolors       => $numcolors,
-            colormap_name   => $colormap_name,
-            colormap_colors => $color_palette,
-            format          => $format,
-            display_type    => $self->display->colortype,
-        }
+    my $util = PortalCalendar::Util->new(app => $self->app, display => $self->display);
+
+    # FIXME?
+    # $self->app->res->headers->content_type('application/octet-stream');
+    # $self->app->res->headers->header('Content-Transfer-Encoding' => 'binary');
+    return $self->render(
+        $util->generate_bitmap(
+            {
+                rotate          => $rotate,
+                flip            => 0,
+                gamma           => $self->display->gamma,
+                numcolors       => $numcolors,
+                colormap_name   => $colormap_name,
+                colormap_colors => $color_palette,
+                format          => $format,
+                display_type    => $self->display->colortype,
+            }
+        )
     );
 }
 

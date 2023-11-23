@@ -20,7 +20,7 @@ has fetch_days_during_single_call => 30;                                        
 
 sub is_available {
     my $self = shift;
-    return $self->config->get('_googlefit_access_token') && $self->config->get('_googlefit_refresh_token');
+    return $self->display->get_config('_googlefit_access_token') && $self->display->get_config('_googlefit_refresh_token');
 }
 
 sub _perform_authenticated_request {
@@ -29,7 +29,7 @@ sub _perform_authenticated_request {
 
     return unless $self->is_available;
 
-    my $access_token = $self->config->get('_googlefit_access_token');
+    my $access_token = $self->display->get_config('_googlefit_access_token');
     $req->header('Authorization' => "Bearer " . $access_token);
     my $response = $self->caching_ua->request($req);
 

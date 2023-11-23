@@ -27,11 +27,6 @@ has 'lwp_cache_dir' => sub {
 # Only to prevent contacting the server too often. It is not intended to be a long term or content-dependent cache, that's a task for DatabaseCache.
 has 'lwp_max_cache_age' => 10 * ONE_MINUTE;
 
-has 'config' => sub {
-    my $self = shift;
-    return $self->app->config_obj;
-};
-
 has 'db_cache' => sub {
     my $self = shift;
     return PortalCalendar::DatabaseCache->new(app => $self->app, creator => ref($self));

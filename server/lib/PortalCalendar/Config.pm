@@ -80,27 +80,29 @@ sub is_boolean_parameter {
     return 0;
 }
 
-sub get {
-    my $self = shift;
-    my $name = shift;
+sub get_from_schema {
+    my $self   = shift;
+    my $schema = shift;
+    my $name   = shift;
 
-    my $item = $self->app->schema->resultset('Config')->find({ name => $name, display_id => ($self->display ? $self->display->id : undef) });
+    my $item = $schema->resultset('Config')->find({ name => $name, display_id => ($self->display ? $self->display->id : undef) });
 
     return $item->value if $item;
     return $self->defaults->{$name} // undef;
 }
 
-sub set {
-    my $self  = shift;
-    my $name  = shift;
-    my $value = shift;
+sub set_from_schema {
+    my $self   = shift;
+    my $schema = shift;
+    my $name   = shift;
+    my $value  = shift;
 
     $value //= 0 if $self->is_boolean_parameter($name);
 
-    if (my $item = $self->app->schema->resultset('Config')->find({ name => $name, display_id => ($self->display ? $self->display->id : undef) })) {
+    if (my $item = $schema->resultset('Config')->find({ name => $name, display_id => ($self->display ? $self->display->id : undef) })) {
         $item->update({ value => $value });
     } else {
-        $self->app->schema->resultset('Config')->create(
+        $schema->resultset('Config')->create(
             {
                 name       => $name,
                 value      => $value,
@@ -110,6 +112,21 @@ sub set {
     }
 
     return;
+}
+
+sub get {
+    my $self = shift;
+    my $name = shift;
+
+    return $self->get_from_schema($self->app->schema, $name);
+}
+
+sub set {
+    my $self  = shift;
+    my $name  = shift;
+    my $value = shift;
+
+    return $self->set_from_schema($self->app->schema, $name, $value);
 }
 
 1;

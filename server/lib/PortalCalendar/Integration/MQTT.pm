@@ -14,10 +14,10 @@ sub publish_retained {
     my $value     = shift;
     my $ha_detail = shift;
 
-    my $server   = $self->config->get('mqtt_server');
-    my $username = $self->config->get('mqtt_username');
-    my $password = $self->config->get('mqtt_password');
-    my $topic    = $self->config->get('mqtt_topic');      # unique device identifier
+    my $server   = $self->display->get_config('mqtt_server');
+    my $username = $self->display->get_config('mqtt_username');
+    my $password = $self->display->get_config('mqtt_password');
+    my $topic    = $self->display->get_config('mqtt_topic');      # unique device identifier
 
     local $ENV{MQTT_SIMPLE_ALLOW_INSECURE_LOGIN} = 1;
     my $mqtt = Net::MQTT::Simple->new($server);

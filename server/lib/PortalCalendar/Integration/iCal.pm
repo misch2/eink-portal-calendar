@@ -48,8 +48,8 @@ sub transform_details {
 
     my $ical = iCal::Parser->new(
         no_todos     => 1,
-        tz           => $self->config->get('timezone'),        # database config, editable in UI
-        timezone_map => $self->app->config->{timezone_map},    # different type of config: .conf file
+        tz           => $self->display->get_config('timezone'),    # database config, editable in UI
+        timezone_map => $self->app->config->{timezone_map},        # different type of config: .conf file
         start        => $start,
         end          => $end,
     );

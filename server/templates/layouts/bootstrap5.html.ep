@@ -21,13 +21,13 @@
 
         % if ($display) {
             % my $last_contact_ago;
-            % if ($display->last_visit) {
-            %     $last_contact_ago = DateTime->now()->subtract_datetime($display->last_visit);
+            % if ($display->last_visit()) {
+            %     $last_contact_ago = DateTime->now()->subtract_datetime($display->last_visit());
             % }
 
-            % my $waiting_tasks  = $config_obj->app->minion->jobs({ states => [ 'inactive', 'active' ] })->total;
-            % my $last_voltage = $display->voltage;
-            % my $battery_percent = $display->battery_percent;
+            %# my $waiting_tasks  = $config_obj->app->minion->jobs({ states => [ 'inactive', 'active' ] })->total;
+            % my $last_voltage = $display->get_config('voltage');
+            % my $battery_percent = $display->battery_percent();
 
             <h4>Selected display: <%= $display->name %></h4>
             <p class="row-fluid">
@@ -53,10 +53,10 @@
                 <%= defined($last_voltage) ? sprintf("%.1f", $last_voltage) : '(unknown)' %> V (<%= defined($battery_percent) ? sprintf("%.0f", $battery_percent) : 'unknown' %> %). 
 
                 OTA mode: 
-                <%= $config_obj->get('ota_mode') ? 'on' : 'off' %>.
+                <%= $display->get_config('ota_mode') ? 'on' : 'off' %>.
 
-                Waiting tasks: 
-                <%= $waiting_tasks %>. 
+                %# Waiting tasks: 
+                %# <%= $waiting_tasks %>. 
             </p>
         % }
 
