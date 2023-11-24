@@ -27,6 +27,7 @@ use PortalCalendar::Integration::SvatkyAPI;
 
 has 'app';
 has 'display';
+has 'minimal_cache_expiry' => 0;
 
 Readonly my @PORTAL_ICONS => qw(a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 b11 b14 c3 c4 c7 d2 d3 d4 d5 e1 e2 e4);
 Readonly my %ICON_NAME_TO_FILENAME => (
@@ -225,7 +226,7 @@ sub html_for_date {
         my $url = $self->display->get_config("web_calendar_ics_url${calendar_no}");
         next unless $url;
 
-        my $calendar = PortalCalendar::Integration::iCal->new(app => $self->app, display => $self->display, ics_url => $url);
+        my $calendar = PortalCalendar::Integration::iCal->new(app => $self->app, display => $self->display, ics_url => $url, minimal_cache_expiry => $self->minimal_cache_expiry);
         try {
             push @today_events,   $calendar->get_events_between($dt->clone()->truncate(to => 'hour'), $dt->clone()->truncate(to => 'day')->add(days   => 1)->subtract(seconds => 1));
             push @nearest_events, $calendar->get_events_between($dt->clone()->truncate(to => 'day'),  $dt->clone()->truncate(to => 'day')->add(months => 12));
@@ -294,7 +295,7 @@ sub html_for_date {
 
     # # FIXME FIXME change to MetNo later
     # if ($self->display->get_config("openweather")) {
-    #     my $api = PortalCalendar::Integration::Weather::OpenWeather->new(app => $self->app, display => $self->display);
+    #     my $api = PortalCalendar::Integration::Weather::OpenWeather->new(app => $self->app, display => $self->display, minimal_cache_expiry => $self->minimal_cache_expiry);
     #     $current_weather = $api->fetch_current_from_web;
     #     $forecast        = $api->fetch_forecast_from_web;
 
@@ -331,11 +332,12 @@ sub html_for_date {
 
     if ($self->display->get_config("metnoweather") && $self->display->get_config("lat") && $self->display->get_config("lon") && $self->display->get_config("alt")) {
         my $api = PortalCalendar::Integration::Weather::MetNo->new(
-            app      => $self->app,
-            display  => $self->display,
-            lat      => $self->display->get_config("lat"),
-            lon      => $self->display->get_config("lon"),
-            altitude => $self->display->get_config("alt"),
+            app                  => $self->app,
+            display              => $self->display,
+            minimal_cache_expiry => $self->minimal_cache_expiry,
+            lat                  => $self->display->get_config("lat"),
+            lon                  => $self->display->get_config("lon"),
+            altitude             => $self->display->get_config("alt"),
         );
 
         my $dt_start = $dt->clone->truncate(to => 'hour');    # ->add(hours => 1);
@@ -357,12 +359,12 @@ sub html_for_date {
     my $weight_series;
     my $last_weight;
     if ($self->display->get_config('googlefit') && $self->display->get_config("googlefit_client_id")) {
-        my $api = PortalCalendar::Integration::Google::Fit->new(app => $self->app, display => $self->display);
+        my $api = PortalCalendar::Integration::Google::Fit->new(app => $self->app, display => $self->display, minimal_cache_expiry => $self->minimal_cache_expiry);
         $weight_series = $api->get_weight_series;
         $last_weight   = $api->get_last_known_weight;
     }
 
-    my $svatky_api = PortalCalendar::Integration::SvatkyAPI->new(app => $self->app, display => $self->display);
+    my $svatky_api = PortalCalendar::Integration::SvatkyAPI->new(app => $self->app, display => $self->display, minimal_cache_expiry => $self->minimal_cache_expiry);
     return (
         template => 'calendar_themes/' . $self->display->get_config('theme'),
         format   => 'html',
@@ -652,7 +654,7 @@ sub update_mqtt {
 
     return unless $self->display->get_config('mqtt');
 
-    my $api        = PortalCalendar::Integration::MQTT->new(app => $self->app, display => $self->display);
+    my $api        = PortalCalendar::Integration::MQTT->new(app => $self->app, display => $self->display, minimal_cache_expiry => $self->minimal_cache_expiry);
     my %ha_details = (
         voltage => {
             component           => 'sensor',

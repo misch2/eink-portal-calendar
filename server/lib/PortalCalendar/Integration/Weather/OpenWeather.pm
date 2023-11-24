@@ -8,8 +8,6 @@ use Mojo::URL;
 use DDP;
 use Time::Seconds;
 
-use PortalCalendar::DatabaseCache;
-
 has 'api_key' => sub {
     my $self = shift;
     return $self->display->get_config('openweather_api_key');

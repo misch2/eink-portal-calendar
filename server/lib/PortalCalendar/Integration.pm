@@ -17,6 +17,7 @@ use PortalCalendar::DatabaseCache;
 
 has 'app' => sub { die "app is not defined " };
 has 'display';    # optional, only for some of the methods
+has 'minimal_cache_expiry' => 0;
 
 has 'lwp_cache_dir' => sub {
     my $self = shift;
@@ -29,7 +30,7 @@ has 'lwp_max_cache_age' => 10 * ONE_MINUTE;
 
 has 'db_cache' => sub {
     my $self = shift;
-    return PortalCalendar::DatabaseCache->new(app => $self->app, creator => ref($self));
+    return PortalCalendar::DatabaseCache->new(app => $self->app, creator => ref($self), minimal_cache_expiry => $self->minimal_cache_expiry);
 };
 
 has chi_cache => sub {

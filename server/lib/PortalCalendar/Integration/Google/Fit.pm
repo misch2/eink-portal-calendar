@@ -6,8 +6,6 @@ use Mojo::Base -base;
 use Mojo::File;
 use Mojo::JSON qw(decode_json encode_json);
 
-use PortalCalendar::DatabaseCache;
-
 use DDP;
 use Try::Tiny;
 use HTTP::Request;

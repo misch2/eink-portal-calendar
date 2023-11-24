@@ -68,7 +68,7 @@
         <img id="aperture-logo" src="/images/Aperture_Laboratories_Logo.png">
 
         <div id="bottom-signature">
-            % my $now = DateTime->now->set_time_zone($display->get_config('timezone'));
+            % my $now = $display->now;
             % my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
 
             %# screen generated at

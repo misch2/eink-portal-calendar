@@ -49,8 +49,8 @@ sub regenerate_image {
 
     # For now we just do the calculations here in the worker thread and we hope the result will be cached for the next 5 minutes (see FIXME above)
     $job->app->log->debug("prefetching cached data");
-    my $util = PortalCalendar::Util->new(app => $job->app, display => $display);
-    $util->html_for_date(DateTime->now(time_zone => $display->get_config('timezone')));    # FIXME use "forced cache expiry + N " option
+    my $util = PortalCalendar::Util->new(app => $job->app, display => $display, minimal_cache_expiry => 2 * ONE_MINUTE);    # use forced minimal cache expiry
+    $util->html_for_date($display->now);
 
     $job->app->log->debug("generating img from cached data");
     my $converter = PortalCalendar::Web2Png->new(pageres_command => $job->app->home->child("node_modules/.bin/pageres"));

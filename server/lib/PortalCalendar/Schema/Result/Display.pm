@@ -207,6 +207,11 @@ use Try::Tiny;
 
 use PortalCalendar::Config;
 
+sub now {
+    my $self = shift;
+    return DateTime->now(time_zone => $self->get_config('timezone'));
+}
+
 sub is_default {
     return shift->id == 0;
 }

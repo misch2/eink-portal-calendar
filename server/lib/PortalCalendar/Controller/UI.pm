@@ -175,7 +175,7 @@ sub calendar_html_default_date {
 
     return $self->render(
         $util->html_for_date(
-            DateTime->now(time_zone => $self->display->get_config('timezone')),
+            $self->display->now,
             {
                 preview_colors => ($self->req->param('preview_colors') // 0)
             }

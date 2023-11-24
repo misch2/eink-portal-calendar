@@ -4,7 +4,6 @@ use Mojo::Base qw/PortalCalendar::Integration/;
 
 use Mojo::Base -base;
 use Mojo::File;
-use PortalCalendar::DatabaseCache;
 
 use iCal::Parser;
 use DDP;

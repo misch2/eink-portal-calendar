@@ -9,7 +9,7 @@
 % $decorator = sub { uc(shift) };       # UPPERCASE
 %# $decorator = sub { ucfirst(shift) }; # Uppercase
 %# $decorator = sub { Text::Unidecode::unidecode(uc(shift)) }; # UPPERCASE with accents removed
-% my $now = DateTime->now->set_time_zone($display->get_config('timezone'));
+% my $now = $display->now;
 % my $precipitation_limit = 0.5; # mm
 
 <body>

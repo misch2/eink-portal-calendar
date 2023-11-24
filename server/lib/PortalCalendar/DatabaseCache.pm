@@ -13,6 +13,8 @@ use Time::Seconds;
 has 'app'     => sub { die "app not set" };
 has 'creator' => sub { die "creator not set" };
 
+has 'minimal_cache_expiry' => 0;
+
 has 'max_age' => sub { 5 * ONE_MINUTE };
 
 sub get_or_set {
@@ -46,7 +48,7 @@ sub get_or_set {
 
     $self->app->log->debug("${log_prefix}storing serialized data into the DB");
     my $serialized_data = b64_encode(Storable::freeze $data);
-    $self->app->schema->resultset('Cache')->update_or_create(
+    my $record          = $self->app->schema->resultset('Cache')->update_or_create(
         {
             # filter keys
             creator => $self->creator,
@@ -61,6 +63,19 @@ sub get_or_set {
             key => 'creator_key_unique',
         }
     );
+
+    if ($self->minimal_cache_expiry) {
+        $self->app->log->debug("${log_prefix}enforcing cache expiry at least in " . $self->minimal_cache_expiry . " seconds");
+        my $future_expiry = $now->clone->add(seconds => $self->minimal_cache_expiry);
+        if ($record->expires_at < $future_expiry) {
+            $self->app->log->debug("${log_prefix}updating cache expiry from " . $record->expires_at . " to " . $future_expiry);
+            $record->update(
+                {
+                    expires_at => $now->clone->add(seconds => $self->minimal_cache_expiry),
+                }
+            );
+        }
+    }
 
     return $data;
 }

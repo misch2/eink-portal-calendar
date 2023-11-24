@@ -12,7 +12,6 @@ use DateTime::Event::Sunrise;
 use Storable;
 use List::Util qw(min max sum uniq);
 
-use PortalCalendar::DatabaseCache;
 use PortalCalendar::Integration::Weather::MetNo::IconsMapping;
 
 has 'lat'      => sub { die "lat is not defined" };

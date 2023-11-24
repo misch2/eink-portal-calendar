@@ -4,7 +4,7 @@
 %= stylesheet '/css/calendar_themes/multiday_calendar.css'
 %= include 'calendar_themes/includes/epd_colors', colors => $colors
 
-% my $now = DateTime->now->set_time_zone($display->get_config('timezone'));
+% my $now = $display->now;
 
 <body>
 <div id="visible-area">
