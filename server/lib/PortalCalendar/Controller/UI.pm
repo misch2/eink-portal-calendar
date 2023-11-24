@@ -136,7 +136,7 @@ sub config_ui_save {
         $self->display->border_bottom($self->req->param('display_border_bottom'));
         $self->display->border_left($self->req->param('display_border_left'));
         $self->display->update;
-    ;
+    }
 
     $self->flash(message => "Parameters saved.");
 
