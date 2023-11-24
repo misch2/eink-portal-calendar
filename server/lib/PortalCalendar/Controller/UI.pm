@@ -14,6 +14,47 @@ has display => sub {
     return $self->get_display_by_id($self->stash('display_number'));
 };
 
+has config_ui_parameters => sub {
+    return [
+        qw/
+            alt
+            googlefit
+            googlefit_auth_callback
+            googlefit_client_id
+            googlefit_client_secret
+            lat
+            lon
+            max_icons_with_calendar
+            max_random_icons
+            metnoweather
+            metnoweather_granularity_hours
+            min_random_icons
+            mqtt
+            mqtt_password
+            mqtt_server
+            mqtt_topic
+            mqtt_username
+            openweather
+            openweather_api_key
+            openweather_lang
+            ota_mode
+            telegram
+            telegram_api_key
+            telegram_chat_id
+            theme
+            timezone
+            totally_random_icon
+            wakeup_schedule
+            web_calendar_ics_url1
+            web_calendar_ics_url2
+            web_calendar_ics_url3
+            web_calendar1
+            web_calendar2
+            web_calendar3
+            /
+    ];
+};
+
 sub select_display {
     my $self = shift;
 
@@ -70,20 +111,18 @@ sub config_ui_show {
         nav_link         => 'config_ui',
 
         display         => $self->display,
-        default_display => $self->app->schema->resultset('Display')->default_display,
     );
 }
 
 sub config_ui_save {
     my $self = shift;
 
-    my $config = PortalCalendar::Config->new(app => $self->app, display => $self->display);
-    my $util   = PortalCalendar::Util->new(app => $self->app, display => $self->display);
+    my $util = PortalCalendar::Util->new(app => $self->app, display => $self->display);
 
     # Generic config parameters
-    foreach my $name (@{ $config->parameters }) {
+    foreach my $name (@{ $self->config_ui_parameters }) {
         my $value = $self->req->param($name);
-        $self->display->set_config($name, $value // '');
+        $self->display->set_config($name, $value);
     }
 
     # Database columns in the 'displays' table
@@ -118,7 +157,6 @@ sub config_ui_theme_show {
                 format   => 'html',
 
                 display         => $self->display,
-                default_display => $self->app->schema->resultset('Display')->default_display,
             );
         } catch {
             $self->app->log->error("Error rendering theme [$theme]: $_");

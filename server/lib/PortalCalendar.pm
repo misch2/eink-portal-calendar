@@ -306,3 +306,35 @@ DELETE FROM config WHERE name IN ('broken glass', 'min_voltage', 'max_voltage', 
 
 -- 18 up
 INSERT INTO displays (id, mac, name, width, height, rotation, colortype, gamma, border_top, border_right, border_bottom, border_left, firmware) VALUES (0, '', 'Default settings', 0, 0, 0, '', 1.8, 0, 0, 0, 0, '');
+
+-- 19 up
+CREATE TEMPORARY TABLE config_bak AS SELECT * FROM config;
+DROP TABLE config;
+CREATE TABLE config (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR NOT NULL,
+    value VARCHAR,
+    display_id INTEGER NOT NULL REFERENCES displays(id)
+);
+INSERT INTO config (id, name, value, display_id) SELECT id, name, value, display_id FROM config_bak WHERE display_id IS NOT NULL;
+CREATE UNIQUE INDEX config_name_display ON config (name, display_id);
+
+-- 20 up
+INSERT INTO config (display_id, name, value) VALUES (0, 'timezone', 'UTC')
+ ON CONFLICT (display_id, name) DO UPDATE SET value=excluded.value WHERE value='' OR value IS NULL;
+INSERT INTO config (display_id, name, value) VALUES (0, 'theme', 'portal_with_icons')
+ ON CONFLICT (display_id, name) DO UPDATE SET value=excluded.value WHERE value='' OR value IS NULL;
+INSERT INTO config (display_id, name, value) VALUES (0, 'min_random_icons', '4')
+ ON CONFLICT (display_id, name) DO UPDATE SET value=excluded.value WHERE value='' OR value IS NULL;
+INSERT INTO config (display_id, name, value) VALUES (0, 'max_random_icons', '10')
+ ON CONFLICT (display_id, name) DO UPDATE SET value=excluded.value WHERE value='' OR value IS NULL;
+INSERT INTO config (display_id, name, value) VALUES (0, 'max_icons_with_calendar', '5')
+ ON CONFLICT (display_id, name) DO UPDATE SET value=excluded.value WHERE value='' OR value IS NULL;
+INSERT INTO config (display_id, name, value) VALUES (0, 'metnoweather_granularity_hours', '2')
+ ON CONFLICT (display_id, name) DO UPDATE SET value=excluded.value WHERE value='' OR value IS NULL;
+INSERT INTO config (display_id, name, value) VALUES (0, 'openweather_lang', 'en')
+ ON CONFLICT (display_id, name) DO UPDATE SET value=excluded.value WHERE value='' OR value IS NULL;
+INSERT INTO config (display_id, name, value) VALUES (0, 'mqtt_topic', 'portal_calendar01')
+ ON CONFLICT (display_id, name) DO UPDATE SET value=excluded.value WHERE value='' OR value IS NULL;
+INSERT INTO config (display_id, name, value) VALUES (0, 'googlefit_auth_callback', 'https://local-server-name/auth/googlefit/cb')
+ ON CONFLICT (display_id, name) DO UPDATE SET value=excluded.value WHERE value='' OR value IS NULL;

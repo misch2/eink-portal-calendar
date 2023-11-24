@@ -232,6 +232,15 @@ sub get_config {
     return $config->get_from_schema($self->result_source->schema, $name);
 }
 
+sub get_config_defaults_only {
+    my $self = shift;
+    my $name = shift;
+
+    my $config = PortalCalendar::Config->new(display => $self);
+
+    return $config->get_from_schema_defaults_only($self->result_source->schema, $name);
+}
+
 sub get_config_without_defaults {
     my $self = shift;
     my $name = shift;
@@ -253,7 +262,7 @@ sub set_config {
 sub voltage {
     my $self    = shift;
     my $voltage = $self->get_config('_last_voltage');
-    return undef if $voltage eq '';
+    return undef if ($voltage // '') eq '';
     return sprintf("%.3f", $voltage);
 }
 

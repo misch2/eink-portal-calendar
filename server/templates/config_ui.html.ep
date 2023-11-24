@@ -6,6 +6,77 @@
     </div>
 % }
 
+<% my $x_input = begin %>
+% my $args = { @_ };
+% if ($args->{label}) {
+    <label for="<%= $args->{name} %>"><%= $args->{label} %></label>
+% }
+<input id="<%= $args->{name} %>"
+    name="<%= $args->{name} %>"
+    type="text" 
+    class="form-control"
+    value="<%= $display->get_config_without_defaults($args->{name}) %>"
+    placeholder="<%= $display->get_config_defaults_only($args->{name}) %>"
+    <%= $args->{disabled} ? " disabled" : "" %>
+>
+% if (defined $args->{legend}) {
+    <div class="form-text">
+        <%== $args->{legend} %>
+    </div>
+% }
+<% end %>
+
+<% my $x_integration_toggle = begin %>
+% my %args = @_;
+% my $name = $args{name};
+<div class="form-group col-12">
+    <div class="form-check form-switch">
+        <label class="form-check-label">
+            <input 
+                class="form-check-input" 
+                type="checkbox" 
+                id="<%= $name %>" 
+                name="<%= $name %>" 
+                value="1" 
+                <%= $display->get_config($name) ? "checked" : "" %>
+                <%= ($display->get_config_without_defaults($name) // '') ne '' ? "" : "disabled" %>
+            >
+            Integration enabled
+        </label>
+    </div>
+</div>
+% unless ($display->is_default) {
+    <div class="form-group col-12">
+        <div class="form-check form-switch">
+            <label class="form-check-label">
+                <input class="form-check-input" 
+                    type="checkbox" 
+                    id="_<%= $name %>_override_global" 
+                    value="1" 
+                    <%= ($display->get_config_without_defaults($name) // '') ne '' ? "checked" : "" %>
+                >
+                Override global settings
+            </label>
+        </div>
+    </div>
+    %= javascript begin
+    $(document).ready(() => {
+        // xxx
+        $("#_<%= $name %>_override_global").on('change', function() {
+            if ($(this).is(':checked')) {
+                // show current value and allow to change it
+                $("#<%= $name %>").prop('checked', <%= $display->get_config_without_defaults($name) ? 'true' : 'false' %>).prop('disabled', false);
+            } else {
+                // show the default value but don''t allow to change it
+                $("#<%= $name %>").prop('checked', <%= $display->get_config_defaults_only($name) ? 'true' : 'false' %>).prop('disabled', true);
+            }
+        });
+    });
+    %= end
+% }
+<% end %>
+
+
 <h3 class="mb-3">Configuration</h3>
 
 <form action="/config_ui/<%= $display->id %>" method="post">
@@ -60,22 +131,18 @@
                 <legend class="w-auto">Location and locale</legend>
                 <div class="form-group row">
                     <div class="col-md-4">
-                        <label for="lat">Latitude (+N/-S)</label>
-                        <input id="lat" name="lat" type="text" placeholder="<%= $default_display->get_config('lat') %>" class="form-control" value="<%= $display->get_config_without_defaults('lat') %>">
+                        <%= $x_input->(name => 'lat', label => 'Latitude (+N/-S)'); %>
                     </div>
                     <div class="col-md-4">
-                        <label for="lon">Longitude (+E/-W)</label>
-                        <input id="lon" name="lon" type="text" placeholder="<%= $default_display->get_config('lon') %>" class="form-control" value="<%= $display->get_config_without_defaults('lon') %>">
+                        <%= $x_input->(name => 'lon', label => 'Longitude (+E/-W)'); %>
                     </div>
                     <div class="col-md-4">
-                        <label for="alt">Altitude (m)</label>
-                        <input id="alt" name="alt" type="text" placeholder="<%= $default_display->get_config('alt') %>" class="form-control" value="<%= $display->get_config_without_defaults('alt') %>">
+                        <%= $x_input->(name => 'alt', label => 'Altitude (m)'); %>
                     </div>
                 </div>
                 <div class="form-group row">
                     <div class="col-md-4">
-                        <label for="timezone">Time zone</label>
-                        <input id="timezone" name="timezone" type="text" placeholder="<%= $default_display->get_config('timezone') %>" class="form-control" value="<%= $display->get_config_without_defaults('timezone') %>">
+                        <%= $x_input->(name => 'timezone', label => 'Time Zone'); %>
                     </div>
                 </div>
             </fieldset>
@@ -137,8 +204,7 @@
 
             <fieldset class="mt-4 row">
                 <div class="col-md-12">
-                    <label for="wakeup_schedule">Wake up (redraw) schedule in <a href="https://crontab.guru/">crontab format</a></label>
-                    <input id="wakeup_schedule" name="wakeup_schedule" type="text" class="form-control" value="<%= $display->get_config_without_defaults('wakeup_schedule') %>" placeholder="<%= $default_display->get_config('wakeup_schedule') %>">
+                    <%= $x_input->(name => 'wakeup_schedule', label => 'Wake up (redraw) schedule', legend => 'Schedule is in the <a href="https://crontab.guru/">crontab format</a>, for example "0 * * * *"') %>
                 </div>
             </fieldset>
         </div>
@@ -188,18 +254,10 @@
         </div>
         <div class="tab-pane" id="nav-metnoweather" role="tabpanel">
             <fieldset class="row">
-                <div class="form-group col-12">
-                    <div class="form-check form-switch">
-                        <label class="form-check-label">
-                            <input class="form-check-input" type="checkbox" id="metnoweather" name="metnoweather" value="1" <%= $display->get_config('metnoweather') ? "checked" : "" %>>
-                            Integration enabled
-                        </label>
-                    </div>
-                </div>
+                <%= $x_integration_toggle->(name => 'metnoweather') %>
                 <div class="form-group col-12 mt-3">
                     <div class="col-md-4">
-                        <label for="metnoweather_granularity_hours">Aggregate forecast by how many hours:</label>
-                        <input id="metnoweather_granularity_hours" name="metnoweather_granularity_hours" type="text" class="form-control" value="<%= $display->get_config_without_defaults('metnoweather_granularity_hours') %>" placeholder="<%= $default_display->get_config('metnoweather_granularity_hours') %>">
+                        <%= $x_input->(name => 'metnoweather_granularity_hours', label => 'Aggregate forecast by how many hours'); %>
                     </div>
                 </div>
             </fieldset>
@@ -207,22 +265,13 @@
 
         <div class="tab-pane" id="nav-openweather" role="tabpanel">
             <fieldset class="row">
-                <div class="form-group col-12">
-                    <div class="form-check form-switch">
-                        <label class="form-check-label">
-                            <input class="form-check-input" type="checkbox" id="openweather" name="openweather" value="1" <%= $display->get_config('openweather') ? "checked" : "" %>>
-                            Integration enabled
-                        </label>
-                    </div>
-                </div>
+                <%= $x_integration_toggle->(name => 'openweather') %>
                 <div class="form-group col-12 mt-3">
-                    <label for="openweather_api_key">API key</label>
-                    <input id="openweather_api_key" name="openweather_api_key" type="text" class="form-control" value="<%= $display->get_config_without_defaults('openweather_api_key') %>" placeholder="<%= $default_display->get_config('openweather_api_key') %>">
+                    <%= $x_input->(name => 'openweather_api_key', label => 'API key'); %>
                 </div>
-                <div class="form-group row">
+                <div class="form-group row mt-3">
                     <div class="col-md-4">
-                        <label for="openweather_lang">Lang</label>
-                        <input id="openweather_lang" name="openweather_lang" type="text" placeholder="<%= $default_display->get_config('openweather_lang') %>" class="form-control" value="<%= $display->get_config_without_defaults('openweather_lang') %>">
+                        <%= $x_input->(name => 'openweather_lang', label => 'Language', legend => 'Language code, for example "en", "cs", etc.'); %>
                     </div>
                 </div>
             </fieldset>
@@ -230,52 +279,31 @@
 
         <div class="tab-pane" id="nav-telegram" role="tabpanel">
             <fieldset class="row">
-                <div class="form-group col-12">
-                    <div class="form-check form-switch">
-                        <label class="form-check-label">
-                            <input class="form-check-input" type="checkbox" id="telegram" name="telegram" value="1" <%= $display->get_config('telegram') ? "checked" : "" %>>
-                            Integration enabled
-                        </label>
-                    </div>
+                <%= $x_integration_toggle->(name => 'telegram') %>
+                <div class="form-group col-12 mt-3">
+                    <%= $x_input->(name => 'telegram_api_key', label => 'API key'); %>
                 </div>
                 <div class="form-group col-12 mt-3">
-                    <label for="telegram_api_key">API key</label>
-                    <input id="telegram_api_key" name="telegram_api_key" type="text" class="form-control" value="<%= $display->get_config_without_defaults('telegram_api_key') %>" placeholder="<%= $default_display->get_config('telegram_api_key') %>">
-                </div>
-                <div class="form-group col-12 mt-3">
-                    <label for="telegram_chat_id">Chat ID</label>
-                    <input id="telegram_chat_id" name="telegram_chat_id" type="text" class="form-control" value="<%= $display->get_config_without_defaults('telegram_chat_id') %>" placeholder="<%= $default_display->get_config('telegram_chat_id') %>">
-                    <div class="form-text">See <a href="https://stackoverflow.com/questions/32423837/telegram-bot-how-to-get-a-group-chat-id">https://stackoverflow.com/questions/32423837/telegram-bot-how-to-get-a-group-chat-id</a> to get the id.</div>
+                    <%= $x_input->(name => 'telegram_chat_id', label => 'Chat ID', legend => 'See <a href="https://stackoverflow.com/questions/32423837/telegram-bot-how-to-get-a-group-chat-id">https://stackoverflow.com/questions/32423837/telegram-bot-how-to-get-a-group-chat-id</a> to get the id.'); %>
                 </div>
             </fieldset>
         </div>
 
         <div class="tab-pane" id="nav-mqtt" role="tabpanel">
             <fieldset class="row">
-                <div class="form-group col-12">
-                    <div class="form-check form-switch">
-                        <label class="form-check-label">
-                            <input class="form-check-input" type="checkbox" id="mqtt" name="mqtt" value="1" <%= $display->get_config('mqtt') ? "checked" : "" %>>
-                            Integration enabled
-                        </label>
-                    </div>
-                </div>
+                <%= $x_integration_toggle->(name => 'mqtt') %>
                 <div class="form-group row mt-3">
                     <div class="col-md-3">
-                        <label for="mqtt_server">Server</label>
-                        <input id="mqtt_server" name="mqtt_server" type="text" class="form-control" value="<%= $display->get_config_without_defaults('mqtt_server') %>" placeholder="<%= $default_display->get_config('mqtt_server') %>">
+                        <%= $x_input->(name => 'mqtt_server', label => 'Server'); %>
                     </div>
                     <div class="col-md-3">
-                        <label for="mqtt_username">Username</label>
-                        <input id="mqtt_username" name="mqtt_username" type="text" class="form-control" value="<%= $display->get_config_without_defaults('mqtt_username') %>" placeholder="<%= $default_display->get_config('mqtt_username') %>">
+                        <%= $x_input->(name => 'mqtt_username', label => 'Username'); %>
                     </div>
                     <div class="col-md-3">
-                        <label for="mqtt_password">Password</label>
-                        <input id="mqtt_password" name="mqtt_password" type="text" class="form-control" value="<%= $display->get_config_without_defaults('mqtt_password') %>" placeholder="<%= $default_display->get_config('mqtt_password') %>">
+                        <%= $x_input->(name => 'mqtt_password', label => 'Password'); %>
                     </div>
                     <div class="col-md-3">
-                        <label for="mqtt_topic">Device topic</label>
-                        <input id="mqtt_topic" name="mqtt_topic" type="text" class="form-control" value="<%= $display->get_config_without_defaults('mqtt_topic') %>" placeholder="<%= $default_display->get_config('mqtt_topic') %>">
+                        <%= $x_input->(name => 'mqtt_topic', label => 'Device topic'); %>
                     </div>
                 </div>
             </fieldset>
@@ -283,14 +311,7 @@
 
         <div class="tab-pane" id="nav-fit" role="tabpanel">
             <fieldset class="row">
-                <div class="form-group col-12">
-                    <div class="form-check form-switch">
-                        <label class="form-check-label">
-                            <input class="form-check-input" type="checkbox" id="googlefit" name="googlefit" value="1" <%= $display->get_config('googlefit') ? "checked" : "" %>>
-                            Integration enabled
-                        </label>
-                    </div>
-                </div>
+                <%= $x_integration_toggle->(name => 'googlefit') %>
 
                 <div class="form-group col-12 mt-3 mb-3">
                     <a class="btn btn-primary" href="/auth/googlefit/<%= $display->id %>">Authorize calendar to use Google Fit with the values below</a>
@@ -300,25 +321,22 @@
                     See <a href="https://console.cloud.google.com/apis/">https://console.cloud.google.com/apis/</a> to get client ID and secret values:
                 </div>
                 <div class="col-md-12">
-                    <label for="googlefit_client_id">Client ID</label>
-                    <input id="googlefit_client_id" name="googlefit_client_id" type="text" class="form-control" value="<%= $display->get_config_without_defaults('googlefit_client_id') %>" placeholder="<%= $default_display->get_config('googlefit_client_id') %>">
+                    <%= $x_input->(name => 'googlefit_client_id', label => 'Client ID'); %>
                 </div>
                 <div class="col-md-12">
-                    <label for="googlefit_client_secret">Client secret</label>
-                    <input id="googlefit_client_secret" name="googlefit_client_secret" type="text" class="form-control" value="<%= $display->get_config_without_defaults('googlefit_client_secret') %>" placeholder="<%= $default_display->get_config('googlefit_client_secret') %>">
+                    <%= $x_input->(name => 'googlefit_client_secret', label => 'Client secret'); %>
                 </div>
                 <div class="col-md-12">
-                    <label for="">Callback URL</label>
-                    <input id="googlefit_auth_callback" name="googlefit_auth_callback" type="text" class="form-control" value="<%= $display->get_config_without_defaults('googlefit_auth_callback') %>" placeholder="<%= $default_display->get_config('googlefit_auth_callback') %>">
-                </div>
-                <hr>
-                <div class="col-md-12">
-                    <label for="">Auth token</label>
-                    <input id="_googlefit_access_token" name="_googlefit_access_token" type="text" class="form-control" value="<%= $display->get_config_without_defaults('_googlefit_access_token') %>" placeholder="<%= $default_display->get_config('_googlefit_access_token') %>">
+                    <%= $x_input->(name => 'googlefit_auth_callback', label => 'Callback URL'); %>
                 </div>
                 <div class="col-md-12">
-                    <label for="">Refresh token</label>
-                    <input id="_googlefit_refresh_token" name="_googlefit_refresh_token" type="text" class="form-control" value="<%= $display->get_config_without_defaults('_googlefit_refresh_token') %>" placeholder="<%= $default_display->get_config('_googlefit_refresh_token') %>">
+                    <hr>
+                </div>
+                <div class="col-md-12">
+                    <%= $x_input->(name => '_googlefit_refresh_token', label => 'Refresh token', disabled => 1); %>
+                </div>
+                <div class="col-md-12">
+                    <%= $x_input->(name => '_googlefit_access_token', label => 'Auth token', disabled => 1); %>
                 </div>
             </fieldset>
         </div>
@@ -345,3 +363,5 @@ $(document).ready(() => {
     });
 });
 %= end
+
+%= include 'shared/checkbox_fix'

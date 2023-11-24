@@ -50,13 +50,13 @@ __PACKAGE__->table("config");
 =head2 value
 
   data_type: 'varchar'
-  is_nullable: 0
+  is_nullable: 1
 
 =head2 display_id
 
   data_type: 'integer'
   is_foreign_key: 1
-  is_nullable: 1
+  is_nullable: 0
 
 =cut
 
@@ -66,9 +66,9 @@ __PACKAGE__->add_columns(
   "name",
   { data_type => "varchar", is_nullable => 0 },
   "value",
-  { data_type => "varchar", is_nullable => 0 },
+  { data_type => "varchar", is_nullable => 1 },
   "display_id",
-  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
 );
 
 =head1 PRIMARY KEY
@@ -113,18 +113,13 @@ __PACKAGE__->belongs_to(
   "display",
   "PortalCalendar::Schema::Result::Display",
   { id => "display_id" },
-  {
-    is_deferrable => 0,
-    join_type     => "LEFT",
-    on_delete     => "NO ACTION",
-    on_update     => "NO ACTION",
-  },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 
 #>>> end of perltidy skipped block
 
-# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-11-03 13:53:17
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:nZ5J2bKFOAS83OC18PkHDA
+# Created by DBIx::Class::Schema::Loader v0.07049 @ 2023-11-24 14:51:21
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:BUKyePstsG70KVqYr25i8g
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

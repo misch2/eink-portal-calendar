@@ -449,7 +449,7 @@ sub generate_bitmap {
     my $self = shift;
     my $args = shift;
 
-    $self->app->log->info("Producing bitmap");
+    $self->app->log->debug("Producing bitmap");
 
     # $self->app->log->info(np($args));
 
