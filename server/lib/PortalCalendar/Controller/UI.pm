@@ -126,15 +126,17 @@ sub config_ui_save {
     }
 
     # Database columns in the 'displays' table
-    $self->display->name($self->req->param('display_name'));
-    $self->display->mac(lc(trim($self->req->param('display_mac'))) || undef);
-    $self->display->rotation($self->req->param('display_rotation'));
-    $self->display->gamma($self->req->param('display_gamma'));
-    $self->display->border_top($self->req->param('display_border_top'));
-    $self->display->border_right($self->req->param('display_border_right'));
-    $self->display->border_bottom($self->req->param('display_border_bottom'));
-    $self->display->border_left($self->req->param('display_border_left'));
-    $self->display->update;
+    unless ($self->display->is_default) {
+        $self->display->name($self->req->param('display_name'));
+        $self->display->mac(lc(trim($self->req->param('display_mac'))) || undef);
+        $self->display->rotation($self->req->param('display_rotation'));
+        $self->display->gamma($self->req->param('display_gamma'));
+        $self->display->border_top($self->req->param('display_border_top'));
+        $self->display->border_right($self->req->param('display_border_right'));
+        $self->display->border_bottom($self->req->param('display_border_bottom'));
+        $self->display->border_left($self->req->param('display_border_left'));
+        $self->display->update;
+    ;
 
     $self->flash(message => "Parameters saved.");
 
