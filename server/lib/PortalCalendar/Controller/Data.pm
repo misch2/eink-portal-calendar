@@ -4,6 +4,7 @@ use Mojo::Base 'PortalCalendar::Controller';
 
 use DateTime;
 use DateTime::Format::ISO8601;
+use WWW::Telegram::BotAPI;
 
 has mac => sub {
     my $self = shift;
@@ -53,7 +54,28 @@ sub config {
     }
 
     $display->set_config('_last_visit', DateTime::Format::ISO8601->format_datetime(DateTime->now(time_zone => 'UTC')));
-    $display->reset_missed_connects_count();
+
+    if ($display->missed_connects > 0) {
+        my $message = $self->app->render_anything(
+            template => 'display_unfrozen',
+            format   => 'txt',
+            display  => $display,
+        );
+        $self->app->log->warn($message);
+
+        my $token = $display->get_config('telegram_api_key');
+        if ($token) {
+            $self->app->log->debug("Sending telegram message to " . $display->get_config('telegram_chat_id'));
+            my $telegram = WWW::Telegram::BotAPI->new(token => $token);
+            $telegram->sendMessage(
+                {
+                    chat_id => $display->get_config('telegram_chat_id'),
+                    text    => $message,
+                }
+            );
+        }
+        $display->reset_missed_connects_count();
+    }
 
     # config values have a NOT NULL restriction
     $display->set_config('_last_voltage_raw', $self->req->param('adc')  // $self->req->param('voltage_raw') // '');

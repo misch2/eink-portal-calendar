@@ -1,0 +1,3 @@
+% my $diff_seconds = $now->subtract_datetime_absolute($last_visit)->seconds;
+%#
+✅ Display #<%= $display->id %> (<%= $display->name %>) has come alive again at <%= $last_visit->format_cldr('dd.MM.YYYY HH:mm') %>.

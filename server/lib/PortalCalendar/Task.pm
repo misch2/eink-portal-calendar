@@ -83,14 +83,18 @@ sub check_missed_connects {
                 my $now_safe = $now->clone()->subtract(minutes => 5);
 
                 if ($next < $now_safe) {
-                    my $diff_seconds = $now_safe->epoch - $last_visit->epoch;
-
                     $last_visit->set_time_zone('local');
                     $next->set_time_zone('local');
                     if (!$display->missed_connects) {    # first time
-                        $job->app->log->warn("Display #" . $display->id . " is frozen for " . $diff_seconds . " seconds, last contact was at $last_visit, should have connected at $next");
-
-
+                        my $message = $job->app->render_anything(
+                            template   => 'display_frozen',
+                            format     => 'txt',
+                            display    => $display,
+                            last_visit => $last_visit,
+                            next       => $next,
+                            now        => $now,
+                        );
+                        $job->app->log->warn($message);
 
                         my $token = $display->get_config('telegram_api_key');
                         if ($token) {
@@ -99,7 +103,7 @@ sub check_missed_connects {
                             $telegram->sendMessage(
                                 {
                                     chat_id => $display->get_config('telegram_chat_id'),
-                                    text    => "Display #" . $display->id . " is frozen for " . $diff_seconds . " seconds, last contact was at $last_visit, should have connected at $next"
+                                    text    => $message,
                                 }
                             );
                         }

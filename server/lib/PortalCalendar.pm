@@ -70,6 +70,8 @@ sub setup_helpers {
         }
     );
 
+    $app->helper(render_anything => sub { shift->render_to_string(@_) });
+
     return;
 }
 
