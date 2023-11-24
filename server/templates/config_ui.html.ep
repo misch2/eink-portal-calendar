@@ -166,6 +166,14 @@
             </fieldset>
 
             <fieldset class="mt-4 row">
+                <div class="col-md-12">
+                    <label for="display_mac">MAC address</label>
+                    <input id="display_mac" name="display_mac" type="text" class="form-control" value="<%= $display->mac %>">
+                    <div class="form-text">MAC address of the display in the aa:bb:cc:dd:ee:ff format.</div>
+                </div>
+            </fieldset>
+
+            <fieldset class="mt-4 row">
                 <div class="col-md-6">
                     <label for="display_rotation">Rotation</label>
                     <select id="display_rotation" name="display_rotation" class="form-select">

@@ -2,7 +2,7 @@
 package PortalCalendar::Controller::UI;
 use Mojo::Base 'PortalCalendar::Controller';
 
-use Mojo::Util qw(url_escape b64_decode b64_encode);
+use Mojo::Util qw(url_escape b64_decode b64_encode trim);
 use Mojo::JSON qw(decode_json encode_json);
 use Try::Tiny;
 
@@ -110,7 +110,7 @@ sub config_ui_show {
         last_voltage_raw => $self->display->get_config('_last_voltage_raw'),
         nav_link         => 'config_ui',
 
-        display         => $self->display,
+        display => $self->display,
     );
 }
 
@@ -127,6 +127,7 @@ sub config_ui_save {
 
     # Database columns in the 'displays' table
     $self->display->name($self->req->param('display_name'));
+    $self->display->mac(lc(trim($self->req->param('display_mac'))) || undef);
     $self->display->rotation($self->req->param('display_rotation'));
     $self->display->gamma($self->req->param('display_gamma'));
     $self->display->border_top($self->req->param('display_border_top'));
@@ -155,8 +156,7 @@ sub config_ui_theme_show {
             $result = $self->render(
                 template => "calendar_themes/configs/$theme",
                 format   => 'html',
-
-                display         => $self->display,
+                display  => $self->display,
             );
         } catch {
             $self->app->log->error("Error rendering theme [$theme]: $_");
