@@ -272,10 +272,14 @@ sub battery_percent {
     return sprintf("%.1f", $percentage);
 }
 
-sub set_missed_connects {
-    my $self  = shift;
-    my $count = shift;
-    $self->set_config('_missed_connects', $count);
+sub reset_missed_connects_count {
+    my $self = shift;
+    $self->set_config('_missed_connects', 0);
+}
+
+sub increase_missed_connects_count {
+    my $self = shift;
+    $self->set_config('_missed_connects', 1 + $self->missed_connects);
 }
 
 sub missed_connects {

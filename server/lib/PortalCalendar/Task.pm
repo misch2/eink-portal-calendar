@@ -90,6 +90,8 @@ sub check_missed_connects {
                     if (!$display->missed_connects) {    # first time
                         $job->app->log->warn("Display #" . $display->id . " is frozen for " . $diff_seconds . " seconds, last contact was at $last_visit, should have connected at $next");
 
+
+
                         my $token = $display->get_config('telegram_api_key');
                         if ($token) {
                             $job->app->log->debug("Sending telegram message to " . $display->get_config('telegram_chat_id'));
@@ -102,7 +104,7 @@ sub check_missed_connects {
                             );
                         }
                     }
-                    $display->set_missed_connects(1 + $display->missed_connects // 0);
+                    $display->increase_missed_connects_count();
                 }
             }
         } catch {

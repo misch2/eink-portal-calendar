@@ -53,7 +53,7 @@ sub config {
     }
 
     $display->set_config('_last_visit', DateTime::Format::ISO8601->format_datetime(DateTime->now(time_zone => 'UTC')));
-    $display->set_missed_connects(0);
+    $display->reset_missed_connects_count();
 
     # config values have a NOT NULL restriction
     $display->set_config('_last_voltage_raw', $self->req->param('adc')  // $self->req->param('voltage_raw') // '');
