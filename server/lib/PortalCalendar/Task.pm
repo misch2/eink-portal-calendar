@@ -17,6 +17,7 @@ sub regenerate_all_images {
     my $job = shift;
 
     foreach my $display ($job->app->schema->resultset('Display')->all_displays) {
+        next if $display->is_default;
         $job->app->minion->enqueue('regenerate_image', [ $display->id ]);
     }
 
@@ -72,6 +73,7 @@ sub check_missed_connects {
     my $now = DateTime->now(time_zone => 'UTC');    # the same timezone as _last_visit
 
     foreach my $display ($job->app->schema->resultset('Display')->all_displays) {
+        next if $display->is_default;
         try {
             my $config     = PortalCalendar::Config->new(app => $job->app, display => $display);
             my $last_visit = $display->last_visit();
