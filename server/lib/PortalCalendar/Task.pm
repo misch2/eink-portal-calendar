@@ -78,8 +78,12 @@ sub check_missed_connects {
             if ($last_visit) {
                 my ($next, undef, undef) = $display->next_wakeup_time($last_visit);
 
-                if ($next < $now) {
-                    my $diff_seconds = $now->epoch - $last_visit->epoch;
+                # Prevent false failures when the $next is very close to $now (e.g. $next=10:00:00 and $now=10:01:00).
+                # The clock in displays is not precise and this shouldn't be considered a missed connection.
+                my $now_safe = $now->clone()->subtract(minutes => 5);
+
+                if ($next < $now_safe) {
+                    my $diff_seconds = $now_safe->epoch - $last_visit->epoch;
 
                     $last_visit->set_time_zone('local');
                     $next->set_time_zone('local');
