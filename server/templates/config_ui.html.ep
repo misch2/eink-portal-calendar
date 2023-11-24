@@ -16,7 +16,9 @@
     type="text" 
     class="form-control"
     value="<%= $display->get_config_without_defaults($args->{name}) %>"
-    placeholder="<%= $display->get_config_defaults_only($args->{name}) %>"
+    % unless ($display->is_default) {
+        placeholder="<%= $display->get_config_defaults_only($args->{name}) %>"
+    % }
     <%= $args->{disabled} ? " disabled" : "" %>
 >
 % if (defined $args->{legend}) {
@@ -39,7 +41,7 @@
                 name="<%= $name %>" 
                 value="1" 
                 <%= $display->get_config($name) ? "checked" : "" %>
-                <%= ($display->get_config_without_defaults($name) // '') ne '' ? "" : "disabled" %>
+                <%= ((($display->get_config_without_defaults($name) // '') ne '') || $display->is_default) ? "" : "disabled" %>
             >
             Integration enabled
         </label>
