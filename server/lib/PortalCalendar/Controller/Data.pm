@@ -56,10 +56,13 @@ sub config {
     $display->set_config('_last_visit', DateTime::Format::ISO8601->format_datetime(DateTime->now(time_zone => 'UTC')));
 
     if ($display->missed_connects > 0) {
-        my $message = $self->app->render_anything(
-            template => 'display_unfrozen',
-            format   => 'txt',
-            display  => $display,
+        my $last_visit = $display->last_visit()->set_time_zone('local');
+        my $message    = $self->app->render_anything(
+            template   => 'display_unfrozen',
+            format     => 'txt',
+            display    => $display,
+            last_visit => $last_visit,
+            now        => DateTime->now->set_time_zone('local'),
         );
         $self->app->log->warn($message);
 
