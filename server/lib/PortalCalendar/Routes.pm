@@ -21,6 +21,7 @@ sub setup {
     $r->get('/')->to('UI#select_display');
     $r->get('/home/:display_number')->to('UI#home');
     $r->get('/test/:display_number')->to('UI#test');
+    $r->post('/delete/:display_number')->to('UI#delete_display');
     $r->get('/calendar/:display_number/html')->to('UI#calendar_html_default_date');
     $r->get('/calendar/:display_number/html/:date')->to('UI#calendar_html_specific_date');
     $r->get('/config_ui/:display_number')->to('UI#config_ui_show');

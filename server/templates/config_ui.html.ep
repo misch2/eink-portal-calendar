@@ -97,14 +97,14 @@
     </nav>
     <div class="tab-content" id="nav-tabContent">
         <div class="tab-pane show active" id="nav-main" role="tabpanel">
-            <fieldset class="row">
-                <legend class="w-auto">Name (title)</legend>
-                <div class="col-md-12">
-                    <input id="display_name" name="display_name" type="text" class="form-control" value="<%= $display->name %>">
-                </div>
-            </fieldset>
-
             % unless ($display->is_default) {
+                <fieldset class="row">
+                    <legend class="w-auto">Name (title)</legend>
+                    <div class="col-md-12">
+                        <input id="display_name" name="display_name" type="text" class="form-control" value="<%= $display->name %>">
+                    </div>
+                </fieldset>
+
                 <fieldset class="mt-4 row">
                     <legend class="w-auto">Theme</legend>
 
@@ -165,52 +165,54 @@
                 </div>
             </fieldset>
 
-            <fieldset class="mt-4 row">
-                <div class="col-md-12">
-                    <label for="display_mac">MAC address</label>
-                    <input id="display_mac" name="display_mac" type="text" class="form-control" value="<%= $display->mac %>">
-                    <div class="form-text">MAC address of the display in the aa:bb:cc:dd:ee:ff format.</div>
-                </div>
-            </fieldset>
+            % unless ($display->is_default) {
+                <fieldset class="mt-4 row">
+                    <div class="col-md-12">
+                        <label for="display_mac">MAC address</label>
+                        <input id="display_mac" name="display_mac" type="text" class="form-control" value="<%= $display->mac %>">
+                        <div class="form-text">MAC address of the display in the aa:bb:cc:dd:ee:ff format.</div>
+                    </div>
+                </fieldset>
 
-            <fieldset class="mt-4 row">
-                <div class="col-md-6">
-                    <label for="display_rotation">Rotation</label>
-                    <select id="display_rotation" name="display_rotation" class="form-select">
-                        <option value="0" <%= 'selected' if $display->rotation == 0 %>> 0° (<%= $display->width %> &times; <%= $display->height %>)</option>
-                        <option value="1" <%= 'selected' if $display->rotation == 1 %>> 90° (<%= $display->height %> &times; <%= $display->width %>)</option>
-                        <option value="2" <%= 'selected' if $display->rotation == 2 %>> 180° (<%= $display->width %> &times; <%= $display->height %> but upside down)</option>
-                        <option value="3" <%= 'selected' if $display->rotation == 3 %>> 270° (<%= $display->height %> &times; <%= $display->width %>)</option>
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label for="display_gamma">Gamma</label>
-                    <input id="display_gamma" name="display_gamma" type="number" step="0.01" class="form-control" value="<%= $display->gamma %>">
-                    <div class="form-text">How should the grayscale/antialiased elements map to the pure black and white. Higher values &gt; 2.2 = darker and thicker, lower values &lt; 1.8 = lighter and thinner.</div>
-                </div>
-            </fieldset">
+                <fieldset class="mt-4 row">
+                    <div class="col-md-6">
+                        <label for="display_rotation">Rotation</label>
+                        <select id="display_rotation" name="display_rotation" class="form-select">
+                            <option value="0" <%= 'selected' if $display->rotation == 0 %>> 0° (<%= $display->width %> &times; <%= $display->height %>)</option>
+                            <option value="1" <%= 'selected' if $display->rotation == 1 %>> 90° (<%= $display->height %> &times; <%= $display->width %>)</option>
+                            <option value="2" <%= 'selected' if $display->rotation == 2 %>> 180° (<%= $display->width %> &times; <%= $display->height %> but upside down)</option>
+                            <option value="3" <%= 'selected' if $display->rotation == 3 %>> 270° (<%= $display->height %> &times; <%= $display->width %>)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="display_gamma">Gamma</label>
+                        <input id="display_gamma" name="display_gamma" type="number" step="0.01" class="form-control" value="<%= $display->gamma %>">
+                        <div class="form-text">How should the grayscale/antialiased elements map to the pure black and white. Higher values &gt; 2.2 = darker and thicker, lower values &lt; 1.8 = lighter and thinner.</div>
+                    </div>
+                </fieldset>
 
-            <fieldset class="mt-4 row">
-                <div class="col-md-3">
-                    <label for="display_border_top">Preview frame top</label>
-                    <input id="display_border_top" name="display_border_top" type="number" step="1" class="form-control" value="<%= $display->border_top %>">
-                </div>
-                <div class="col-md-3">
-                    <label for="display_border_right">Preview frame right</label>
-                    <input id="display_border_right" name="display_border_right" type="number" step="1" class="form-control" value="<%= $display->border_right %>">
-                </div>
-                <div class="col-md-3">
-                    <label for="display_border_bottom">Preview frame bottom</label>
-                    <input id="display_border_bottom" name="display_border_bottom" type="number" step="1" class="form-control" value="<%= $display->border_bottom %>">
-                </div>
-                <div class="col-md-3">
-                    <label for="display_border_left">Preview frame left</label>
-                    <input id="display_border_left" name="display_border_left" type="number" step="1" class="form-control" value="<%= $display->border_left %>">
-                </div>
-                <div class="col-md-12 form-text">
-                    Preview frame border (how much the physical frame overlaps the display on each side)
-                </div>
-            </fieldset>
+                <fieldset class="mt-4 row">
+                    <div class="col-md-3">
+                        <label for="display_border_top">Preview frame top</label>
+                        <input id="display_border_top" name="display_border_top" type="number" step="1" class="form-control" value="<%= $display->border_top %>">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="display_border_right">Preview frame right</label>
+                        <input id="display_border_right" name="display_border_right" type="number" step="1" class="form-control" value="<%= $display->border_right %>">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="display_border_bottom">Preview frame bottom</label>
+                        <input id="display_border_bottom" name="display_border_bottom" type="number" step="1" class="form-control" value="<%= $display->border_bottom %>">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="display_border_left">Preview frame left</label>
+                        <input id="display_border_left" name="display_border_left" type="number" step="1" class="form-control" value="<%= $display->border_left %>">
+                    </div>
+                    <div class="col-md-12 form-text">
+                        Preview frame border (how much the physical frame overlaps the display on each side)
+                    </div>
+                </fieldset>
+            % }
 
             <fieldset class="mt-4 row">
                 <div class="col-md-12">

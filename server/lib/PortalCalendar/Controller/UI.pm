@@ -94,6 +94,17 @@ sub test {
     );
 }
 
+sub delete_display {
+    my $self = shift;
+
+    $self->display->delete;
+
+    $self->app->log->warn("Display deleted: " . $self->display->id);
+    $self->flash(message => "Display deleted.");
+
+    $self->redirect_to('/');
+}
+
 sub config_ui_show {
     my $self = shift;
 
