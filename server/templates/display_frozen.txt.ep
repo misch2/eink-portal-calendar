@@ -1,4 +1,4 @@
-% my $diff_seconds = $now->subtract_datetime_absolute($last_visit)->seconds;
+% my $diff_seconds = $now->subtract_datetime_absolute($next)->seconds;
 % my $diff_minutes = int($diff_seconds / 60);
 % my $diff_hours = int($diff_minutes / 60);
 %#

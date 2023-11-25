@@ -87,7 +87,8 @@ sub check_missed_connects {
                 if ($next < $now_safe) {
                     $last_visit->set_time_zone('local');
                     $next->set_time_zone('local');
-                    if (!$display->missed_connects) {    # first time
+                    $display->increase_missed_connects_count();
+                    if ($display->missed_connects == 2) {    # only alert on the second missed connection
                         my $message = $job->app->render_anything(
                             template   => 'display_frozen',
                             format     => 'txt',
@@ -110,7 +111,6 @@ sub check_missed_connects {
                             );
                         }
                     }
-                    $display->increase_missed_connects_count();
                 }
             }
         } catch {
