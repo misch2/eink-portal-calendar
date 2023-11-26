@@ -81,7 +81,7 @@
         </td>
         <td>
             % unless ($d->is_default) {
-                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_modal" data-display-id="<%= $d->id %>" data-display-name="<%= $d->name %>">Delete</button>
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#delete_modal" data-display-id="<%= $d->id %>" data-display-name="<%= $d->name %>">Delete</button>
             % }
     </tr>
 % }
