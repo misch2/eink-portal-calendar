@@ -1,4 +1,5 @@
 #ifdef DEBUG
+
 #ifdef SYSLOG_SERVER
 // A UDP instance to let us send and receive packets over UDP
 WiFiUDP udpClient;
@@ -23,8 +24,16 @@ Syslog syslog(udpClient, SYSLOG_SERVER, SYSLOG_PORT, HOSTNAME, SYSLOG_MYAPPNAME,
   Serial.printf(__VA_ARGS__); \
   Serial.print('\n')
 #endif
+
+#define TRACE_PRINT(...)      \
+  Serial.printf(__VA_ARGS__); \
+  Serial.print('\n');
+
 #else
+
 #define DEBUG_PRINT(...)
+#define TRACE_PRINT(...)
+
 #endif
 
 // WiFi is connected now => all messages go to syslog too.
