@@ -37,7 +37,7 @@ sub regenerate_image {
 
     $job->app->log->info("Regenerating calendar image for display #" . $display->id);
 
-    # FIXME don't just request "/calendar/id/html" via web, because that will trigger a refresh of the calendar IN THE WEBSERVER (UI thread) and not in this worker thread. And it causes errors like "Worker 1837132 has no heartbeat (50 seconds), restarting" when the UI thread is busy with getting calendar data etc..
+    # Don't just request "/calendar/id/html" via web, because that will trigger a refresh of the calendar IN THE WEBSERVER (UI thread) and not in this worker thread. And it causes errors like "Worker 1837132 has no heartbeat (50 seconds), restarting" when the UI thread is busy with getting calendar data etc..
     # It would be much better to do all the calculations here and only use the "/html" route to get the HTML code using cached-only data.
     # I.e. something like:
     #   - minion job:
@@ -46,8 +46,8 @@ sub regenerate_image {
     #      - call the "/html" route to get the HTML code
     #   - UI thread:
     #      - just return the HTML code from the cache (i.e. with a "forced cache hit" option)
-
-    # For now we just do the calculations here in the worker thread and we hope the result will be cached for the next 5 minutes (see FIXME above)
+    #
+    # For now we just do the calculations here in the worker thread and we hope the result will be cached for the next 5 minutes.
     $job->app->log->debug("prefetching cached data");
     my $util = PortalCalendar::Util->new(app => $job->app, display => $display, minimal_cache_expiry => 2 * ONE_MINUTE);    # use forced minimal cache expiry
     $util->html_for_date($display->now);
@@ -82,13 +82,13 @@ sub check_missed_connects {
 
                 # Prevent false failures when the $next is very close to $now (e.g. $next=10:00:00 and $now=10:01:00).
                 # The clock in displays is not precise and this shouldn't be considered a missed connection.
-                my $now_safe = $now->clone()->subtract(minutes => 5);
+                my $now_safe = $now->clone()->subtract(minutes => $display->get_config('alive_check_safety_lag_minutes'));
 
                 if ($next < $now_safe) {
                     $last_visit->set_time_zone('local');
                     $next->set_time_zone('local');
                     $display->increase_missed_connects_count();
-                    my $missed_connections_limit = 2;    # only alert on the second missed connection
+                    my $missed_connections_limit = $display->get_config('alive_check_minimal_failure_count') || 1;
                     if ($display->missed_connects == $missed_connections_limit) {
                         my $message = $job->app->render_anything(
                             template                 => 'display_frozen',

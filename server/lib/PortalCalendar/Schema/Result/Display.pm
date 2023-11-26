@@ -410,14 +410,12 @@ sub next_wakeup_time {
     #   3. !!! server sends the content to display but it AGAIN suggests to wake up at 7:00
     #   4. !!! display unnecessarily wakes up at approx. 7:00 and displays the content. Or it wakes at 6:59:45 and the whole loop repeats (see point 2)
     #
-    # Fixed here by accepting a small (~5 minutes) time difference:
+    # On the other hand, even when the display wakes up too early, if the image is not changed, it will not be redrawn and the display will go to sleep again ASAP.
+    #
+    # Fixed here by accepting a small (~1 minute) time difference:
     my $diff_seconds = $next_time->epoch - $now->epoch;
-    if ($diff_seconds <= 5 * ONE_MINUTE) {
-
-        # warn "wakeup time ($next_time) too close to now ($now), moving to next event";
+    if ($diff_seconds <= 1 * ONE_MINUTE) {
         $next_time = $self->_next_wakeup_time_for_datetime($schedule, $next_time->clone->add(seconds => 1));
-
-        # warn " -> updated next: $next_time";
     }
 
     my $sleep_in_seconds = $next_time->epoch - $now->epoch;

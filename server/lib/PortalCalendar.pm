@@ -338,3 +338,10 @@ INSERT INTO config (display_id, name, value) VALUES (0, 'mqtt_topic', 'portal_ca
  ON CONFLICT (display_id, name) DO UPDATE SET value=excluded.value WHERE value='' OR value IS NULL;
 INSERT INTO config (display_id, name, value) VALUES (0, 'googlefit_auth_callback', 'https://local-server-name/auth/googlefit/cb')
  ON CONFLICT (display_id, name) DO UPDATE SET value=excluded.value WHERE value='' OR value IS NULL;
+
+-- 21 up
+INSERT INTO config (display_id, name, value) VALUES (0, 'alive_check_safety_lag_minutes', '0')
+  ON CONFLICT (display_id, name) DO UPDATE SET value=excluded.value WHERE value='' OR value IS NULL;
+INSERT INTO config (display_id, name, value) VALUES (0, 'alive_check_minimal_failure_count', '2')
+  ON CONFLICT (display_id, name) DO UPDATE SET value=excluded.value WHERE value='' OR value IS NULL;
+  

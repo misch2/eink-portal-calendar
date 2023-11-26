@@ -17,6 +17,8 @@ has display => sub {
 has config_ui_parameters => sub {
     return [
         qw/
+            alive_check_safety_lag_minutes
+            alive_check_minimal_failure_count
             alt
             googlefit
             googlefit_auth_callback

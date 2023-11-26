@@ -8,22 +8,28 @@
 
 <% my $x_input = begin %>
 % my $args = { @_ };
-% if ($args->{label}) {
-    <label for="<%= $args->{name} %>"><%= $args->{label} %></label>
+% my $name = delete $args->{name};
+% my $label = delete $args->{label};
+% my $legend = delete $args->{legend};
+% if ($label) {
+    <label for="<%= $name %>"><%= $label %></label>
 % }
-<input id="<%= $args->{name} %>"
-    name="<%= $args->{name} %>"
-    type="text" 
-    class="form-control"
-    value="<%= $display->get_config_without_defaults($args->{name}) %>"
-    % unless ($display->is_default) {
-        placeholder="<%= $display->get_config_defaults_only($args->{name}) %>"
+<input id="<%= $name %>" \
+    name="<%= $name %>" \
+    type="<%= delete $args->{type} || 'text' %>"
+    class="form-control" \
+    value="<%= $display->get_config_without_defaults($name) %>" \
+    % foreach my $key (sort keys %{ $args }) {
+        <%= $key %>="<%= $args->{$key} %>" \
     % }
-    <%= $args->{disabled} ? " disabled" : "" %>
+    % unless ($display->is_default) {
+        placeholder="<%= $display->get_config_defaults_only($name) %>" 
+    % }
+    <%= $args->{disabled} ? " disabled" : "" %> \
 >
-% if (defined $args->{legend}) {
+% if (defined $legend) {
     <div class="form-text">
-        <%== $args->{legend} %>
+        <%== $legend %>
     </div>
 % }
 <% end %>
@@ -215,8 +221,14 @@
             % }
 
             <fieldset class="mt-4 row">
-                <div class="col-md-12">
+                <div class="col-md-4">
                     <%= $x_input->(name => 'wakeup_schedule', label => 'Wake up (redraw) schedule', legend => 'Schedule is in the <a href="https://crontab.guru/">crontab format</a>, for example "0 * * * *"') %>
+                </div>
+                <div class="col-md-4">
+                    <%= $x_input->(name => 'alive_check_safety_lag_minutes', type => 'number', label => 'Enforced lag when checking if display is alive (minutes)', legend => 'How many minutes to delay the check after the expected contact time') %>
+                </div>
+                <div class="col-md-4">
+                    <%= $x_input->(name => 'alive_check_minimal_failure_count', type => 'number', label => 'Min. number of alive check failures', legend => 'Minimal number of failures the display is considered to be frozen and before a notification is sent.') %>
                 </div>
             </fieldset>
         </div>
