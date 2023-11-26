@@ -88,14 +88,16 @@ sub check_missed_connects {
                     $last_visit->set_time_zone('local');
                     $next->set_time_zone('local');
                     $display->increase_missed_connects_count();
-                    if ($display->missed_connects == 2) {    # only alert on the second missed connection
+                    my $missed_connections_limit = 2;    # only alert on the second missed connection
+                    if ($display->missed_connects == $missed_connections_limit) {
                         my $message = $job->app->render_anything(
-                            template   => 'display_frozen',
-                            format     => 'txt',
-                            display    => $display,
-                            last_visit => $last_visit,
-                            next       => $next,
-                            now        => $now,
+                            template                 => 'display_frozen',
+                            format                   => 'txt',
+                            display                  => $display,
+                            last_visit               => $last_visit,
+                            next                     => $next,
+                            now                      => $now,
+                            missed_connections_limit => $missed_connections_limit
                         );
                         $job->app->log->warn($message);
 
