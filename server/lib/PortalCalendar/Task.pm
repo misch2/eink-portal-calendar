@@ -90,6 +90,7 @@ sub check_missed_connects {
                     $display->increase_missed_connects_count();
                     my $missed_connections_limit = $display->get_config('alive_check_minimal_failure_count') || 1;
                     if ($display->missed_connects == $missed_connections_limit) {
+                        $display->set_config('_frozen_notification_sent', 1);
                         my $message = $job->app->render_anything(
                             template                 => 'display_frozen',
                             format                   => 'txt',
