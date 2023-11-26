@@ -236,8 +236,8 @@ void logResetReason() {
 }
 
 void disconnectAndHibernate() {
-  logRuntimeStats();
-  // ^ last syslog message before the WiFi disconnects
+  sleepTime -= (millis() - fullStartTime) / 1000;  // correct the sleep time for the time spent in the setup
+  logRuntimeStats();                               // last syslog message before the WiFi disconnects
   stopDisplay();
   stopWiFi();
   boardSpecificDone();
