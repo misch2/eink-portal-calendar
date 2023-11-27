@@ -13,6 +13,7 @@
 #include <WiFiManager.h>
 #endif
 #include <WiFiUdp.h>
+#include <esp_task_wdt.h>
 
 // dynamically include board-specific config
 // clang-format off
@@ -44,6 +45,8 @@ const char *defined_color_type = "3C";
 #include <GxEPD2_3C.h>
 #endif
 
+#define WDT_TIMEOUT 60  // seconds
+
 // TODO add other display types too
 
 #include "debug.h"
@@ -72,6 +75,7 @@ ESP32AnalogRead adc;
 #endif
 
 uint32_t fullStartTime;
+uint32_t configLoadTime;
 
 int voltage_adc_raw;
 float voltage_real;
@@ -114,6 +118,7 @@ void startHttpGetRequest(String path) {
   int statusCode = 0;
   bool ok = false;
   for (int attempt = 1; attempt <= 3; attempt++) {
+    wdtRefresh();
     if (attempt > 1) {
       DEBUG_PRINT("Retrying download, attempt #%d", attempt);
     };
@@ -163,6 +168,7 @@ void loadConfigFromWeb() {
                 + "&c=" + String(defined_color_type)                              //
                 + "&fw=" + String(FIRMWARE_VERSION);                              //
 
+  configLoadTime = millis();
   startHttpGetRequest(path);
   String jsonText = httpClient.responseBody();
 
@@ -198,6 +204,22 @@ void basicInit() {
   ++wakeupCount;
   Serial.begin(115200);
   DEBUG_PRINT("Started");
+}
+
+void wdtInit() {
+  TRACE_PRINT("Configuring WDT for %d seconds", WDT_TIMEOUT);
+  esp_task_wdt_init(WDT_TIMEOUT, true);  // enable panic so ESP32 restarts
+  esp_task_wdt_add(NULL);                // add current thread to WDT watch
+}
+
+void wdtRefresh() {
+  TRACE_PRINT("(WDT ping)");
+  esp_task_wdt_reset();
+}
+
+void wdtStop() {
+  TRACE_PRINT("Stopping WDT...");
+  esp_task_wdt_deinit();
 }
 
 void wakeupAndConnect() {
@@ -256,9 +278,16 @@ void logResetReason() {
 }
 
 void disconnectAndHibernate() {
-  sleepTime -= (millis() - fullStartTime) / 1000;  // correct the sleep time for the time spent in the setup
-  logRuntimeStats();                               // last syslog message before the WiFi disconnects
+  logRuntimeStats();  // last syslog message before the WiFi disconnects
   stopDisplay();
+
+  sleepTime -= (millis() - configLoadTime) / 1000;  // correct the sleep time for the time spent in the setup
+  if (sleepTime < 10) {
+    DEBUG_PRINT("SleepTime is too low (%d seconds), resetting to a sane value", sleepTime);
+    sleepTime = 300;
+  }
+  DEBUG_PRINT("Going to hibernate for %d seconds", sleepTime);
+
   stopWiFi();
   boardSpecificDone();
   espDeepSleep(sleepTime);
@@ -267,6 +296,7 @@ void disconnectAndHibernate() {
 int httpReadStringUntil(char terminator, String &result) {
   result = "";
 
+  wdtRefresh();
   int bytes = 0;
   while (httpClient.connected() && httpClient.available()) {
     int c = httpClient.read();
@@ -308,6 +338,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
     uint32_t bytes_read = 0;
     DEBUG_PRINT("Reading bitmap header");
     // FIXME from HTTP headers would be ideal
+    wdtRefresh();
     String line;
     bytes_read += httpReadStringUntil('\n', line);
     if (line != "MM")  // signature
@@ -318,6 +349,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
 
     DEBUG_PRINT("Reading checksum");
     // FIXME from HTTP headers would be ideal
+    wdtRefresh();
     bytes_read += httpReadStringUntil('\n', line);
     DEBUG_PRINT("Last checksum was: %s", lastChecksum);
     DEBUG_PRINT("New checksum is: %s", line.c_str());
@@ -334,6 +366,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
 
     for (uint16_t row = 0; row < h; row++) {
       // DEBUG_PRINT("Reading row %d, bytes_read=%d", row, bytes_read);
+      wdtRefresh();
       ArduinoOTA.handle();
 
 #ifdef DISPLAY_TYPE_BW
@@ -370,6 +403,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
   DEBUG_PRINT("Download time: %lu ms", millis() - startTime);
 
   TRACE_PRINT("Display refresh start");
+  wdtRefresh();
   startTime = millis();
   display.refresh();  // full refresh
   DEBUG_PRINT("Display refresh time: %lu ms", millis() - startTime);
@@ -379,6 +413,7 @@ void stopWiFi() {
   TRACE_PRINT("stopWiFi()");
 
   unsigned long start = millis();
+  wdtRefresh();
 
   // do not reset settings (SSID/password) when disconnecting
   WiFi.persistent(false);
@@ -401,13 +436,16 @@ bool startWiFi() {
 
   // wifiManager.setFastConnectMode(true); // no difference
 #ifdef USE_WIFI_MANAGER
+  wdtStop();
   res = wifiManager.autoConnect();
+  wdtInit();
   if (!res) {
     DEBUG_PRINT("Failed to connect");
     stopWiFi();
     return false;
   }
 #else
+  wdtRefresh();
   WiFi.setHostname(HOSTNAME);
   WiFi.config(NETWORK_IP_ADDRESS, NETWORK_IP_GATEWAY, NETWORK_IP_SUBNET, NETWORK_IP_DNS);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -449,17 +487,21 @@ void displayText(String message, const GFXfont *font) {
   uint16_t wh = (display.height() / 2);
   // display.setPartialWindow(0, wy, display.width(), wh);
 
+  wdtRefresh();
   display.firstPage();
   do {
     display.fillScreen(GxEPD_WHITE);
     display.setCursor(x, y);
     display.print(message);
+    wdtRefresh();
   } while (display.nextPage());
   display.refresh();  // full refresh
+  wdtRefresh();
 }
 
 void initOTA() {
   ArduinoOTA.setHostname(HOSTNAME);
+  ArduinoOTA.onStart([]() { wdtStop(); });
   // ArduinoOTA
   //     .onStart([]() {
   //       String type;
@@ -503,6 +545,7 @@ void error(String message) {
 }
 
 void espDeepSleep(uint64_t seconds) {
+  wdtStop();
   TRACE_PRINT("Going to deep sleep for %lu s", seconds);
   esp_sleep_enable_timer_wakeup(seconds * uS_PER_S);
   esp_deep_sleep_start();
@@ -535,17 +578,19 @@ void initDisplay() {
 void stopDisplay() {
   //
   DEBUG_PRINT("stopDisplay()");
+  wdtRefresh();
   display.powerOff();
+  wdtRefresh();
 }
 
 void logRuntimeStats() {
   TRACE_PRINT("logRuntimeStats()");
   DEBUG_PRINT("Total execution time: %lu ms", millis() - fullStartTime);
-  DEBUG_PRINT("Going to hibernate for %d seconds", sleepTime);
 }
 
 void setup() {
   basicInit();
+  wdtInit();
   boardSpecificInit();
   wakeupAndConnect();
 
