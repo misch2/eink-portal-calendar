@@ -292,8 +292,16 @@ sub reset_missed_connects_count {
 }
 
 sub increase_missed_connects_count {
-    my $self = shift;
-    $self->set_config('_missed_connects', 1 + $self->missed_connects);
+    my $self                     = shift;
+    my $expected_time_of_connect = shift;
+
+    my $previous_expected_time_of_connect = $self->get_config('_last_expected_time_of_connect');
+    if ($previous_expected_time_of_connect eq DateTime::Format::ISO8601->format_datetime($expected_time_of_connect)) {
+        # warn "Skipping increase_missed_connects_count because the expected time of connect is the same as the previous one ($previous_expected_time_of_connect)";
+        return;
+    }
+    $self->set_config('_last_expected_time_of_connect', DateTime::Format::ISO8601->format_datetime($expected_time_of_connect));
+    $self->set_config('_missed_connects',               1 + $self->missed_connects);
 }
 
 sub missed_connects {
