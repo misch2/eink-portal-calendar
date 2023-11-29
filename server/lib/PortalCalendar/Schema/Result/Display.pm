@@ -412,9 +412,9 @@ sub next_wakeup_time {
     #
     # On the other hand, even when the display wakes up too early, if the image is not changed, it will not be redrawn and the display will go to sleep again ASAP.
     #
-    # Fixed here by accepting a small (~1 minute) time difference:
+    # Fixed here by accepting a small (~minimal_sleep_time_minutes) time difference:
     my $diff_seconds = $next_time->epoch - $now->epoch;
-    if ($diff_seconds <= 1 * ONE_MINUTE) {
+    if ($diff_seconds <= $self->get_config('minimal_sleep_time_minutes') * ONE_MINUTE) {
         $next_time = $self->_next_wakeup_time_for_datetime($schedule, $next_time->clone->add(seconds => 1));
     }
 

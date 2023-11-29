@@ -265,7 +265,7 @@ sub html_for_date {
         }
 
         if ($has_calendar_entries) {
-            pop @icons while (scalar @icons > $self->display->get_config('max_icons_with_calendar'));
+            pop @icons while (scalar @icons > $self->display->get_config('max_icons_with_calendar') // 0);
         }
     } else {
 

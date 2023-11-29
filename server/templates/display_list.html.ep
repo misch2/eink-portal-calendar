@@ -63,9 +63,14 @@
         <td>
             % unless ($d->is_default) {
                 % if ($d->missed_connects > 0) {
-                    <span class="badge bg-danger">frozen since 
-                        <%= $d->last_visit->set_time_zone('local')->format_cldr('dd.MM.YYYY HH:mm') %> 
-                        (<%= int((DateTime->now()->epoch - $d->last_visit->epoch) / (60 * 60) + 0.5) %> hours)
+                    % if ($d->missed_connects >= ($d->get_config('alive_check_minimal_failure_count') || 1)) {
+                        <span class="badge bg-danger">Frozen since 
+                    % } else {
+                        <span class="badge bg-info">Possibly frozen since 
+                    % }
+                        <%= $d->last_visit->set_time_zone('local')->format_cldr('dd.MM.YYYY HH:mm') %>.
+                        <br>
+                        <%= int((DateTime->now()->epoch - $d->last_visit->epoch) / (60 * 60) + 0.5) %> hours, <%= $d->missed_connects %> missed connect(s)
                     </span>
                 % } else {
                     <span class="badge bg-success">OK</span>
