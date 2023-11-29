@@ -58,7 +58,7 @@ RTC_DATA_ATTR int wakeupCount = 0;
 RTC_DATA_ATTR char lastChecksum[64 + 1] = "<not_defined_yet>";  // TODO check the length in read loop to prevent overflow
 
 // remotely configurable variables (via JSON)
-int sleepTime = SECONDS_PER_HOUR;
+int sleepTime = SECONDS_PER_MINUTE * 5;
 bool otaMode = false;
 
 // ordinary vars
@@ -111,22 +111,39 @@ String textStatusCode(int statusCode) {
 };
 
 void startHttpGetRequest(String path) {
-  DEBUG_PRINT(">>> GET %s", path.c_str());
-  httpClient.beginRequest();
-  httpClient.get(path);
-  httpClient.endRequest();
+  int statusCode = 0;
+  bool ok = false;
+  for (int attempt = 1; attempt <= 3; attempt++) {
+    if (attempt > 1) {
+      DEBUG_PRINT("Retrying download, attempt #%d", attempt);
+    };
 
-  int statusCode = httpClient.responseStatusCode();
-  DEBUG_PRINT("<<< HTTP response code: %d (%s)", statusCode, textStatusCode(statusCode));
+    DEBUG_PRINT(">>> GET %s", path.c_str());
+    httpClient.beginRequest();
+    httpClient.get(path);
+    httpClient.endRequest();
 
-  while (httpClient.connected() && httpClient.available() && httpClient.headerAvailable()) {
-    String headerName = httpClient.readHeaderName();
-    String headerValue = httpClient.readHeaderValue();
-    DEBUG_PRINT("<<< HTTP header: %s: %s", headerName.c_str(), headerValue.c_str());
+    statusCode = httpClient.responseStatusCode();
+    DEBUG_PRINT("<<< HTTP response code: %d (%s)", statusCode, textStatusCode(statusCode).c_str());
+    if (statusCode == 200) {
+      ok = true;
+      break;
+    } else {
+      DEBUG_PRINT("HTTP response code: %d (%s), attempt #%d", statusCode, textStatusCode(statusCode).c_str(), attempt);
+      httpClient.stop();
+      delay(1000);
+      continue;
+    };
+
+    while (httpClient.connected() && httpClient.available() && httpClient.headerAvailable()) {
+      String headerName = httpClient.readHeaderName();
+      String headerValue = httpClient.readHeaderValue();
+      DEBUG_PRINT("<<< HTTP header: %s: %s", headerName.c_str(), headerValue.c_str());
+    };
+    // httpClient.skipResponseHeaders();
   };
-  // httpClient.skipResponseHeaders();
 
-  if (statusCode != 200) {
+  if (!ok) {
     error(String("Unexpected HTTP response.\n"
                  "URL: ") +
           String(CALENDAR_URL_HOST) + ":" + String(CALENDAR_URL_PORT) + path + "\n" +
@@ -145,6 +162,7 @@ void loadConfigFromWeb() {
                 + "&w=" + String(DISPLAY_WIDTH) + "&h=" + String(DISPLAY_HEIGHT)  //
                 + "&c=" + String(defined_color_type)                              //
                 + "&fw=" + String(FIRMWARE_VERSION);                              //
+
   startHttpGetRequest(path);
   String jsonText = httpClient.responseBody();
 
@@ -154,15 +172,16 @@ void loadConfigFromWeb() {
   if (errorStr) {
     DEBUG_PRINT("error: %s", errorStr.c_str());
     error("Can't parse response");
-  }
+  };
 
   int tmpi = response["sleep"];
+  TRACE_PRINT("sleepTime from JSON: %d", tmpi);
   if (tmpi != 0) {
     sleepTime = tmpi;
-    // DEBUG_PRINT("sleepTime set to %d seconds", tmpi);
   }
 
   bool tmpb = response["ota_mode"];
+  TRACE_PRINT("otaMode from JSON: %d", tmpb);
   otaMode = tmpb;
   if (otaMode) {
     DEBUG_PRINT("Permanent OTA mode enabled in remote config");
@@ -178,6 +197,7 @@ void basicInit() {
   fullStartTime = millis();
   ++wakeupCount;
   Serial.begin(115200);
+  DEBUG_PRINT("Started");
 }
 
 void wakeupAndConnect() {
@@ -236,8 +256,8 @@ void logResetReason() {
 }
 
 void disconnectAndHibernate() {
-  logRuntimeStats();
-  // ^ last syslog message before the WiFi disconnects
+  sleepTime -= (millis() - fullStartTime) / 1000;  // correct the sleep time for the time spent in the setup
+  logRuntimeStats();                               // last syslog message before the WiFi disconnects
   stopDisplay();
   stopWiFi();
   boardSpecificDone();
@@ -349,20 +369,22 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
   }
   DEBUG_PRINT("Download time: %lu ms", millis() - startTime);
 
+  TRACE_PRINT("Display refresh start");
   startTime = millis();
   display.refresh();  // full refresh
   DEBUG_PRINT("Display refresh time: %lu ms", millis() - startTime);
 }
 
 void stopWiFi() {
+  TRACE_PRINT("stopWiFi()");
+
   unsigned long start = millis();
 
   // do not reset settings (SSID/password) when disconnecting
   WiFi.persistent(false);
 
   // WiFi.disconnect(true);   // no, this resets the password too (even when
-  // only in current session, it's enough to prevent WiFiManager to reconnect)
-
+  // only in current session, it's enough to prevent WiFiManager to reconnect).
   // this is sufficient to disconnect
   WiFi.mode(WIFI_OFF);
   WiFi.persistent(true);
@@ -481,14 +503,14 @@ void error(String message) {
 }
 
 void espDeepSleep(uint64_t seconds) {
-  DEBUG_PRINT("Sleeping for %lu s", seconds);
+  TRACE_PRINT("Going to deep sleep for %lu s", seconds);
   esp_sleep_enable_timer_wakeup(seconds * uS_PER_S);
   esp_deep_sleep_start();
 }
 
 void initDisplay() {
   DEBUG_PRINT("Display setup start");
-  DEBUG_PRINT("CS=%d, DC=%d, RST=%d, BUSY=%d", CS_PIN, DC_PIN, RST_PIN, BUSY_PIN);  // RST and BUSY are used directly in the board specific header file
+  TRACE_PRINT("CS=%d, DC=%d, RST=%d, BUSY=%d", CS_PIN, DC_PIN, RST_PIN, BUSY_PIN);  // RST and BUSY are used directly in the board specific header file
 
   delay(100);
 
@@ -512,10 +534,12 @@ void initDisplay() {
 
 void stopDisplay() {
   //
+  DEBUG_PRINT("stopDisplay()");
   display.powerOff();
 }
 
 void logRuntimeStats() {
+  TRACE_PRINT("logRuntimeStats()");
   DEBUG_PRINT("Total execution time: %lu ms", millis() - fullStartTime);
   DEBUG_PRINT("Going to hibernate for %d seconds", sleepTime);
 }

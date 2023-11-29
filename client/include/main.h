@@ -28,3 +28,4 @@ void espDeepSleep(uint64_t seconds);
 
 #define uS_PER_S 1000000
 #define SECONDS_PER_HOUR 3600
+#define SECONDS_PER_MINUTE 60
