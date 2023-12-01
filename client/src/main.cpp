@@ -325,6 +325,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
 
   String partial_uri = String(path) + "?mac=" + WiFi.macAddress();
 
+  String newChecksum = String(lastChecksum);
   for (int attempt = 1; attempt <= 3; attempt++) {
     if (attempt > 1) {
       DEBUG_PRINT("Retrying download, attempt #%d", attempt);
@@ -359,6 +360,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
     } else {
       DEBUG_PRINT("Checksum has changed, reading image and refreshing the display");
     };
+    newChecksum = line;
     ArduinoOTA.handle();
 
     DEBUG_PRINT("Reading image data for %d rows", h);
@@ -408,8 +410,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
   DEBUG_PRINT("Display refresh time: %lu ms", millis() - startTime);
 
   // Store the new checksum only when the image has been successfully displayed
-  strcpy(lastChecksum, line.c_str());  // to survive a deep sleep
-
+  strcpy(lastChecksum, newChecksum.c_str());  // to survive a deep sleep
 }
 
 void stopWiFi() {
