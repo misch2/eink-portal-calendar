@@ -359,7 +359,6 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
     } else {
       DEBUG_PRINT("Checksum has changed, reading image and refreshing the display");
     };
-    strcpy(lastChecksum, line.c_str());  // to survive a deep sleep
     ArduinoOTA.handle();
 
     DEBUG_PRINT("Reading image data for %d rows", h);
@@ -407,6 +406,10 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
   startTime = millis();
   display.refresh();  // full refresh
   DEBUG_PRINT("Display refresh time: %lu ms", millis() - startTime);
+
+  // Store the new checksum only when the image has been successfully displayed
+  strcpy(lastChecksum, line.c_str());  // to survive a deep sleep
+
 }
 
 void stopWiFi() {
