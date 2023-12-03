@@ -326,14 +326,12 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
   String partial_uri = String(path) + "?mac=" + WiFi.macAddress();
 
   String newChecksum = String(lastChecksum);
-  for (int attempt = 1; attempt <= 3; attempt++) {
+  for (int attempt = 1; attempt <= 5; attempt++) {
     if (attempt > 1) {
       DEBUG_PRINT("Retrying download, attempt #%d", attempt);
     };
 
     startHttpGetRequest(partial_uri);
-    ArduinoOTA.handle();
-
     DEBUG_PRINT("Expected content length (from headers): %d", httpClient.contentLength());
 
     uint32_t bytes_read = 0;
@@ -346,7 +344,6 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
     {
       error(String("Invalid bitmap received, doesn't start with a magic sequence:\n") + "Line: " + line + "\n");
     }
-    ArduinoOTA.handle();
 
     DEBUG_PRINT("Reading checksum");
     // FIXME from HTTP headers would be ideal
@@ -361,21 +358,34 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
       DEBUG_PRINT("Checksum has changed, reading image and refreshing the display");
     };
     newChecksum = line;
-    ArduinoOTA.handle();
-
     DEBUG_PRINT("Reading image data for %d rows", h);
 
     for (uint16_t row = 0; row < h; row++) {
       // DEBUG_PRINT("Reading row %d, bytes_read=%d", row, bytes_read);
       wdtRefresh();
-      ArduinoOTA.handle();
 
+      uint32_t local_bytes_read = 0;
 #ifdef DISPLAY_TYPE_BW
-      bytes_read += httpClient.read(input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
+      local_bytes_read = httpClient.read(input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
+      if (local_bytes_read != DISPLAY_BUFFER_SIZE) {
+        DEBUG_PRINT("WARNING: bytes read != bytes expected, skipped %d bytes on row %d", DISPLAY_BUFFER_SIZE - local_bytes_read, row);
+        break;
+      }
+      bytes_read += local_bytes_read;
 #endif
 #ifdef DISPLAY_TYPE_3C
-      bytes_read += httpClient.read(input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
-      bytes_read += httpClient.read(input_row_color_buffer, DISPLAY_BUFFER_SIZE);
+      local_bytes_read = httpClient.read(input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
+      if (local_bytes_read != DISPLAY_BUFFER_SIZE) {
+        DEBUG_PRINT("WARNING: bytes read != bytes expected, skipped %d bytes on row %d", DISPLAY_BUFFER_SIZE - local_bytes_read, row);
+        break;
+      }
+      bytes_read += local_bytes_read;
+      local_bytes_read = httpClient.read(input_row_color_buffer, DISPLAY_BUFFER_SIZE);
+      if (local_bytes_read != DISPLAY_BUFFER_SIZE) {
+        DEBUG_PRINT("WARNING: bytes read != bytes expected, skipped %d bytes on row %d", DISPLAY_BUFFER_SIZE - local_bytes_read, row);
+        break;
+      }
+      bytes_read += local_bytes_read;
 #endif
       // TODO add other display types too
 
@@ -393,11 +403,13 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
       // TODO add other display types too
 
     }  // end line
-    DEBUG_PRINT("Bytes read: %d, bytes expected: %d, %s", bytes_read, httpClient.contentLength(), bytes_read == httpClient.contentLength() ? "OK" : "ERROR");
+    DEBUG_PRINT("Total bytes read: %d, total bytes expected: %d, %s", bytes_read, httpClient.contentLength(),
+                bytes_read == httpClient.contentLength() ? "OK" : "ERROR");
     if (bytes_read == httpClient.contentLength()) {
       break;
     } else {
-      DEBUG_PRINT("WARNING: bytes read != bytes expected, skipped %d bytes", httpClient.contentLength() - bytes_read);
+      DEBUG_PRINT("WARNING: total bytes read != total bytes expected, skipped %d bytes", httpClient.contentLength() - bytes_read);
+      httpClient.stop();
       // delay(1000);
     }
   }
