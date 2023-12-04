@@ -712,7 +712,7 @@ sub update_mqtt {
             icon                => 'mdi:clock-time-four',
         },
         firmware => {
-            component           => 'sensor',
+            component           => 'update',
             entity_category     => 'config',
             device_class        => 'firmware',
             state_class         => '',
