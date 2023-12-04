@@ -50,7 +50,8 @@ sub publish_retained {
             #value_template => "{{ value_json.battery }}"
         }
     );
-    $mqtt->retain("homeassistant/$ha_detail->{component}/$topic/$key/config", $bytes);
+    my $component = $ha_detail->{component} // 'sensor';
+    $mqtt->retain("homeassistant/$component/$topic/$key/config", $bytes);
 
     # Direct value storage, not JSON
     $mqtt->retain("$topic/state/$key", $value);

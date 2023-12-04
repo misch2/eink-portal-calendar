@@ -710,7 +710,15 @@ sub update_mqtt {
             state_class         => '',
             unit_of_measurement => '',
             icon                => 'mdi:clock-time-four',
-        }
+        },
+        firmware => {
+            component           => 'sensor',
+            entity_category     => 'config',
+            device_class        => 'firmware',
+            state_class         => '',
+            unit_of_measurement => '',
+            icon                => 'mdi:check-circle',
+        },
     );
 
     my $ha_detail = $ha_details{$key};
