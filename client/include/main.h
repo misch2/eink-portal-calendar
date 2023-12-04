@@ -14,6 +14,9 @@ void initDisplay();
 void stopDisplay();
 void initOTA();
 void disconnectAndHibernate();
+void wdtInit();
+void wdtStop();
+void wdtRefresh();
 
 void displayText(String message, const GFXfont* font);
 void error(String message);
