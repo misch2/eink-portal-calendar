@@ -26,13 +26,16 @@
     <div class="calendar-container">
         % my $cnt = 0;
         % my $last_title = '';
-        % foreach my $block ('today', 'week', 'rest') {
+        % foreach my $block ('24hrs', 'week', 'rest') { # 'today' or '24hrs'
             % my @events_for_block = ();
             % foreach my $event (@{ $nearest_events }) {
                 % my $dt = $event->{DTSTART};
                 % my $delta_days = $dt->delta_days($now)->in_units('days');
+                % my $delta_hours = ($dt->epoch - $now->epoch) / 3600;
 
-                % if ($block eq 'today') {
+                % if ($block eq '24hrs') {
+                    % next unless $delta_hours <= 24;
+                % } elsif ($block eq 'today') {
                     % next unless $delta_days == 0;
                 % } elsif ($block eq 'week') {
                     % next unless $delta_days > 0 && $delta_days <= 7;
@@ -44,7 +47,10 @@
             % }
 
             % if (@events_for_block) {
-                % if ($block eq 'today') {
+                % if ($block eq '24hrs') {
+                <div class="calendar-event-block calendar-event-block-today">
+                <div class="calendar-event-block-title">Nejbližších 24 hodin</div>
+                % } elsif ($block eq 'today') {
                 <div class="calendar-event-block calendar-event-block-today">
                 <div class="calendar-event-block-title">Dnes</div>
                 % } elsif ($block eq 'week') {
