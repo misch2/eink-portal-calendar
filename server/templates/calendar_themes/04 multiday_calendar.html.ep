@@ -26,6 +26,7 @@
     <div class="calendar-container">
         % my $cnt = 0;
         % my $last_title = '';
+        % my %events_displayed = ();
         % foreach my $block ('24hrs', 'week', 'rest') { # 'today' or '24hrs'
             % my @events_for_block = ();
             % foreach my $event (@{ $nearest_events }) {
@@ -48,21 +49,22 @@
 
             % if (@events_for_block) {
                 % if ($block eq '24hrs') {
-                <div class="calendar-event-block calendar-event-block-today">
-                <div class="calendar-event-block-title">Nejbližších 24 hodin</div>
+                    <div class="calendar-event-block calendar-event-block-today">
+                    <div class="calendar-event-block-title">Nejbližších 24 hodin</div>
                 % } elsif ($block eq 'today') {
-                <div class="calendar-event-block calendar-event-block-today">
-                <div class="calendar-event-block-title">Dnes</div>
+                    <div class="calendar-event-block calendar-event-block-today">
+                    <div class="calendar-event-block-title">Dnes</div>
                 % } elsif ($block eq 'week') {
-                <div class="calendar-event-block calendar-event-block-week">
-                <div class="calendar-event-block-title">Nejbližších 7 dní</div>
+                    <div class="calendar-event-block calendar-event-block-week">
+                    <div class="calendar-event-block-title">Nejbližších 7 dní</div>
                 % } else {
-                <div class="calendar-event-block calendar-event-block-rest">
-                <div class="calendar-event-block-title">Pozdější události</div>
+                    <div class="calendar-event-block calendar-event-block-rest">
+                    <div class="calendar-event-block-title">Pozdější události</div>
                 % }
-
+                % $last_title = '';
                 <div class="calendar-event-block-content">
                     % foreach my $event (@events_for_block) {
+                        % next if $events_displayed{$event->{UID}};
                         % my $dt = $event->{DTSTART};
                         % my $delta_days = $dt->delta_days($now)->in_units('days');
                         % my $day_description = $dt->day_name;
@@ -85,6 +87,7 @@
                                 (~<%= int($event->{hours} + 0.5) %> hod.)
                             % }
                         </div>
+                        % $events_displayed{$event->{UID}} = 1;
                     % }
                 </div>  <!-- class="calendar-event-block-content" -->
                 </div>  <!-- class="calendar-event-block-..." -->
