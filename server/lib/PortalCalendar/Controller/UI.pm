@@ -20,6 +20,7 @@ has config_ui_parameters => sub {
             alive_check_safety_lag_minutes
             alive_check_minimal_failure_count
             alt
+            display_title
             googlefit
             googlefit_auth_callback
             googlefit_client_id

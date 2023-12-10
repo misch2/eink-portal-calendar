@@ -86,6 +86,13 @@ div.top-date-row {
     border-bottom: 2px solid var(--epd-black);
 }
 
+h3#calendar-title {
+    text-align: center;
+    font-size: 1.2rem;
+    margin-top: 0;
+    margin-bottom: 0.4rem;
+}
+
 div.calendar-container {
     overflow: hidden;
 }

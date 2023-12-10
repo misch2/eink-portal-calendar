@@ -101,6 +101,7 @@ sub _extract_data {
         provider_symbol_code => $current->{data}->{next_1_hours}->{summary}->{symbol_code},
         wi_symbol_code       => $self->symbol_mapper->map_symbol($current->{data}->{next_1_hours}->{summary}->{symbol_code}),
         description          => $self->symbol_mapper->map_description($current->{data}->{next_1_hours}->{summary}->{symbol_code}),
+        short_description    => $self->symbol_mapper->map_short_description($current->{data}->{next_1_hours}->{summary}->{symbol_code}),
 
         time_start => $time_start,
         time_end   => $time_end,
@@ -188,6 +189,7 @@ sub aggregate {
         provider_symbol_codes => [ uniq(map { $_->{provider_symbol_code} } @usable) ],
         wi_symbol_codes       => [ uniq(map { $_->{wi_symbol_code} } @usable) ],
         descriptions          => [ uniq(map { $_->{description} } @usable) ],
+        short_descriptions    => [ uniq(map { $_->{short_description} } @usable) ],
 
         time_start => min(map { $_->{time_start} } @usable),
         time_end   => max(map { $_->{time_end} } @usable),

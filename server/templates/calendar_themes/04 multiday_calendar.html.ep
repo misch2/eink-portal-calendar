@@ -8,26 +8,15 @@
 
 <body>
 <div id="visible-area">
-    <div class="top-date-row">
-        <div>
-            %# LLLL = standalone month name
-            %# MMMM = month name in context of a date
-            <%= uc($date->format_cldr('d. MMMM y')) %>
-        </div>
-        <div>
-            <%= uc($name_day_details->{as_text}->{name}) %>
-        </div>
-    </div>
-
-    <h3 id="calendar-title" style="text-align: center; font-size: 1.2rem; margin-top: 1.1rem; margin-bottom: 0.4rem">
-       Rodinný kalendář
+    <h3 id="calendar-title">
+       <%= $display->get_config('display_title') %>
     </h3>
 
     <div class="calendar-container">
         % my $cnt = 0;
         % my $last_title = '';
         % my %events_displayed = ();
-        % foreach my $block ('24hrs', 'week', 'rest') { # 'today' or '24hrs'
+        % foreach my $block ('2days', 'week', 'rest') { # 'today' or '24hrs' or '2days'
             % my @events_for_block = ();
             % foreach my $event (@{ $nearest_events }) {
                 % my $dt = $event->{DTSTART};
@@ -36,6 +25,8 @@
 
                 % if ($block eq '24hrs') {
                     % next unless $delta_hours <= 24;
+                % } elsif ($block eq '2days') {
+                    % next unless $delta_days <= 1;
                 % } elsif ($block eq 'today') {
                     % next unless $delta_days == 0;
                 % } elsif ($block eq 'week') {
@@ -51,6 +42,9 @@
                 % if ($block eq '24hrs') {
                     <div class="calendar-event-block calendar-event-block-today">
                     <div class="calendar-event-block-title">Nejbližších 24 hodin</div>
+                % } elsif ($block eq '2days') {
+                    <div class="calendar-event-block calendar-event-block-today">
+                    <div class="calendar-event-block-title">Dnes a zítra</div>
                 % } elsif ($block eq 'today') {
                     <div class="calendar-event-block calendar-event-block-today">
                     <div class="calendar-event-block-title">Dnes</div>
