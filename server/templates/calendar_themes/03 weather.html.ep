@@ -149,26 +149,26 @@
         % }
         </div>
 
-        <div id="bottom-signature">
-            % my $data_from = $current_weather->{time_start}->clone()->set_time_zone($display->get_config('timezone'));
-            % my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
-
-            %# weather data from
-            <iconify-icon icon="material-symbols:cloud-download-outline"></iconify-icon>
-            % if ($data_from->ymd eq $now->ymd) {
-                <%= $data_from->format_cldr('H:mm') %>.
-            % } else {
-                <%= $data_from->format_cldr('d. MMMM H:mm') %>
-            % }
-
-            %# screen generated at
-            <iconify-icon icon="material-symbols:refresh"></iconify-icon>
-            <%= $now->format_cldr('H:mm') %>,
-
-            %# screen displayed at
-            <iconify-icon icon="material-symbols:add-to-home-screen-sharp"></iconify-icon>
-            <%= $next_wakeup->format_cldr('H:mm') %>.
-        </div>
+%#        <div id="bottom-signature">
+%#            % my $data_from = $current_weather->{time_start}->clone()->set_time_zone%#($display->get_config('timezone'));
+%#            % my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
+%#
+%#            %# weather data from
+%#            <iconify-icon icon="material-symbols:cloud-download-outline"></iconify-icon>
+%#            % if ($data_from->ymd eq $now->ymd) {
+%#                <%= $data_from->format_cldr('H:mm') %>.
+%#            % } else {
+%#                <%= $data_from->format_cldr('d. MMMM H:mm') %>
+%#            % }
+%#
+%#            %# screen generated at
+%#            <iconify-icon icon="material-symbols:refresh"></iconify-icon>
+%#            <%= $now->format_cldr('H:mm') %>,
+%#
+%#            %# screen displayed at
+%#            <iconify-icon icon="material-symbols:add-to-home-screen-sharp"></iconify-icon>
+%#            <%= $next_wakeup->format_cldr('H:mm') %>.
+%#        </div>
 
         <div id="battery-status">
             %= include 'calendar_themes/includes/battery_status_icon', display => $display
