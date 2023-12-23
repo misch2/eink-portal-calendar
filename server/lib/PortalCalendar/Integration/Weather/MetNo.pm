@@ -184,6 +184,7 @@ sub aggregate {
         precipitation_min => min(map { $_->{precipitation} } @usable),
         precipitation_max => max(map { $_->{precipitation} } @usable),
         precipitation_avg => sum(map { $_->{precipitation} } @usable) / $cnt,
+        precipitation_sum => sum(map { $_->{precipitation} } @usable),
 
         provider_symbol_codes => [ uniq(map { $_->{provider_symbol_code} } @usable) ],
         wi_symbol_codes       => [ uniq(map { $_->{wi_symbol_code} } @usable) ],
