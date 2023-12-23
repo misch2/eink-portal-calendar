@@ -102,7 +102,8 @@
                 </div>
                 <div>
                     % foreach my $description (@{ $item->{descriptions} }[0]) { # FIXME only the first one?
-                        <div style="font-weight: bold"><%= lc($description) %></div>
+                        %# crop the description to fit the space
+                        <div style="font-weight: bold; max-height: 1em; overflow_visible"><%= lc($description) %></div>
                     % }
                 </div>
                 <div>
