@@ -85,11 +85,13 @@ sub check_missed_connects {
                 my $now_safe = $now->clone()->subtract(minutes => $display->get_config('alive_check_safety_lag_minutes'));
 
                 if ($next < $now_safe) {
+                    $display->increase_missed_connects_count($next);
+
                     $last_visit->set_time_zone('local');
                     $next->set_time_zone('local');
-                    $display->increase_missed_connects_count();
                     my $missed_connections_limit = $display->get_config('alive_check_minimal_failure_count') || 1;
                     if ($display->missed_connects == $missed_connections_limit) {
+                        $display->set_config('_frozen_notification_sent', 1);
                         my $message = $job->app->render_anything(
                             template                 => 'display_frozen',
                             format                   => 'txt',

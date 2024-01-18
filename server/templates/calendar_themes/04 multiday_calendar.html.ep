@@ -8,31 +8,26 @@
 
 <body>
 <div id="visible-area">
-    <div class="top-date-row">
-        <div>
-            %# LLLL = standalone month name
-            %# MMMM = month name in context of a date
-            <%= uc($date->format_cldr('d. MMMM y')) %>
-        </div>
-        <div>
-            <%= uc($name_day_details->{as_text}->{name}) %>
-        </div>
-    </div>
-
-    <h3 id="calendar-title" style="text-align: center; font-size: 1.2rem; margin-top: 1.1rem; margin-bottom: 0.4rem">
-       Rodinný kalendář
+    <h3 id="calendar-title">
+       <%= $display->get_config('display_title') %>
     </h3>
 
     <div class="calendar-container">
         % my $cnt = 0;
         % my $last_title = '';
-        % foreach my $block ('today', 'week', 'rest') {
+        % my %events_displayed = ();
+        % foreach my $block ('2days', 'week', 'rest') { # 'today' or '24hrs' or '2days'
             % my @events_for_block = ();
             % foreach my $event (@{ $nearest_events }) {
                 % my $dt = $event->{DTSTART};
                 % my $delta_days = $dt->delta_days($now)->in_units('days');
+                % my $delta_hours = ($dt->epoch - $now->epoch) / 3600;
 
-                % if ($block eq 'today') {
+                % if ($block eq '24hrs') {
+                    % next unless $delta_hours <= 24;
+                % } elsif ($block eq '2days') {
+                    % next unless $delta_days <= 1;
+                % } elsif ($block eq 'today') {
                     % next unless $delta_days == 0;
                 % } elsif ($block eq 'week') {
                     % next unless $delta_days > 0 && $delta_days <= 7;
@@ -44,19 +39,26 @@
             % }
 
             % if (@events_for_block) {
-                % if ($block eq 'today') {
-                <div class="calendar-event-block calendar-event-block-today">
-                <div class="calendar-event-block-title">Dnes</div>
+                % if ($block eq '24hrs') {
+                    <div class="calendar-event-block calendar-event-block-today">
+                    <div class="calendar-event-block-title">Nejbližších 24 hodin</div>
+                % } elsif ($block eq '2days') {
+                    <div class="calendar-event-block calendar-event-block-today">
+                    <div class="calendar-event-block-title">Dnes a zítra</div>
+                % } elsif ($block eq 'today') {
+                    <div class="calendar-event-block calendar-event-block-today">
+                    <div class="calendar-event-block-title">Dnes</div>
                 % } elsif ($block eq 'week') {
-                <div class="calendar-event-block calendar-event-block-week">
-                <div class="calendar-event-block-title">Nejbližších 7 dní</div>
+                    <div class="calendar-event-block calendar-event-block-week">
+                    <div class="calendar-event-block-title">Nejbližších 7 dní</div>
                 % } else {
-                <div class="calendar-event-block calendar-event-block-rest">
-                <div class="calendar-event-block-title">Pozdější události</div>
+                    <div class="calendar-event-block calendar-event-block-rest">
+                    <div class="calendar-event-block-title">Pozdější události</div>
                 % }
-
+                % $last_title = '';
                 <div class="calendar-event-block-content">
                     % foreach my $event (@events_for_block) {
+                        % next if $events_displayed{$event->{UID}};
                         % my $dt = $event->{DTSTART};
                         % my $delta_days = $dt->delta_days($now)->in_units('days');
                         % my $day_description = $dt->day_name;
@@ -79,6 +81,7 @@
                                 (~<%= int($event->{hours} + 0.5) %> hod.)
                             % }
                         </div>
+                        % $events_displayed{$event->{UID}} = 1;
                     % }
                 </div>  <!-- class="calendar-event-block-content" -->
                 </div>  <!-- class="calendar-event-block-..." -->
@@ -87,18 +90,18 @@
     </div>
 
     <div id="bottom-row">
-        <div id="bottom-signature">
-            % my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
-
-            %# screen generated at
-            <iconify-icon icon="material-symbols:refresh"></iconify-icon>
-            <%= $now->format_cldr('H:mm') %>,
-
-            %# screen displayed at
-            <iconify-icon icon="material-symbols:add-to-home-screen-sharp"></iconify-icon>
-            <%= $next_wakeup->format_cldr('H:mm') %>.
-
-        </div>
+%#        <div id="bottom-signature">
+%#            % my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
+%#
+%#            %# screen generated at
+%#            <iconify-icon icon="material-symbols:refresh"></iconify-icon>
+%#            <%= $now->format_cldr('H:mm') %>,
+%#
+%#            %# screen displayed at
+%#            <iconify-icon icon="material-symbols:add-to-home-screen-sharp"></iconify-icon>
+%#            <%= $next_wakeup->format_cldr('H:mm') %>.
+%#
+%#        </div>
 
         <div id="battery-status">
             %= include 'calendar_themes/includes/battery_status_icon', display => $display

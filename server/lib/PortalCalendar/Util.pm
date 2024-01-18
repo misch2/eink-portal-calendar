@@ -265,7 +265,7 @@ sub html_for_date {
         }
 
         if ($has_calendar_entries) {
-            pop @icons while (scalar @icons > $self->display->get_config('max_icons_with_calendar'));
+            pop @icons while (scalar @icons > $self->display->get_config('max_icons_with_calendar') // 0);
         }
     } else {
 
@@ -710,7 +710,15 @@ sub update_mqtt {
             state_class         => '',
             unit_of_measurement => '',
             icon                => 'mdi:clock-time-four',
-        }
+        },
+        firmware => {
+            component           => 'update',
+            entity_category     => 'config',
+            device_class        => 'firmware',
+            state_class         => '',
+            unit_of_measurement => '',
+            icon                => 'mdi:check-circle',
+        },
     );
 
     my $ha_detail = $ha_details{$key};

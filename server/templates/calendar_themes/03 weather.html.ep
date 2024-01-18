@@ -17,7 +17,7 @@
         <div class="weather-current-big">
             % my $temp = int($current_weather->{temperature_avg} + 0.5);
             % my $wind = int($current_weather->{wind_speed_avg} + 0.5);
-            % my $total_precip = $current_weather->{precipitation_avg};
+            % my $total_precip = $current_weather->{precipitation_sum};
             % my $dt = $current_weather->{time_start};
             
             % my $day_or_night = $current_weather->{time_is_day} ? 'day' : 'night';
@@ -56,7 +56,7 @@
 
             % if ($total_precip > 0) {
                 <div style="position: absolute; bottom: 0; right: 0; text-align: right" class="<%= $class_rain_or_snow %>">
-                    <i class="wi wi-rain FIXME or snow?" style="font-size: 1rem"></i> <%= $total_precip %> mm
+                    <i class="wi wi-rain FIXME-or-wi-snow" style="font-size: 1rem"></i> <%= $total_precip %> mm
                 </div>
             % }
         </div>
@@ -81,7 +81,7 @@
             % $cnt++;
             % last if $cnt > 6; # FIXME do it better, via flex wrap or so
 
-            % my $total_precip = $item->{precipitation_max};    # FIXME?
+            % my $total_precip = $item->{precipitation_sum};
             % my $day_or_night = $item->{time_is_day} ? 'day' : 'night';
 
             % my $dt = $item->{time_start};
@@ -102,7 +102,8 @@
                 </div>
                 <div>
                     % foreach my $description (@{ $item->{descriptions} }[0]) { # FIXME only the first one?
-                        <div style="font-weight: bold"><%= lc($description) %></div>
+                        %# crop the description to fit the space
+                        <div style="font-weight: bold; max-height: 1em; overflow_visible"><%= lc($description) %></div>
                     % }
                 </div>
                 <div>
@@ -149,26 +150,26 @@
         % }
         </div>
 
-        <div id="bottom-signature">
-            % my $data_from = $current_weather->{time_start}->clone()->set_time_zone($display->get_config('timezone'));
-            % my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
-
-            %# weather data from
-            <iconify-icon icon="material-symbols:cloud-download-outline"></iconify-icon>
-            % if ($data_from->ymd eq $now->ymd) {
-                <%= $data_from->format_cldr('H:mm') %>.
-            % } else {
-                <%= $data_from->format_cldr('d. MMMM H:mm') %>
-            % }
-
-            %# screen generated at
-            <iconify-icon icon="material-symbols:refresh"></iconify-icon>
-            <%= $now->format_cldr('H:mm') %>,
-
-            %# screen displayed at
-            <iconify-icon icon="material-symbols:add-to-home-screen-sharp"></iconify-icon>
-            <%= $next_wakeup->format_cldr('H:mm') %>.
-        </div>
+%#        <div id="bottom-signature">
+%#            % my $data_from = $current_weather->{time_start}->clone()->set_time_zone%#($display->get_config('timezone'));
+%#            % my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
+%#
+%#            %# weather data from
+%#            <iconify-icon icon="material-symbols:cloud-download-outline"></iconify-icon>
+%#            % if ($data_from->ymd eq $now->ymd) {
+%#                <%= $data_from->format_cldr('H:mm') %>.
+%#            % } else {
+%#                <%= $data_from->format_cldr('d. MMMM H:mm') %>
+%#            % }
+%#
+%#            %# screen generated at
+%#            <iconify-icon icon="material-symbols:refresh"></iconify-icon>
+%#            <%= $now->format_cldr('H:mm') %>,
+%#
+%#            %# screen displayed at
+%#            <iconify-icon icon="material-symbols:add-to-home-screen-sharp"></iconify-icon>
+%#            <%= $next_wakeup->format_cldr('H:mm') %>.
+%#        </div>
 
         <div id="battery-status">
             %= include 'calendar_themes/includes/battery_status_icon', display => $display

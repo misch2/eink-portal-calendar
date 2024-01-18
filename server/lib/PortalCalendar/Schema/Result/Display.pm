@@ -292,8 +292,16 @@ sub reset_missed_connects_count {
 }
 
 sub increase_missed_connects_count {
-    my $self = shift;
-    $self->set_config('_missed_connects', 1 + $self->missed_connects);
+    my $self                     = shift;
+    my $expected_time_of_connect = shift;
+
+    my $previous_expected_time_of_connect = $self->get_config('_last_expected_time_of_connect');
+    if ($previous_expected_time_of_connect eq DateTime::Format::ISO8601->format_datetime($expected_time_of_connect)) {
+        # warn "Skipping increase_missed_connects_count because the expected time of connect is the same as the previous one ($previous_expected_time_of_connect)";
+        return;
+    }
+    $self->set_config('_last_expected_time_of_connect', DateTime::Format::ISO8601->format_datetime($expected_time_of_connect));
+    $self->set_config('_missed_connects',               1 + $self->missed_connects);
 }
 
 sub missed_connects {
@@ -412,9 +420,9 @@ sub next_wakeup_time {
     #
     # On the other hand, even when the display wakes up too early, if the image is not changed, it will not be redrawn and the display will go to sleep again ASAP.
     #
-    # Fixed here by accepting a small (~1 minute) time difference:
+    # Fixed here by accepting a small (~minimal_sleep_time_minutes) time difference:
     my $diff_seconds = $next_time->epoch - $now->epoch;
-    if ($diff_seconds <= 1 * ONE_MINUTE) {
+    if ($diff_seconds <= $self->get_config('minimal_sleep_time_minutes') * ONE_MINUTE) {
         $next_time = $self->_next_wakeup_time_for_datetime($schedule, $next_time->clone->add(seconds => 1));
     }
 

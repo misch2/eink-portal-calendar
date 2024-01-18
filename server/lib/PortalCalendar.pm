@@ -345,3 +345,6 @@ INSERT INTO config (display_id, name, value) VALUES (0, 'alive_check_safety_lag_
 INSERT INTO config (display_id, name, value) VALUES (0, 'alive_check_minimal_failure_count', '2')
   ON CONFLICT (display_id, name) DO UPDATE SET value=excluded.value WHERE value='' OR value IS NULL;
   
+-- 22 up
+INSERT INTO config (display_id, name, value) VALUES (0, 'minimal_sleep_time_minutes', '5')
+  ON CONFLICT (display_id, name) DO UPDATE SET value=excluded.value WHERE value='' OR value IS NULL;
