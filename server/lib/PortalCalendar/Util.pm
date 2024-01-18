@@ -24,6 +24,7 @@ use PortalCalendar::Integration::Weather::MetNo;
 use PortalCalendar::Integration::MQTT;
 use PortalCalendar::Integration::Google::Fit;
 use PortalCalendar::Integration::SvatkyAPI;
+use PortalCalendar::Integration::XKCD;
 
 has 'app';
 has 'display';
@@ -365,6 +366,9 @@ sub html_for_date {
     }
 
     my $svatky_api = PortalCalendar::Integration::SvatkyAPI->new(app => $self->app, display => $self->display, minimal_cache_expiry => $self->minimal_cache_expiry);
+
+    my $xkcd = PortalCalendar::Integration::XKCD->new(app => $self->app, display => $self->display, minimal_cache_expiry => $self->minimal_cache_expiry);
+
     return (
         template => 'calendar_themes/' . $self->display->get_config('theme'),
         format   => 'html',
@@ -382,6 +386,8 @@ sub html_for_date {
 
         # name day:
         name_day_details => $svatky_api->get_today_details,
+
+        xkcd => $xkcd,    # whole module, to fetch data on the fly
 
         current_weather => $current_weather,
         forecast        => $forecast,
