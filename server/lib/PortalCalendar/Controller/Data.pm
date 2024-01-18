@@ -51,6 +51,8 @@ sub config {
                 border_left   => 0,
             }
         );
+        $display->set_config('theme', 'default');
+        $self->app->minion->enqueue('regenerate_image', [ $display->id ]);
     }
 
     $display->set_config('_last_visit', DateTime::Format::ISO8601->format_datetime(DateTime->now(time_zone => 'UTC')));
