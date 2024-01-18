@@ -44,6 +44,10 @@ sub _perform_authenticated_request {
         }
     }
 
+    if (!$response->is_success) {
+        $self->app->log->error(DDP::np($response));
+    }
+
     return $response;
 }
 
@@ -98,8 +102,10 @@ sub fetch_from_web {
                 # p $req;
 
                 my $response = $self->_perform_authenticated_request($req);
-                die $response->status_line . "\n" . $response->content
-                    unless $response->is_success;
+                if (!$response->is_success) {
+                    $self->app->log->error("Error fetching Google Fit data: " . $response->status_line . "\n" . $response->content);
+                    die $response->status_line . "\n" . $response->content;
+                }
 
                 my $json = decode_json($response->decoded_content);
 
