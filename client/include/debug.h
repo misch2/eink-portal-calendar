@@ -25,9 +25,10 @@ Syslog syslog(udpClient, SYSLOG_SERVER, SYSLOG_PORT, HOSTNAME, SYSLOG_MYAPPNAME,
   Serial.print('\n')
 #endif
 
-#define TRACE_PRINT(...)      \
-  Serial.printf(__VA_ARGS__); \
-  Serial.print('\n');
+// #define TRACE_PRINT(...)      \
+//   Serial.printf(__VA_ARGS__); \
+//   Serial.print('\n');
+#define TRACE_PRINT(...)
 
 #else
 

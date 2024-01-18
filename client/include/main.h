@@ -32,3 +32,14 @@ void espDeepSleep(uint64_t seconds);
 #define uS_PER_S 1000000
 #define SECONDS_PER_HOUR 3600
 #define SECONDS_PER_MINUTE 60
+
+class WiFiClientWithBlockingReads : public WiFiClient {
+ protected:
+  uint32_t blockingReadTimeout = 2000;
+  int blocking_read(uint8_t* buffer, size_t bytes);
+
+ public:
+  void setBlockingReadTimeout(uint32_t timeout);
+  int read() override;
+  int read(uint8_t* buf, size_t size) override;
+};

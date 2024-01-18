@@ -9,6 +9,7 @@
 #include <SPI.h>
 #endif
 #include <Syslog.h>
+#include <WiFi.h>
 #ifdef USE_WIFI_MANAGER
 #include <WiFiManager.h>
 #endif
@@ -68,7 +69,7 @@ bool otaMode = false;
 #ifdef USE_WIFI_MANAGER
 WiFiManager wifiManager;
 #endif
-WiFiClient wifiClient;
+WiFiClientWithBlockingReads wifiClient;
 HttpClient httpClient = HttpClient(wifiClient, CALENDAR_URL_HOST, CALENDAR_URL_PORT);
 #ifdef VOLTAGE_ADC_PIN
 ESP32AnalogRead adc;
@@ -76,6 +77,57 @@ ESP32AnalogRead adc;
 
 uint32_t fullStartTime;
 uint32_t configLoadTime;
+
+int WiFiClientWithBlockingReads::blocking_read(uint8_t *buffer, size_t bytes) {
+  int remain = bytes;
+  uint32_t start = millis();
+
+  while ((WiFiClient::connected() || WiFiClient::available()) && (remain > 0)) {
+    if (WiFiClient::available()) {
+      uint8_t data = 0;
+      int res = WiFiClient::read(&data, 1);
+      if (res <= 0) {  // error or EOF
+        DEBUG_PRINT("WiFiClient::read() returned %d", res);
+        return res;
+      }
+      if (buffer) {
+        *buffer++ = data;
+      }
+      remain--;
+    } else {
+      delay(1);
+    };
+    if (millis() - start > blockingReadTimeout) {
+      DEBUG_PRINT("WiFiClientWithBlockingReads::blocking_read() timeout (%d ms)", blockingReadTimeout);
+      return -1;  // timeout
+    }
+  }
+
+  if (remain != 0) {
+    DEBUG_PRINT("WiFiClientWithBlockingReads::blocking_read() EOF");
+  }
+  return bytes - remain;
+}
+
+void WiFiClientWithBlockingReads::setBlockingReadTimeout(uint32_t timeout) { blockingReadTimeout = timeout; }
+
+int WiFiClientWithBlockingReads::read() {  // returns the read character or -1 if none is available
+  uint8_t data;
+  int res = blocking_read(&data, 1);
+
+  if (res < 0) {  // error
+    return res;
+  } else if (res == 0) {  // timeout or EOF
+    return -1;
+  }
+
+  return data;
+}
+
+int WiFiClientWithBlockingReads::read(uint8_t *buf, size_t size) {  // returns the number of bytes read
+  int res = blocking_read(buf, size);
+  return res;
+}
 
 int voltage_adc_raw;
 float voltage_real;
@@ -124,6 +176,7 @@ void startHttpGetRequest(String path) {
     };
 
     DEBUG_PRINT(">>> GET %s", path.c_str());
+
     httpClient.beginRequest();
     httpClient.get(path);
     httpClient.endRequest();
@@ -227,6 +280,7 @@ void wakeupAndConnect() {
   if (!startWiFi()) {
     error("WiFi connect/login unsuccessful.");
   }
+  wifiClient.setBlockingReadTimeout(5000);  // msec
   logResetReason();
   initOTA();
 
@@ -281,11 +335,15 @@ void disconnectAndHibernate() {
   logRuntimeStats();  // last syslog message before the WiFi disconnects
   stopDisplay();
 
+#ifdef GHOST_HUNTING
+  sleepTime = 15;
+#else
   sleepTime -= (millis() - configLoadTime) / 1000;  // correct the sleep time for the time spent in the setup
   if (sleepTime < 10) {
     DEBUG_PRINT("SleepTime is too low (%d seconds), resetting to a sane value", sleepTime);
     sleepTime = 300;
   }
+#endif
   DEBUG_PRINT("Going to hibernate for %d seconds", sleepTime);
 
   stopWiFi();
@@ -325,6 +383,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
 
   String partial_uri = String(path) + "?mac=" + WiFi.macAddress();
 
+  bool ok = false;
   String newChecksum = String(lastChecksum);
   for (int attempt = 1; attempt <= 5; attempt++) {
     if (attempt > 1) {
@@ -349,6 +408,8 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
     // FIXME from HTTP headers would be ideal
     wdtRefresh();
     bytes_read += httpReadStringUntil('\n', line);
+
+#ifndef GHOST_HUNTING
     DEBUG_PRINT("Last checksum was: %s", lastChecksum);
     DEBUG_PRINT("New checksum is: %s", line.c_str());
     if (line == String(lastChecksum)) {
@@ -357,6 +418,8 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
     } else {
       DEBUG_PRINT("Checksum has changed, reading image and refreshing the display");
     };
+#endif
+
     newChecksum = line;
     DEBUG_PRINT("Reading image data for %d rows", h);
 
@@ -368,22 +431,29 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
 #ifdef DISPLAY_TYPE_BW
       local_bytes_read = httpClient.read(input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
       if (local_bytes_read != DISPLAY_BUFFER_SIZE) {
-        DEBUG_PRINT("WARNING: bytes read != bytes expected, skipped %d bytes on row %d", DISPLAY_BUFFER_SIZE - local_bytes_read, row);
+        DEBUG_PRINT("WARNING(1): bytes read != bytes expected, skipped %d bytes on row %d", DISPLAY_BUFFER_SIZE - local_bytes_read, row);
+#ifndef GHOST_HUNTING
         break;
+#endif
       }
       bytes_read += local_bytes_read;
 #endif
+
 #ifdef DISPLAY_TYPE_3C
       local_bytes_read = httpClient.read(input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
       if (local_bytes_read != DISPLAY_BUFFER_SIZE) {
-        DEBUG_PRINT("WARNING: bytes read != bytes expected, skipped %d bytes on row %d", DISPLAY_BUFFER_SIZE - local_bytes_read, row);
+        DEBUG_PRINT("WARNING(2): bytes read != bytes expected, skipped %d bytes on row %d", DISPLAY_BUFFER_SIZE - local_bytes_read, row);
+#ifndef GHOST_HUNTING
         break;
+#endif
       }
       bytes_read += local_bytes_read;
       local_bytes_read = httpClient.read(input_row_color_buffer, DISPLAY_BUFFER_SIZE);
       if (local_bytes_read != DISPLAY_BUFFER_SIZE) {
-        DEBUG_PRINT("WARNING: bytes read != bytes expected, skipped %d bytes on row %d", DISPLAY_BUFFER_SIZE - local_bytes_read, row);
+        DEBUG_PRINT("WARNING(3): bytes read != bytes expected, skipped %d bytes on row %d", DISPLAY_BUFFER_SIZE - local_bytes_read, row);
+#ifndef GHOST_HUNTING
         break;
+#endif
       }
       bytes_read += local_bytes_read;
 #endif
@@ -405,15 +475,25 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
     }  // end line
     DEBUG_PRINT("Total bytes read: %d, total bytes expected: %d, %s", bytes_read, httpClient.contentLength(),
                 bytes_read == httpClient.contentLength() ? "OK" : "ERROR");
+
+#ifdef GHOST_HUNTING
+    ok = 1;
+    break;
+#endif
     if (bytes_read == httpClient.contentLength()) {
+      ok = 1;
       break;
     } else {
-      DEBUG_PRINT("WARNING: total bytes read != total bytes expected, skipped %d bytes", httpClient.contentLength() - bytes_read);
+      DEBUG_PRINT("WARNING(4): total bytes read != total bytes expected, skipped %d bytes", httpClient.contentLength() - bytes_read);
       httpClient.stop();
       // delay(1000);
     }
   }
   DEBUG_PRINT("Download time: %lu ms", millis() - startTime);
+
+  if (!ok) {
+    error("Failed to download image, there were errors in all attempts.");
+  }
 
   TRACE_PRINT("Display refresh start");
   wdtRefresh();
@@ -557,6 +637,7 @@ void error(String message) {
   strcpy(lastChecksum, "");  // to force reload of image next time
   DEBUG_PRINT("Displaying error: %s", message.c_str());
   displayText(message, &DejaVu_Sans_Mono_16);
+  sleepTime = 300;
   disconnectAndHibernate();
 }
 
@@ -609,6 +690,10 @@ void setup() {
   wdtInit();
   boardSpecificInit();
   wakeupAndConnect();
+
+#ifdef GHOST_HUNTING
+  DEBUG_PRINT("Ghost hunting mode enabled, not going to sleep");
+#endif
 
   if (otaMode) {
     DEBUG_PRINT("Running OTA loop on %s (%s.local)", WiFi.localIP().toString().c_str(), HOSTNAME);
