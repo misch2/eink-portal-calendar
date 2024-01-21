@@ -1,0 +1,42 @@
+/* resets */
+
+html,
+body {
+    /* background-color: aqua; */
+    font-size: 14pt;
+    font-family: sans-serif;
+}
+
+html,
+body,
+div,
+p {
+    padding: 0;
+    margin: 0;
+}
+
+div#visible-area {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    height: 460px;
+    width: 780px;
+    overflow: hidden;
+    /* background-color: gainsboro; */
+}
+
+h1 {
+/*    font-family: 'Roboto', sans-serif; */
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+    padding: 0 0 1rem 0;
+    color: var(--epd-black);
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    float: left;
+    padding: 0 2rem 2rem 0;
+}

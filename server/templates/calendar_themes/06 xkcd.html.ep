@@ -1,24 +1,16 @@
 <html>
 %# see https://icon-sets.iconify.design/material-symbols
 %= javascript 'https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js'
-
-<style type="text/css">
-:root {
-    --epd-black:  <%= $colors->{epd_black} %>;
-    --epd-white:  <%= $colors->{epd_white} %>;
-}
-
-img {
-    max-width: 100%;
-    height: auto;
-}
-</style>
+%= stylesheet '/css/calendar_themes/xkcd.css'
+%= include 'calendar_themes/includes/epd_colors', colors => $colors
 
 <body>
 <div id="visible-area">
-    <div style="position: absolute; top: 0; left: 0; width: 800px; height: 480px">
-        <img src="<%= $xkcd->json->{img} %>" title="<%= $xkcd->json->{title} %>" alt="<%= $xkcd->json->{alt} %>" />
-    </div>
+    <h1><%= $xkcd->json->{title} %></h1>
+    <img src="<%= $xkcd->json->{img} %>">
+    <p>
+        <%= $xkcd->json->{alt} %>
+    </p>
 </div>
 </body>
 
