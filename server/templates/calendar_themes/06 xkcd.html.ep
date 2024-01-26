@@ -6,11 +6,15 @@
 
 <body>
 <div id="visible-area">
-    <h1><%= $xkcd->json->{title} %></h1>
-    <img src="<%= $xkcd->json->{img} %>">
-    <p>
-        <%= $xkcd->json->{alt} %>
-    </p>
+    <div class="<%= $xkcd->image_is_landscape ? 'landscape' : 'portrait' %>">
+        <h1><%= $xkcd->json->{title} %></h1>
+        <div class="image-and-alt">
+            <img src="<%= $xkcd->image_as_data_url %>">
+            <div class="alt">
+                <%= $xkcd->json->{alt} %>
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 
