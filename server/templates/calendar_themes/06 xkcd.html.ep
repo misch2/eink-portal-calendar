@@ -1,9 +1,15 @@
 <html>
+<head>
 %# see https://icon-sets.iconify.design/material-symbols
 %= javascript 'https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js'
 %= stylesheet '/css/calendar_themes/xkcd.css'
 %= include 'calendar_themes/includes/epd_colors', colors => $colors
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playpen+Sans:wght@100..800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+
+</head>
 <body>
 <div id="visible-area">
     <div class="<%= $xkcd->image_is_landscape ? 'landscape' : 'portrait' %>">

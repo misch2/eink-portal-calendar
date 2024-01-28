@@ -19,7 +19,7 @@ sub convert_url {
 
     # Pageres generates file relative to cwd(), always. It doesn't support absolute paths
     my $tmpfile = "web2png.tmp";                                                                                                  # only filename, NEVER with a path
-    my @cmd     = ($self->pageres_command, $url, "${width}x${height}", "--filename=${tmpfile}", "--overwrite", "--format=png");
+    my @cmd     = ($self->pageres_command, $url, "${width}x${height}", "--filename=${tmpfile}", "--overwrite", "--format=png", "--delay=2");    # delay for web fonts
 
     {   my $dir = tempd();
         system(@cmd) == 0
