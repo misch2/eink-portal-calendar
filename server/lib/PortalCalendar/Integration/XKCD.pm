@@ -49,7 +49,9 @@ has image_is_landscape => sub {
 
     my $img = $self->image_data;
 
-    return $img->getwidth > $img->getheight;
+    return 0 if $img->getwidth == 0 || $img->getheight == 0;
+    return 1 if $img->getwidth / $img->getheight > 4 / 3;      # only significantly wider images are considered landscape
+    return 0;
 };
 
 has image_as_data_url => sub {
