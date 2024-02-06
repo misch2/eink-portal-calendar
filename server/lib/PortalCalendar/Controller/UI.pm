@@ -224,7 +224,8 @@ sub googlefit_redirect {
         #
         "?client_id=" . $self->display->get_config('googlefit_client_id') .
         #
-        "&access_type=offline&response_type=code&scope=" . $goauth->googlefit_oauth2_scope .
+        "&access_type=offline&prompt=consent" .    # important for getting refresh token
+        "&response_type=code&scope=" . $goauth->googlefit_oauth2_scope .
         #
         "&state=" . url_escape(b64_encode(encode_json({ display_number => $self->display->id }))) .
         #
