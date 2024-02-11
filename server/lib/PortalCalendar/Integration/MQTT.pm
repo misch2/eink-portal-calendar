@@ -8,20 +8,45 @@ use Net::MQTT::Simple;
 use DDP;
 use DateTime;
 
-sub publish_retained {
+has mqtt => sub {
+    my $self = shift;
+    local $ENV{MQTT_SIMPLE_ALLOW_INSECURE_LOGIN} = 1;
+
+    my $server   = $self->display->get_config('mqtt_server');
+    my $username = $self->display->get_config('mqtt_username');
+    my $password = $self->display->get_config('mqtt_password');
+
+    my $mqtt = Net::MQTT::Simple->new($server);
+    $mqtt->login($username, $password);
+
+    return $mqtt;
+};
+
+# has _config_topics_published => sub { return {} };
+
+# sub was_config_topic_published {
+#     my $self  = shift;
+#     my $topic = shift;
+
+#     return $self->_config_topics_published->{$topic} ? 1 : 0;
+# }
+
+# sub mark_config_topic_as_published {
+#     my $self  = shift;
+#     my $topic = shift;
+
+#     $self->_config_topics_published->{$topic} = 1;
+
+#     return;
+# }
+
+sub publish_sensor {
     my $self      = shift;
     my $key       = shift;
     my $value     = shift;
     my $ha_detail = shift;
 
-    my $server   = $self->display->get_config('mqtt_server');
-    my $username = $self->display->get_config('mqtt_username');
-    my $password = $self->display->get_config('mqtt_password');
-    my $topic    = $self->display->get_config('mqtt_topic');      # unique device identifier
-
-    local $ENV{MQTT_SIMPLE_ALLOW_INSECURE_LOGIN} = 1;
-    my $mqtt = Net::MQTT::Simple->new($server);
-    $mqtt->login($username, $password);
+    my $topic = $self->display->get_config('mqtt_topic');    # unique device identifier
 
     my $component    = $ha_detail->{component} // 'sensor';
     my $config_topic = "homeassistant/$component/$topic/$key/config";
@@ -35,6 +60,8 @@ sub publish_retained {
                 model        => 'Portal calendar',
                 identifiers  => [$topic],
                 name         => $topic,
+                hw_version   => '1.0',
+                sw_version   => ($self->display ? $self->display->firmware : 'unknown'),
             },
             enabled_by_default  => \1,
             entity_category     => $ha_detail->{entity_category},
@@ -47,8 +74,8 @@ sub publish_retained {
         }
     );
 
-    $mqtt->retain($config_topic, $bytes);
-    $mqtt->retain($state_topic,  $value);
+    $self->mqtt->retain($config_topic, $bytes);
+    $self->mqtt->publish($state_topic, $value);
 
     return;
 }

@@ -713,22 +713,14 @@ sub update_mqtt {
             component           => 'sensor',
             entity_category     => "diagnostic",
             device_class        => "timestamp",             # see https://www.home-assistant.io/integrations/sensor/#device-class
-            state_class         => '',
+            state_class         => 'measurement',
             unit_of_measurement => '',
             icon                => 'mdi:clock-time-four',
-        },
-        firmware => {
-            component           => 'update',
-            entity_category     => 'config',
-            device_class        => 'firmware',
-            state_class         => '',
-            unit_of_measurement => '',
-            icon                => 'mdi:check-circle',
         },
     );
 
     my $ha_detail = $ha_details{$key};
-    $api->publish_retained($key, $value, $ha_detail);
+    $api->publish_sensor($key, $value, $ha_detail);
 
     return;
 }

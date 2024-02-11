@@ -101,7 +101,6 @@ sub config {
     $util->update_mqtt_with_forced_jitter('voltage_raw',     $display->get_config('_last_voltage_raw'), 0.001);
     $util->update_mqtt_with_forced_jitter('min_voltage',     $display->get_config('_min_voltage'),      0.001);
     $util->update_mqtt_with_forced_jitter('max_voltage',     $display->get_config('_max_voltage'),      0.001);
-    $util->update_mqtt('firmware',   $display->firmware);
     $util->update_mqtt('last_visit', DateTime->now()->rfc3339);
     $util->update_mqtt_with_forced_jitter('sleep_time', $sleep_in_seconds, 1);
 
