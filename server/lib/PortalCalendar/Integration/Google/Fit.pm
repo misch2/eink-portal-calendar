@@ -34,6 +34,8 @@ sub _perform_authenticated_request {
     # p $response;
 
     if (!$response->is_success) {
+        $self->app->log->error("Unsuccessful response " . DDP::np($response));
+        $self->app->log->error("Original request: " . DDP::np($req));
         my $new_access_token = $self->get_new_access_token_from_refresh_token();
         if ($new_access_token && $new_access_token ne $access_token) {
             $req->header('Authorization' => "Bearer " . $new_access_token);

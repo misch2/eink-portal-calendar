@@ -18,20 +18,18 @@ sub get_new_access_token_from_refresh_token {
     $self->app->log->info("Getting new access token");
 
     #Get tokens from auth code
-    my $res = $self->app->ua->post(
-        $self->google_oauth2_token_url,
-        'form',
-        {
-            client_id     => $self->display->get_config('googlefit_client_id'),
-            client_secret => $self->display->get_config('googlefit_client_secret'),
-            redirect_uri  => $self->display->get_config('googlefit_auth_callback'),
-            grant_type    => 'refresh_token',
-            refresh_token => $self->display->get_config('_googlefit_refresh_token'),
-        }
-    )->res;
+    my %post_data = (
+        client_id     => $self->display->get_config('googlefit_client_id'),
+        client_secret => $self->display->get_config('googlefit_client_secret'),
+        redirect_uri  => $self->display->get_config('googlefit_auth_callback'),
+        grant_type    => 'refresh_token',
+        refresh_token => $self->display->get_config('_googlefit_refresh_token'),
+    );
+    my $res = $self->app->ua->post($self->google_oauth2_token_url, 'form', \%post_data,)->res;
 
     if (!$res->is_success) {
-        $self->app->log->error(DDP::np($res));
+        $self->app->log->error("Error refreshing access token: " . DDP::np($res));
+        $self->app->log->error("POST data: " . DDP::np(%post_data));
         return;
     }
 
