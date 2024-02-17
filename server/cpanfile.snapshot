@@ -1959,6 +1959,15 @@ DISTRIBUTIONS
       Log::Any::Test 1.717
     requirements:
       ExtUtils::MakeMaker 0
+  Log-Any-Adapter-Mojo-0.06
+    pathname: H/HE/HENRYYKT/Log-Any-Adapter-Mojo-0.06.tar.gz
+    provides:
+      Log::Any::Adapter::Mojo 0.06
+    requirements:
+      ExtUtils::MakeMaker 0
+      Log::Any 0.14
+      Log::Any::Adapter 0.07
+      Mojolicious 1.13
   Log-Dispatch-2.71
     pathname: D/DR/DROLSKY/Log-Dispatch-2.71.tar.gz
     provides:
