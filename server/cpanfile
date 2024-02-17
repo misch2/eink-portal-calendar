@@ -1,3 +1,4 @@
+requires 'Algorithm::Cron';
 requires 'DateTime::Event::Sunrise';
 requires 'DateTime::Format::Duration';
 requires 'DateTime::Format::ISO8601';
@@ -41,6 +42,7 @@ requires 'Test::Mojo';
 requires 'Test::More';
 requires 'Text::Unidecode';
 requires 'Time::HiRes';
+requires 'Time::timegm';
 requires 'Try::Tiny';
 requires 'WWW::Telegram::BotAPI';
 requires 'YAML::XS';
