@@ -43,3 +43,4 @@ requires 'Text::Unidecode';
 requires 'Time::HiRes';
 requires 'Try::Tiny';
 requires 'WWW::Telegram::BotAPI';
+requires 'YAML::XS';
