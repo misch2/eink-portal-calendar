@@ -4,6 +4,7 @@ requires 'DateTime::Format::ISO8601';
 requires 'DateTime::Format::SQLite';
 requires 'DateTime::Format::Strptime';
 requires 'DateTime';
+requires 'Data::UUID';
 requires 'DBD::SQLite';
 requires 'DBI';
 requires 'DBIx::Class::Schema';
