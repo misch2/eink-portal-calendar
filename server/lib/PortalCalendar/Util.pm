@@ -653,6 +653,20 @@ sub generate_bitmap {
     }
 }
 
+has _cached_mqtt_api_list => sub { {} };
+has cached_mqtt_api       => sub {
+    my $self = shift;
+
+    my $list      = $self->_cached_mqtt_api_list;
+    my $cache_key = $self->display->id;
+
+    if (!$list->{$cache_key}) {
+        $list->{$cache_key} = PortalCalendar::Integration::MQTT->new(app => $self->app, display => $self->display);
+    }
+
+    return $list->{$cache_key};
+};
+
 sub update_mqtt {
     my $self  = shift;
     my $key   = shift;
@@ -660,7 +674,7 @@ sub update_mqtt {
 
     return unless $self->display->get_config('mqtt');
 
-    my $api        = PortalCalendar::Integration::MQTT->new(app => $self->app, display => $self->display, minimal_cache_expiry => $self->minimal_cache_expiry);
+    my $api        = $self->cached_mqtt_api;
     my %ha_details = (
         voltage => {
             component           => 'sensor',
