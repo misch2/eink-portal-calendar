@@ -74,7 +74,9 @@ sub publish_sensor {
         }
     );
 
+    $self->app->log->debug("publishing retained config topic $config_topic");
     $self->mqtt->retain($config_topic, $bytes);
+    $self->app->log->debug("publishing non-retained state topic $state_topic");
     $self->mqtt->publish($state_topic, $value);
 
     return;
