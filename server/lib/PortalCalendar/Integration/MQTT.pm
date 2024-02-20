@@ -50,14 +50,14 @@ sub publish_sensor {
 
     my $component    = $ha_detail->{component} // 'sensor';
     my $config_topic = "homeassistant/$component/$topic/$key/config";
-    my $state_topic  = "portal_calendar/$topic/state/$key";
+    my $state_topic  = "epapers/$topic/state/$key";
 
     my $bytes = encode_json(
         {
             state_topic => $state_topic,
             device      => {
                 manufacturer => 'Michal',
-                model        => 'Portal calendar',
+                model        => 'Portal calendar ePaper',
                 identifiers  => [$topic],
                 name         => $topic,
                 hw_version   => '1.0',
