@@ -5,16 +5,9 @@
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
 #include <ESP32AnalogRead.h>
-#ifdef SPI_BUS
-#include <SPI.h>
-#endif
 #include <Syslog.h>
 #include <WiFi.h>
-#ifdef USE_WIFI_MANAGER
-#include <WiFiManager.h>
-#endif
 #include <WiFiUdp.h>
-#include <esp_task_wdt.h>
 
 // dynamically include board-specific config
 // clang-format off
@@ -24,6 +17,17 @@
 #define CONCAT3(a, b, c) STRINGIFY(EXPAND(a)EXPAND(b)EXPAND(c))
 #include CONCAT3(boards/,BOARD_CONFIG,.h)
 // clang-format on
+
+// conditionally included libraries
+#ifdef SPI_BUS
+#include <SPI.h>
+#endif
+#ifdef USE_WIFI_MANAGER
+#include <WiFiManager.h>
+#endif
+#ifdef USE_WDT
+#include <esp_task_wdt.h>
+#endif
 
 #define DISPLAY_BUFFER_SIZE (DISPLAY_WIDTH * BITMAP_BPP / 8)
 
@@ -46,8 +50,6 @@ const char *defined_color_type = "3C";
 #include <GxEPD2_3C.h>
 #endif
 
-#define WDT_TIMEOUT 60  // seconds
-
 // TODO add other display types too
 
 #include "debug.h"
@@ -61,8 +63,12 @@ DISPLAY_INSTANCE
 RTC_DATA_ATTR int wakeupCount = 0;
 RTC_DATA_ATTR char lastChecksum[64 + 1] = "<not_defined_yet>";  // TODO check the length in read loop to prevent overflow
 
+#define SLEEP_TIME_DEFAULT (SECONDS_PER_MINUTE * 5)
+#define SLEEP_TIME_TEMPORARY_ERROR (SECONDS_PER_MINUTE * 5)
+#define SLEEP_TIME_PERMANENT_ERROR (SECONDS_PER_HOUR * 24)
+
 // remotely configurable variables (via JSON)
-int sleepTime = SECONDS_PER_MINUTE * 5;
+int sleepTime = SLEEP_TIME_DEFAULT;
 bool otaMode = false;
 
 // ordinary vars
@@ -202,6 +208,7 @@ void startHttpGetRequest(String path) {
   };
 
   if (!ok) {
+    sleepTime = SLEEP_TIME_TEMPORARY_ERROR;
     error(String("Unexpected HTTP response.\n"
                  "URL: ") +
           String(CALENDAR_URL_HOST) + ":" + String(CALENDAR_URL_PORT) + path + "\n" +
@@ -230,6 +237,7 @@ void loadConfigFromWeb() {
 
   if (errorStr) {
     DEBUG_PRINT("error: %s", errorStr.c_str());
+    sleepTime = SLEEP_TIME_TEMPORARY_ERROR;
     error("Can't parse response");
   };
 
@@ -260,33 +268,49 @@ void basicInit() {
 }
 
 void wdtInit() {
+#ifdef USE_WDT
   TRACE_PRINT("Configuring WDT for %d seconds", WDT_TIMEOUT);
   esp_task_wdt_init(WDT_TIMEOUT, true);  // enable panic so ESP32 restarts
   esp_task_wdt_add(NULL);                // add current thread to WDT watch
+#endif
 }
 
 void wdtRefresh() {
+#ifdef USE_WDT
   TRACE_PRINT("(WDT ping)");
   esp_task_wdt_reset();
+#endif
 }
 
 void wdtStop() {
+#ifdef USE_WDT
   TRACE_PRINT("Stopping WDT...");
   esp_task_wdt_deinit();
+#endif
 }
 
 void wakeupAndConnect() {
   initDisplay();
   if (!startWiFi()) {
+    sleepTime = SLEEP_TIME_PERMANENT_ERROR;
     error("WiFi connect/login unsuccessful.");
   }
   wifiClient.setBlockingReadTimeout(5000);  // msec
   logResetReason();
+
+#ifdef USE_WDT
+  if (esp_reset_reason() == ESP_RST_TASK_WDT) {
+    sleepTime = SLEEP_TIME_PERMANENT_ERROR;
+    error("Watchdog issue. Please report this to the developer.");
+  }
+#endif
+
   initOTA();
 
   readVoltage();
   loadConfigFromWeb();
   if (voltage_real > 0 && voltage_real < VOLTAGE_MIN) {
+    sleepTime = SLEEP_TIME_PERMANENT_ERROR;
     error(String("Battery voltage too low: ") + String(voltage_real) + " V\n" + "Minimum is: " + String(VOLTAGE_MIN) + " V\n" +
           "Please charge the battery and try again.");
   }
@@ -309,7 +333,7 @@ void logResetReason() {
   } else if (reset_reason == ESP_RST_TASK_WDT) {
     DEBUG_PRINT("Reset reason: TASK_WDT");
   } else if (reset_reason == ESP_RST_WDT) {
-    DEBUG_PRINT("Reset reason: _WDT");
+    DEBUG_PRINT("Reset reason: WDT");
   } else if (reset_reason == ESP_RST_DEEPSLEEP) {
     DEBUG_PRINT("Reset reason: DEEPSLEEP");
   } else if (reset_reason == ESP_RST_BROWNOUT) {
@@ -401,6 +425,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
     bytes_read += httpReadStringUntil('\n', line);
     if (line != "MM")  // signature
     {
+      sleepTime = SLEEP_TIME_PERMANENT_ERROR;
       error(String("Invalid bitmap received, doesn't start with a magic sequence:\n") + "Line: " + line + "\n");
     }
 
@@ -424,7 +449,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
     DEBUG_PRINT("Reading image data for %d rows", h);
 
     for (uint16_t row = 0; row < h; row++) {
-      // DEBUG_PRINT("Reading row %d, bytes_read=%d", row, bytes_read);
+      DEBUG_PRINT("Reading row %d, bytes_read=%d", row, bytes_read);
       wdtRefresh();
 
       uint32_t local_bytes_read = 0;
@@ -492,6 +517,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
   DEBUG_PRINT("Download time: %lu ms", millis() - startTime);
 
   if (!ok) {
+    sleepTime = SLEEP_TIME_PERMANENT_ERROR;
     error("Failed to download image, there were errors in all attempts.");
   }
 
@@ -637,7 +663,6 @@ void error(String message) {
   strcpy(lastChecksum, "");  // to force reload of image next time
   DEBUG_PRINT("Displaying error: %s", message.c_str());
   displayText(message, &DejaVu_Sans_Mono_16);
-  sleepTime = 300;
   disconnectAndHibernate();
 }
 
@@ -673,7 +698,6 @@ void initDisplay() {
 }
 
 void stopDisplay() {
-  //
   DEBUG_PRINT("stopDisplay()");
   wdtRefresh();
   display.powerOff();
