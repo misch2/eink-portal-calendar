@@ -727,25 +727,21 @@ sub update_mqtt {
             component           => 'sensor',
             entity_category     => "diagnostic",
             device_class        => "timestamp",             # see https://www.home-assistant.io/integrations/sensor/#device-class
-            state_class         => 'measurement',
+            state_class         => undef,
             unit_of_measurement => '',
             icon                => 'mdi:clock-time-four',
         },
         reset_reason => {
-            component           => 'text',
+            component           => 'sensor',
             entity_category     => "diagnostic",
-            device_class        => "problem",               # see https://www.home-assistant.io/integrations/sensor/#device-class
-            state_class         => 'measurement',
-            unit_of_measurement => '',
-            icon                => 'mdi:alert',
+            device_class        => "enum",               # see https://www.home-assistant.io/integrations/sensor/#device-class
+            icon                => 'mdi:chip',
         },
         wakeup_reason => {
-            component           => 'text',
+            component           => 'sensor',
             entity_category     => "diagnostic",
-            device_class        => "problem",               # see https://www.home-assistant.io/integrations/sensor/#device-class
-            state_class         => 'measurement',
-            unit_of_measurement => '',
-            icon                => 'mdi:alert',
+            device_class        => "enum",               # see https://www.home-assistant.io/integrations/sensor/#device-class
+            icon                => 'mdi:sleep-off',
         },
     );
 
