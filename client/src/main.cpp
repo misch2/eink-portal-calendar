@@ -226,7 +226,10 @@ void loadConfigFromWeb() {
                 + "&vmax=" + String(VOLTAGE_MAX)                                  //
                 + "&w=" + String(DISPLAY_WIDTH) + "&h=" + String(DISPLAY_HEIGHT)  //
                 + "&c=" + String(defined_color_type)                              //
-                + "&fw=" + String(FIRMWARE_VERSION);                              //
+                + "&fw=" + String(FIRMWARE_VERSION)                               //
+                + "&reset=" + resetReasonAsString()                               //
+                + "&wakeup=" + wakeupReasonAsString()                             //
+      ;
 
   configLoadTime = millis();
   startHttpGetRequest(path);
@@ -316,42 +319,55 @@ void wakeupAndConnect() {
   }
 }
 
-void logResetReason() {
-  esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
+String resetReasonAsString() {
   esp_reset_reason_t reset_reason = esp_reset_reason();
-
   if (reset_reason == ESP_RST_UNKNOWN) {
-    DEBUG_PRINT("Reset reason: UNKNOWN");
+    return "UNKNOWN";
   } else if (reset_reason == ESP_RST_POWERON) {
-    DEBUG_PRINT("Reset reason: POWERON");
+    return "POWERON";
   } else if (reset_reason == ESP_RST_SW) {
-    DEBUG_PRINT("Reset reason: SW");
+    return "SW";
   } else if (reset_reason == ESP_RST_PANIC) {
-    DEBUG_PRINT("Reset reason: PANIC");
+    return "PANIC";
   } else if (reset_reason == ESP_RST_INT_WDT) {
-    DEBUG_PRINT("Reset reason: INT_WDT");
+    return "INT_WDT";
   } else if (reset_reason == ESP_RST_TASK_WDT) {
-    DEBUG_PRINT("Reset reason: TASK_WDT");
+    return "TASK_WDT";
   } else if (reset_reason == ESP_RST_WDT) {
-    DEBUG_PRINT("Reset reason: WDT");
+    return "WDT";
   } else if (reset_reason == ESP_RST_DEEPSLEEP) {
-    DEBUG_PRINT("Reset reason: DEEPSLEEP");
+    return "DEEPSLEEP";
   } else if (reset_reason == ESP_RST_BROWNOUT) {
-    DEBUG_PRINT("Reset reason: BROWNOUT");
+    return "BROWNOUT";
   } else if (reset_reason == ESP_RST_SDIO) {
-    DEBUG_PRINT("Reset reason: SDIO");
+    return "SDIO";
   } else {
-    DEBUG_PRINT("Reset reason: ? (%d)", reset_reason);
+    return "? (" + String(reset_reason) + ")";
   }
+};
 
-  if (wakeup_reason == ESP_SLEEP_WAKEUP_TIMER) {
-    DEBUG_PRINT("Wakeup reason: TIMER");
-  } else if (wakeup_reason == ESP_SLEEP_WAKEUP_UNDEFINED) {
-    DEBUG_PRINT("Wakeup reason: UNDEFINED");
+String wakeupReasonAsString() {
+  esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
+  if (wakeup_reason == ESP_SLEEP_WAKEUP_UNDEFINED) {
+    return "UNDEFINED";
+  } else if (wakeup_reason == ESP_SLEEP_WAKEUP_EXT0) {
+    return "EXT0";
+  } else if (wakeup_reason == ESP_SLEEP_WAKEUP_EXT1) {
+    return "EXT1";
+  } else if (wakeup_reason == ESP_SLEEP_WAKEUP_TIMER) {
+    return "TIMER";
+  } else if (wakeup_reason == ESP_SLEEP_WAKEUP_TOUCHPAD) {
+    return "TOUCHPAD";
+  } else if (wakeup_reason == ESP_SLEEP_WAKEUP_ULP) {
+    return "ULP";
   } else {
-    DEBUG_PRINT("Wakeup reason: ? (%d)", wakeup_reason);
+    return "? (" + String(wakeup_reason) + ")";
   }
+};
 
+void logResetReason() {
+  DEBUG_PRINT("Reset reason: " + resetReasonAsString());
+  DEBUG_PRINT("Wakeup reason: " + wakeupReasonAsString());
   DEBUG_PRINT("Wakeup count: %d, last image checksum: %s", wakeupCount, lastChecksum);
 }
 
@@ -662,7 +678,7 @@ void initOTA() {
 void error(String message) {
   strcpy(lastChecksum, "");  // to force reload of image next time
   DEBUG_PRINT("Displaying error: %s", message.c_str());
-  displayText(message, &DejaVu_Sans_Mono_16);
+  displayText(message + "\n\nRetrying after " + String(sleepTime / 60) + " minutes.", &DejaVu_Sans_Mono_16);
   disconnectAndHibernate();
 }
 
