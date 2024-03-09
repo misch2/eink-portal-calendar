@@ -366,8 +366,8 @@ String wakeupReasonAsString() {
 };
 
 void logResetReason() {
-  DEBUG_PRINT("Reset reason: " + resetReasonAsString());
-  DEBUG_PRINT("Wakeup reason: " + wakeupReasonAsString());
+  DEBUG_PRINT("Reset reason: %s", resetReasonAsString());
+  DEBUG_PRINT("Wakeup reason: %s", wakeupReasonAsString());
   DEBUG_PRINT("Wakeup count: %d, last image checksum: %s", wakeupCount, lastChecksum);
 }
 
@@ -465,7 +465,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
     DEBUG_PRINT("Reading image data for %d rows", h);
 
     for (uint16_t row = 0; row < h; row++) {
-      DEBUG_PRINT("Reading row %d, bytes_read=%d", row, bytes_read);
+      // DEBUG_PRINT("Reading row %d, bytes_read=%d", row, bytes_read);
       wdtRefresh();
 
       uint32_t local_bytes_read = 0;
