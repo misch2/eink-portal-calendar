@@ -713,7 +713,9 @@ sub update_mqtt {
             device_class        => "battery",               # see https://www.home-assistant.io/integrations/sensor/#device-class
             state_class         => 'measurement',
             unit_of_measurement => '%',
-            icon                => 'mdi:battery-unknown',
+
+            # icon                => 'mdi:battery',
+            icon => '',
         },
         sleep_time => {
             component           => 'sensor',
@@ -730,6 +732,22 @@ sub update_mqtt {
             state_class         => 'measurement',
             unit_of_measurement => '',
             icon                => 'mdi:clock-time-four',
+        },
+        reset_reason => {
+            component           => 'sensor',
+            entity_category     => "diagnostic",
+            device_class        => "problem",               # see https://www.home-assistant.io/integrations/sensor/#device-class
+            state_class         => 'measurement',
+            unit_of_measurement => '',
+            icon                => 'mdi:alert',
+        },
+        wakeup_reason => {
+            component           => 'sensor',
+            entity_category     => "diagnostic",
+            device_class        => "problem",               # see https://www.home-assistant.io/integrations/sensor/#device-class
+            state_class         => 'measurement',
+            unit_of_measurement => '',
+            icon                => 'mdi:alert',
         },
     );
 
