@@ -61,6 +61,9 @@ VCC  - gray   #888 - to +3.3V
 
 #define DISPLAY_INSTANCE GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN));
 
+// #define USE_WDT
+// #define WDT_TIMEOUT 60  // seconds
+
 void boardSpecificInit() {
   // power on the ePaper and I2C
   //   pinMode(2, OUTPUT);
