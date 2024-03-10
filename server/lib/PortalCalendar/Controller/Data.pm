@@ -98,15 +98,18 @@ sub config {
     my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
     $self->app->log->info("Next wakeup at $next_wakeup (in $sleep_in_seconds seconds) according to crontab schedule '$schedule'");
 
-    $util->update_mqtt_with_forced_jitter('voltage',         $display->voltage,                         0.001);
-    $util->update_mqtt_with_forced_jitter('battery_percent', $display->battery_percent(),               0.001);
-    $util->update_mqtt_with_forced_jitter('voltage_raw',     $display->get_config('_last_voltage_raw'), 0.001);
-    $util->update_mqtt_with_forced_jitter('min_voltage',     $display->get_config('_min_voltage'),      0.001);
-    $util->update_mqtt_with_forced_jitter('max_voltage',     $display->get_config('_max_voltage'),      0.001);
-    $util->update_mqtt('last_visit', DateTime->now()->rfc3339);
-    $util->update_mqtt_with_forced_jitter('sleep_time', $sleep_in_seconds, 1);
-    $util->update_mqtt('reset_reason',  $display->get_config('_reset_reason'));
-    $util->update_mqtt('wakeup_reason', $display->get_config('_wakeup_reason'));
+    $util->update_mqtt('voltage',         $display->voltage,                         1);
+    $util->update_mqtt('battery_percent', $display->battery_percent(),               1);
+    $util->update_mqtt('voltage_raw',     $display->get_config('_last_voltage_raw'), 1);
+    $util->update_mqtt('min_voltage',     $display->get_config('_min_voltage'),      1);
+    $util->update_mqtt('max_voltage',     $display->get_config('_max_voltage'),      1);
+    $util->update_mqtt('last_visit',      DateTime->now()->rfc3339);
+    $util->update_mqtt('sleep_time',      $sleep_in_seconds,                      1);
+    $util->update_mqtt('reset_reason',    $display->get_config('_reset_reason'),  1);
+    $util->update_mqtt('wakeup_reason',   $display->get_config('_wakeup_reason'), 1);
+
+    $util->update_mqtt('last_visit', DateTime->now()->rfc3339);    # final message, FIXME ugly hack, workaround for the wakeup_reason not being updated although it is sent
+    $util->disconnect_mqtt;
 
     my $ret = {
 

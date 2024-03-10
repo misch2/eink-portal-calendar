@@ -8,7 +8,7 @@ use Net::MQTT::Simple;
 use DDP;
 use DateTime;
 
-has mqtt => sub {
+has _mqtt => sub {
     my $self = shift;
     local $ENV{MQTT_SIMPLE_ALLOW_INSECURE_LOGIN} = 1;
 
@@ -21,6 +21,15 @@ has mqtt => sub {
 
     return $mqtt;
 };
+
+sub disconnect {
+    my $self = shift;
+
+    $self->_mqtt->disconnect;
+    $self->_mqtt(undef);
+
+    return;
+}
 
 # has _config_topics_published => sub { return {} };
 
@@ -45,6 +54,7 @@ sub publish_sensor {
     my $key       = shift;
     my $value     = shift;
     my $ha_detail = shift;
+    my $forced    = shift;
 
     my $topic = $self->display->get_config('mqtt_topic');    # unique device identifier
 
@@ -64,6 +74,7 @@ sub publish_sensor {
                 sw_version   => ($self->display ? $self->display->firmware : 'unknown'),
             },
             enabled_by_default  => \1,
+            force_update        => $forced ? \1 : \0,
             entity_category     => $ha_detail->{entity_category},
             device_class        => $ha_detail->{device_class},
             state_class         => $ha_detail->{state_class},
@@ -74,10 +85,10 @@ sub publish_sensor {
         }
     );
 
-    $self->app->log->debug("publishing retained config topic $config_topic");
-    $self->mqtt->retain($config_topic, $bytes);
-    $self->app->log->debug("publishing non-retained state topic $state_topic");
-    $self->mqtt->publish($state_topic, $value);
+    $self->app->log->debug("publishing retained config topic $config_topic: [$bytes]");
+    $self->_mqtt->retain($config_topic, $bytes);
+    $self->app->log->debug("publishing retained state topic $state_topic: [$value]");
+    $self->_mqtt->retain($state_topic, $value);
 
     return;
 }

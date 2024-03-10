@@ -668,9 +668,10 @@ has cached_mqtt_api       => sub {
 };
 
 sub update_mqtt {
-    my $self  = shift;
-    my $key   = shift;
-    my $value = shift;
+    my $self   = shift;
+    my $key    = shift;
+    my $value  = shift;
+    my $forced = shift;
 
     return unless $self->display->get_config('mqtt');
 
@@ -747,20 +748,17 @@ sub update_mqtt {
     );
 
     my $ha_detail = $ha_details{$key};
-    $api->publish_sensor($key, $value, $ha_detail);
+    $api->publish_sensor($key, $value, $ha_detail, $forced);
 
     return;
 }
 
-# Force grafana to store updated values, or to accept the fact that the value has changed.
-sub update_mqtt_with_forced_jitter {
-    my $self   = shift;
-    my $key    = shift;
-    my $value  = shift;
-    my $jitter = shift // 0.001;
+sub disconnect_mqtt {
+    my $self = shift;
 
-    $self->update_mqtt($key, $value + $jitter);
-    $self->update_mqtt($key, $value);
+    return unless $self->display->get_config('mqtt');
+    my $api = $self->cached_mqtt_api;
+    $api->disconnect;
 
     return;
 }
