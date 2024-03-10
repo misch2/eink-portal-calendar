@@ -80,7 +80,7 @@ sub publish_sensor {
             state_class         => $ha_detail->{state_class},
             unit_of_measurement => $ha_detail->{unit_of_measurement},
             $ha_detail->{icon} ? (icon => $ha_detail->{icon}) : (),
-            name      => "${topic} ${key}",    # space is useful for HA, it produces nice names ($topic is removed automatically before displaying)
+            name      => "${key}",
             unique_id => "${topic}_${key}",
         }
     );
