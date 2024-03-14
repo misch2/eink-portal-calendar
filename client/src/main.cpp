@@ -743,6 +743,7 @@ void setup() {
 #endif
 
   if (otaMode) {
+    wdtStop();
     DEBUG_PRINT("Running OTA loop on %s (%s.local)", WiFi.localIP().toString().c_str(), HOSTNAME);
     while (true) {
       ArduinoOTA.handle();
