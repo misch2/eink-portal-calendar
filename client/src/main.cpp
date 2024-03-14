@@ -141,11 +141,16 @@ void readVoltage() {
   int rawVoltageADCReading;
 #ifdef VOLTAGE_ADC_PIN
   adc.attach(VOLTAGE_ADC_PIN);
-  delay(5);
-  float voltage = adc.readVoltage();
-  DEBUG_PRINT("voltage read: %f V", voltage);
+
+  float voltage = 0;
+  for (int i = 0; i < VOLTAGE_AVERAGING_COUNT; i++) {
+    delay(100);
+    voltage += adc.readVoltage();
+  }
+  voltage /= VOLTAGE_AVERAGING_COUNT;
+  DEBUG_PRINT("raw voltage read (avg): %f V", voltage);
   voltage_real = voltage * VOLTAGE_MULTIPLICATION_COEFFICIENT;
-  DEBUG_PRINT("voltage corrected (by %f): %f V", VOLTAGE_MULTIPLICATION_COEFFICIENT, voltage_real);
+  DEBUG_PRINT("real voltage (corrected by %f): %f V", VOLTAGE_MULTIPLICATION_COEFFICIENT, voltage_real);
 
   rawVoltageADCReading = adc.readRaw();
   voltage_adc_raw = rawVoltageADCReading;
