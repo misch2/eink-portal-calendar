@@ -52,7 +52,7 @@
                     in <%= $minutes %> minutes and <%= $seconds %> seconds.
 
                     Voltage:
-                    <%= defined($last_voltage) ? sprintf("%.1f", $last_voltage) : '(unknown)' %> V (<%= defined($battery_percent) ? sprintf("%.0f", $battery_percent) : 'unknown' %> %). 
+                    <%= defined($last_voltage) ? sprintf("%.2f", $last_voltage) : '(unknown)' %> V (<%= defined($battery_percent) ? sprintf("%.0f", $battery_percent) : 'unknown' %> %). 
 
                     OTA mode: 
                     <%= $display->get_config('ota_mode') ? 'on' : 'off' %>.

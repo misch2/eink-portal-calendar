@@ -273,8 +273,8 @@ sub voltage {
 
 sub battery_percent {
     my $self = shift;
-    my $min  = $self->get_config('_min_voltage');
-    my $max  = $self->get_config('_max_voltage');
+    my $min  = $self->get_config('_min_linear_voltage');
+    my $max  = $self->get_config('_max_linear_voltage');
 
     my $cur = $self->voltage;
 
@@ -297,6 +297,7 @@ sub increase_missed_connects_count {
 
     my $previous_expected_time_of_connect = $self->get_config('_last_expected_time_of_connect');
     if ($previous_expected_time_of_connect eq DateTime::Format::ISO8601->format_datetime($expected_time_of_connect)) {
+
         # warn "Skipping increase_missed_connects_count because the expected time of connect is the same as the previous one ($previous_expected_time_of_connect)";
         return;
     }
