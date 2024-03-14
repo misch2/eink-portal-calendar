@@ -145,7 +145,7 @@ void readVoltage() {
   float voltage = adc.readVoltage();
   DEBUG_PRINT("voltage read: %f V", voltage);
   voltage_real = voltage * VOLTAGE_MULTIPLICATION_COEFFICIENT;
-  DEBUG_PRINT("voltage corrected: %f V", voltage_real);
+  DEBUG_PRINT("voltage corrected (by %f): %f V", VOLTAGE_MULTIPLICATION_COEFFICIENT, voltage_real);
 
   rawVoltageADCReading = adc.readRaw();
   voltage_adc_raw = rawVoltageADCReading;
@@ -224,6 +224,8 @@ void loadConfigFromWeb() {
                 + "&v=" + String(voltage_real)                                    //
                 + "&vmin=" + String(VOLTAGE_MIN)                                  //
                 + "&vmax=" + String(VOLTAGE_MAX)                                  //
+                + "&vlmin=" + String(VOLTAGE_LINEAR_MIN)                          //
+                + "&vlmax=" + String(VOLTAGE_LINEAR_MAX)                          //
                 + "&w=" + String(DISPLAY_WIDTH) + "&h=" + String(DISPLAY_HEIGHT)  //
                 + "&c=" + String(defined_color_type)                              //
                 + "&fw=" + String(FIRMWARE_VERSION)                               //
