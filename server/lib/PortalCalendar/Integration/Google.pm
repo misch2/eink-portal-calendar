@@ -17,6 +17,9 @@ sub get_new_access_token_from_refresh_token {
 
     $self->app->log->info("Getting new access token");
 
+    # WARNING! Test refresh tokens expire in 7 days too:
+    # https://stackoverflow.com/questions/66058279/token-has-been-expired-or-revoked-google-oauth2-refresh-token-gets-expired-i
+
     #Get tokens from auth code
     my %post_data = (
         client_id     => $self->display->get_config('googlefit_client_id'),
@@ -29,7 +32,7 @@ sub get_new_access_token_from_refresh_token {
 
     if (!$res->is_success) {
         $self->app->log->error("Error refreshing access token: " . DDP::np($res));
-        $self->app->log->error("POST data: " . DDP::np(%post_data));
+        $self->app->log->error("POST data for " . $self->google_oauth2_token_url . ": " . DDP::np(%post_data));
         return;
     }
 

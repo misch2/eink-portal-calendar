@@ -668,9 +668,10 @@ has cached_mqtt_api       => sub {
 };
 
 sub update_mqtt {
-    my $self  = shift;
-    my $key   = shift;
-    my $value = shift;
+    my $self   = shift;
+    my $key    = shift;
+    my $value  = shift;
+    my $forced = shift;
 
     return unless $self->display->get_config('mqtt');
 
@@ -713,7 +714,8 @@ sub update_mqtt {
             device_class        => "battery",               # see https://www.home-assistant.io/integrations/sensor/#device-class
             state_class         => 'measurement',
             unit_of_measurement => '%',
-            icon                => 'mdi:battery-unknown',
+
+            # icon                => 'mdi:battery',
         },
         sleep_time => {
             component           => 'sensor',
@@ -727,27 +729,36 @@ sub update_mqtt {
             component           => 'sensor',
             entity_category     => "diagnostic",
             device_class        => "timestamp",             # see https://www.home-assistant.io/integrations/sensor/#device-class
-            state_class         => 'measurement',
+            state_class         => undef,
             unit_of_measurement => '',
             icon                => 'mdi:clock-time-four',
+        },
+        reset_reason => {
+            component       => 'sensor',
+            entity_category => "diagnostic",
+            device_class    => "enum",                      # see https://www.home-assistant.io/integrations/sensor/#device-class
+            icon            => 'mdi:chip',
+        },
+        wakeup_reason => {
+            component       => 'sensor',
+            entity_category => "diagnostic",
+            device_class    => "enum",                      # see https://www.home-assistant.io/integrations/sensor/#device-class
+            icon            => 'mdi:sleep-off',
         },
     );
 
     my $ha_detail = $ha_details{$key};
-    $api->publish_sensor($key, $value, $ha_detail);
+    $api->publish_sensor($key, $value, $ha_detail, $forced);
 
     return;
 }
 
-# Force grafana to store updated values, or to accept the fact that the value has changed.
-sub update_mqtt_with_forced_jitter {
-    my $self   = shift;
-    my $key    = shift;
-    my $value  = shift;
-    my $jitter = shift // 0.001;
+sub disconnect_mqtt {
+    my $self = shift;
 
-    $self->update_mqtt($key, $value + $jitter);
-    $self->update_mqtt($key, $value);
+    return unless $self->display->get_config('mqtt');
+    my $api = $self->cached_mqtt_api;
+    $api->disconnect;
 
     return;
 }
