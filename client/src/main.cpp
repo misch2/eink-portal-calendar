@@ -89,6 +89,7 @@ int WiFiClientWithBlockingReads::blocking_read(uint8_t *buffer, size_t bytes) {
   uint32_t start = millis();
 
   while ((WiFiClient::connected() || WiFiClient::available()) && (remain > 0)) {
+    ArduinoOTA.handle();
     if (WiFiClient::available()) {
       uint8_t data = 0;
       int res = WiFiClient::read(&data, 1);
@@ -318,7 +319,9 @@ void wakeupAndConnect() {
   initOTA();
 
   readVoltage();
+  ArduinoOTA.handle();
   loadConfigFromWeb();
+  ArduinoOTA.handle();
   if (voltage_real > 0 && voltage_real < VOLTAGE_MIN) {
     sleepTime = SLEEP_TIME_PERMANENT_ERROR;
     error(String("Battery voltage too low: ") + String(voltage_real) + " V\n" + "Minimum is: " + String(VOLTAGE_MIN) + " V\n" +
@@ -404,6 +407,7 @@ int httpReadStringUntil(char terminator, String &result) {
   wdtRefresh();
   int bytes = 0;
   while (httpClient.connected() && httpClient.available()) {
+    ArduinoOTA.handle();
     int c = httpClient.read();
     if (c < 0) {
       DEBUG("Premature end of HTTP response");
@@ -635,6 +639,7 @@ void displayText(String message, const GFXfont *font) {
   wdtRefresh();
   display.firstPage();
   do {
+    ArduinoOTA.handle();
     display.fillScreen(GxEPD_WHITE);
     display.setCursor(x, y);
     display.print(message);
