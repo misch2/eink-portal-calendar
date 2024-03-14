@@ -708,6 +708,22 @@ sub update_mqtt {
             unit_of_measurement => 'V',
             icon                => 'mdi:battery',
         },
+        min_linear_voltage => {
+            component           => 'sensor',
+            entity_category     => "diagnostic",
+            device_class        => "voltage",               # see https://www.home-assistant.io/integrations/sensor/#device-class
+            state_class         => 'measurement',
+            unit_of_measurement => 'V',
+            icon                => 'mdi:battery-outline',
+        },
+        max_linear_voltage => {
+            component           => 'sensor',
+            entity_category     => "diagnostic",
+            device_class        => "voltage",               # see https://www.home-assistant.io/integrations/sensor/#device-class
+            state_class         => 'measurement',
+            unit_of_measurement => 'V',
+            icon                => 'mdi:battery',
+        },
         battery_percent => {
             component           => 'sensor',
             entity_category     => "diagnostic",
