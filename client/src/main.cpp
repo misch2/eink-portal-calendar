@@ -145,7 +145,7 @@ void readVoltage() {
   float voltage = adc.readVoltage();
   DEBUG_PRINT("voltage read: %f V", voltage);
   voltage_real = voltage * VOLTAGE_MULTIPLICATION_COEFFICIENT;
-  DEBUG_PRINT("voltage corrected: %f V", voltage_real);
+  DEBUG_PRINT("voltage corrected (by %f): %f V", VOLTAGE_MULTIPLICATION_COEFFICIENT, voltage_real);
 
   rawVoltageADCReading = adc.readRaw();
   voltage_adc_raw = rawVoltageADCReading;
@@ -224,6 +224,8 @@ void loadConfigFromWeb() {
                 + "&v=" + String(voltage_real)                                    //
                 + "&vmin=" + String(VOLTAGE_MIN)                                  //
                 + "&vmax=" + String(VOLTAGE_MAX)                                  //
+                + "&vlmin=" + String(VOLTAGE_LINEAR_MIN)                          //
+                + "&vlmax=" + String(VOLTAGE_LINEAR_MAX)                          //
                 + "&w=" + String(DISPLAY_WIDTH) + "&h=" + String(DISPLAY_HEIGHT)  //
                 + "&c=" + String(defined_color_type)                              //
                 + "&fw=" + String(FIRMWARE_VERSION)                               //
@@ -366,8 +368,8 @@ String wakeupReasonAsString() {
 };
 
 void logResetReason() {
-  DEBUG_PRINT("Reset reason: " + resetReasonAsString());
-  DEBUG_PRINT("Wakeup reason: " + wakeupReasonAsString());
+  DEBUG_PRINT("Reset reason: %s", resetReasonAsString());
+  DEBUG_PRINT("Wakeup reason: %s", wakeupReasonAsString());
   DEBUG_PRINT("Wakeup count: %d, last image checksum: %s", wakeupCount, lastChecksum);
 }
 
@@ -465,7 +467,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
     DEBUG_PRINT("Reading image data for %d rows", h);
 
     for (uint16_t row = 0; row < h; row++) {
-      DEBUG_PRINT("Reading row %d, bytes_read=%d", row, bytes_read);
+      // DEBUG_PRINT("Reading row %d, bytes_read=%d", row, bytes_read);
       wdtRefresh();
 
       uint32_t local_bytes_read = 0;

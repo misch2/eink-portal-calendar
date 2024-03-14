@@ -17,6 +17,8 @@ void disconnectAndHibernate();
 void wdtInit();
 void wdtStop();
 void wdtRefresh();
+String resetReasonAsString();
+String wakeupReasonAsString();
 
 void displayText(String message, const GFXfont* font);
 void error(String message);
