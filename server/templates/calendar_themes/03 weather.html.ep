@@ -11,6 +11,7 @@
 %# $decorator = sub { Text::Unidecode::unidecode(uc(shift)) }; # UPPERCASE with accents removed
 % my $now = $display->now;
 % my $precipitation_limit = 0.5; # mm
+% my $tz = $display->get_config('timezone');
 
 <body>
     <div id="visible-area">
@@ -18,7 +19,7 @@
             % my $temp = int($current_weather->{temperature_avg} + 0.5);
             % my $wind = int($current_weather->{wind_speed_avg} + 0.5);
             % my $total_precip = $current_weather->{precipitation_sum};
-            % my $dt = $current_weather->{time_start};
+            % my $dt = $current_weather->{time_start}->clone()->set_time_zone($tz);
             
             % my $day_or_night = $current_weather->{time_is_day} ? 'day' : 'night';
             % my $class_rain_or_snow = $total_precip >= $precipitation_limit ? 'weather-is-rain-or-snow' : '';
@@ -84,7 +85,7 @@
             % my $total_precip = $item->{precipitation_sum};
             % my $day_or_night = $item->{time_is_day} ? 'day' : 'night';
 
-            % my $dt = $item->{time_start};
+            % my $dt = $item->{time_start}->clone()->set_time_zone($tz);
             % my $day_description = '';
             % if ($dt->ymd eq $now->ymd) {
             %    $day_description = 'dnes';
