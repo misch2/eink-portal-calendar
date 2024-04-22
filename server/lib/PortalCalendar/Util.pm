@@ -341,33 +341,33 @@ sub weather_component {
     my $self = shift;
     my $dt   = shift;
 
+    return unless $self->display->get_config("metnoweather") && $self->display->get_config("lat") && $self->display->get_config("lon") && $self->display->get_config("alt");
+
     my $current_weather;
     my $forecast;
+    my $api = PortalCalendar::Integration::Weather::MetNo->new(
+        app                  => $self->app,
+        display              => $self->display,
+        minimal_cache_expiry => $self->minimal_cache_expiry,
+        lat                  => $self->display->get_config("lat"),
+        lon                  => $self->display->get_config("lon"),
+        altitude             => $self->display->get_config("alt"),
+    );
 
-    if ($self->display->get_config("metnoweather") && $self->display->get_config("lat") && $self->display->get_config("lon") && $self->display->get_config("alt")) {
-        my $api = PortalCalendar::Integration::Weather::MetNo->new(
-            app                  => $self->app,
-            display              => $self->display,
-            minimal_cache_expiry => $self->minimal_cache_expiry,
-            lat                  => $self->display->get_config("lat"),
-            lon                  => $self->display->get_config("lon"),
-            altitude             => $self->display->get_config("alt"),
-        );
+    my $detailed_forecast = $api->forecast;
 
-        my $dt_start = $dt->clone->truncate(to => 'hour');    # ->add(hours => 1);
+    my $dt_start = $dt->clone->truncate(to => 'hour');    # ->add(hours => 1);
 
-        my $detailed_forecast = $api->forecast;
+    #$current_weather = $api->current;
+    $current_weather = $api->aggregate($detailed_forecast, $dt_start, 1);
 
-        #$current_weather = $api->current;
-        $current_weather = $api->aggregate($detailed_forecast, $dt_start, 1);
-        $dt_start->add(hours => 1);
+    $dt_start->add(hours => 1);                           # FIXME or $aggregate_hours?
 
-        my $aggregate_hours = $self->display->get_config("metnoweather_granularity_hours") || 2;
-        $forecast = [];
-        for (1 .. 8) {
-            push @{$forecast}, $api->aggregate($detailed_forecast, $dt_start, $aggregate_hours);
-            $dt_start->add(hours => $aggregate_hours);
-        }
+    my $aggregate_hours = $self->display->get_config("metnoweather_granularity_hours") || 2;
+    $forecast = [];
+    for (1 .. 8) {
+        push @{$forecast}, $api->aggregate($detailed_forecast, $dt_start, $aggregate_hours);
+        $dt_start->add(hours => $aggregate_hours);
     }
 
     return ($current_weather, $forecast);
