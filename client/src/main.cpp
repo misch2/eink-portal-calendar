@@ -89,6 +89,7 @@ int WiFiClientWithBlockingReads::blocking_read(uint8_t *buffer, size_t bytes) {
   uint32_t start = millis();
 
   while ((WiFiClient::connected() || WiFiClient::available()) && (remain > 0)) {
+    ArduinoOTA.handle();
     if (WiFiClient::available()) {
       uint8_t data = 0;
       int res = WiFiClient::read(&data, 1);
@@ -141,11 +142,16 @@ void readVoltage() {
   int rawVoltageADCReading;
 #ifdef VOLTAGE_ADC_PIN
   adc.attach(VOLTAGE_ADC_PIN);
-  delay(5);
-  float voltage = adc.readVoltage();
-  DEBUG_PRINT("voltage read: %f V", voltage);
+
+  float voltage = 0;
+  for (int i = 0; i < VOLTAGE_AVERAGING_COUNT; i++) {
+    delay(100);
+    voltage += adc.readVoltage();
+  }
+  voltage /= VOLTAGE_AVERAGING_COUNT;
+  DEBUG_PRINT("raw voltage read (avg): %f V", voltage);
   voltage_real = voltage * VOLTAGE_MULTIPLICATION_COEFFICIENT;
-  DEBUG_PRINT("voltage corrected (by %f): %f V", VOLTAGE_MULTIPLICATION_COEFFICIENT, voltage_real);
+  DEBUG_PRINT("real voltage (corrected by %f): %f V", VOLTAGE_MULTIPLICATION_COEFFICIENT, voltage_real);
 
   rawVoltageADCReading = adc.readRaw();
   voltage_adc_raw = rawVoltageADCReading;
@@ -313,7 +319,9 @@ void wakeupAndConnect() {
   initOTA();
 
   readVoltage();
+  ArduinoOTA.handle();
   loadConfigFromWeb();
+  ArduinoOTA.handle();
   if (voltage_real > 0 && voltage_real < VOLTAGE_MIN) {
     sleepTime = SLEEP_TIME_PERMANENT_ERROR;
     error(String("Battery voltage too low: ") + String(voltage_real) + " V\n" + "Minimum is: " + String(VOLTAGE_MIN) + " V\n" +
@@ -399,6 +407,7 @@ int httpReadStringUntil(char terminator, String &result) {
   wdtRefresh();
   int bytes = 0;
   while (httpClient.connected() && httpClient.available()) {
+    ArduinoOTA.handle();
     int c = httpClient.read();
     if (c < 0) {
       DEBUG("Premature end of HTTP response");
@@ -630,6 +639,7 @@ void displayText(String message, const GFXfont *font) {
   wdtRefresh();
   display.firstPage();
   do {
+    ArduinoOTA.handle();
     display.fillScreen(GxEPD_WHITE);
     display.setCursor(x, y);
     display.print(message);
@@ -738,6 +748,7 @@ void setup() {
 #endif
 
   if (otaMode) {
+    wdtStop();
     DEBUG_PRINT("Running OTA loop on %s (%s.local)", WiFi.localIP().toString().c_str(), HOSTNAME);
     while (true) {
       ArduinoOTA.handle();
