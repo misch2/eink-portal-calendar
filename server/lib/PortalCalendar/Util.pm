@@ -219,6 +219,49 @@ sub html_for_date {
     # keep the calendar random, but consistent for any given day
     srand($dt->ymd(''));
 
+    my ($icons, $today_events, $nearest_events, $nearest_events_grouped, $has_calendar_entries) = $self->calendar_component($dt);
+
+    my ($current_weather, $forecast) = $self->weather_component($dt);
+
+    my ($weight_series, $last_weight) = $self->googlefit_component($dt);
+
+    my $svatky_api = $self->svatkyapi_component($dt);
+
+    my $xkcd = $self->xkcd_component($dt);
+
+    return (
+        template => 'calendar_themes/' . $self->display->get_config('theme'),
+        format   => 'html',
+        app      => $self->app,
+        display  => $self->display,
+        colors   => $self->display->css_color_map($args->{preview_colors}),
+
+        # other variables
+        date                   => $dt,
+        icons                  => $icons,
+        today_events           => $today_events,
+        nearest_events         => $nearest_events,
+        nearest_events_grouped => $nearest_events_grouped,
+        has_calendar_entries   => $has_calendar_entries,
+
+        # name day:
+        name_day_details => $svatky_api->get_today_details,
+
+        xkcd => $xkcd,    # whole module, to fetch data on the fly
+
+        current_weather => $current_weather,
+        forecast        => $forecast,
+
+        # googlefit data:
+        last_weight   => $last_weight,
+        weight_series => $weight_series,
+    );
+}
+
+sub calendar_component {
+    my $self = shift;
+    my $dt   = shift;
+
     my @today_events;
     my @nearest_events;
     foreach my $calendar_no (1 .. 3) {
@@ -291,45 +334,15 @@ sub html_for_date {
         @icons = @icons[ 0 .. $icons_count - 1 ];
     }
 
+    return (\@icons, \@today_events, \@nearest_events, \%nearest_events_grouped, $has_calendar_entries);
+}
+
+sub weather_component {
+    my $self = shift;
+    my $dt   = shift;
+
     my $current_weather;
     my $forecast;
-
-    # # FIXME FIXME change to MetNo later
-    # if ($self->display->get_config("openweather")) {
-    #     my $api = PortalCalendar::Integration::Weather::OpenWeather->new(app => $self->app, display => $self->display, minimal_cache_expiry => $self->minimal_cache_expiry);
-    #     $current_weather = $api->fetch_current_from_web;
-    #     $forecast        = $api->fetch_forecast_from_web;
-
-    #     # p $forecast, as => 'forecast';
-    #     # p $current_weather, as => 'current_weather';
-
-    #     foreach my $days_add (0 .. 4) {
-    #         my $dt = DateTime->now->truncate(to => 'day')->add(days => $days_add);
-
-    #         my %daily_details = ();
-    #         foreach my $hours_add (8, 12, 16) {
-    #             my $dt2         = $dt->clone->add(hours => $hours_add);
-    #             my $time_of_day = 'morning';
-    #             $time_of_day = 'noon'      if $hours_add == 12;
-    #             $time_of_day = 'afternoon' if $hours_add == 16;
-
-    #             if (my $f = $self->find_nearest_forecast($forecast->{list}, $dt2)) {
-    #                 $daily_details{$time_of_day} = {
-    #                     required_dt => $dt2,
-    #                     forecast    => $f
-    #                 };
-    #             }
-    #         }
-
-    #         push @forecast_5_days,
-    #             {
-    #             date    => $dt,
-    #             details => \%daily_details,
-    #             };
-    #     }
-
-    #     # p @forecast_5_days;
-    # }
 
     if ($self->display->get_config("metnoweather") && $self->display->get_config("lat") && $self->display->get_config("lon") && $self->display->get_config("alt")) {
         my $api = PortalCalendar::Integration::Weather::MetNo->new(
@@ -357,6 +370,13 @@ sub html_for_date {
         }
     }
 
+    return ($current_weather, $forecast);
+}
+
+sub googlefit_component {
+    my $self = shift;
+    my $dt   = shift;
+
     my $weight_series;
     my $last_weight;
     if ($self->display->get_config('googlefit') && $self->display->get_config("googlefit_client_id")) {
@@ -365,37 +385,25 @@ sub html_for_date {
         $last_weight   = $api->get_last_known_weight;
     }
 
+    return ($weight_series, $last_weight);
+}
+
+sub svatkyapi_component {
+    my $self = shift;
+    my $dt   = shift;
+
     my $svatky_api = PortalCalendar::Integration::SvatkyAPI->new(app => $self->app, display => $self->display, minimal_cache_expiry => $self->minimal_cache_expiry);
+
+    return $svatky_api;
+}
+
+sub xkcd_component {
+    my $self = shift;
+    my $dt   = shift;
 
     my $xkcd = PortalCalendar::Integration::XKCD->new(app => $self->app, display => $self->display, minimal_cache_expiry => $self->minimal_cache_expiry);
 
-    return (
-        template => 'calendar_themes/' . $self->display->get_config('theme'),
-        format   => 'html',
-        app      => $self->app,
-        display  => $self->display,
-        colors   => $self->display->css_color_map($args->{preview_colors}),
-
-        # other variables
-        date                   => $dt,
-        icons                  => \@icons,
-        today_events           => \@today_events,
-        nearest_events         => \@nearest_events,
-        nearest_events_grouped => \%nearest_events_grouped,
-        has_calendar_entries   => $has_calendar_entries,
-
-        # name day:
-        name_day_details => $svatky_api->get_today_details,
-
-        xkcd => $xkcd,    # whole module, to fetch data on the fly
-
-        current_weather => $current_weather,
-        forecast        => $forecast,
-
-        # googlefit data:
-        last_weight   => $last_weight,
-        weight_series => $weight_series,
-    );
+    return $xkcd;
 }
 
 # # Finds a forecast with datetime nearest to the required one.
