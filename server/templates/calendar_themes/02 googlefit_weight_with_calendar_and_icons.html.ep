@@ -138,19 +138,19 @@ function drawBasic() {
 
         <img id="aperture-logo" src="/images/Aperture_Laboratories_Logo.png">
 
-%#        <div id="bottom-signature">
-%#            % my $now = DateTime->now->set_time_zone($display->get_config('timezone'));
-%#            % my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
-%#
+        <div id="bottom-signature">
+            % my $now = DateTime->now->set_time_zone($display->get_config('timezone'));
+            % my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
+
 %#            %# screen generated at
 %#            <iconify-icon icon="material-symbols:refresh"></iconify-icon>
 %#            <%= $now->format_cldr('H:mm') %>,
-%#
-%#            %# screen displayed at
-%#            <iconify-icon icon="material-symbols:add-to-home-screen-sharp"></iconify-icon>
-%#            <%= $next_wakeup->format_cldr('H:mm') %>,
-%#
-%#        </div>
+
+            %# screen displayed at
+            <iconify-icon icon="material-symbols:add-to-home-screen-sharp"></iconify-icon>
+            <%= $next_wakeup->format_cldr('H:mm') %>,
+
+        </div>
 
         <div id="battery-status">
             %= include 'calendar_themes/includes/battery_status_icon', display => $display
