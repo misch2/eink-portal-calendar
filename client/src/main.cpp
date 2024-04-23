@@ -65,7 +65,7 @@ RTC_DATA_ATTR char lastChecksum[64 + 1] = "<not_defined_yet>";  // TODO check th
 
 #define SLEEP_TIME_DEFAULT (SECONDS_PER_MINUTE * 5)
 #define SLEEP_TIME_TEMPORARY_ERROR (SECONDS_PER_MINUTE * 5)
-#define SLEEP_TIME_PERMANENT_ERROR (SECONDS_PER_HOUR * 24)
+#define SLEEP_TIME_PERMANENT_ERROR (SECONDS_PER_HOUR * 1)
 
 // remotely configurable variables (via JSON)
 int sleepTime = SLEEP_TIME_DEFAULT;
@@ -280,7 +280,7 @@ void basicInit() {
 
 void wdtInit() {
 #ifdef USE_WDT
-  TRACE_PRINT("Configuring WDT for %d seconds", WDT_TIMEOUT);
+  DEBUG_PRINT("Configuring WDT for %d seconds", WDT_TIMEOUT);
   esp_task_wdt_init(WDT_TIMEOUT, true);  // enable panic so ESP32 restarts
   esp_task_wdt_add(NULL);                // add current thread to WDT watch
 #endif
@@ -295,7 +295,7 @@ void wdtRefresh() {
 
 void wdtStop() {
 #ifdef USE_WDT
-  TRACE_PRINT("Stopping WDT...");
+  DEBUG_PRINT("Stopping WDT...");
   esp_task_wdt_deinit();
 #endif
 }
@@ -395,6 +395,7 @@ void disconnectAndHibernate() {
   }
 #endif
   DEBUG_PRINT("Going to hibernate for %d seconds", sleepTime);
+  wdtStop();
 
   stopWiFi();
   boardSpecificDone();
@@ -548,7 +549,7 @@ void showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, i
     error("Failed to download image, there were errors in all attempts.");
   }
 
-  TRACE_PRINT("Display refresh start");
+  DEBUG_PRINT("Display refresh starting");
   wdtRefresh();
   startTime = millis();
   display.refresh();  // full refresh
