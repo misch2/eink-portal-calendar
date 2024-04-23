@@ -142,10 +142,13 @@ sub aggregate {
     my $dt       = shift;
     my $hours    = shift;
 
+    my $dt_start = $dt->clone;
+    my $dt_end   = $dt->clone->add(hours => $hours);
+
     my @usable = ();
     foreach my $f (@$forecast) {
-        if (   $f->{time_end} > $dt
-            && $f->{time_start} < $dt->clone->add(hours => $hours)) {
+        if (   $f->{time_end} > $dt_start
+            && $f->{time_start} < $dt_end) {
             push @usable, $f;
         }
     }
