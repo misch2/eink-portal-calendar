@@ -23,6 +23,7 @@
 #include <SPI.h>
 #endif
 #ifdef USE_WIFI_MANAGER
+#define WM_MDNS
 #include <WiFiManager.h>
 #endif
 #ifdef USE_WDT
@@ -75,8 +76,10 @@ bool otaMode = false;
 #ifdef USE_WIFI_MANAGER
 WiFiManager wifiManager;
 #endif
+
 WiFiClientWithBlockingReads wifiClient;
 HttpClient httpClient = HttpClient(wifiClient, CALENDAR_URL_HOST, CALENDAR_URL_PORT);
+
 #ifdef VOLTAGE_ADC_PIN
 ESP32AnalogRead adc;
 #endif
@@ -587,6 +590,10 @@ bool startWiFi() {
   // wifiManager.setFastConnectMode(true); // no difference
 #ifdef USE_WIFI_MANAGER
   wdtStop();
+  wifiManager.setHostname(HOSTNAME);
+  wifiManager.setConnectRetries(3);
+  wifiManager.setConnectTimeout(15);            // 15 seconds
+  wifiManager.setConfigPortalTimeout(10 * 60);  // Stay 10 minutes max in the AP web portal, then reboot
   res = wifiManager.autoConnect();
   wdtInit();
   if (!res) {
