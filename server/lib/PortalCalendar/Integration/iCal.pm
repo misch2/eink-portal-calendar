@@ -76,12 +76,40 @@ sub get_all_items {
         sub {
             my $raw       = $self->cached_raw_details_from_web()->{content};
             my $processed = $self->transform_details($raw, $start, $end);
+  
+            my $all_events = $processed->{events};
+            my %UIDs_count = ();
+            foreach my $year (keys %{$all_events}) {
+                foreach my $month (keys %{ $all_events->{$year} }) {
+                    foreach my $day (keys %{ $all_events->{$year}->{$month} }) {
+                        my @UIDs = keys %{ $all_events->{$year}->{$month}->{$day} };
+                        foreach my $UID (@UIDs) {
+                            $UIDs_count{$UID}++;
+                        }
+                    }
+                }
+            }
+
+            foreach my $year (keys %{$all_events}) {
+                foreach my $month (keys %{ $all_events->{$year} }) {
+                    foreach my $day (keys %{ $all_events->{$year}->{$month} }) {
+                        my @events = values %{ $all_events->{$year}->{$month}->{$day} };
+                        foreach my $event (@events) {
+                            if ($UIDs_count{$event->{UID}} > 1) {
+                                $event->{recurrent} = 1;
+                            }
+                        }
+                    }
+                }
+            }
+
             return $processed;
         },
         {
             url   => $self->ics_url,
             start => $start,
-            end   => $end
+            end   => $end,
+            v     => '2.2',
         }
     );
 

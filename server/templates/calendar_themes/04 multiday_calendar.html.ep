@@ -58,7 +58,7 @@
                 % $last_title = '';
                 <div class="calendar-event-block-content">
                     % foreach my $event (@events_for_block) {
-                        % next if $events_displayed{$event->{UID}};
+                        %# next if $events_displayed{$event->{UID}};
                         % my $dt = $event->{DTSTART};
                         % my $delta_days = $dt->delta_days($now)->in_units('days');
                         % my $day_description = $dt->day_name;
@@ -72,6 +72,9 @@
                             </div>
                         % }
                         <div class="calendar-event">
+                            % if ($event->{recurrent}) {
+                                ↻
+                            % }
                             % if ($event->{allday}) {
                                 <%= $event->{SUMMARY} %>
                                 <!-- (celý den) -->
