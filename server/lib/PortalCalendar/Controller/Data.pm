@@ -70,7 +70,7 @@ sub config {
             $self->app->log->warn($message);
 
             my $token = $display->get_config('telegram_api_key');
-            if ($token) {
+            if ($token && $display->get_config('telegram')) {
                 $self->app->log->debug("Sending telegram message to " . $display->get_config('telegram_chat_id'));
                 my $telegram = WWW::Telegram::BotAPI->new(token => $token);
                 $telegram->sendMessage(
