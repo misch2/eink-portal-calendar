@@ -395,19 +395,19 @@ sub _next_wakeup_time_for_datetime {
     my $schedule = shift;
     my $dt       = shift;
 
-    # crontab definitions are in SERVER LOCAL time zone, not display dependent
-    return $dt->clone->set_time_zone('local')->truncate(to => 'day')->add(days => 1) unless $schedule;    # no schedule, wake up tomorrow
+    return $dt->clone->truncate(to => 'day')->add(days => 1) unless $schedule;    # no schedule, wake up tomorrow
+    # crontab definitions are in the same time zone as the display (and the $dt should also be in that time zone)
     my $cron = Schedule::Cron::Events->new($schedule, Seconds => $dt->epoch) or die "Invalid crontab schedule";
 
     my ($seconds, $minutes, $hours, $dayOfMonth, $month, $year) = $cron->nextEvent;
-    my $next_time = DateTime->new(year => 1900 + $year, month => 1 + $month, day => $dayOfMonth, hour => $hours, minute => $minutes, second => $seconds, time_zone => 'local');
+    my $next_time = DateTime->new(year => 1900 + $year, month => 1 + $month, day => $dayOfMonth, hour => $hours, minute => $minutes, second => $seconds, time_zone => $dt->time_zone);
 
     return $next_time;
 }
 
 sub next_wakeup_time {
     my $self = shift;
-    my $now  = shift // DateTime->now(time_zone => 'local');
+    my $now  = shift // $self->now; # at the display timezone
 
     my $schedule  = $self->get_config('wakeup_schedule');
     my $next_time = $self->_next_wakeup_time_for_datetime($schedule, $now);
