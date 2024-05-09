@@ -98,7 +98,7 @@ sub config {
 
     my $util = PortalCalendar::Util->new(app => $self->app, display => $display);
     my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
-    $self->app->log->info("Next wakeup at $next_wakeup (in $sleep_in_seconds seconds) according to crontab schedule '$schedule'");
+    $self->app->log->info("Next wakeup at $next_wakeup " . $next_wakeup->time_zone->name . " (in $sleep_in_seconds seconds) according to crontab schedule '$schedule'");
 
     $util->update_mqtt('voltage',            $display->voltage,                           1);
     $util->update_mqtt('battery_percent',    $display->battery_percent(),                 1);
