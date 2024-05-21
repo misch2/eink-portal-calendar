@@ -16,79 +16,88 @@
         % my $cnt = 0;
         % my $last_title = '';
         % my %event_displayed = ();
-        % foreach my $block ('2days', 'week', 'rest') { # 'today' or '24hrs' or '2days'
+
+        % my $blocks = {
+        %     # '24hrs' => {
+        %     #     title => 'Dnes',
+        %     #     class => 'calendar-event-block-today',
+        %     #     conditions => sub {
+        %     #         my ($delta_days, $delta_hours) = @_;
+        %     #         return $delta_hours <= 24;
+        %     #     },
+        %     # },
+        %     '2days' => {
+        %         title => 'Dnes a zítra',
+        %         class => 'calendar-event-block-today',
+        %         conditions => sub {
+        %             my ($delta_days, $delta_hours) = @_;
+        %             return $delta_hours >= 0 && $delta_days <= 1;
+        %         },
+        %     },
+        %     'week' => {
+        %         title => 'Nejbližších 7 dní',
+        %         class => 'calendar-event-block-week',
+        %         conditions => sub {
+        %             my ($delta_days, $delta_hours) = @_;
+        %             return $delta_days > 1 && $delta_days <= 7;
+        %         },
+        %     },
+        %     'rest' => {
+        %         title => 'Pozdější události',
+        %         class => 'calendar-event-block-rest',
+        %         conditions => sub {
+        %             my ($delta_days, $delta_hours) = @_;
+        %             return $delta_days > 7;
+        %         },
+        %     }
+        % };
+        % foreach my $block_id ('2days', 'week', 'rest') {
+            % my $block = $blocks->{$block_id};
             % my @events_for_block = ();
             % foreach my $event (@{ $nearest_events }) {
                 % my $dt = $event->{DTSTART};
                 % my $delta_days = $dt->delta_days($now)->in_units('days');
                 % my $delta_hours = ($dt->epoch - $now->epoch) / 3600;
 
-                % if ($block eq '24hrs') {
-                    % next unless $delta_hours <= 24;
-                % } elsif ($block eq '2days') {
-                    % next if $delta_hours <= 24;
-                    % next unless $delta_days <= 1;
-                %# } elsif ($block eq 'today') {
-                    %# next unless $delta_days == 0;
-                % } elsif ($block eq 'week') {
-                    % next if $delta_days <= 1;
-                    % next unless $delta_days > 0 && $delta_days <= 7;
-                % } else {
-                    % next unless $delta_days > 7;
-                % }
-
+                % next unless $block->{conditions}->($delta_days, $delta_hours);
                 % push @events_for_block, $event;
             % }
 
             % if (@events_for_block) {
-                % if ($block eq '24hrs') {
-                    <div class="calendar-event-block calendar-event-block-today">
-                    <div class="calendar-event-block-title">Nejbližších 24 hodin</div>
-                % } elsif ($block eq '2days') {
-                    <div class="calendar-event-block calendar-event-block-today">
-                    <div class="calendar-event-block-title">Dnes a zítra</div>
-                % } elsif ($block eq 'today') {
-                    <div class="calendar-event-block calendar-event-block-today">
-                    <div class="calendar-event-block-title">Dnes</div>
-                % } elsif ($block eq 'week') {
-                    <div class="calendar-event-block calendar-event-block-week">
-                    <div class="calendar-event-block-title">Nejbližších 7 dní</div>
-                % } else {
-                    <div class="calendar-event-block calendar-event-block-rest">
-                    <div class="calendar-event-block-title">Pozdější události</div>
-                % }
-                % $last_title = '';
-                <div class="calendar-event-block-content">
-                    % foreach my $event (@events_for_block) {
-                        %# next if $event_displayed{$event->{UID}} && !$event->{recurrent};
-                        % my $dt = $event->{DTSTART};
-                        % my $delta_days = $dt->delta_days($now)->in_units('days');
-                        % my $day_description = $dt->day_name;
-                        % my $title = $day_description . ', ' . $dt->format_cldr('d. M. y');
+                <div class="calendar-event-block <%= $block->{class} %>">
+                    <div class="calendar-event-block-title"><%= $block->{title} %></div>
+                    % $last_title = '';
+                    <div class="calendar-event-block-content">
+                        % foreach my $event (@events_for_block) {
+                            %# next if $event_displayed{$event->{UID}} && !$event->{recurrent};
+                            % my $dt = $event->{DTSTART};
+                            % my $delta_days = $dt->delta_days($now)->in_units('days');
+                            % my $day_description = $dt->day_name;
+                            % my $title = $day_description . ', ' . $dt->format_cldr('d. M. y');
 
-                        % $title .= ' (+' . $delta_days .  ')' if $delta_days > 0;
-                        % if ($title ne $last_title) {
-                            % $last_title = $title;
-                            <div class="calendar-day-title">
-                                <%= $title %>
+                            % $title .= ' (+' . $delta_days .  ')' if $delta_days > 0;
+                            % if ($title ne $last_title) {
+                                % $last_title = $title;
+                                <div class="calendar-day-title">
+                                    <%= $title %>
+                                </div>
+                            % }
+                            <div class="calendar-event">
+                                % if ($event->{recurrent}) {
+                                    ↻
+                                % }
+                                % if ($event->{allday}) {
+                                    <%= $event->{SUMMARY} %>
+                                    <!-- (celý den) -->
+                                % } else {
+                                    <%= $dt->format_cldr('H:mm') %>
+                                    <%= $event->{SUMMARY} %>
+                                    (~<%= int($event->{hours} + 0.5) %> hod.)
+                                % }
                             </div>
+                            % $event_displayed{$event->{UID}} = 1;
                         % }
-                        <div class="calendar-event">
-                            % if ($event->{recurrent}) {
-                                ↻
-                            % }
-                            % if ($event->{allday}) {
-                                <%= $event->{SUMMARY} %>
-                                <!-- (celý den) -->
-                            % } else {
-                                <%= $dt->format_cldr('H:mm') %>
-                                <%= $event->{SUMMARY} %>
-                                (~<%= int($event->{hours} + 0.5) %> hod.)
-                            % }
-                        </div>
-                        % $event_displayed{$event->{UID}} = 1;
-                    % }
-                </div>  <!-- class="calendar-event-block-content" -->
+                    </div>  <!-- class="calendar-event-block-content" -->
                 </div>  <!-- class="calendar-event-block-..." -->
             % }
         % }
