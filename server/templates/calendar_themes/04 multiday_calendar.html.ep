@@ -4,7 +4,7 @@
 %= stylesheet '/css/calendar_themes/multiday_calendar.css'
 %= include 'calendar_themes/includes/epd_colors', colors => $colors
 
-% my $now = $display->now;
+% my $now = $date;
 
 <body>
 <div id="visible-area">
