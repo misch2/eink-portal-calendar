@@ -16,13 +16,25 @@ has 'lwp_max_cache_age' => 4 * ONE_HOUR;
 has raw_json_from_web => sub {
     my $self = shift;
 
-    my $url      = Mojo::URL->new('https://xkcd.com/info.0.json');
-    my $response = $self->caching_ua->get($url->to_string);
+    my $cache = $self->db_cache;
+    $cache->max_age( 15 * ONE_MINUTE );
 
-    die $response->status_line . "\n" . $response->content
-        unless $response->is_success;
+    my $url = Mojo::URL->new('https://xkcd.com/info.0.json');
 
-    return $response->decoded_content;
+    my $info = $cache->get_or_set(
+        sub {
+            $self->app->log->debug("Really fetching XKCD JSON");
+            my $response = $self->caching_ua->get( $url->to_string );
+
+            die $response->status_line . "\n" . $response->content
+              unless $response->is_success;
+
+            return { content => $response->decoded_content };
+        },
+        { url => $url->to_unsafe_string },
+    );
+
+    return $info->{content};
 };
 
 has json => sub {
@@ -34,13 +46,25 @@ has json => sub {
 has image_data => sub {
     my $self = shift;
 
-    my $url      = Mojo::URL->new($self->json->{img});
-    my $response = $self->caching_ua->get($url->to_string);
+    my $cache = $self->db_cache;
+    $cache->max_age( 14 * ONE_DAY );
 
-    die $response->status_line . "\n" . $response->content
-        unless $response->is_success;
+    my $url = Mojo::URL->new( $self->json->{img} );
 
-    my $img = Imager->new(data => $response->decoded_content);
+    my $info = $cache->get_or_set(
+        sub {
+            $self->app->log->debug("Really fetching XKCD image");
+            my $response = $self->caching_ua->get( $url->to_string );
+
+            die $response->status_line . "\n" . $response->content
+              unless $response->is_success;
+
+            return { content => $response->decoded_content };
+        },
+        { url => $url->to_unsafe_string },
+    );
+
+    my $img = Imager->new( data => $info->{content} ) or die Imager->errstr;
     return $img;
 };
 
@@ -50,7 +74,9 @@ has image_is_landscape => sub {
     my $img = $self->image_data;
 
     return 0 if $img->getwidth == 0 || $img->getheight == 0;
-    return 1 if $img->getwidth / $img->getheight > 4 / 3;      # only significantly wider images are considered landscape
+    return 1
+      if $img->getwidth / $img->getheight >
+      4 / 3;    # only significantly wider images are considered landscape
     return 0;
 };
 
@@ -64,7 +90,7 @@ has image_as_data_url => sub {
         type => 'png',
     ) or die $img->errstr;
 
-    return 'data:image/png;base64,' . b64_encode($data, '');
+    return 'data:image/png;base64,' . b64_encode( $data, '' );
 };
 
 1;
