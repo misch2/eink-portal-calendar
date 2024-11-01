@@ -49,7 +49,11 @@
         </td>
         <td class="text-end">
             % unless ($d->is_default) {
-                <%= sprintf('%.0f', $d->battery_percent) %> %
+                % if (defined $d->battery_percent) {
+                    <%= sprintf('%.0f', $d->battery_percent) %> %
+                % } else {
+                    <span class="badge bg-danger">unknown</span>}
+                % }
             % }
         </td>
         <td>
