@@ -245,8 +245,7 @@ sub html_for_date {
         has_calendar_entries   => $has_calendar_entries,
 
         # name day:
-        # FIXME handle errors better
-        name_day_details => '?', # $svatky_api->get_today_details,
+        name_day_details => $svatky_api->get_today_details,
 
         xkcd => $xkcd,    # whole module, to fetch data on the fly
 

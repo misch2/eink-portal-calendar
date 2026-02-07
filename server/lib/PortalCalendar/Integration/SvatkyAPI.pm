@@ -14,11 +14,13 @@ sub raw_details_from_web {
     my $self = shift;
     my $date = shift;
 
-    my $url      = Mojo::URL->new('https://svatkyapi.cz/api/day/' . $date->ymd('-'))->to_unsafe_string;
+    my $url =
+      Mojo::URL->new( 'https://svatkyapi.cz/api/day/' . $date->ymd('-') )
+      ->to_unsafe_string;
     my $response = $self->caching_ua->get($url);
 
     die $response->status_line . "\n" . $response->content
-        unless $response->is_success;
+      unless $response->is_success;
 
     return $response->decoded_content;
 }
@@ -58,16 +60,25 @@ sub get_today_details {
     my $date = shift // DateTime->now();
 
     my $cache = $self->db_cache;
-    $cache->max_age(1 * ONE_DAY);
+    $cache->max_age( 1 * ONE_DAY );
 
-    return $cache->get_or_set(
-        sub {
-            my $raw       = $self->raw_details_from_web($date);
-            my $processed = $self->transform_details($raw);
-            return $processed;
-        },
-        { date => $date->ymd('-') }    # date only, ignore the time
-    );
+    my $ret;
+    try {
+        $ret = $cache->get_or_set(
+            sub {
+                my $raw       = $self->raw_details_from_web($date);
+                my $processed = $self->transform_details($raw);
+                return $processed;
+            },
+            { date => $date->ymd('-') }    # date only, ignore the time
+        );
+    }
+    catch {
+        warn "Error fetching data for date " . $date->ymd('-') . ": $_";
+        $ret = {};
+    };
+
+    return $ret;
 }
 
 1;
