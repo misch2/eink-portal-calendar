@@ -19,7 +19,7 @@ sub raw_details_from_web {
       ->to_unsafe_string;
     my $response = $self->caching_ua->get($url);
 
-    die $response->status_line . "\n" . $response->content
+    die "Error fetching data from $url: " . $response->status_line . "\n" . $response->content
       unless $response->is_success;
 
     return $response->decoded_content;
