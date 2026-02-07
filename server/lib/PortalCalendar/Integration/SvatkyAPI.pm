@@ -5,6 +5,7 @@ use Mojo::Base qw/PortalCalendar::Integration/;
 use Mojo::JSON qw(decode_json);
 use Mojo::URL;
 
+use Try::Tiny;
 use DateTime;
 use Time::Seconds;
 
@@ -74,7 +75,7 @@ sub get_today_details {
         );
     }
     catch {
-        warn "Error fetching data for date " . $date->ymd('-') . ": $_";
+        $self->app->log->error("Error fetching data for date " . $date->ymd('-') . ": $_";
         $ret = {};
     };
 
