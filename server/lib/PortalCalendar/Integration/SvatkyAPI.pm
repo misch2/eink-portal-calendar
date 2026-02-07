@@ -15,6 +15,8 @@ sub raw_details_from_web {
     my $self = shift;
     my $date = shift;
 
+    return '{}'; # FIXME API is currently unavailable, return empty string to avoid errors --- IGNORE ---
+
     my $url =
       Mojo::URL->new( 'https://svatkyapi.cz/api/day/' . $date->ymd('-') )
       ->to_unsafe_string;
@@ -73,9 +75,8 @@ sub get_today_details {
             },
             { date => $date->ymd('-') }    # date only, ignore the time
         );
-    }
-    catch {
-        $self->app->log->error("Error fetching data for date " . $date->ymd('-') . ": $_";
+    } catch {
+        $self->app->log->error("Error fetching data for date " . $date->ymd('-') . ": $_");
         $ret = {};
     };
 
