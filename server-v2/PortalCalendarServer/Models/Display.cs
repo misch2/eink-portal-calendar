@@ -17,7 +17,7 @@ public partial class Display
 
     public int Rotation { get; set; }
 
-    public string Colortype { get; set; } = null!;
+    public string ColorType { get; set; } = null!;
 
     public double? Gamma { get; set; }
 

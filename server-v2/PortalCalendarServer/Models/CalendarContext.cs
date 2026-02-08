@@ -82,7 +82,7 @@ public partial class CalendarContext : DbContext
             entity.Property(e => e.BorderLeft).HasColumnName("border_left");
             entity.Property(e => e.BorderRight).HasColumnName("border_right");
             entity.Property(e => e.BorderTop).HasColumnName("border_top");
-            entity.Property(e => e.Colortype)
+            entity.Property(e => e.ColorType)
                 .HasColumnType("VARCHAR")
                 .HasColumnName("colortype");
             entity.Property(e => e.Firmware)
