@@ -21,12 +21,6 @@ public partial class CalendarContext : DbContext
 
     public virtual DbSet<Display> Displays { get; set; }
 
-    public virtual DbSet<MojoMigration> MojoMigrations { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlite("Data Source=..\\_data\\devel\\calendar.db");
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Cache>(entity =>
@@ -106,16 +100,6 @@ public partial class CalendarContext : DbContext
                 .HasColumnName("name");
             entity.Property(e => e.Rotation).HasColumnName("rotation");
             entity.Property(e => e.Width).HasColumnName("width");
-        });
-
-        modelBuilder.Entity<MojoMigration>(entity =>
-        {
-            entity.HasKey(e => e.Name);
-
-            entity.ToTable("mojo_migrations");
-
-            entity.Property(e => e.Name).HasColumnName("name");
-            entity.Property(e => e.Version).HasColumnName("version");
         });
 
         OnModelCreatingPartial(modelBuilder);
