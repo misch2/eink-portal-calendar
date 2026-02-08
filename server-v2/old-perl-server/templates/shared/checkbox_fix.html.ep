@@ -1,0 +1,19 @@
+%# Fix for checkboxes not being sent when unchecked. 
+%# See https://stackoverflow.com/questions/14067215/unchecked-checkbox-returning-null-value
+%# 
+%= javascript begin
+jQuery(document).ready(function($) {
+    $(document).on('submit', 'form', function(e) {
+        var $form = $(this);
+
+        $form.find('input:checkbox:not(:checked):not(:disabled)').each(function(index, input) {
+            $form.append(
+                $('<input/>')
+                    .attr('type', 'hidden')
+                    .attr('name', input.name)
+                    .val(0)
+            );
+        });
+    });
+});
+% end

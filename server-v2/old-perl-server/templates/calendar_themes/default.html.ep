@@ -1,0 +1,8 @@
+<html>
+%= include 'calendar_themes/includes/epd_colors', colors => $colors
+
+<body>
+Hello world
+</body>
+
+</html>

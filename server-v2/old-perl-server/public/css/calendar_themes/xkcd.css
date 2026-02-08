@@ -1,0 +1,84 @@
+/* resets */
+html,
+body {
+    font-size: 14pt;
+    /* font-family: sans-serif; */
+    /* font-family: 'Roboto', sans-serif; */
+    font-family: 'Playpen Sans', sans-serif;
+    /* background-color: aqua;     */
+}
+
+html,
+body,
+div,
+p {
+    padding: 0;
+    margin: 0;
+}
+
+div#visible-area {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    height: 460px;
+    width: 780px;
+    overflow: hidden;
+    /* background-color: gainsboro;  */
+}
+
+h1 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+    padding: 0 0 0.5rem 0;
+    color: var(--epd-black);
+}
+
+img {
+    padding: 0;
+}
+
+.image-and-alt {
+    display: flex;
+    align-items: flex-start;
+    /* justify-content: space-between; */
+    padding: 0;
+    gap: 1rem;
+    height: 100%;
+    /* background-color: cadetblue; */
+}
+
+/* portrait */
+.portrait div.image-and-alt {
+    flex-direction: row;
+}
+
+.portrait div.image-and-alt div.title-and-alt {
+    display: flex;
+    flex-direction: column
+}
+
+.portrait img {
+    height: 100%;
+}
+
+/* landscape */
+.landscape div.image-and-alt {
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.landscape h1 {
+    padding: 0;
+}
+
+.landscape img {
+    max-width: 100%;
+    min-height: 50%;
+    /* flex: 2; */
+    flex: 0 1 auto;
+}
+.landscape .alt {
+    flex: 1.5;
+    /* background-color: chocolate; */
+}

@@ -1,0 +1,19 @@
+% layout 'bootstrap5';
+
+<h3>Error</h3>
+
+Error getting authentication token:
+
+<p>
+Code:
+<pre>
+<%= $error->{error} %>
+</pre>
+
+<p>
+Description:
+<pre>
+<%= $error->{error_description} %>
+</pre>
+<p>
+

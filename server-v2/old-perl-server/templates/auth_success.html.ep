@@ -1,0 +1,19 @@
+% layout 'bootstrap5';
+
+<h3>Success</h3>
+
+<p>
+% if ($a_token) {
+    Authorization token successfully received.
+% } else {
+    Authorization token NOT RECEIVED!
+% }
+</p>
+<p>
+% if ($r_token) {
+    Refresh token successfully received.
+% } else {
+    Refresh token NOT RECEIVED!
+% }
+</p>
+

@@ -1,0 +1,161 @@
+<html>
+%# see https://icon-sets.iconify.design/material-symbols
+%= javascript 'https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js'
+%= stylesheet '/css/calendar.css'
+%= stylesheet '/css/calendar_themes/googlefit.css'
+%= include 'calendar_themes/includes/epd_colors', colors => $colors
+
+% my $decorator = sub { shift };        # returns input as-is
+% $decorator = sub { uc(shift) };       # UPPERCASE
+%# $decorator = sub { ucfirst(shift) }; # Uppercase
+%# $decorator = sub { Text::Unidecode::unidecode(uc(shift)) }; # UPPERCASE with accents removed
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+google.charts.load('current', {packages: ['corechart', 'line']});
+google.charts.setOnLoadCallback(drawBasic);
+
+function drawBasic() {
+    var data = new google.visualization.DataTable();
+    data.addColumn('date', 'Day');
+    data.addColumn('number', 'Weight');
+
+    data.addRows([
+        % foreach my $point (@{ $weight_series }) {
+        [
+            %= sprintf("new Date(%d, %d, %d, %d, %d, %d, 0)", $point->{date}->year, $point->{date}->month, $point->{date}->day, $point->{date}->hour, $point->{date}->minute, $point->{date}->second)
+            ,
+            %== encode_json($point->{weight})
+        ],
+        % }
+    ]);
+
+    // https://developers.google.com/chart/interactive/docs/gallery/linechart
+    var options = {
+        colors:['black', 'black'],
+        enableInteractivity: false,
+        theme: 'maximized',
+
+        // remove legend
+        legend: { position: 'none' },
+        // x-axis labels and gridlines
+        hAxis: { XtextPosition: 'none', format: 'MMM', gridlines: { color: '#888' }, minorGridlines: { color: 'transparent' },
+            textStyle: { fontSize: 10, color: '#000000' },
+            ticks: [
+                % foreach my $point (@{ $weight_series }) {
+                    % if ($point->{date}->day == 1) {
+                    {
+                        %= "v:" . sprintf("new Date(%d, %d, %d)", $point->{date}->year, $point->{date}->month, $point->{date}->day) . ","
+                        %== "f:'" . $point->{date}->format_cldr('LLLL') . "'"
+                    },
+                    % }
+                % }
+            ],
+        },
+        // dtto for y-axis
+        // vAxis: { textPosition: 'none', gridlines: { Xcolor: 'transparent' } },
+        vAxis: { XXXtitle: 'Váha', XXXtextPosition: 'none', gridlines: { Xcolor: 'transparent', color: '#000', count: 3 }, minorGridlines: { color: 'transparent' },
+            textStyle: { fontSize: 12, color: '#000000' } },
+
+        // remove chart area border
+        chartArea: { left: 0, top: 0, width: '100%', height: '100%' },
+
+        // interpolate NULL values
+        interpolateNulls: true,
+
+        // smooth curve
+        curveType: 'function',
+
+        // show points
+        pointShape: 'circle',   //  'circle', 'triangle', 'square', 'diamond', 'star', or 'polygon'
+        pointSize: 4,
+    };
+
+    var chart = new google.visualization.LineChart(document.getElementById('weight_chart_div'));
+
+    chart.draw(data, options);
+}
+</script>
+
+<body>
+    <div id="spacer">
+        <div class="top-month-header">
+            %# LLLL = standalone month name
+            <div>
+                <%= $decorator->($date->format_cldr('LLLL')) %>
+            </div>
+        </div>
+
+        <div class="current-weight-big">
+            <span><%= sprintf("%.1f", $last_weight) %></span>
+            <!-- <span class="current-weight-small-kg"> kg</span> -->
+        </div>
+
+        <div class="weight-chart" id="weight_chart_div">
+        </div>
+
+        <div class="day-of-week-block">
+            <div class="dow-number-and-name">
+                <div>
+                    <%= $date->day .'/'. $date->month_length %>
+                </div>
+                <div>
+                    <%= $decorator->($date->day_name) %>
+                </div>
+            </div>
+            <div class="separator"></div>
+            <div class="bunch-of-bars">
+                % for (1 .. $date->day) {
+                    <div class="bar"></div>
+                % }
+            </div>
+        </div>
+
+        % if (scalar @{ $icons }) {
+            <div class="icons-container">
+                % foreach my $icon (@{ $icons }) {
+                    <img src="/images/portal_icons/<%= $icon->{name} %>.png" class="icon<%= $icon->{grayed} ? ' grayed' : '' %>">
+                % }
+            </div>
+        % }
+
+        % if ($has_calendar_entries) {
+            <div class="calendar-container">
+                % foreach my $event (@{ $today_events }) {
+                    <div>
+                        % if ($event->{allday}) {
+                            <%= $event->{SUMMARY} %>
+                            <!-- (celý den) -->
+                        % } else {
+                            <%= $event->{DTSTART}->format_cldr('H:mm') %>
+                            <%= $event->{SUMMARY} %>
+                            (~<%= int($event->{hours} + 0.5) %> hod.)
+                        % }
+                    </div>
+                % }
+            </div>
+        % }
+
+        <img id="aperture-logo" src="/images/Aperture_Laboratories_Logo.png">
+
+        <div id="bottom-signature">
+            % my $now = DateTime->now->set_time_zone($display->get_config('timezone'));
+            % my ($next_wakeup, $sleep_in_seconds, $schedule) = $display->next_wakeup_time();
+
+%#            %# screen generated at
+%#            <iconify-icon icon="material-symbols:refresh"></iconify-icon>
+%#            <%= $now->format_cldr('H:mm') %>,
+
+            %# screen displayed at
+            <iconify-icon icon="material-symbols:add-to-home-screen-sharp"></iconify-icon>
+            <%= $next_wakeup->format_cldr('H:mm') %>,
+
+        </div>
+
+        <div id="battery-status">
+            %= include 'calendar_themes/includes/battery_status_icon', display => $display
+        </div>
+    </div>
+</body>
+
+</html>
