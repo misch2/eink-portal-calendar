@@ -1,0 +1,163 @@
+@model List<Display>
+@inject CalendarContext Db
+@using PortalCalendarServer.Models
+
+<h3>Displays</h3>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Name</th>
+            <th scope="col">MAC address</th>
+            <th scope="col">Width × height</th>
+            <th scope="col">Color type</th>
+            <th scope="col">Firmware</th>
+            <th scope="col">Battery</th>
+            <th scope="col">Next wakeup</th>
+            <th scope="col">Status</th>
+            <th scope="col">Last image</th>
+            <th scope="col">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var d in Model)
+        {
+            <tr>
+                <td>@d.Id</td>
+                <td>
+                    @if (d.IsDefault())
+                    {
+                        <a href="/config_ui/@d.Id">@d.Name</a>
+                    }
+                    else
+                    {
+                        <a href="/home/@d.Id">@d.Name</a>
+                    }
+                </td>
+                <td>@d.Mac</td>
+                <td>
+                    @if (!d.IsDefault())
+                    {
+                        @($"{d.VirtualWidth()} × {d.VirtualHeight()}")
+                    }
+                </td>
+                <td>@d.ColorTypeFormatted()</td>
+                <td>@d.Firmware</td>
+                <td class="text-end">
+                    @if (!d.IsDefault())
+                    {
+                        var batteryPercent = d.BatteryPercent();
+                        if (batteryPercent.HasValue)
+                        {
+                            @($"{batteryPercent.Value:F0} %")
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">unknown</span>
+                        }
+                    }
+                </td>
+                <td>
+                    @if (!d.IsDefault())
+                    {
+                        var (nextWakeup, sleepInSeconds, schedule) = d.NextWakeupTime();
+                        var minutes = sleepInSeconds / 60;
+                        var seconds = sleepInSeconds % 60;
+                        @($"{nextWakeup:dd.MM.yyyy HH:mm} (in {minutes} minutes and {seconds} seconds)")
+                    }
+                </td>
+                <td>
+                    @if (!d.IsDefault())
+                    {
+                        var missedConnects = d.MissedConnects();
+                        if (missedConnects > 0)
+                        {
+                            var minFailuresStr = d.GetConfig(Db, "alive_check_minimal_failure_count", null);
+                            var minFailures = int.TryParse(minFailuresStr, out var mf) ? mf : 1;
+                            var lastVisit = d.LastVisit();
+                            
+                            if (missedConnects >= minFailures)
+                            {
+                                <span class="badge bg-danger">Frozen since @(lastVisit?.ToString("dd.MM.yyyy HH:mm") ?? "unknown")</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-info">Possibly frozen since @(lastVisit?.ToString("dd.MM.yyyy HH:mm") ?? "unknown")</span>
+                            }
+                            <br />
+                            @if (lastVisit.HasValue)
+                            {
+                                var hoursSince = (int)((DateTime.UtcNow - lastVisit.Value).TotalHours + 0.5);
+                                @($"{hoursSince} hours, {missedConnects} missed connect(s)")
+                            }
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">OK</span>
+                        }
+                    }
+                </td>
+                <td>
+                    @if (!d.IsDefault())
+                    {
+                        <a href="/home/@d.Id">
+                            <img src="/api/calendar/bitmap?preview_colors=true&mac=@d.Mac" 
+                                 style="max-height: 6rem; width: auto; border: 1px solid gray" 
+                                 alt="Display preview" />
+                        </a>
+                    }
+                </td>
+                <td>
+                    @if (!d.IsDefault())
+                    {
+                        <button type="button" class="btn btn-secondary btn-sm" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#delete_modal" 
+                                data-display-id="@d.Id" 
+                                data-display-name="@d.Name">
+                            Delete
+                        </button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="delete_modal" tabindex="-1">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete display</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Do you really want to <b>completely delete</b> display 
+                #<span class="delete_modal_display_id"></span>
+                <b>"<span class="delete_modal_display_name"></span>"</b>?
+            </div>
+            <div class="modal-footer">
+                <form id="delete_form" method="post" action="">
+                    @Html.AntiForgeryToken()
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $('#delete_modal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var modal = $(this);
+            var displayId = button.data('display-id');
+            modal.find('.delete_modal_display_id').text(displayId);
+            modal.find('.delete_modal_display_name').text(button.data('display-name'));
+            modal.find('#delete_form').attr('action', '/delete/' + displayId);
+        });
+    </script>
+}

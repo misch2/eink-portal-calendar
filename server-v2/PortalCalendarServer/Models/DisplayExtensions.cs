@@ -4,6 +4,64 @@ namespace PortalCalendarServer.Models;
 
 public static class DisplayExtensions
 {
+    public static bool IsDefault(this Display display)
+    {
+        return display.Id == 0;
+    }
+
+    public static string ColorTypeFormatted(this Display display)
+    {
+        return display.ColorType switch
+        {
+            "BW" => "Black & White",
+            "4G" => "Grayscale, 4 levels",
+            "3C" => "Black & White & Color (red or yellow)",
+            _ => display.ColorType
+        };
+    }
+
+    public static int MissedConnects(this Display display)
+    {
+        var missedStr = display.Configs?.FirstOrDefault(c => c.Name == "_missed_connects")?.Value;
+        return int.TryParse(missedStr, out var missed) ? missed : 0;
+    }
+
+    public static DateTime? LastVisit(this Display display)
+    {
+        var lastVisitStr = display.Configs?.FirstOrDefault(c => c.Name == "_last_visit")?.Value;
+        if (string.IsNullOrEmpty(lastVisitStr))
+        {
+            return null;
+        }
+
+        if (DateTime.TryParse(lastVisitStr, null, DateTimeStyles.RoundtripKind, out var lastVisit))
+        {
+            return lastVisit.ToUniversalTime();
+        }
+
+        return null;
+    }
+
+    public static string GetConfigWithoutDefaults(this Display display, CalendarContext context, string name)
+    {
+        var config = display.Configs?.FirstOrDefault(c => c.Name == name);
+        return config?.Value ?? string.Empty;
+    }
+
+    public static string GetConfigDefaultsOnly(this Display display, CalendarContext context, string name)
+    {
+        if (display.Id == 0)
+        {
+            return string.Empty;
+        }
+
+        // Get from default display (ID = 0)
+        var defaultConfig = context.Configs
+            .FirstOrDefault(c => c.DisplayId == 0 && c.Name == name);
+
+        return defaultConfig?.Value ?? string.Empty;
+    }
+
     public static string GetConfig(this Display display, CalendarContext context, string name, string defaultValue = "")
     {
         var config = display.Configs?.FirstOrDefault(c => c.Name == name);

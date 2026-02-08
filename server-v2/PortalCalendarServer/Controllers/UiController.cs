@@ -9,11 +9,26 @@ public class UiController : Controller
 {
     private readonly CalendarContext _context;
     private readonly ILogger<UiController> _logger;
+    private readonly IWebHostEnvironment _environment;
 
-    public UiController(CalendarContext context, ILogger<UiController> logger)
+    // Config parameter names that can be saved from the UI
+    private static readonly string[] ConfigUiParameters = new[]
+    {
+        "alive_check_safety_lag_minutes", "alive_check_minimal_failure_count", "alt", "display_title",
+        "googlefit", "googlefit_auth_callback", "googlefit_client_id", "googlefit_client_secret",
+        "lat", "lon", "max_icons_with_calendar", "max_random_icons", "metnoweather",
+        "metnoweather_granularity_hours", "min_random_icons", "mqtt", "mqtt_password", "mqtt_server",
+        "mqtt_topic", "mqtt_username", "openweather", "openweather_api_key", "openweather_lang",
+        "ota_mode", "telegram", "telegram_api_key", "telegram_chat_id", "theme", "timezone",
+        "totally_random_icon", "wakeup_schedule", "web_calendar_ics_url1", "web_calendar_ics_url2",
+        "web_calendar_ics_url3", "web_calendar1", "web_calendar2", "web_calendar3"
+    };
+
+    public UiController(CalendarContext context, ILogger<UiController> logger, IWebHostEnvironment environment)
     {
         _context = context;
         _logger = logger;
+        _environment = environment;
     }
 
     // Helper to get display by ID
@@ -36,11 +51,14 @@ public class UiController : Controller
     public async Task<IActionResult> SelectDisplay()
     {
         var displays = await _context.Displays
+            .Include(d => d.Configs)
             .OrderBy(d => d.Id)
             .ToListAsync();
 
-        // TODO: Return view with display list
-        return Ok(new { message = "Display list page", displays });
+        ViewData["NavLink"] = "index";
+        ViewData["Title"] = "Displays";
+
+        return View("DisplayList", displays);
     }
 
     // GET /home/{display_number}
@@ -53,8 +71,10 @@ public class UiController : Controller
             return NotFound();
         }
 
-        // TODO: Return home view
-        return Ok(new { message = "Home page", display });
+        ViewData["NavLink"] = "home";
+        ViewData["Title"] = $"Display {display.Name}";
+
+        return View("Index", display);
     }
 
     // GET /test/{display_number}
@@ -67,8 +87,10 @@ public class UiController : Controller
             return NotFound();
         }
 
-        // TODO: Return side-by-side comparison view
-        return Ok(new { message = "Test/comparison page", display });
+        ViewData["NavLink"] = "compare";
+        ViewData["Title"] = $"Test - {display.Name}";
+
+        return View("Test", display);
     }
 
     // POST /delete/{display_number}
@@ -87,13 +109,13 @@ public class UiController : Controller
 
         _logger.LogWarning("Display deleted: {DisplayId}", displayNumber);
 
-        // TODO: Set flash message "Display deleted."
+        TempData["Message"] = "Display deleted.";
         return RedirectToAction(nameof(SelectDisplay));
     }
 
     // GET /calendar/{display_number}/html
     [HttpGet("/calendar/{displayNumber:int}/html")]
-    public async Task<IActionResult> CalendarHtmlDefaultDate(int displayNumber)
+    public async Task<IActionResult> CalendarHtmlDefaultDate(int displayNumber, [FromQuery] bool preview_colors = false)
     {
         var display = await GetDisplayByIdAsync(displayNumber);
         if (display == null)
@@ -102,16 +124,12 @@ public class UiController : Controller
         }
 
         // TODO: Implement calendar HTML rendering for current date
-        var previewColors = Request.Query.ContainsKey("preview_colors") 
-            ? bool.Parse(Request.Query["preview_colors"]!) 
-            : false;
-
-        return Ok(new { message = "Calendar HTML for current date", display, previewColors });
+        return Content($"Calendar HTML for display {display.Name} (current date) - preview_colors: {preview_colors}", "text/html");
     }
 
     // GET /calendar/{display_number}/html/{date}
     [HttpGet("/calendar/{displayNumber:int}/html/{date}")]
-    public async Task<IActionResult> CalendarHtmlSpecificDate(int displayNumber, string date)
+    public async Task<IActionResult> CalendarHtmlSpecificDate(int displayNumber, string date, [FromQuery] bool preview_colors = false)
     {
         var display = await GetDisplayByIdAsync(displayNumber);
         if (display == null)
@@ -125,11 +143,7 @@ public class UiController : Controller
         }
 
         // TODO: Implement calendar HTML rendering for specific date
-        var previewColors = Request.Query.ContainsKey("preview_colors") 
-            ? bool.Parse(Request.Query["preview_colors"]!) 
-            : false;
-
-        return Ok(new { message = "Calendar HTML for specific date", display, date = parsedDate, previewColors });
+        return Content($"Calendar HTML for display {display.Name} on {parsedDate:yyyy-MM-dd} - preview_colors: {preview_colors}", "text/html");
     }
 
     // GET /config_ui/{display_number}
@@ -142,15 +156,32 @@ public class UiController : Controller
             return NotFound();
         }
 
-        // TODO: Get available template names from filesystem
-        // TODO: Return configuration UI view
-        return Ok(new { message = "Configuration UI page", display });
+        // Get available template names from filesystem
+        var themesPath = Path.Combine(_environment.ContentRootPath, "Views", "CalendarThemes");
+        var templateNames = new List<string>();
+        
+        if (Directory.Exists(themesPath))
+        {
+            templateNames = Directory.GetFiles(themesPath, "*.cshtml")
+                .Select(f => Path.GetFileNameWithoutExtension(f))
+                .Where(n => !n.StartsWith("_"))
+                .ToList();
+        }
+
+        ViewData["NavLink"] = "config_ui";
+        ViewData["Title"] = $"Configuration - {display.Name}";
+        ViewData["TemplateNames"] = templateNames;
+        ViewData["CurrentTheme"] = display.GetConfig(_context, "theme");
+        ViewData["LastVoltage"] = display.Voltage();
+        ViewData["LastVoltageRaw"] = display.GetConfig(_context, "_last_voltage_raw");
+
+        return View("ConfigUi", display);
     }
 
     // POST /config_ui/{display_number}
     [HttpPost("/config_ui/{displayNumber:int}")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ConfigUiSave(int displayNumber)
+    public async Task<IActionResult> ConfigUiSave(int displayNumber, [FromForm] IFormCollection form)
     {
         var display = await GetDisplayByIdAsync(displayNumber);
         if (display == null)
@@ -158,13 +189,70 @@ public class UiController : Controller
             return NotFound();
         }
 
-        // TODO: Read form parameters and update display configuration
-        // TODO: Update database columns in the 'displays' table
-        // TODO: Enqueue regenerate_all_images task
+        // Save generic config parameters
+        foreach (var paramName in ConfigUiParameters)
+        {
+            if (form.ContainsKey(paramName))
+            {
+                var value = form[paramName].ToString();
+                display.SetConfig(_context, paramName, value);
+            }
+            else if (paramName.StartsWith("web_calendar") || paramName == "googlefit" || 
+                     paramName == "metnoweather" || paramName == "openweather" || 
+                     paramName == "telegram" || paramName == "mqtt" || paramName == "ota_mode")
+            {
+                // Checkboxes: if not present, set to empty/false
+                display.SetConfig(_context, paramName, "");
+            }
+        }
+
+        // Update database columns in the 'displays' table
+        if (!display.IsDefault())
+        {
+            if (form.ContainsKey("display_name"))
+            {
+                display.Name = form["display_name"].ToString();
+            }
+            if (form.ContainsKey("display_mac"))
+            {
+                var mac = form["display_mac"].ToString().Trim().ToLowerInvariant();
+                display.Mac = string.IsNullOrEmpty(mac) ? null : mac;
+            }
+            if (form.ContainsKey("display_rotation") && int.TryParse(form["display_rotation"], out var rotation))
+            {
+                display.Rotation = rotation;
+            }
+            if (form.ContainsKey("display_gamma") && double.TryParse(form["display_gamma"], out var gamma))
+            {
+                display.Gamma = gamma;
+            }
+            if (form.ContainsKey("display_border_top") && int.TryParse(form["display_border_top"], out var borderTop))
+            {
+                display.BorderTop = borderTop;
+            }
+            if (form.ContainsKey("display_border_right") && int.TryParse(form["display_border_right"], out var borderRight))
+            {
+                display.BorderRight = borderRight;
+            }
+            if (form.ContainsKey("display_border_bottom") && int.TryParse(form["display_border_bottom"], out var borderBottom))
+            {
+                display.BorderBottom = borderBottom;
+            }
+            if (form.ContainsKey("display_border_left") && int.TryParse(form["display_border_left"], out var borderLeft))
+            {
+                display.BorderLeft = borderLeft;
+            }
+
+            _context.Update(display);
+        }
+
+        await _context.SaveChangesAsync();
 
         _logger.LogInformation("Configuration saved for display {DisplayId}", displayNumber);
 
-        // TODO: Set flash message "Parameters saved."
+        // TODO: Enqueue regenerate_all_images task
+
+        TempData["Message"] = "Parameters saved.";
         return RedirectToAction(nameof(ConfigUiShow), new { displayNumber });
     }
 
@@ -187,10 +275,20 @@ public class UiController : Controller
         var sanitizedTheme = new string(theme.Where(c => 
             char.IsLetterOrDigit(c) || c == '_' || c == '-' || c == ' ').ToArray());
 
-        // TODO: Render theme configuration template
-        _logger.LogInformation("Rendering theme configuration for theme: {Theme}", sanitizedTheme);
+        try
+        {
+            // Try to render the theme configuration partial view
+            var viewPath = $"~/Views/CalendarThemes/Configs/{sanitizedTheme}.cshtml";
+            
+            _logger.LogInformation("Rendering theme configuration for theme: {Theme}", sanitizedTheme);
 
-        return Ok(new { message = "Theme configuration", display, theme = sanitizedTheme });
+            return PartialView(viewPath, display);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error rendering theme [{Theme}]", sanitizedTheme);
+            return Content(string.Empty);
+        }
     }
 
     // GET /auth/googlefit/{display_number}
@@ -203,11 +301,29 @@ public class UiController : Controller
             return NotFound();
         }
 
-        // TODO: Build Google OAuth2 URL with proper parameters
-        // TODO: Redirect to Google OAuth consent page
+        // Build Google OAuth2 URL
+        var clientId = display.GetConfig(_context, "googlefit_client_id");
+        var callback = display.GetConfig(_context, "googlefit_auth_callback");
+        var scope = "https://www.googleapis.com/auth/fitness.body.read";
+        
+        var state = Convert.ToBase64String(
+            System.Text.Encoding.UTF8.GetBytes(
+                System.Text.Json.JsonSerializer.Serialize(new { display_number = displayNumber })
+            )
+        );
+
+        var url = "https://accounts.google.com/o/oauth2/v2/auth" +
+                  $"?client_id={Uri.EscapeDataString(clientId)}" +
+                  "&access_type=offline&prompt=consent" +
+                  "&response_type=code" +
+                  $"&scope={Uri.EscapeDataString(scope)}" +
+                  $"&state={Uri.EscapeDataString(state)}" +
+                  "&include_granted_scopes=true" +
+                  $"&redirect_uri={Uri.EscapeDataString(callback)}";
+
         _logger.LogInformation("Redirecting to Google Fit OAuth for display {DisplayId}", displayNumber);
 
-        return Ok(new { message = "Google Fit OAuth redirect", display });
+        return Redirect(url);
     }
 
     // GET /auth/googlefit/success/{display_number}
@@ -226,7 +342,11 @@ public class UiController : Controller
             return BadRequest(new { error = "No access token found" });
         }
 
-        // TODO: Return success view with token information
-        return Ok(new { message = "Google Fit authentication successful", display, hasToken = true });
+        ViewData["NavLink"] = "config_ui";
+        ViewData["Title"] = "Google Fit Authentication Successful";
+        ViewData["AccessToken"] = accessToken;
+        ViewData["RefreshToken"] = display.GetConfig(_context, "_googlefit_refresh_token");
+
+        return View("AuthSuccess", display);
     }
 }

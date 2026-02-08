@@ -1,0 +1,20 @@
+@model Display
+@using PortalCalendarServer.Models
+
+<h1>Success!</h1>
+
+<p>Google Fit authentication successful for display <strong>@Model.Name</strong>.</p>
+
+<div class="mb-3">
+    <label class="form-label">Auth token:</label>
+    <pre class="border p-2 bg-light">@ViewData["AccessToken"]</pre>
+</div>
+
+<div class="mb-3">
+    <label class="form-label">Refresh token:</label>
+    <pre class="border p-2 bg-light">@ViewData["RefreshToken"]</pre>
+</div>
+
+<p>
+    <a href="/config_ui/@Model.Id" class="btn btn-primary">Return to Configuration</a>
+</p>

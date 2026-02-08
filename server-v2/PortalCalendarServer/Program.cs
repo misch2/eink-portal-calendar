@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using PortalCalendarServer.Models;
 using Scalar.AspNetCore;
 
@@ -14,7 +16,38 @@ builder.Services.AddDbContext<CalendarContext>(options =>
 
 // Add services to the container
 builder.Services.AddControllersWithViews(); // Support for both API and MVC controllers
-builder.Services.AddOpenApi();
+
+// Configure OpenAPI with custom settings
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        document.Info = new OpenApiInfo
+        {
+            Title = "Portal Calendar API",
+            Version = "v1",
+            Description = "API for managing e-ink portal calendar displays",
+            Contact = new OpenApiContact
+            {
+                Name = "Portal Calendar",
+                Url = new Uri("https://github.com/misch2/eink-portal-calendar")
+            }
+        };
+
+        // Organize tags
+        document.Tags = new List<OpenApiTag>
+        {
+            new() { Name = "Health Checks", Description = "System health and connectivity checks" },
+            new() { Name = "Device API", Description = "Endpoints called by e-ink devices" },
+            new() { Name = "Display Configuration", Description = "Display settings and management" },
+            new() { Name = "Image Generation", Description = "Bitmap and image generation" },
+            new() { Name = "UI Management", Description = "Web UI for display management" },
+            new() { Name = "Authentication", Description = "OAuth and authentication flows" }
+        };
+
+        return Task.CompletedTask;
+    });
+});
 
 var app = builder.Build();
 
@@ -27,7 +60,12 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi(); // Serves the OpenAPI JSON at /openapi/v1.json
 
     // Optional: Add Scalar UI for interactive API documentation
-    app.MapScalarApiReference(); // Available at /scalar/v1
+    app.MapScalarApiReference(options =>
+    {
+        options.Title = "Portal Calendar API";
+        options.Theme = ScalarTheme.DeepSpace;
+        options.DefaultHttpClient = new(ScalarTarget.CSharp, ScalarClient.HttpClient);
+    }); // Available at /scalar/v1
 }
 
 app.UseHttpsRedirection();
