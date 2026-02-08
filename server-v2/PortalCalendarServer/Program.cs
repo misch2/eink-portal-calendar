@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Models;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +21,13 @@ var app = builder.Build();
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    // /openapi/v1.json - Raw OpenAPI specification (JSON)
+    // /scalar/v1 - Beautiful interactive API documentation UI where you can test endpoints
+
+    app.MapOpenApi(); // Serves the OpenAPI JSON at /openapi/v1.json
+
+    // Optional: Add Scalar UI for interactive API documentation
+    app.MapScalarApiReference(); // Available at /scalar/v1
 }
 
 app.UseHttpsRedirection();

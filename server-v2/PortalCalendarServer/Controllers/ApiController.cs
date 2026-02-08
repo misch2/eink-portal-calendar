@@ -40,6 +40,7 @@ public class ApiController : ControllerBase
 
     // GET /api/ping
     [HttpGet("ping")]
+    [Tags("Health Checks")]
     public IActionResult Ping()
     {
         return Ok(new { status = "ok" });
@@ -47,6 +48,7 @@ public class ApiController : ControllerBase
 
     // GET /api/health
     [HttpGet("health")]
+    [Tags("Health Checks")]
     public IActionResult Health()
     {
         try
@@ -71,6 +73,7 @@ public class ApiController : ControllerBase
 
     // GET /api/config?mac=XX:XX:XX:XX:XX:XX&fw=1.0&w=800&h=480&c=BW&adc=2048&v=4.2&...
     [HttpGet("config")]
+    [Tags("Device API", "Display Configuration")]
     public async Task<IActionResult> Config(
     [FromQuery] string? mac,
     [FromQuery] string? fw,
@@ -172,6 +175,7 @@ public class ApiController : ControllerBase
 
     // GET /api/calendar/bitmap?mac=XX:XX:XX:XX:XX:XX&rotate=0&flip=&format=png&...
     [HttpGet("calendar/bitmap")]
+    [Tags("Device API", "Image Generation")]
     public async Task<IActionResult> Bitmap(
         [FromQuery] string? mac,
         [FromQuery] int rotate = 0,
@@ -201,6 +205,7 @@ public class ApiController : ControllerBase
 
     // GET /api/calendar/bitmap/epaper?mac=XX:XX:XX:XX:XX:XX&web_format=false&preview_colors=false
     [HttpGet("calendar/bitmap/epaper")]
+    [Tags("Device API", "Image Generation")]
     public async Task<IActionResult> BitmapEpaper(
         [FromQuery] string? mac,
         [FromQuery] bool web_format = false,
