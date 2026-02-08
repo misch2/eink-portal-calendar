@@ -73,6 +73,7 @@ public class UiController : Controller
 
         ViewData["NavLink"] = "home";
         ViewData["Title"] = $"Display {display.Name}";
+        ViewBag.Display = display; // for _Layout
 
         return View("Index", display);
     }
