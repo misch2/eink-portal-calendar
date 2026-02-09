@@ -180,9 +180,9 @@ img#aperture-logo {
 
 div#bottom-signature {
     position: absolute;
-    width: 200;
-    top: 710;
-    left: 130;
+    width: 200px;
+    top: 710px;
+    left: 130px;
     font-size: 0.7rem;
     text-align: right;
 }
