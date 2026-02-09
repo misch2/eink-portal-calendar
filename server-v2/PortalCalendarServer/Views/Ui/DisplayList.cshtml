@@ -1,6 +1,7 @@
 @model List<Display>
-@inject CalendarContext Db
 @using PortalCalendarServer.Models
+@using PortalCalendarServer.Services
+@inject DisplayService DisplayService
 
 <h3>Displays</h3>
 
@@ -42,7 +43,7 @@
                         @($"{d.VirtualWidth()} × {d.VirtualHeight()}")
                     }
                 </td>
-                <td>@d.ColorTypeFormatted()</td>
+                <td>@d.ColorTypePretty()</td>
                 <td>@d.Firmware</td>
                 <td class="text-end">
                     @if (!d.IsDefault())
@@ -61,10 +62,10 @@
                 <td>
                     @if (!d.IsDefault())
                     {
-                        var (nextWakeup, sleepInSeconds, schedule) = d.NextWakeupTime();
-                        var minutes = sleepInSeconds / 60;
-                        var seconds = sleepInSeconds % 60;
-                        @($"{nextWakeup:dd.MM.yyyy HH:mm} (in {minutes} minutes and {seconds} seconds)")
+                        var nextWakeupInfo = d.NextWakeupTime();
+                        var minutes = nextWakeupInfo.SleepInSeconds / 60;
+                        var seconds = nextWakeupInfo.SleepInSeconds % 60;
+                        @($"{nextWakeupInfo.NextWakeup:dd.MM.yyyy HH:mm} (in {minutes} minutes and {seconds} seconds)")
                     }
                 </td>
                 <td>
@@ -73,10 +74,10 @@
                         var missedConnects = d.MissedConnects();
                         if (missedConnects > 0)
                         {
-                            var minFailuresStr = d.GetConfig(Db, "alive_check_minimal_failure_count", null);
+                            var minFailuresStr = DisplayService.GetConfig(d, "alive_check_minimal_failure_count");
                             var minFailures = int.TryParse(minFailuresStr, out var mf) ? mf : 1;
                             var lastVisit = d.LastVisit();
-                            
+
                             if (missedConnects >= minFailures)
                             {
                                 <span class="badge bg-danger">Frozen since @(lastVisit?.ToString("dd.MM.yyyy HH:mm") ?? "unknown")</span>
@@ -89,7 +90,7 @@
                             @if (lastVisit.HasValue)
                             {
                                 var hoursSince = (int)((DateTime.UtcNow - lastVisit.Value).TotalHours + 0.5);
-                                @($"{hoursSince} hours, {missedConnects} missed connect(s)")
+                                <text>@($"{hoursSince} hours, {missedConnects} missed connect(s)")</text>
                             }
                         }
                         else
@@ -102,8 +103,8 @@
                     @if (!d.IsDefault())
                     {
                         <a href="/home/@d.Id">
-                            <img src="/api/calendar/bitmap?preview_colors=true&mac=@d.Mac" 
-                                 style="max-height: 6rem; width: auto; border: 1px solid gray" 
+                            <img src="/api/calendar/bitmap?preview_colors=true&mac=@d.Mac"
+                                 style="max-height: 6rem; width: auto; border: 1px solid gray"
                                  alt="Display preview" />
                         </a>
                     }
@@ -111,10 +112,10 @@
                 <td>
                     @if (!d.IsDefault())
                     {
-                        <button type="button" class="btn btn-secondary btn-sm" 
-                                data-bs-toggle="modal" 
-                                data-bs-target="#delete_modal" 
-                                data-display-id="@d.Id" 
+                        <button type="button" class="btn btn-secondary btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#delete_modal"
+                                data-display-id="@d.Id"
                                 data-display-name="@d.Name">
                             Delete
                         </button>
@@ -134,7 +135,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                Do you really want to <b>completely delete</b> display 
+                Do you really want to <b>completely delete</b> display
                 #<span class="delete_modal_display_id"></span>
                 <b>"<span class="delete_modal_display_name"></span>"</b>?
             </div>

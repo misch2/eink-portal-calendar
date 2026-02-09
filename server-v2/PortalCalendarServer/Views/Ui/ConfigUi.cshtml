@@ -1,9 +1,11 @@
 @model Display
 @using PortalCalendarServer.Models
+@using PortalCalendarServer.Services
 
 @{
     var templateNames = (List<string>)ViewData["TemplateNames"]!;
     var currentTheme = (string?)ViewData["CurrentTheme"];
+    var displayService = (DisplayService)ViewData["DisplayService"]!;
 }
 
 <h3 class="mb-3">Configuration</h3>
@@ -42,7 +44,7 @@
                             <option value=""></option>
                             @foreach (var theme in templateNames)
                             {
-                                <option value="@theme" selected="@(Model.GetConfig(ViewContext.HttpContext.RequestServices.GetRequiredService<CalendarContext>(), "theme") == theme)">@theme</option>
+                                <option value="@theme" selected="@(displayService.GetConfig(Model, "theme") == theme)">@theme</option>
                             }
                         </select>
                     </div>
@@ -62,28 +64,28 @@
                     <div class="col-md-4">
                         <label for="lat">Latitude (+N/-S)</label>
                         <input id="lat" name="lat" type="text" class="form-control" 
-                               value="@Model.GetConfigWithoutDefaults(ViewContext.HttpContext.RequestServices.GetRequiredService<CalendarContext>(), "lat")"
-                               placeholder="@Model.GetConfigDefaultsOnly(ViewContext.HttpContext.RequestServices.GetRequiredService<CalendarContext>(), "lat")">
+                               value="@displayService.GetConfigWithoutDefaults(Model, "lat")"
+                               placeholder="@displayService.GetConfigDefaultsOnly("lat")">
                     </div>
                     <div class="col-md-4">
                         <label for="lon">Longitude (+E/-W)</label>
                         <input id="lon" name="lon" type="text" class="form-control" 
-                               value="@Model.GetConfigWithoutDefaults(ViewContext.HttpContext.RequestServices.GetRequiredService<CalendarContext>(), "lon")"
-                               placeholder="@Model.GetConfigDefaultsOnly(ViewContext.HttpContext.RequestServices.GetRequiredService<CalendarContext>(), "lon")">
+                               value="@displayService.GetConfigWithoutDefaults(Model, "lon")"
+                               placeholder="@displayService.GetConfigDefaultsOnly("lon")">
                     </div>
                     <div class="col-md-4">
                         <label for="alt">Altitude (m)</label>
                         <input id="alt" name="alt" type="text" class="form-control" 
-                               value="@Model.GetConfigWithoutDefaults(ViewContext.HttpContext.RequestServices.GetRequiredService<CalendarContext>(), "alt")"
-                               placeholder="@Model.GetConfigDefaultsOnly(ViewContext.HttpContext.RequestServices.GetRequiredService<CalendarContext>(), "alt")">
+                               value="@displayService.GetConfigWithoutDefaults(Model, "alt")"
+                               placeholder="@displayService.GetConfigDefaultsOnly("alt")">
                     </div>
                 </div>
                 <div class="form-group row mt-2">
                     <div class="col-md-4">
                         <label for="timezone">Time Zone</label>
                         <input id="timezone" name="timezone" type="text" class="form-control" 
-                               value="@Model.GetConfigWithoutDefaults(ViewContext.HttpContext.RequestServices.GetRequiredService<CalendarContext>(), "timezone")"
-                               placeholder="@Model.GetConfigDefaultsOnly(ViewContext.HttpContext.RequestServices.GetRequiredService<CalendarContext>(), "timezone")">
+                               value="@displayService.GetConfigWithoutDefaults(Model, "timezone")"
+                               placeholder="@displayService.GetConfigDefaultsOnly("timezone")">
                     </div>
                 </div>
             </fieldset>
@@ -95,7 +97,7 @@
                 <div class="col-md-12">
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" id="ota_mode" name="ota_mode" value="1" 
-                               checked="@(Model.GetConfig(ViewContext.HttpContext.RequestServices.GetRequiredService<CalendarContext>(), "ota_mode") == "1")">
+                               checked="@(displayService.GetConfig(Model, "ota_mode") == "1")">
                         <label class="form-check-label" for="ota_mode">OTA mode on</label>
                     </div>
                     <div class="form-text">
@@ -136,8 +138,8 @@
                 <div class="col-md-6">
                     <label for="wakeup_schedule">Wake up (redraw) schedule</label>
                     <input id="wakeup_schedule" name="wakeup_schedule" type="text" class="form-control" 
-                           value="@Model.GetConfigWithoutDefaults(ViewContext.HttpContext.RequestServices.GetRequiredService<CalendarContext>(), "wakeup_schedule")"
-                           placeholder="@Model.GetConfigDefaultsOnly(ViewContext.HttpContext.RequestServices.GetRequiredService<CalendarContext>(), "wakeup_schedule")">
+                           value="@displayService.GetConfigWithoutDefaults(Model, "wakeup_schedule")"
+                           placeholder="@displayService.GetConfigDefaultsOnly("wakeup_schedule")">
                     <div class="form-text">Crontab format, e.g. "0 * * * *"</div>
                 </div>
             </fieldset>
@@ -148,13 +150,13 @@
             <fieldset class="row mb-3">
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="web_calendar1" name="web_calendar1" value="1" 
-                           checked="@(Model.GetConfig(ViewContext.HttpContext.RequestServices.GetRequiredService<CalendarContext>(), "web_calendar1") == "1")">
+                           checked="@(displayService.GetConfig(Model, "web_calendar1") == "1")">
                     <label class="form-check-label" for="web_calendar1">ICS calendar #1 enabled</label>
                 </div>
                 <div class="col-md-12 mt-2">
                     <label for="web_calendar_ics_url1">URL</label>
                     <input id="web_calendar_ics_url1" name="web_calendar_ics_url1" type="text" class="form-control" 
-                           value="@Model.GetConfigWithoutDefaults(ViewContext.HttpContext.RequestServices.GetRequiredService<CalendarContext>(), "web_calendar_ics_url1")">
+                           value="@displayService.GetConfigWithoutDefaults(Model, "web_calendar_ics_url1")">
                 </div>
             </fieldset>
         </div>
@@ -164,7 +166,7 @@
             <fieldset class="row mb-3">
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="metnoweather" name="metnoweather" value="1" 
-                           checked="@(Model.GetConfig(ViewContext.HttpContext.RequestServices.GetRequiredService<CalendarContext>(), "metnoweather") == "1")">
+                           checked="@(displayService.GetConfig(Model, "metnoweather") == "1")">
                     <label class="form-check-label" for="metnoweather">Met.no Weather enabled</label>
                 </div>
             </fieldset>
@@ -175,7 +177,7 @@
             <fieldset class="row mb-3">
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="telegram" name="telegram" value="1" 
-                           checked="@(Model.GetConfig(ViewContext.HttpContext.RequestServices.GetRequiredService<CalendarContext>(), "telegram") == "1")">
+                           checked="@(displayService.GetConfig(Model, "telegram") == "1")">
                     <label class="form-check-label" for="telegram">Telegram enabled</label>
                 </div>
             </fieldset>
@@ -186,7 +188,7 @@
             <fieldset class="row mb-3">
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="mqtt" name="mqtt" value="1" 
-                           checked="@(Model.GetConfig(ViewContext.HttpContext.RequestServices.GetRequiredService<CalendarContext>(), "mqtt") == "1")">
+                           checked="@(displayService.GetConfig(Model, "mqtt") == "1")">
                     <label class="form-check-label" for="mqtt">MQTT enabled</label>
                 </div>
             </fieldset>
@@ -197,7 +199,7 @@
             <fieldset class="row mb-3">
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="googlefit" name="googlefit" value="1" 
-                           checked="@(Model.GetConfig(ViewContext.HttpContext.RequestServices.GetRequiredService<CalendarContext>(), "googlefit") == "1")">
+                           checked="@(displayService.GetConfig(Model, "googlefit") == "1")">
                     <label class="form-check-label" for="googlefit">Google Fit enabled</label>
                 </div>
 
@@ -208,12 +210,12 @@
                 <div class="col-md-12">
                     <label for="googlefit_client_id">Client ID</label>
                     <input id="googlefit_client_id" name="googlefit_client_id" type="text" class="form-control" 
-                           value="@Model.GetConfigWithoutDefaults(ViewContext.HttpContext.RequestServices.GetRequiredService<CalendarContext>(), "googlefit_client_id")">
+                           value="@displayService.GetConfigWithoutDefaults(Model, "googlefit_client_id")">
                 </div>
                 <div class="col-md-12 mt-2">
                     <label for="googlefit_client_secret">Client secret</label>
                     <input id="googlefit_client_secret" name="googlefit_client_secret" type="text" class="form-control" 
-                           value="@Model.GetConfigWithoutDefaults(ViewContext.HttpContext.RequestServices.GetRequiredService<CalendarContext>(), "googlefit_client_secret")">
+                           value="@displayService.GetConfigWithoutDefaults(Model, "googlefit_client_secret")">
                 </div>
             </fieldset>
         </div>

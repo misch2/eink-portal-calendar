@@ -1,0 +1,43 @@
+@* Partial view for battery status icon *@
+@using PortalCalendarServer.Models
+@model Display
+
+@{
+    var pct = Model.BatteryPercent() ?? 0;
+    string batteryIcon;
+    
+    if (pct >= 87)
+    {
+        batteryIcon = "material-symbols:battery-full-sharp";
+    }
+    else if (pct >= 75)
+    {
+        batteryIcon = "material-symbols:battery-6-bar-sharp";
+    }
+    else if (pct >= 62)
+    {
+        batteryIcon = "material-symbols:battery-5-bar-sharp";
+    }
+    else if (pct >= 50)
+    {
+        batteryIcon = "material-symbols:battery-4-bar-sharp";
+    }
+    else if (pct >= 37)
+    {
+        batteryIcon = "material-symbols:battery-3-bar-sharp";
+    }
+    else if (pct >= 25)
+    {
+        batteryIcon = "material-symbols:battery-2-bar-sharp";
+    }
+    else if (pct >= 12)
+    {
+        batteryIcon = "material-symbols:battery-1-bar-sharp";
+    }
+    else
+    {
+        batteryIcon = "material-symbols:battery-0-bar-sharp";
+    }
+}
+
+<iconify-icon icon="@batteryIcon" rotate="90deg" class="battery-icon"></iconify-icon>

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using PortalCalendarServer.Models;
+using PortalCalendarServer.Services;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,10 @@ builder.Services.AddDbContext<CalendarContext>(options =>
 
 // Add services to the container
 builder.Services.AddControllersWithViews(); // Support for both API and MVC controllers
+
+// Register services
+builder.Services.AddScoped<DisplayService>();
+builder.Services.AddScoped<ICalendarUtilFactory, CalendarUtilFactory>();
 
 // Configure OpenAPI with custom settings
 builder.Services.AddOpenApi(options =>

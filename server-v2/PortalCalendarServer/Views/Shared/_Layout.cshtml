@@ -1,5 +1,6 @@
 @using PortalCalendarServer.Models
-@inject CalendarContext Db
+@using PortalCalendarServer.Services
+@inject DisplayService DisplayService
 
 <!DOCTYPE html>
 <html lang="en">
@@ -67,16 +68,16 @@
 
           Next wakeup:
           @{
-            var (next_wakeup, sleep_seconds, schedule) = display.NextWakeupTime();
-            int nw_minutes = sleep_seconds / 60;
-            int nw_seconds = sleep_seconds % 60;
+            var nextWakeupInfo = display.NextWakeupTime();
+            int nw_minutes = nextWakeupInfo.SleepInSeconds / 60;
+            int nw_seconds = nextWakeupInfo.SleepInSeconds % 60;
             @($"in {nw_minutes} minutes and {nw_seconds} seconds.")
           }
 
 
           Voltage: @(last_voltage?.ToString("F2") ?? "(unknown)" ) V (@(battery_percent?.ToString("F0") ?? "unknown") %).
 
-          OTA mode: @(display.GetConfigBool("ota_mode") ? "on" : "off").
+          OTA mode: @(DisplayService.GetConfigBool(display, "ota_mode") ? "on" : "off").
           
         </p>
       }

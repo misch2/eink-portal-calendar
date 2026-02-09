@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Models;
+using PortalCalendarServer.Services;
 
 namespace PortalCalendarServer.Controllers;
 
@@ -10,6 +11,8 @@ public class UiController : Controller
     private readonly CalendarContext _context;
     private readonly ILogger<UiController> _logger;
     private readonly IWebHostEnvironment _environment;
+    private readonly ICalendarUtilFactory _calendarUtilFactory;
+    private readonly DisplayService _displayService;
 
     // Config parameter names that can be saved from the UI
     private static readonly string[] ConfigUiParameters = new[]
@@ -24,11 +27,18 @@ public class UiController : Controller
         "web_calendar_ics_url3", "web_calendar1", "web_calendar2", "web_calendar3"
     };
 
-    public UiController(CalendarContext context, ILogger<UiController> logger, IWebHostEnvironment environment)
+    public UiController(
+        CalendarContext context, 
+        ILogger<UiController> logger, 
+        IWebHostEnvironment environment,
+        ICalendarUtilFactory calendarUtilFactory,
+        DisplayService displayService)
     {
         _context = context;
         _logger = logger;
         _environment = environment;
+        _calendarUtilFactory = calendarUtilFactory;
+        _displayService = displayService;
     }
 
     // Helper to get display by ID
@@ -124,8 +134,12 @@ public class UiController : Controller
             return NotFound();
         }
 
-        // TODO: Implement calendar HTML rendering for current date
-        return Content($"Calendar HTML for display {display.Name} (current date) - preview_colors: {preview_colors}", "text/html");
+        var util = _calendarUtilFactory.Create(display);
+        var viewModel = util.HtmlForDate(DateTime.UtcNow, preview_colors);
+
+        // TODO: Return calendar theme view
+        var theme = _displayService.GetConfig(display, "theme") ?? "default";
+        return View($"~/Views/CalendarThemes/{theme}.cshtml", viewModel);
     }
 
     // GET /calendar/{display_number}/html/{date}
@@ -143,8 +157,12 @@ public class UiController : Controller
             return BadRequest(new { error = "Invalid date format" });
         }
 
-        // TODO: Implement calendar HTML rendering for specific date
-        return Content($"Calendar HTML for display {display.Name} on {parsedDate:yyyy-MM-dd} - preview_colors: {preview_colors}", "text/html");
+        var util = _calendarUtilFactory.Create(display);
+        var viewModel = util.HtmlForDate(parsedDate, preview_colors);
+
+        // TODO: Return calendar theme view
+        var theme = _displayService.GetConfig(display, "theme") ?? "default";
+        return View($"~/Views/CalendarThemes/{theme}.cshtml", viewModel);
     }
 
     // GET /config_ui/{display_number}
@@ -172,9 +190,12 @@ public class UiController : Controller
         ViewData["NavLink"] = "config_ui";
         ViewData["Title"] = $"Configuration - {display.Name}";
         ViewData["TemplateNames"] = templateNames;
-        ViewData["CurrentTheme"] = display.GetConfig(_context, "theme");
+        ViewData["CurrentTheme"] = _displayService.GetConfig(display, "theme");
         ViewData["LastVoltage"] = display.Voltage();
-        ViewData["LastVoltageRaw"] = display.GetConfig(_context, "_last_voltage_raw");
+        ViewData["LastVoltageRaw"] = _displayService.GetConfig(display, "_last_voltage_raw");
+        
+        // Pass DisplayService to the view through ViewData
+        ViewData["DisplayService"] = _displayService;
 
         return View("ConfigUi", display);
     }
@@ -196,14 +217,14 @@ public class UiController : Controller
             if (form.ContainsKey(paramName))
             {
                 var value = form[paramName].ToString();
-                display.SetConfig(_context, paramName, value);
+                _displayService.SetConfig(display, paramName, value);
             }
             else if (paramName.StartsWith("web_calendar") || paramName == "googlefit" || 
                      paramName == "metnoweather" || paramName == "openweather" || 
                      paramName == "telegram" || paramName == "mqtt" || paramName == "ota_mode")
             {
                 // Checkboxes: if not present, set to empty/false
-                display.SetConfig(_context, paramName, "");
+                _displayService.SetConfig(display, paramName, "");
             }
         }
 
@@ -247,7 +268,7 @@ public class UiController : Controller
             _context.Update(display);
         }
 
-        await _context.SaveChangesAsync();
+        await _displayService.SaveChangesAsync();
 
         _logger.LogInformation("Configuration saved for display {DisplayId}", displayNumber);
 
@@ -303,8 +324,8 @@ public class UiController : Controller
         }
 
         // Build Google OAuth2 URL
-        var clientId = display.GetConfig(_context, "googlefit_client_id");
-        var callback = display.GetConfig(_context, "googlefit_auth_callback");
+        var clientId = _displayService.GetConfig(display, "googlefit_client_id");
+        var callback = _displayService.GetConfig(display, "googlefit_auth_callback");
         var scope = "https://www.googleapis.com/auth/fitness.body.read";
         
         var state = Convert.ToBase64String(
@@ -337,7 +358,7 @@ public class UiController : Controller
             return NotFound();
         }
 
-        var accessToken = display.GetConfig(_context, "_googlefit_access_token");
+        var accessToken = _displayService.GetConfig(display, "_googlefit_access_token");
         if (string.IsNullOrEmpty(accessToken))
         {
             return BadRequest(new { error = "No access token found" });
@@ -346,7 +367,7 @@ public class UiController : Controller
         ViewData["NavLink"] = "config_ui";
         ViewData["Title"] = "Google Fit Authentication Successful";
         ViewData["AccessToken"] = accessToken;
-        ViewData["RefreshToken"] = display.GetConfig(_context, "_googlefit_refresh_token");
+        ViewData["RefreshToken"] = _displayService.GetConfig(display, "_googlefit_refresh_token");
 
         return View("AuthSuccess", display);
     }

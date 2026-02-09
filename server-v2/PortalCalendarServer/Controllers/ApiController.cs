@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Models;
+using PortalCalendarServer.Services;
 
 namespace PortalCalendarServer.Controllers;
 
@@ -10,11 +11,13 @@ public class ApiController : ControllerBase
 {
     private readonly CalendarContext _context;
     private readonly ILogger<ApiController> _logger;
+    private readonly DisplayService _displayService;
 
-    public ApiController(CalendarContext context, ILogger<ApiController> logger)
+    public ApiController(CalendarContext context, ILogger<ApiController> logger, DisplayService displayService)
     {
         _context = context;
         _logger = logger;
+        _displayService = displayService;
     }
 
     // Helper to get display by MAC address
@@ -120,8 +123,8 @@ public class ApiController : ControllerBase
             await _context.SaveChangesAsync();
 
             // Set default theme
-            display.SetConfig(_context, "theme", "default");
-            await _context.SaveChangesAsync();
+            _displayService.SetConfig(display, "theme", "default");
+            await _displayService.SaveChangesAsync();
 
             _logger.LogInformation("New display created with MAC {Mac}, ID: {Id}", mac, display.Id);
 
@@ -139,25 +142,25 @@ public class ApiController : ControllerBase
         }
 
         // Update last visit timestamp
-        display.SetConfig(_context, "_last_visit", DateTime.UtcNow.ToString("O"));
+        _displayService.SetConfig(display, "_last_visit", DateTime.UtcNow.ToString("O"));
 
         // Store voltage and diagnostic data
-        display.SetConfig(_context, "_last_voltage_raw", adc ?? voltage_raw ?? string.Empty);
-        display.SetConfig(_context, "_last_voltage", v ?? string.Empty);
-        display.SetConfig(_context, "_min_voltage", vmin ?? string.Empty);
-        display.SetConfig(_context, "_max_voltage", vmax ?? string.Empty);
-        display.SetConfig(_context, "_min_linear_voltage", vlmin ?? string.Empty);
-        display.SetConfig(_context, "_max_linear_voltage", vlmax ?? string.Empty);
-        display.SetConfig(_context, "_reset_reason", reset ?? string.Empty);
-        display.SetConfig(_context, "_wakeup_reason", wakeup ?? string.Empty);
+        _displayService.SetConfig(display, "_last_voltage_raw", adc ?? voltage_raw ?? string.Empty);
+        _displayService.SetConfig(display, "_last_voltage", v ?? string.Empty);
+        _displayService.SetConfig(display, "_min_voltage", vmin ?? string.Empty);
+        _displayService.SetConfig(display, "_max_voltage", vmax ?? string.Empty);
+        _displayService.SetConfig(display, "_min_linear_voltage", vlmin ?? string.Empty);
+        _displayService.SetConfig(display, "_max_linear_voltage", vlmax ?? string.Empty);
+        _displayService.SetConfig(display, "_reset_reason", reset ?? string.Empty);
+        _displayService.SetConfig(display, "_wakeup_reason", wakeup ?? string.Empty);
 
-        await _context.SaveChangesAsync();
+        await _displayService.SaveChangesAsync();
 
         // Calculate next wakeup time
-        var (nextWakeup, sleepInSeconds, schedule) = display.NextWakeupTime();
+        var wakeupInfo = display.NextWakeupTime();
         _logger.LogInformation(
             "Next wakeup at {NextWakeup} (in {SleepSeconds} seconds) according to crontab schedule '{Schedule}'",
-            nextWakeup, sleepInSeconds, schedule);
+            wakeupInfo.NextWakeup, wakeupInfo.SleepInSeconds, wakeupInfo.Schedule);
 
         // TODO: Update MQTT values
 
@@ -165,9 +168,9 @@ public class ApiController : ControllerBase
 
         var response = new
         {
-            sleep = sleepInSeconds,
+            sleep = wakeupInfo.SleepInSeconds,
             battery_percent = display.BatteryPercent(),
-            ota_mode = display.GetConfigBool("ota_mode")
+            ota_mode = _displayService.GetConfigBool(display, "ota_mode")
         };
 
         return Ok(response);
