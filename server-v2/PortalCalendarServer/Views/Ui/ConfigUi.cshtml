@@ -63,19 +63,19 @@
                 <div class="form-group row">
                     <div class="col-md-4">
                         <label for="lat">Latitude (+N/-S)</label>
-                        <input id="lat" name="lat" type="text" class="form-control" 
+                        <input id="lat" name="lat" type="text" class="form-control"
                                value="@displayService.GetConfigWithoutDefaults(Model, "lat")"
                                placeholder="@displayService.GetConfigDefaultsOnly("lat")">
                     </div>
                     <div class="col-md-4">
                         <label for="lon">Longitude (+E/-W)</label>
-                        <input id="lon" name="lon" type="text" class="form-control" 
+                        <input id="lon" name="lon" type="text" class="form-control"
                                value="@displayService.GetConfigWithoutDefaults(Model, "lon")"
                                placeholder="@displayService.GetConfigDefaultsOnly("lon")">
                     </div>
                     <div class="col-md-4">
                         <label for="alt">Altitude (m)</label>
-                        <input id="alt" name="alt" type="text" class="form-control" 
+                        <input id="alt" name="alt" type="text" class="form-control"
                                value="@displayService.GetConfigWithoutDefaults(Model, "alt")"
                                placeholder="@displayService.GetConfigDefaultsOnly("alt")">
                     </div>
@@ -83,7 +83,7 @@
                 <div class="form-group row mt-2">
                     <div class="col-md-4">
                         <label for="timezone">Time Zone</label>
-                        <input id="timezone" name="timezone" type="text" class="form-control" 
+                        <input id="timezone" name="timezone" type="text" class="form-control"
                                value="@displayService.GetConfigWithoutDefaults(Model, "timezone")"
                                placeholder="@displayService.GetConfigDefaultsOnly("timezone")">
                     </div>
@@ -96,7 +96,7 @@
             <fieldset class="row mb-3">
                 <div class="col-md-12">
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="ota_mode" name="ota_mode" value="1" 
+                        <input class="form-check-input" type="checkbox" id="ota_mode" name="ota_mode" value="1"
                                checked="@(displayService.GetConfig(Model, "ota_mode") == "1")">
                         <label class="form-check-label" for="ota_mode">OTA mode on</label>
                     </div>
@@ -137,7 +137,7 @@
             <fieldset class="row mb-3">
                 <div class="col-md-6">
                     <label for="wakeup_schedule">Wake up (redraw) schedule</label>
-                    <input id="wakeup_schedule" name="wakeup_schedule" type="text" class="form-control" 
+                    <input id="wakeup_schedule" name="wakeup_schedule" type="text" class="form-control"
                            value="@displayService.GetConfigWithoutDefaults(Model, "wakeup_schedule")"
                            placeholder="@displayService.GetConfigDefaultsOnly("wakeup_schedule")">
                     <div class="form-text">Crontab format, e.g. "0 * * * *"</div>
@@ -149,13 +149,13 @@
         <div class="tab-pane" id="nav-calendar" role="tabpanel">
             <fieldset class="row mb-3">
                 <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="web_calendar1" name="web_calendar1" value="1" 
+                    <input class="form-check-input" type="checkbox" id="web_calendar1" name="web_calendar1" value="1"
                            checked="@(displayService.GetConfig(Model, "web_calendar1") == "1")">
                     <label class="form-check-label" for="web_calendar1">ICS calendar #1 enabled</label>
                 </div>
                 <div class="col-md-12 mt-2">
                     <label for="web_calendar_ics_url1">URL</label>
-                    <input id="web_calendar_ics_url1" name="web_calendar_ics_url1" type="text" class="form-control" 
+                    <input id="web_calendar_ics_url1" name="web_calendar_ics_url1" type="text" class="form-control"
                            value="@displayService.GetConfigWithoutDefaults(Model, "web_calendar_ics_url1")">
                 </div>
             </fieldset>
@@ -165,7 +165,7 @@
         <div class="tab-pane" id="nav-metnoweather" role="tabpanel">
             <fieldset class="row mb-3">
                 <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="metnoweather" name="metnoweather" value="1" 
+                    <input class="form-check-input" type="checkbox" id="metnoweather" name="metnoweather" value="1"
                            checked="@(displayService.GetConfig(Model, "metnoweather") == "1")">
                     <label class="form-check-label" for="metnoweather">Met.no Weather enabled</label>
                 </div>
@@ -176,7 +176,7 @@
         <div class="tab-pane" id="nav-telegram" role="tabpanel">
             <fieldset class="row mb-3">
                 <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="telegram" name="telegram" value="1" 
+                    <input class="form-check-input" type="checkbox" id="telegram" name="telegram" value="1"
                            checked="@(displayService.GetConfig(Model, "telegram") == "1")">
                     <label class="form-check-label" for="telegram">Telegram enabled</label>
                 </div>
@@ -187,7 +187,7 @@
         <div class="tab-pane" id="nav-mqtt" role="tabpanel">
             <fieldset class="row mb-3">
                 <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="mqtt" name="mqtt" value="1" 
+                    <input class="form-check-input" type="checkbox" id="mqtt" name="mqtt" value="1"
                            checked="@(displayService.GetConfig(Model, "mqtt") == "1")">
                     <label class="form-check-label" for="mqtt">MQTT enabled</label>
                 </div>
@@ -198,7 +198,7 @@
         <div class="tab-pane" id="nav-fit" role="tabpanel">
             <fieldset class="row mb-3">
                 <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="googlefit" name="googlefit" value="1" 
+                    <input class="form-check-input" type="checkbox" id="googlefit" name="googlefit" value="1"
                            checked="@(displayService.GetConfig(Model, "googlefit") == "1")">
                     <label class="form-check-label" for="googlefit">Google Fit enabled</label>
                 </div>
@@ -209,12 +209,12 @@
 
                 <div class="col-md-12">
                     <label for="googlefit_client_id">Client ID</label>
-                    <input id="googlefit_client_id" name="googlefit_client_id" type="text" class="form-control" 
+                    <input id="googlefit_client_id" name="googlefit_client_id" type="text" class="form-control"
                            value="@displayService.GetConfigWithoutDefaults(Model, "googlefit_client_id")">
                 </div>
                 <div class="col-md-12 mt-2">
                     <label for="googlefit_client_secret">Client secret</label>
-                    <input id="googlefit_client_secret" name="googlefit_client_secret" type="text" class="form-control" 
+                    <input id="googlefit_client_secret" name="googlefit_client_secret" type="text" class="form-control"
                            value="@displayService.GetConfigWithoutDefaults(Model, "googlefit_client_secret")">
                 </div>
             </fieldset>
@@ -227,6 +227,10 @@
 </form>
 
 @section Scripts {
+    @* Fix for checkboxes not being sent when unchecked.
+ See https://stackoverflow.com/questions/14067215/unchecked-checkbox-returning-null-value *@
+    <script src="/scripts/checkbox_fix.js"></script>
+
     <script>
         $(document).ready(function() {
             $('#theme').on('change', function() {
