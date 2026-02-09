@@ -4,6 +4,7 @@ using Microsoft.OpenApi.Models;
 using PortalCalendarServer.Models;
 using PortalCalendarServer.Services;
 using Scalar.AspNetCore;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,27 @@ builder.Services.AddControllersWithViews(); // Support for both API and MVC cont
 // Register services
 builder.Services.AddScoped<DisplayService>();
 builder.Services.AddScoped<ICalendarUtilFactory, CalendarUtilFactory>();
+
+// Configure localization
+var defaultCulture = builder.Configuration["Culture:DefaultCulture"] ?? "en-US";
+//var supportedCultures = builder.Configuration.GetSection("Culture:SupportedCultures").Get<string[]>() 
+//    ?? new[] { "en-US" };
+
+//var supportedCultureInfos = supportedCultures
+//    .Select(c => new CultureInfo(c))
+//    .ToArray();
+
+//builder.Services.Configure<RequestLocalizationOptions>(options =>
+//{
+//    options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture(defaultCulture);
+//    options.SupportedCultures = supportedCultureInfos;
+//    options.SupportedUICultures = supportedCultureInfos;
+//});
+
+// use the default culture for all requests (since we don't have multiple cultures yet) and everything
+
+CultureInfo.DefaultThreadCurrentCulture = new CultureInfo(defaultCulture);
+
 
 // Configure OpenAPI with custom settings
 builder.Services.AddOpenApi(options =>
@@ -72,6 +94,9 @@ if (app.Environment.IsDevelopment())
         options.DefaultHttpClient = new(ScalarTarget.CSharp, ScalarClient.HttpClient);
     }); // Available at /scalar/v1
 }
+
+//// Use request localization
+//app.UseRequestLocalization();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles(); // For serving static content (CSS, JS, images)

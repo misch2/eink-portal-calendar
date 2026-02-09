@@ -6,10 +6,13 @@
 @{
     Layout = null;
     
+    // Get culture from current thread (set by request localization middleware)
+    var culture = CultureInfo.CurrentCulture;
+    
     // Text decorator function (can be: lowercase, UPPERCASE, Capitalized)
     Func<string, string> decorator = text => text; // returns as-is
     // decorator = text => text.ToUpperInvariant(); // UPPERCASE
-    // decorator = text => CultureInfo.CurrentCulture.TextInfo.ToTitleCase(text); // Capitalized
+    // decorator = text => culture.TextInfo.ToTitleCase(text); // Capitalized
     
     var displayService = ViewContext.HttpContext.RequestServices.GetRequiredService<DisplayService>();
     var timezone = TimeZoneInfo.FindSystemTimeZoneById(displayService.GetConfig(Model.Display, "timezone") ?? "UTC");
@@ -86,7 +89,7 @@
                                 <text>
                                 {
                                     v: new Date(@point.Date.Year, @(point.Date.Month - 1), @point.Date.Day),
-                                    f: '@point.Date.ToString("MMMM", CultureInfo.CurrentCulture)'
+                                    f: '@point.Date.ToString("MMMM", culture)'
                                 },
                                 </text>
                             }
@@ -125,14 +128,14 @@
     <div id="spacer">
         <div class="top-month-header">
             <div>
-                @decorator(Model.Date.ToString("MMMM", CultureInfo.CurrentCulture))
+                @decorator(Model.Date.ToString("MMMM", culture))
             </div>
         </div>
 
         <div class="current-weight-big">
             @if (Model.LastWeight.HasValue)
             {
-                <span>@Model.LastWeight.Value.ToString("F1")</span>
+                <span>@Model.LastWeight.Value.ToString("F1", culture)</span>
             }
             else
             {
@@ -149,7 +152,7 @@
                     @Model.Date.Day/@DateTime.DaysInMonth(Model.Date.Year, Model.Date.Month)
                 </div>
                 <div>
-                    @decorator(Model.Date.ToString("dddd", CultureInfo.CurrentCulture))
+                    @decorator(Model.Date.ToString("dddd", culture))
                 </div>
             </div>
             <div class="separator"></div>
@@ -183,7 +186,7 @@
                         }
                         else
                         {
-                            @evt.StartTime.ToString("H:mm")
+                            @evt.StartTime.ToString("H:mm", culture)
                             @evt.Summary
                             @if (evt.DurationHours.HasValue)
                             {
@@ -200,7 +203,7 @@
         <div id="bottom-signature">
             @* Screen displayed at *@
             <iconify-icon icon="material-symbols:add-to-home-screen-sharp"></iconify-icon>
-            @nextWakeup.ToString("H:mm"),
+            @nextWakeup.ToString("H:mm", culture),
         </div>
 
         <div id="battery-status">
