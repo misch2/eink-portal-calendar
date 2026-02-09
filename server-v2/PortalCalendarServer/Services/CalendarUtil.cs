@@ -68,7 +68,7 @@ public class CalendarUtil
     /// <summary>
     /// Generate HTML data for a specific date
     /// </summary>
-    public CalendarViewModel HtmlForDate(DateTime date, bool previewColors = false)
+    public CalendarViewModel CalendarModelForDate(DateTime date, bool previewColors = false)
     {
         // Keep the calendar random, but consistent for any given day
         var seed = int.Parse(date.ToString("yyyyMMdd"));
@@ -92,11 +92,23 @@ public class CalendarUtil
             NearestEvents = nearestEvents,
             NearestEventsGrouped = nearestEventsGrouped,
             HasCalendarEntries = hasCalendarEntries,
+
+
             // CurrentWeather = currentWeather,
             // Forecast = forecast,
             // LastWeight = lastWeight,
             // WeightSeries = weightSeries,
-            
+
+            // FIXME FIXME mock data:
+            LastWeight = 106.8m,
+            WeightSeries = Enumerable.Range(0, 90)
+                .Select(i => new WeightDataPoint
+                {
+                    Date = date.AddDays(-89 + i),
+                    Weight = 110m - i * 0.1m + (decimal)(random.NextDouble() * 2 - 1) // Simulate a downward trend with some noise
+                })
+                .ToList(),
+
             // EPD Colors
             Colors = _display.CssColorMap(previewColors),
         };
@@ -504,7 +516,7 @@ public class BitmapOptions
     public string ColormapName { get; set; } = "none";
     public List<string> ColormapColors { get; set; } = new();
     public string Format { get; set; } = "png";
-    public string DisplayType { get; set; } = "BW";
+    public string DisplayType { get; set; } = Models.Constants.ColorType.BlackAndWhite;
 }
 
 public class BitmapResult

@@ -5,27 +5,6 @@ VisualStudioVersion = 17.14.36811.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortalCalendarServer", "PortalCalendarServer.csproj", "{FB3F3AB8-0C5D-1882-3006-CE92C99B7232}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
-	ProjectSection(SolutionItems) = preProject
-		..\old-perl-server\templates\calendar_themes\01 portal_style_calendar_with_icons.html.ep = ..\old-perl-server\templates\calendar_themes\01 portal_style_calendar_with_icons.html.ep
-		..\old-perl-server\templates\calendar_themes\02 googlefit_weight_with_calendar_and_icons.html.ep = ..\old-perl-server\templates\calendar_themes\02 googlefit_weight_with_calendar_and_icons.html.ep
-		..\old-perl-server\templates\calendar_themes\03 weather.html.ep = ..\old-perl-server\templates\calendar_themes\03 weather.html.ep
-		..\old-perl-server\templates\calendar_themes\04 multiday_calendar.html.ep = ..\old-perl-server\templates\calendar_themes\04 multiday_calendar.html.ep
-		..\old-perl-server\templates\calendar_themes\06 xkcd.html.ep = ..\old-perl-server\templates\calendar_themes\06 xkcd.html.ep
-		..\old-perl-server\templates\auth_error.html.ep = ..\old-perl-server\templates\auth_error.html.ep
-		..\old-perl-server\templates\auth_success.html.ep = ..\old-perl-server\templates\auth_success.html.ep
-		..\old-perl-server\templates\shared\checkbox_fix.html.ep = ..\old-perl-server\templates\shared\checkbox_fix.html.ep
-		..\old-perl-server\templates\layouts\bootstrap5.html = ..\old-perl-server\templates\layouts\bootstrap5.html
-		..\old-perl-server\templates\config_ui.html.ep = ..\old-perl-server\templates\config_ui.html.ep
-		..\old-perl-server\templates\calendar_themes\default.html.ep = ..\old-perl-server\templates\calendar_themes\default.html.ep
-		..\old-perl-server\templates\display_frozen.txt.ep = ..\old-perl-server\templates\display_frozen.txt.ep
-		..\old-perl-server\templates\display_list.html.ep = ..\old-perl-server\templates\display_list.html.ep
-		..\old-perl-server\templates\display_unfrozen.txt.ep = ..\old-perl-server\templates\display_unfrozen.txt.ep
-		..\old-perl-server\templates\index.html.ep = ..\old-perl-server\templates\index.html.ep
-		..\old-perl-server\templates\test.html.ep = ..\old-perl-server\templates\test.html.ep
-		..\old-perl-server\lib\PortalCalendar\Controller\UI.pm = ..\old-perl-server\lib\PortalCalendar\Controller\UI.pm
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

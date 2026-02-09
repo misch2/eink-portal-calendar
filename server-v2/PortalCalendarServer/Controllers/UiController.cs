@@ -17,7 +17,7 @@ public class UiController : Controller
     // Config parameter names that can be saved from the UI
     private static readonly string[] ConfigUiParameters = new[]
     {
-        "alive_check_safety_lag_minutes", "alive_check_minimal_failure_count", "alt", "display_title",
+        "alive_check_safety_lag_minutes", "alive_check_minimal_failure_count", "alt", "date_culture", "display_title",
         "googlefit", "googlefit_auth_callback", "googlefit_client_id", "googlefit_client_secret",
         "lat", "lon", "max_icons_with_calendar", "max_random_icons", "metnoweather",
         "metnoweather_granularity_hours", "min_random_icons", "mqtt", "mqtt_password", "mqtt_server",
@@ -28,8 +28,8 @@ public class UiController : Controller
     };
 
     public UiController(
-        CalendarContext context, 
-        ILogger<UiController> logger, 
+        CalendarContext context,
+        ILogger<UiController> logger,
         IWebHostEnvironment environment,
         ICalendarUtilFactory calendarUtilFactory,
         DisplayService displayService)
@@ -135,7 +135,7 @@ public class UiController : Controller
         }
 
         var util = _calendarUtilFactory.Create(display);
-        var viewModel = util.HtmlForDate(DateTime.UtcNow, preview_colors);
+        var viewModel = util.CalendarModelForDate(DateTime.UtcNow, preview_colors);
 
         // TODO: Return calendar theme view
         var theme = _displayService.GetConfig(display, "theme") ?? "default";
@@ -158,7 +158,7 @@ public class UiController : Controller
         }
 
         var util = _calendarUtilFactory.Create(display);
-        var viewModel = util.HtmlForDate(parsedDate, preview_colors);
+        var viewModel = util.CalendarModelForDate(parsedDate, preview_colors);
 
         // TODO: Return calendar theme view
         var theme = _displayService.GetConfig(display, "theme") ?? "default";
@@ -178,7 +178,7 @@ public class UiController : Controller
         // Get available template names from filesystem
         var themesPath = Path.Combine(_environment.ContentRootPath, "Views", "CalendarThemes");
         var templateNames = new List<string>();
-        
+
         if (Directory.Exists(themesPath))
         {
             templateNames = Directory.GetFiles(themesPath, "*.cshtml")
@@ -193,7 +193,7 @@ public class UiController : Controller
         ViewData["CurrentTheme"] = _displayService.GetConfig(display, "theme");
         ViewData["LastVoltage"] = display.Voltage();
         ViewData["LastVoltageRaw"] = _displayService.GetConfig(display, "_last_voltage_raw");
-        
+
         // Pass DisplayService to the view through ViewData
         ViewData["DisplayService"] = _displayService;
 
@@ -219,8 +219,8 @@ public class UiController : Controller
                 var value = form[paramName].ToString();
                 _displayService.SetConfig(display, paramName, value);
             }
-            else if (paramName.StartsWith("web_calendar") || paramName == "googlefit" || 
-                     paramName == "metnoweather" || paramName == "openweather" || 
+            else if (paramName.StartsWith("web_calendar") || paramName == "googlefit" ||
+                     paramName == "metnoweather" || paramName == "openweather" ||
                      paramName == "telegram" || paramName == "mqtt" || paramName == "ota_mode")
             {
                 // Checkboxes: if not present, set to empty/false
@@ -237,8 +237,7 @@ public class UiController : Controller
             }
             if (form.ContainsKey("display_mac"))
             {
-                var mac = form["display_mac"].ToString().Trim().ToLowerInvariant();
-                display.Mac = string.IsNullOrEmpty(mac) ? null : mac;
+                display.Mac = form["display_mac"].ToString().Trim().ToLowerInvariant();
             }
             if (form.ContainsKey("display_rotation") && int.TryParse(form["display_rotation"], out var rotation))
             {
@@ -294,14 +293,14 @@ public class UiController : Controller
         }
 
         // Sanitize theme name
-        var sanitizedTheme = new string(theme.Where(c => 
+        var sanitizedTheme = new string(theme.Where(c =>
             char.IsLetterOrDigit(c) || c == '_' || c == '-' || c == ' ').ToArray());
 
         try
         {
             // Try to render the theme configuration partial view
             var viewPath = $"~/Views/CalendarThemes/Configs/{sanitizedTheme}.cshtml";
-            
+
             _logger.LogInformation("Rendering theme configuration for theme: {Theme}", sanitizedTheme);
 
             return PartialView(viewPath, display);
@@ -320,14 +319,19 @@ public class UiController : Controller
         var display = await GetDisplayByIdAsync(displayNumber);
         if (display == null)
         {
-            return NotFound();
+            return BadRequest(new { error = "Display not found" });
         }
 
         // Build Google OAuth2 URL
         var clientId = _displayService.GetConfig(display, "googlefit_client_id");
         var callback = _displayService.GetConfig(display, "googlefit_auth_callback");
         var scope = "https://www.googleapis.com/auth/fitness.body.read";
-        
+
+        if (clientId == null || callback == null)
+        {
+            return BadRequest(new { error = "Google Fit client ID or callback URL not configured" });
+        }
+
         var state = Convert.ToBase64String(
             System.Text.Encoding.UTF8.GetBytes(
                 System.Text.Json.JsonSerializer.Serialize(new { display_number = displayNumber })

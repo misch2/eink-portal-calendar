@@ -9,6 +9,7 @@ namespace PortalCalendarServer.Models
         public required string Schedule;
     }
 
+
     public partial class Display
     {
         public bool IsDefault()
@@ -21,9 +22,10 @@ namespace PortalCalendarServer.Models
         {
             return ColorType switch
             {
-                "BW" => "Black & White",
-                "4G" => "Grayscale, 4 levels",
-                "3C" => "Black & White & Color (red or yellow)",
+                Constants.ColorType.BlackAndWhite => "Black & White",
+                Constants.ColorType.Grayscale4Levels => "Grayscale, 4 levels",
+                Constants.ColorType.ThreeColor => "Black & White & Color (red or yellow)",
+                Constants.ColorType.Grayscale16 => "Grayscale, 16 levels",
                 _ => ColorType
             };
         }
@@ -33,10 +35,10 @@ namespace PortalCalendarServer.Models
         {
             return ColorType switch
             {
-                "BW" => 2,
-                "4G" => 4,
-                "3C" => 3,
-                "16G" => 16,
+                Constants.ColorType.BlackAndWhite => 2,
+                Constants.ColorType.Grayscale4Levels => 4,
+                Constants.ColorType.ThreeColor => 3,
+                Constants.ColorType.Grayscale16 => 16,
                 _ => 256
             };
         }

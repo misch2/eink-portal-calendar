@@ -87,6 +87,16 @@
                                value="@displayService.GetConfigWithoutDefaults(Model, "timezone")"
                                placeholder="@displayService.GetConfigDefaultsOnly("timezone")">
                     </div>
+                    <div class="col-md-4">
+                        <label for="date_culture">Date style</label>
+                        <select id="date_culture" name="date_culture" class="form-select">
+                            <option value="" disabled selected="@(String.IsNullOrEmpty(displayService.GetConfigWithoutDefaults(Model, "date_culture")))">(@displayService.GetConfigDefaultsOnly("date_culture") - default)</option>
+                            @foreach (var val in new[] { "en-US", "cs-CZ" })
+                            {
+                                <option value="@val" selected="@(displayService.GetConfigWithoutDefaults(Model, "date_culture") == val)">@val</option>
+                            }
+                        </select>
+                    </div>
                 </div>
             </fieldset>
         </div>

@@ -2,27 +2,26 @@
 @using PortalCalendarServer.Models
 @using PortalCalendarServer.Services
 @using System.Globalization
-
 @{
     Layout = null;
-    
-    // Get culture from current thread (set by request localization middleware)
-    var culture = CultureInfo.CurrentCulture;
-    
-    // Text decorator function (can be: lowercase, UPPERCASE, Capitalized)
-    Func<string, string> decorator = text => text; // returns as-is
-    // decorator = text => text.ToUpperInvariant(); // UPPERCASE
-    // decorator = text => culture.TextInfo.ToTitleCase(text); // Capitalized
-    
+
     var displayService = ViewContext.HttpContext.RequestServices.GetRequiredService<DisplayService>();
+
+    var dateCulture = new CultureInfo(displayService.GetConfig(Model.Display, "date_culture") ?? "en-US");
     var timezone = TimeZoneInfo.FindSystemTimeZoneById(displayService.GetConfig(Model.Display, "timezone") ?? "UTC");
+
     var now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timezone);
     var wakeupInfo = Model.Display.NextWakeupTime();
     var nextWakeup = wakeupInfo.NextWakeup;
     var sleepInSeconds = wakeupInfo.SleepInSeconds;
     var schedule = wakeupInfo.Schedule;
-}
 
+    // Text decorator function (can be: lowercase, UPPERCASE, Capitalized)
+    Func<string, string> decorator = text => text; // returns as-is by default
+    decorator = text => text.ToUpperInvariant(); // UPPERCASE
+    // decorator = text => culture.TextInfo.ToTitleCase(text); // Capitalized
+    
+}
 <!DOCTYPE html>
 <html>
 <head>
@@ -76,7 +75,7 @@
                 
                 // X-axis labels and gridlines
                 hAxis: {
-                    textPosition: 'out',
+                    XtextPosition: 'none',
                     format: 'MMM',
                     gridlines: { color: '#888' },
                     minorGridlines: { color: 'transparent' },
@@ -88,8 +87,8 @@
                             {
                                 <text>
                                 {
-                                    v: new Date(@point.Date.Year, @(point.Date.Month - 1), @point.Date.Day),
-                                    f: '@point.Date.ToString("MMMM", culture)'
+                                    "v": new Date(@point.Date.Year, @(point.Date.Month - 1), @point.Date.Day),
+                                    "f": @Json.Serialize(@point.Date.ToString("MMMM", dateCulture))
                                 },
                                 </text>
                             }
@@ -99,6 +98,8 @@
                 
                 // Y-axis
                 vAxis: {
+                    XXXtitle: 'Váha', 
+                    XXXtextPosition: 'none',
                     gridlines: { color: '#000', count: 3 },
                     minorGridlines: { color: 'transparent' },
                     textStyle: { fontSize: 12, color: '#000000' }
@@ -114,7 +115,7 @@
                 curveType: 'function',
 
                 // Show points
-                pointShape: 'circle',
+                pointShape: 'circle',   //  'circle', 'triangle', 'square', 'diamond', 'star', or 'polygon'
                 pointSize: 4,
             };
 
@@ -128,19 +129,20 @@
     <div id="spacer">
         <div class="top-month-header">
             <div>
-                @decorator(Model.Date.ToString("MMMM", culture))
+                @decorator(Model.Date.ToString("MMMM", dateCulture))
             </div>
         </div>
 
         <div class="current-weight-big">
             @if (Model.LastWeight.HasValue)
             {
-                <span>@Model.LastWeight.Value.ToString("F1", culture)</span>
+                <span>@Model.LastWeight.Value.ToString("F1", CultureInfo.InvariantCulture)</span>
             }
             else
             {
                 <span>--.-</span>
             }
+            <!-- <span class="current-weight-small-kg"> kg</span> -->
         </div>
 
         <div class="weight-chart" id="weight_chart_div">
@@ -152,7 +154,7 @@
                     @Model.Date.Day/@DateTime.DaysInMonth(Model.Date.Year, Model.Date.Month)
                 </div>
                 <div>
-                    @decorator(Model.Date.ToString("dddd", culture))
+                    @decorator(Model.Date.ToString("dddd", dateCulture))
                 </div>
             </div>
             <div class="separator"></div>
@@ -186,7 +188,7 @@
                         }
                         else
                         {
-                            @evt.StartTime.ToString("H:mm", culture)
+                            @evt.StartTime.ToString("H:mm", dateCulture)
                             @evt.Summary
                             @if (evt.DurationHours.HasValue)
                             {
@@ -203,7 +205,7 @@
         <div id="bottom-signature">
             @* Screen displayed at *@
             <iconify-icon icon="material-symbols:add-to-home-screen-sharp"></iconify-icon>
-            @nextWakeup.ToString("H:mm", culture),
+            @nextWakeup.ToString("H:mm", dateCulture),
         </div>
 
         <div id="battery-status">

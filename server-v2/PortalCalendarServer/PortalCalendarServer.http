@@ -1,6 +1,0 @@
-@PortalCalendarServer_HostAddress = http://localhost:5252
-
-GET {{PortalCalendarServer_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

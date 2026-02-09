@@ -109,7 +109,7 @@ public class ApiController : ControllerBase
                 Name = $"New display with MAC {mac.ToUpperInvariant()} added on {DateTime.UtcNow}",
                 Width = w ?? 800,
                 Height = h ?? 480,
-                ColorType = c ?? "BW",
+                ColorType = c ?? Models.Constants.ColorType.BlackAndWhite,
                 Firmware = fw ?? string.Empty,
                 Rotation = 0,
                 Gamma = 2.2,

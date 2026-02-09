@@ -37,7 +37,7 @@
       TimeSpan? last_contact_ago = null;
       if (display.LastVisit() != null)
       {
-        last_contact_ago = DateTime.UtcNow - display.LastVisit().Value;
+        last_contact_ago = DateTime.UtcNow - display.LastVisit()!.Value;
       }
 
       @* FIXME waiting tasks *@

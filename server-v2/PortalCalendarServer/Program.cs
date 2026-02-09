@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using PortalCalendarServer.Models;
 using PortalCalendarServer.Services;
+using PortalCalendarServer.Services.Integrations;
 using Scalar.AspNetCore;
 using System.Globalization;
 
@@ -19,30 +20,44 @@ builder.Services.AddDbContext<CalendarContext>(options =>
 // Add services to the container
 builder.Services.AddControllersWithViews(); // Support for both API and MVC controllers
 
+// Add memory cache for HTTP response caching
+builder.Services.AddMemoryCache(options =>
+{
+    options.SizeLimit = 100 * 1024 * 1024; // 100MB cache limit
+});
+
+// Configure HttpClient with caching
+builder.Services.AddHttpClient();
+builder.Services.AddTransient<CachingHttpMessageHandler>();
+
+// Configure named HttpClients for different integrations
+builder.Services.AddHttpClient("GoogleFitIntegrationService")
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+    {
+        AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate
+    })
+    .AddHttpMessageHandler<CachingHttpMessageHandler>();
+
 // Register services
 builder.Services.AddScoped<DisplayService>();
 builder.Services.AddScoped<ICalendarUtilFactory, CalendarUtilFactory>();
+builder.Services.AddScoped<CacheManagementService>();
 
-// Configure localization
-var defaultCulture = builder.Configuration["Culture:DefaultCulture"] ?? "en-US";
-//var supportedCultures = builder.Configuration.GetSection("Culture:SupportedCultures").Get<string[]>() 
-//    ?? new[] { "en-US" };
+// Register background services
+builder.Services.AddHostedService<CacheCleanupService>();
 
-//var supportedCultureInfos = supportedCultures
-//    .Select(c => new CultureInfo(c))
-//    .ToArray();
+// Register integration services
+builder.Services.AddScoped<GoogleFitIntegrationService>();
+// Add other integration services here as you create them:
+// builder.Services.AddScoped<WeatherIntegrationService>();
+// builder.Services.AddScoped<ICalIntegrationService>();
 
-//builder.Services.Configure<RequestLocalizationOptions>(options =>
-//{
-//    options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture(defaultCulture);
-//    options.SupportedCultures = supportedCultureInfos;
-//    options.SupportedUICultures = supportedCultureInfos;
-//});
+// Configure localization to not disturb number formatting in HTML forms etc.
+var invariant = CultureInfo.InvariantCulture;
+CultureInfo.DefaultThreadCurrentCulture = invariant;
+CultureInfo.DefaultThreadCurrentUICulture = invariant;
 
-// use the default culture for all requests (since we don't have multiple cultures yet) and everything
-
-CultureInfo.DefaultThreadCurrentCulture = new CultureInfo(defaultCulture);
-
+var dateCulture = builder.Configuration["Culture:DateCulture"] ?? "en-US";
 
 // Configure OpenAPI with custom settings
 builder.Services.AddOpenApi(options =>
