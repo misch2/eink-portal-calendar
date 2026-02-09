@@ -43,6 +43,19 @@ namespace PortalCalendarServer.Models
             };
         }
 
+        // FIXME move to services?
+        public List<string> ColorPalette(bool for_preview)
+        {
+            var cssColors = CssColorMap(for_preview);
+            return ColorType switch
+            {
+                Constants.ColorType.BlackAndWhite => new List<string> { cssColors["epd_black"], cssColors["epd_white"] },
+                Constants.ColorType.Grayscale4Levels => new List<string> { cssColors["epd_black"], "#555555", "#aaaaaa", cssColors["epd_white"] }, // FIXME
+                Constants.ColorType.ThreeColor => new List<string> { cssColors["epd_black"], cssColors["epd_white"], cssColors["epd_red"], cssColors["epd_yellow"] },
+                _ => new List<string>() // FIXME
+            };
+        }
+
         public int MissedConnects()
         {
             var missedStr = Configs?.FirstOrDefault(c => c.Name == "_missed_connects")?.Value;

@@ -14,7 +14,9 @@
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.12" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Playwright" Version="1.49.1" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.12.36" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.7" />
   </ItemGroup>
 
     <ItemGroup>

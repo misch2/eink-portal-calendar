@@ -12,12 +12,16 @@ public class ApiController : ControllerBase
     private readonly CalendarContext _context;
     private readonly ILogger<ApiController> _logger;
     private readonly DisplayService _displayService;
+    private readonly ICalendarUtilFactory _calendarUtilFactory;
+    private readonly Web2PngService _web2PngService;
 
-    public ApiController(CalendarContext context, ILogger<ApiController> logger, DisplayService displayService)
+    public ApiController(CalendarContext context, ILogger<ApiController> logger, DisplayService displayService, ICalendarUtilFactory calendarUtilFactory, Web2PngService web2PngService)
     {
         _context = context;
         _logger = logger;
         _displayService = displayService;
+        _calendarUtilFactory = calendarUtilFactory;
+        _web2PngService = web2PngService;
     }
 
     // Helper to get display by MAC address
@@ -198,12 +202,44 @@ public class ApiController : ControllerBase
         gamma ??= display.Gamma;
         colors ??= display.NumColors();
 
-        // TODO: Implement bitmap generation
-        // This will require porting the Perl image generation logic
-        // For now, return a placeholder response
-        _logger.LogWarning("Bitmap generation not yet implemented");
+        var color_palette = display.ColorPalette(preview_colors);
+        if (color_palette.Count == 0)
+        {
+            colormap_name = "webmap";
+        }
 
-        return NotFound(new { error = "Bitmap generation not yet implemented" });
+        var util = _calendarUtilFactory.Create(display);
+
+        var bitmapOptions = new Services.BitmapOptions
+        {
+            Rotate = rotate,
+            Flip = flip,
+            Gamma = gamma!.Value,
+            NumColors = colors!.Value,
+            ColormapName = colormap_name,
+            ColormapColors = color_palette,
+            Format = format,
+            DisplayType = display.ColorType
+        };
+
+        util.GenerateImageFromWeb(); // FIXME pre-generate
+        var bitmap = util.GenerateBitmap(bitmapOptions);
+
+        if (bitmap == null)
+        {
+            return StatusCode(500, new { error = "Failed to generate bitmap" });
+        }
+
+        // Return the bitmap data with proper headers
+        if (bitmap.Headers != null)
+        {
+            foreach (var header in bitmap.Headers)
+            {
+                Response.Headers.Add(header.Key, header.Value);
+            }
+        }
+
+        return File(bitmap.Data, bitmap.ContentType);
     }
 
     // GET /api/calendar/bitmap/epaper?mac=XX:XX:XX:XX:XX:XX&web_format=false&preview_colors=false

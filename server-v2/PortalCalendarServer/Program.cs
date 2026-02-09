@@ -42,6 +42,7 @@ builder.Services.AddHttpClient("GoogleFitIntegrationService")
 builder.Services.AddScoped<DisplayService>();
 builder.Services.AddScoped<ICalendarUtilFactory, CalendarUtilFactory>();
 builder.Services.AddScoped<CacheManagementService>();
+builder.Services.AddSingleton<Web2PngService>();
 
 // Register background services
 builder.Services.AddHostedService<CacheCleanupService>();
