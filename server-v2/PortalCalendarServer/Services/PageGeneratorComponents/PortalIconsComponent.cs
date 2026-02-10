@@ -271,3 +271,9 @@ public class PortalIconsComponent : BaseComponent
         };
     }
 }
+
+public class IconViewModel
+{
+    public string Name { get; set; } = string.Empty;
+    public bool Grayed { get; set; }
+}

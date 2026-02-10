@@ -215,8 +215,9 @@ public class ApiController : ControllerBase
         }
 
         var util = _calendarUtilFactory.Create(display);
+        util.GenerateImageFromWeb(); // FIXME pre-generate
 
-        var bitmapOptions = new Services.BitmapOptions
+        var bitmapOptions = new BitmapOptions
         {
             Rotate = rotate,
             Flip = flip,
@@ -228,7 +229,6 @@ public class ApiController : ControllerBase
             DisplayType = display.ColorType
         };
 
-        util.GenerateImageFromWeb(); // FIXME pre-generate
         var bitmap = util.GenerateBitmap(bitmapOptions);
 
         if (bitmap == null)

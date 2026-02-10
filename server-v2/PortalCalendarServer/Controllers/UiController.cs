@@ -137,7 +137,7 @@ public class UiController : Controller
         _displayService.UseDisplay(display);
 
         var util = _calendarUtilFactory.Create(display);
-        var viewModel = util.CalendarModelForDate(DateTime.UtcNow, preview_colors);
+        var viewModel = util.PageViewModelForDate(DateTime.UtcNow, preview_colors);
 
         // TODO: Return calendar theme view
         var theme = _displayService.GetConfig("theme") ?? "default";
@@ -161,7 +161,7 @@ public class UiController : Controller
         }
 
         var util = _calendarUtilFactory.Create(display);
-        var viewModel = util.CalendarModelForDate(parsedDate, preview_colors);
+        var viewModel = util.PageViewModelForDate(parsedDate, preview_colors);
 
         // TODO: Return calendar theme view
         var theme = _displayService.GetConfig("theme") ?? "default";

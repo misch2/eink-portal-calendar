@@ -1,13 +1,5 @@
 ﻿namespace PortalCalendarServer.Services.PageGeneratorComponents;
 
-public class CalendarInfo
-{
-    public List<CalendarEvent> TodayEvents { get; set; } = new();
-    public List<CalendarEvent> NearestEvents { get; set; } = new();
-    public Dictionary<string, List<CalendarEvent>> NearestEventsGrouped { get; set; } = new();
-    public bool HasEntries { get; set; }
-}
-
 public class CalendarComponent : BaseComponent
 {
     public CalendarComponent(
@@ -71,3 +63,21 @@ public class CalendarComponent : BaseComponent
     }
 }
 
+public class CalendarInfo
+{
+    public List<CalendarEvent> TodayEvents { get; set; } = new();
+    public List<CalendarEvent> NearestEvents { get; set; } = new();
+    public Dictionary<string, List<CalendarEvent>> NearestEventsGrouped { get; set; } = new();
+    public bool HasEntries { get; set; }
+}
+
+public class CalendarEvent
+{
+    public DateTime StartTime { get; set; }
+    public DateTime EndTime { get; set; }
+    public string Summary { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string Location { get; set; } = string.Empty;
+    public bool AllDay { get; set; }
+    public double? DurationHours { get; set; }
+}

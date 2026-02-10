@@ -145,14 +145,21 @@ namespace PortalCalendarServer.Services
             await _context.SaveChangesAsync();
         }
 
-        public IColorType GetColorType()
+        public IColorType? GetColorType()
         {
             ValidateDisplayIsSet();
+
+            if (string.IsNullOrEmpty(_currentDisplay!.ColorType))
+            {
+                return null;
+            }
+
             var ret = _colorTypeRegistry.GetColorType(_currentDisplay!.ColorType);
             if (ret == null)
             {
                 throw new InvalidOperationException($"Color type '{_currentDisplay.ColorType}' not found in registry.");
             }
+
             return ret;
         }
 

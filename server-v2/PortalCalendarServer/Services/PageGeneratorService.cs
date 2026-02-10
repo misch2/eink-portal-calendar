@@ -1,9 +1,11 @@
+using Microsoft.Playwright;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models;
 using PortalCalendarServer.Services.PageGeneratorComponents;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Processing.Processors.Quantization;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Cryptography;
@@ -41,15 +43,10 @@ public class PageGeneratorService
         _displayService.UseDisplay(display);
     }
 
-    /// <summary>
-    /// Generate HTML data for a specific date
-    /// </summary>
-    public PageViewModel CalendarModelForDate(DateTime date, bool previewColors = false)
+    public PageViewModel PageViewModelForDate(DateTime date, bool previewColors = false)
     {
         var seed = int.Parse(date.ToString("yyyyMMdd"));
         var random = new Random(seed);
-
-        // FIXME        var (icons, todayEvents, nearestEvents, nearestEventsGrouped, hasCalendarEntries) =            GetCalendarComponent(date);
 
         var viewModel = new PageViewModel
         {
@@ -59,9 +56,9 @@ public class PageGeneratorService
         };
 
         viewModel.InitializeComponents(
-        portalIconsFactory: () => new PortalIconsComponent(_logger, _displayService, date),
-        calendarFactory: () => new CalendarComponent(_logger, _displayService, date),
-        weightFactory: () => new WeightComponent(_logger, date, random)
+            portalIconsFactory: () => new PortalIconsComponent(_logger, _displayService, date),
+            calendarFactory: () => new CalendarComponent(_logger, _displayService, date),
+            weightFactory: () => new WeightComponent(_logger, date, random)
         );
 
         return viewModel;
@@ -84,6 +81,7 @@ public class PageGeneratorService
         _logger.LogInformation("Generating calendar image from URL {Url} to {OutputPath}", url, outputPath);
 
         // FIXME await?
+        // FIXME timeout?
         _web2PngService.ConvertUrlAsync(
             url,
             _display.VirtualWidth(),
@@ -171,10 +169,32 @@ public class PageGeneratorService
             });
         }
 
-        // Convert to grayscale if needed for e-paper processing
-        if (options.NumColors < 256 || options.Format == "epaper_native")
+        if (options.NumColors < 256)
         {
-            img.Mutate(x => x.Grayscale());
+            // Convert to palette-based image with specified number of colors
+            var quantizerOptions = new QuantizerOptions
+            {
+                Dither = null, // use closest color without dithering
+                MaxColors = options.NumColors,
+            };
+            PaletteQuantizer quantizer;
+
+            if (options.ColormapName == "none")
+            {
+                var palette = new List<Color>();
+                palette.AddRange(options.ColormapColors.Select(c => new Color(Rgba32.ParseHex(c))));
+                quantizer = new PaletteQuantizer(palette.ToArray(), quantizerOptions);
+            }
+            else if (options.ColormapName == "webmap")
+            {
+                quantizer = new WebSafePaletteQuantizer(quantizerOptions);
+            }
+            else
+            {
+                throw new ArgumentException($"Unknown colormap name: {options.ColormapName}");
+            }
+
+            img.Mutate(x => x.Quantize(quantizer));
         }
 
         // Generate output based on format
@@ -193,7 +213,7 @@ public class PageGeneratorService
         }
         else if (options.Format == "epaper_native")
         {
-            var bitmap = ConvertToEpaperFormat(img, options.DisplayType);
+            var bitmap = _convertToEpaperFormat(img, options.DisplayType);
             var checksum = ComputeSHA1(bitmap);
 
             // Output format: "MM\n" + checksum + "\n" + bitmap data
@@ -221,7 +241,7 @@ public class PageGeneratorService
     /// <summary>
     /// Convert image to e-paper native format (BW, 4G, 3C, etc.)
     /// </summary>
-    private byte[] ConvertToEpaperFormat(Image<Rgba32> img, string displayType)
+    private byte[] _convertToEpaperFormat(Image<Rgba32> img, string displayType)
     {
         using var ms = new MemoryStream();
 
@@ -292,7 +312,7 @@ public class PageGeneratorService
                     }
                 }
             }
-            else if (displayType == "3C")
+            else if (displayType == "3C") // FIXME constant
             {
                 // 3-color (black, white, red/yellow) - dual buffers per row
                 for (int y = 0; y < accessor.Height; y++)
@@ -403,22 +423,6 @@ public class PageViewModel
     }
 }
 
-public class IconViewModel
-{
-    public string Name { get; set; } = string.Empty;
-    public bool Grayed { get; set; }
-}
-
-public class CalendarEvent
-{
-    public DateTime StartTime { get; set; }
-    public DateTime EndTime { get; set; }
-    public string Summary { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string Location { get; set; } = string.Empty;
-    public bool AllDay { get; set; }
-    public double? DurationHours { get; set; }
-}
 
 public class BitmapOptions
 {
@@ -426,6 +430,9 @@ public class BitmapOptions
     public string Flip { get; set; } = string.Empty;
     public double Gamma { get; set; } = 1.0;
     public int NumColors { get; set; } = 256;
+    /// <summary>
+    /// Either "none" or "webmap". Originally used for the Perl Imager module.
+    /// </summary>
     public string ColormapName { get; set; } = "none";
     public List<string> ColormapColors { get; set; } = new();
     public string Format { get; set; } = "png";
