@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PortalCalendarServer.Data;
 using PortalCalendarServer.Models;
 using PortalCalendarServer.Services;
 
@@ -14,14 +15,16 @@ public class ApiController : ControllerBase
     private readonly DisplayService _displayService;
     private readonly ICalendarUtilFactory _calendarUtilFactory;
     private readonly Web2PngService _web2PngService;
+    private readonly ColorTypeRegistry _colorTypeRegistry;
 
-    public ApiController(CalendarContext context, ILogger<ApiController> logger, DisplayService displayService, ICalendarUtilFactory calendarUtilFactory, Web2PngService web2PngService)
+    public ApiController(CalendarContext context, ILogger<ApiController> logger, DisplayService displayService, ICalendarUtilFactory calendarUtilFactory, Web2PngService web2PngService, ColorTypeRegistry colorTypeRegistry)
     {
         _context = context;
         _logger = logger;
         _displayService = displayService;
         _calendarUtilFactory = calendarUtilFactory;
         _web2PngService = web2PngService;
+        _colorTypeRegistry = colorTypeRegistry;
     }
 
     // Helper to get display by MAC address
@@ -113,7 +116,7 @@ public class ApiController : ControllerBase
                 Name = $"New display with MAC {mac.ToUpperInvariant()} added on {DateTime.UtcNow}",
                 Width = w ?? 800,
                 Height = h ?? 480,
-                ColorType = c ?? Models.Constants.ColorType.BlackAndWhite,
+                ColorType = c ?? "BW",
                 Firmware = fw ?? string.Empty,
                 Rotation = 0,
                 Gamma = 2.2,
@@ -200,9 +203,9 @@ public class ApiController : ControllerBase
         }
 
         gamma ??= display.Gamma;
-        colors ??= display.NumColors();
+        colors ??= _displayService.GetNumColors(display);
 
-        var color_palette = display.ColorPalette(preview_colors);
+        var color_palette = _displayService.GetColorPalette(display, preview_colors);
         if (color_palette.Count == 0)
         {
             colormap_name = "webmap";
@@ -235,7 +238,7 @@ public class ApiController : ControllerBase
         {
             foreach (var header in bitmap.Headers)
             {
-                Response.Headers.Add(header.Key, header.Value);
+                Response.Headers.Append(header.Key, header.Value);
             }
         }
 

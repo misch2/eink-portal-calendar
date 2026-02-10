@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualBasic;
+using PortalCalendarServer.Data;
 using PortalCalendarServer.Models;
+using PortalCalendarServer.Models.Constants;
+using PortalCalendarServer.Models.Entities;
 
 namespace PortalCalendarServer.Services
 {
@@ -9,11 +13,16 @@ namespace PortalCalendarServer.Services
     {
         private readonly CalendarContext _context;
         private readonly ILogger<DisplayService> _logger;
+        private readonly ColorTypeRegistry _colorTypeRegistry;
 
-        public DisplayService(CalendarContext context, ILogger<DisplayService> logger)
+        public DisplayService(
+            CalendarContext context, 
+            ILogger<DisplayService> logger,
+            ColorTypeRegistry colorTypeRegistry)
         {
             _context = context;
             _logger = logger;
+            _colorTypeRegistry = colorTypeRegistry;
         }
 
 
@@ -117,6 +126,24 @@ namespace PortalCalendarServer.Services
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
+        }
+
+        public string GetColorTypePretty(Display display)
+        {
+            var colorType = _colorTypeRegistry.GetColorType(display.ColorType);
+            return colorType?.PrettyName ?? display.ColorType;
+        }
+
+        public int GetNumColors(Display display)
+        {
+            var colorType = _colorTypeRegistry.GetColorType(display.ColorType);
+            return colorType?.NumColors ?? 256;
+        }
+
+        public List<string> GetColorPalette(Display display, bool forPreview)
+        {
+            var colorType = _colorTypeRegistry.GetColorType(display.ColorType);
+            return colorType?.GetColorPalette(forPreview) ?? new List<string>();
         }
     }
 }

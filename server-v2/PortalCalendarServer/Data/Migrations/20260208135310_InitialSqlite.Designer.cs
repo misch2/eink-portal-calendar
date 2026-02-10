@@ -4,21 +4,22 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using PortalCalendarServer.Models;
+using PortalCalendarServer.Data;
+
 
 #nullable disable
 
 namespace PortalCalendarServer.Migrations
 {
     [DbContext(typeof(CalendarContext))]
-    [Migration("20260208140607_RemoveMojoMigrations")]
-    partial class RemoveMojoMigrations
+    [Migration("20260208135310_InitialSqlite")]
+    partial class InitialSqlite
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.12");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.2");
 
             modelBuilder.Entity("PortalCalendarServer.Models.Cache", b =>
                 {
@@ -160,6 +161,21 @@ namespace PortalCalendarServer.Migrations
                         .IsUnique();
 
                     b.ToTable("displays", (string)null);
+                });
+
+            modelBuilder.Entity("PortalCalendarServer.Models.MojoMigration", b =>
+                {
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("name");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("version");
+
+                    b.HasKey("Name");
+
+                    b.ToTable("mojo_migrations", (string)null);
                 });
 
             modelBuilder.Entity("PortalCalendarServer.Models.Config", b =>

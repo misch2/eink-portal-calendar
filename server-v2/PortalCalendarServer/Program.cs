@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using PortalCalendarServer.Models;
+using PortalCalendarServer.Data;
+using PortalCalendarServer.Controllers.ModelBinders;
+using PortalCalendarServer.Models.ColorTypes;
 using PortalCalendarServer.Services;
 using PortalCalendarServer.Services.Integrations;
 using Scalar.AspNetCore;
@@ -18,7 +20,10 @@ builder.Services.AddDbContext<CalendarContext>(options =>
     options.UseSqlite(absoluteConnectionString));
 
 // Add services to the container
-builder.Services.AddControllersWithViews(); // Support for both API and MVC controllers
+// Support for both API and MVC controllers
+builder.Services.AddControllersWithViews(options =>
+    options.ModelBinderProviders.Insert(0, new FlexibleBoolBinderProvider())
+    );
 
 // Add memory cache for HTTP response caching
 builder.Services.AddMemoryCache(options =>
@@ -43,6 +48,7 @@ builder.Services.AddScoped<DisplayService>();
 builder.Services.AddScoped<ICalendarUtilFactory, CalendarUtilFactory>();
 builder.Services.AddScoped<CacheManagementService>();
 builder.Services.AddSingleton<Web2PngService>();
+builder.Services.AddSingleton<ColorTypeRegistry>();
 
 // Register background services
 builder.Services.AddHostedService<CacheCleanupService>();

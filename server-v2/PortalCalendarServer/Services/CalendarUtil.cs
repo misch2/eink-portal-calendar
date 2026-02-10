@@ -5,6 +5,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using System.Collections.Generic;
+using PortalCalendarServer.Data;
 
 namespace PortalCalendarServer.Services;
 
@@ -402,45 +403,46 @@ public class CalendarUtil
         // Process each row of pixels
         img.ProcessPixelRows(accessor =>
         {
-            if (displayType == "256G")
-            {
-                // 8-bit grayscale, one byte per pixel
-                for (int y = 0; y < accessor.Height; y++)
-                {
-                    var rowSpan = accessor.GetRowSpan(y);
-                    foreach (var pixel in rowSpan)
-                    {
-                        var gray = (byte)((pixel.R + pixel.G + pixel.B) / 3);
-                        ms.WriteByte(gray);
-                    }
-                }
-            }
-            else if (displayType == "4G")
-            {
-                // 2-bit grayscale, 4 pixels per byte
-                for (int y = 0; y < accessor.Height; y++)
-                {
-                    var rowSpan = accessor.GetRowSpan(y);
-                    byte currentByte = 0;
-                    int bitCount = 0;
+            //if (displayType == "256G")
+            //{
+            //    // 8-bit grayscale, one byte per pixel
+            //    for (int y = 0; y < accessor.Height; y++)
+            //    {
+            //        var rowSpan = accessor.GetRowSpan(y);
+            //        foreach (var pixel in rowSpan)
+            //        {
+            //            var gray = (byte)((pixel.R + pixel.G + pixel.B) / 3);
+            //            ms.WriteByte(gray);
+            //        }
+            //    }
+            //}
+            //else if (displayType == "4G")
+            //{
+            //    // 2-bit grayscale, 4 pixels per byte
+            //    for (int y = 0; y < accessor.Height; y++)
+            //    {
+            //        var rowSpan = accessor.GetRowSpan(y);
+            //        byte currentByte = 0;
+            //        int bitCount = 0;
 
-                    foreach (var pixel in rowSpan)
-                    {
-                        var gray = (byte)((pixel.R + pixel.G + pixel.B) / 3);
-                        var bits = (byte)(gray >> 6); // 0-3 range
-                        currentByte = (byte)((currentByte << 2) | bits);
-                        bitCount += 2;
+            //        foreach (var pixel in rowSpan)
+            //        {
+            //            var gray = (byte)((pixel.R + pixel.G + pixel.B) / 3);
+            //            var bits = (byte)(gray >> 6); // 0-3 range
+            //            currentByte = (byte)((currentByte << 2) | bits);
+            //            bitCount += 2;
 
-                        if (bitCount == 8)
-                        {
-                            ms.WriteByte(currentByte);
-                            currentByte = 0;
-                            bitCount = 0;
-                        }
-                    }
-                }
-            }
-            else if (displayType == Models.Constants.ColorType.BlackAndWhite) // "BW"
+            //            if (bitCount == 8)
+            //            {
+            //                ms.WriteByte(currentByte);
+            //                currentByte = 0;
+            //                bitCount = 0;
+            //            }
+            //        }
+            //    }
+            //}
+            //else 
+            if (displayType == "BW") // FIXME constant
             {
                 // 1-bit black and white, 8 pixels per byte
                 for (int y = 0; y < accessor.Height; y++)
@@ -732,12 +734,12 @@ public class BitmapOptions
     public string ColormapName { get; set; } = "none";
     public List<string> ColormapColors { get; set; } = new();
     public string Format { get; set; } = "png";
-    public string DisplayType { get; set; } = Models.Constants.ColorType.BlackAndWhite;
+    public string DisplayType { get; set; } = "BW"; // FIXME constant
 }
 
 public class BitmapResult
 {
-    public byte[] Data { get; set; } = Array.Empty<byte>();
+    public byte[] Data { get; set; } = [];
     public string ContentType { get; set; } = "image/png";
     public Dictionary<string, string>? Headers { get; set; }
 }

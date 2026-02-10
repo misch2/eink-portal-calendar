@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace PortalCalendarServer.Models;
+namespace PortalCalendarServer.Models.Entities;
 
 public partial class Cache
 {

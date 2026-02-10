@@ -2,7 +2,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
-using PortalCalendarServer.Models;
+using PortalCalendarServer.Data;
+using PortalCalendarServer.Models.Entities;
 
 namespace PortalCalendarServer.Services;
 

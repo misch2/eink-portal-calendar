@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using PortalCalendarServer.Models;
+using PortalCalendarServer.Models.Entities;
 
-namespace PortalCalendarServer.Models;
+namespace PortalCalendarServer.Data;
 
 public partial class CalendarContext : DbContext
 {

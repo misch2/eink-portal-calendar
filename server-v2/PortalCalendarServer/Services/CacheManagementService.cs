@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using PortalCalendarServer.Models;
+using PortalCalendarServer.Data;
 
 namespace PortalCalendarServer.Services;
 

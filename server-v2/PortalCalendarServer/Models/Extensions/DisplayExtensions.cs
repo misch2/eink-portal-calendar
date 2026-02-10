@@ -1,59 +1,14 @@
 ﻿using System.Globalization;
+using PortalCalendarServer.Models.POCOs.Display;
 
 namespace PortalCalendarServer.Models
 {
-    public class WakeUpInfo
-    {
-        public required DateTime NextWakeup;
-        public required int SleepInSeconds;
-        public required string Schedule;
-    }
-
 
     public partial class Display
     {
         public bool IsDefault()
         {
             return Id == 0;
-        }
-
-        // FIXME move to services?
-        public string ColorTypePretty()
-        {
-            return ColorType switch
-            {
-                Constants.ColorType.BlackAndWhite => "Black & White",
-                Constants.ColorType.Grayscale4Levels => "Grayscale, 4 levels",
-                Constants.ColorType.ThreeColor => "Black & White & Color (red or yellow)",
-                Constants.ColorType.Grayscale16 => "Grayscale, 16 levels",
-                _ => ColorType
-            };
-        }
-
-        // FIXME move to services?
-        public int NumColors()
-        {
-            return ColorType switch
-            {
-                Constants.ColorType.BlackAndWhite => 2,
-                Constants.ColorType.Grayscale4Levels => 4,
-                Constants.ColorType.ThreeColor => 3,
-                Constants.ColorType.Grayscale16 => 16,
-                _ => 256
-            };
-        }
-
-        // FIXME move to services?
-        public List<string> ColorPalette(bool for_preview)
-        {
-            var cssColors = CssColorMap(for_preview);
-            return ColorType switch
-            {
-                Constants.ColorType.BlackAndWhite => new List<string> { cssColors["epd_black"], cssColors["epd_white"] },
-                Constants.ColorType.Grayscale4Levels => new List<string> { cssColors["epd_black"], "#555555", "#aaaaaa", cssColors["epd_white"] }, // FIXME
-                Constants.ColorType.ThreeColor => new List<string> { cssColors["epd_black"], cssColors["epd_white"], cssColors["epd_red"], cssColors["epd_yellow"] },
-                _ => new List<string>() // FIXME
-            };
         }
 
         public int MissedConnects()
