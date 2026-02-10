@@ -134,12 +134,13 @@ public class UiController : Controller
         {
             return NotFound();
         }
+        _displayService.UseDisplay(display);
 
         var util = _calendarUtilFactory.Create(display);
         var viewModel = util.CalendarModelForDate(DateTime.UtcNow, preview_colors);
 
         // TODO: Return calendar theme view
-        var theme = _displayService.GetConfig(display, "theme") ?? "default";
+        var theme = _displayService.GetConfig("theme") ?? "default";
         return View($"~/Views/CalendarThemes/{theme}.cshtml", viewModel);
     }
 
@@ -152,6 +153,7 @@ public class UiController : Controller
         {
             return NotFound();
         }
+        _displayService.UseDisplay(display);
 
         if (!DateTime.TryParse(date, out var parsedDate))
         {
@@ -162,7 +164,7 @@ public class UiController : Controller
         var viewModel = util.CalendarModelForDate(parsedDate, preview_colors);
 
         // TODO: Return calendar theme view
-        var theme = _displayService.GetConfig(display, "theme") ?? "default";
+        var theme = _displayService.GetConfig("theme") ?? "default";
         return View($"~/Views/CalendarThemes/{theme}.cshtml", viewModel);
     }
 
@@ -175,6 +177,7 @@ public class UiController : Controller
         {
             return NotFound();
         }
+        _displayService.UseDisplay(display);
 
         // Get available template names from filesystem
         var themesPath = Path.Combine(_environment.ContentRootPath, "Views", "CalendarThemes");
@@ -191,9 +194,9 @@ public class UiController : Controller
         ViewData["NavLink"] = "config_ui";
         ViewData["Title"] = $"Configuration - {display.Name}";
         ViewData["TemplateNames"] = templateNames;
-        ViewData["CurrentTheme"] = _displayService.GetConfig(display, "theme");
+        ViewData["CurrentTheme"] = _displayService.GetConfig("theme");
         ViewData["LastVoltage"] = display.Voltage();
-        ViewData["LastVoltageRaw"] = _displayService.GetConfig(display, "_last_voltage_raw");
+        ViewData["LastVoltageRaw"] = _displayService.GetConfig("_last_voltage_raw");
 
         // Pass DisplayService to the view through ViewData
         ViewData["DisplayService"] = _displayService;
@@ -211,6 +214,7 @@ public class UiController : Controller
         {
             return NotFound();
         }
+        _displayService.UseDisplay(display);
 
         // Save generic config parameters
         foreach (var paramName in ConfigUiParameters)
@@ -218,14 +222,14 @@ public class UiController : Controller
             if (form.ContainsKey(paramName))
             {
                 var value = form[paramName].ToString();
-                _displayService.SetConfig(display, paramName, value);
+                _displayService.SetConfig(paramName, value);
             }
             else if (paramName.StartsWith("web_calendar") || paramName == "googlefit" ||
                      paramName == "metnoweather" || paramName == "openweather" ||
                      paramName == "telegram" || paramName == "mqtt" || paramName == "ota_mode")
             {
                 // Checkboxes: if not present, set to empty/false
-                _displayService.SetConfig(display, paramName, "");
+                _displayService.SetConfig(paramName, "");
             }
         }
 
@@ -287,6 +291,7 @@ public class UiController : Controller
         {
             return NotFound();
         }
+        _displayService.UseDisplay(display);
 
         if (string.IsNullOrWhiteSpace(theme))
         {
@@ -322,10 +327,11 @@ public class UiController : Controller
         {
             return BadRequest(new { error = "Display not found" });
         }
+        _displayService.UseDisplay(display);
 
         // Build Google OAuth2 URL
-        var clientId = _displayService.GetConfig(display, "googlefit_client_id");
-        var callback = _displayService.GetConfig(display, "googlefit_auth_callback");
+        var clientId = _displayService.GetConfig("googlefit_client_id");
+        var callback = _displayService.GetConfig("googlefit_auth_callback");
         var scope = "https://www.googleapis.com/auth/fitness.body.read";
 
         if (clientId == null || callback == null)
@@ -362,8 +368,9 @@ public class UiController : Controller
         {
             return NotFound();
         }
+        _displayService.UseDisplay(display);
 
-        var accessToken = _displayService.GetConfig(display, "_googlefit_access_token");
+        var accessToken = _displayService.GetConfig("_googlefit_access_token");
         if (string.IsNullOrEmpty(accessToken))
         {
             return BadRequest(new { error = "No access token found" });
@@ -372,7 +379,7 @@ public class UiController : Controller
         ViewData["NavLink"] = "config_ui";
         ViewData["Title"] = "Google Fit Authentication Successful";
         ViewData["AccessToken"] = accessToken;
-        ViewData["RefreshToken"] = _displayService.GetConfig(display, "_googlefit_refresh_token");
+        ViewData["RefreshToken"] = _displayService.GetConfig("_googlefit_refresh_token");
 
         return View("AuthSuccess", display);
     }

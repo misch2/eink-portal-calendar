@@ -5,6 +5,6 @@ namespace PortalCalendarServer.Models.ColorTypes
         string Code { get; }
         string PrettyName { get; }
         int NumColors { get; }
-        List<string> GetColorPalette(bool forPreview);
+        List<string> ColorPalette(bool forPreview);
     }
 }

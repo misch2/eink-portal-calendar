@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Data;
 
-namespace PortalCalendarServer.Services;
+namespace PortalCalendarServer.Services.Caches;
 
 /// <summary>
 /// Utility service for managing all caches in the application.

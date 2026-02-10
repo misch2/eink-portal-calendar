@@ -5,9 +5,11 @@ using PortalCalendarServer.Data;
 using PortalCalendarServer.Controllers.ModelBinders;
 using PortalCalendarServer.Models.ColorTypes;
 using PortalCalendarServer.Services;
+using PortalCalendarServer.Services.PageGeneratorComponents;
 using PortalCalendarServer.Services.Integrations;
 using Scalar.AspNetCore;
 using System.Globalization;
+using PortalCalendarServer.Services.Caches;
 
 var builder = WebApplication.CreateBuilder(args);
 

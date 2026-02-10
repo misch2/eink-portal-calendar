@@ -1,5 +1,6 @@
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models;
+using PortalCalendarServer.Services.PageGeneratorComponents;
 
 namespace PortalCalendarServer.Services;
 
@@ -8,23 +9,24 @@ namespace PortalCalendarServer.Services;
 /// </summary>
 public interface ICalendarUtilFactory
 {
-    CalendarUtil Create(Display display, int minimalCacheExpiry = 0);
+    PageGeneratorService Create(Display display, int minimalCacheExpiry = 0);
 }
 
 public class CalendarUtilFactory : ICalendarUtilFactory
 {
-    private readonly ILogger<CalendarUtil> _logger;
+    private readonly ILogger<PageGeneratorService> _logger;
     private readonly CalendarContext _context;
     private readonly IWebHostEnvironment _environment;
     private readonly DisplayService _displayService;
     private readonly Web2PngService _web2PngService;
 
     public CalendarUtilFactory(
-        ILogger<CalendarUtil> logger,
+        ILogger<PageGeneratorService> logger,
         CalendarContext context,
         IWebHostEnvironment environment,
         DisplayService displayService,
-        Web2PngService web2PngService)
+        Web2PngService web2PngService
+        )
     {
         _logger = logger;
         _context = context;
@@ -33,8 +35,15 @@ public class CalendarUtilFactory : ICalendarUtilFactory
         _web2PngService = web2PngService;
     }
 
-    public CalendarUtil Create(Display display, int minimalCacheExpiry = 0)
+    public PageGeneratorService Create(Display display, int minimalCacheExpiry = 0)
     {
-        return new CalendarUtil(_logger, _context, _environment, _displayService, _web2PngService, display, minimalCacheExpiry);
+        return new PageGeneratorService(
+            _logger,
+            _context,
+            _environment,
+            _displayService,
+            _web2PngService,
+            display,
+            minimalCacheExpiry);
     }
 }

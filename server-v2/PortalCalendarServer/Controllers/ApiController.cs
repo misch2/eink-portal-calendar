@@ -14,8 +14,6 @@ public class ApiController : ControllerBase
     private readonly ILogger<ApiController> _logger;
     private readonly DisplayService _displayService;
     private readonly ICalendarUtilFactory _calendarUtilFactory;
-    private readonly Web2PngService _web2PngService;
-    private readonly ColorTypeRegistry _colorTypeRegistry;
 
     public ApiController(CalendarContext context, ILogger<ApiController> logger, DisplayService displayService, ICalendarUtilFactory calendarUtilFactory, Web2PngService web2PngService, ColorTypeRegistry colorTypeRegistry)
     {
@@ -23,8 +21,6 @@ public class ApiController : ControllerBase
         _logger = logger;
         _displayService = displayService;
         _calendarUtilFactory = calendarUtilFactory;
-        _web2PngService = web2PngService;
-        _colorTypeRegistry = colorTypeRegistry;
     }
 
     // Helper to get display by MAC address
@@ -130,7 +126,8 @@ public class ApiController : ControllerBase
             await _context.SaveChangesAsync();
 
             // Set default theme
-            _displayService.SetConfig(display, "theme", "default");
+            _displayService.UseDisplay(display);
+            _displayService.SetConfig("theme", "default");
             await _displayService.SaveChangesAsync();
 
             _logger.LogInformation("New display created with MAC {Mac}, ID: {Id}", mac, display.Id);
@@ -146,20 +143,23 @@ public class ApiController : ControllerBase
                 _context.Update(display);
                 await _context.SaveChangesAsync();
             }
+
+            _displayService.UseDisplay(display);
         }
 
+
         // Update last visit timestamp
-        _displayService.SetConfig(display, "_last_visit", DateTime.UtcNow.ToString("O"));
+        _displayService.SetConfig("_last_visit", DateTime.UtcNow.ToString("O"));
 
         // Store voltage and diagnostic data
-        _displayService.SetConfig(display, "_last_voltage_raw", adc ?? voltage_raw ?? string.Empty);
-        _displayService.SetConfig(display, "_last_voltage", v ?? string.Empty);
-        _displayService.SetConfig(display, "_min_voltage", vmin ?? string.Empty);
-        _displayService.SetConfig(display, "_max_voltage", vmax ?? string.Empty);
-        _displayService.SetConfig(display, "_min_linear_voltage", vlmin ?? string.Empty);
-        _displayService.SetConfig(display, "_max_linear_voltage", vlmax ?? string.Empty);
-        _displayService.SetConfig(display, "_reset_reason", reset ?? string.Empty);
-        _displayService.SetConfig(display, "_wakeup_reason", wakeup ?? string.Empty);
+        _displayService.SetConfig("_last_voltage_raw", adc ?? voltage_raw ?? string.Empty);
+        _displayService.SetConfig("_last_voltage", v ?? string.Empty);
+        _displayService.SetConfig("_min_voltage", vmin ?? string.Empty);
+        _displayService.SetConfig("_max_voltage", vmax ?? string.Empty);
+        _displayService.SetConfig("_min_linear_voltage", vlmin ?? string.Empty);
+        _displayService.SetConfig("_max_linear_voltage", vlmax ?? string.Empty);
+        _displayService.SetConfig("_reset_reason", reset ?? string.Empty);
+        _displayService.SetConfig("_wakeup_reason", wakeup ?? string.Empty);
 
         await _displayService.SaveChangesAsync();
 
@@ -177,7 +177,7 @@ public class ApiController : ControllerBase
         {
             sleep = wakeupInfo.SleepInSeconds,
             battery_percent = display.BatteryPercent(),
-            ota_mode = _displayService.GetConfigBool(display, "ota_mode")
+            ota_mode = _displayService.GetConfigBool("ota_mode")
         };
 
         return Ok(response);
@@ -202,10 +202,13 @@ public class ApiController : ControllerBase
             return NotFound(new { error = "Display not found" });
         }
 
-        gamma ??= display.Gamma;
-        colors ??= _displayService.GetNumColors(display);
+        _displayService.UseDisplay(display);
+        var colortype = _displayService.GetColorType();
 
-        var color_palette = _displayService.GetColorPalette(display, preview_colors);
+        gamma ??= display.Gamma;
+        colors ??= colortype.NumColors;
+
+        var color_palette = colortype.ColorPalette(preview_colors);
         if (color_palette.Count == 0)
         {
             colormap_name = "webmap";

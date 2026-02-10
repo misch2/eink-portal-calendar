@@ -8,13 +8,13 @@ namespace PortalCalendarServer.Models.ColorTypes
         public string PrettyName => "Black & White";
         public int NumColors => 2;
 
-        public List<string> GetColorPalette(bool forPreview)
+        public List<string> ColorPalette(bool forPreview)
         {
-            var cssColors = EpdColors.GetColorMap(forPreview);
+            var cssColors = EPDColors.GetColorMap(forPreview);
             return 
             [
-                cssColors[EpdColors.EPD_Black],
-                cssColors[EpdColors.EPD_White]
+                cssColors[EPDColors.EPD_Black],
+                cssColors[EPDColors.EPD_White]
             ];
         }
     }

@@ -1,7 +1,7 @@
 @model List<Display>
 @using PortalCalendarServer.Models
 @using PortalCalendarServer.Services
-@inject DisplayService DisplayService
+@inject DisplayService displayService
 
 <h3>Displays</h3>
 
@@ -24,6 +24,8 @@
     <tbody>
         @foreach (var d in Model)
         {
+            displayService.UseDisplay(d);
+
             <tr>
                 <td>@d.Id</td>
                 <td>
@@ -43,7 +45,7 @@
                         @($"{d.VirtualWidth()} × {d.VirtualHeight()}")
                     }
                 </td>
-                <td>@DisplayService.GetColorTypePretty(d)</td>
+                <td>@displayService.GetColorType().PrettyName</td>
                 <td>@d.Firmware</td>
                 <td class="text-end">
                     @if (!d.IsDefault())
@@ -74,7 +76,7 @@
                         var missedConnects = d.MissedConnects();
                         if (missedConnects > 0)
                         {
-                            var minFailuresStr = DisplayService.GetConfig(d, "alive_check_minimal_failure_count");
+                            var minFailuresStr = displayService.GetConfig("alive_check_minimal_failure_count");
                             var minFailures = int.TryParse(minFailuresStr, out var mf) ? mf : 1;
                             var lastVisit = d.LastVisit();
 

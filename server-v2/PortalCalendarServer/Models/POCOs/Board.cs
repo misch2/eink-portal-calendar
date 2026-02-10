@@ -1,4 +1,4 @@
-﻿namespace PortalCalendarServer.Models.POCOs.Display
+﻿namespace PortalCalendarServer.Models.POCOs.Board
 {
     public class WakeUpInfo
     {

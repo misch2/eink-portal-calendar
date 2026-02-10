@@ -1,5 +1,5 @@
 ﻿using System.Globalization;
-using PortalCalendarServer.Models.POCOs.Display;
+using PortalCalendarServer.Models.POCOs.Board;
 
 namespace PortalCalendarServer.Models
 {

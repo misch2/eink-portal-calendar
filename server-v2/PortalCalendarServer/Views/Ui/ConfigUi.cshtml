@@ -6,6 +6,8 @@
     var templateNames = (List<string>)ViewData["TemplateNames"]!;
     var currentTheme = (string?)ViewData["CurrentTheme"];
     var displayService = (DisplayService)ViewData["DisplayService"]!;
+
+    displayService.UseDisplay(Model);
 }
 
 <h3 class="mb-3">Configuration</h3>
@@ -44,7 +46,7 @@
                             <option value=""></option>
                             @foreach (var theme in templateNames)
                             {
-                                <option value="@theme" selected="@(displayService.GetConfig(Model, "theme") == theme)">@theme</option>
+                                <option value="@theme" selected="@(displayService.GetConfig("theme") == theme)">@theme</option>
                             }
                         </select>
                     </div>
@@ -64,19 +66,19 @@
                     <div class="col-md-4">
                         <label for="lat">Latitude (+N/-S)</label>
                         <input id="lat" name="lat" type="text" class="form-control"
-                               value="@displayService.GetConfigWithoutDefaults(Model, "lat")"
+                               value="@displayService.GetConfigWithoutDefaults("lat")"
                                placeholder="@displayService.GetConfigDefaultsOnly("lat")">
                     </div>
                     <div class="col-md-4">
                         <label for="lon">Longitude (+E/-W)</label>
                         <input id="lon" name="lon" type="text" class="form-control"
-                               value="@displayService.GetConfigWithoutDefaults(Model, "lon")"
+                               value="@displayService.GetConfigWithoutDefaults("lon")"
                                placeholder="@displayService.GetConfigDefaultsOnly("lon")">
                     </div>
                     <div class="col-md-4">
                         <label for="alt">Altitude (m)</label>
                         <input id="alt" name="alt" type="text" class="form-control"
-                               value="@displayService.GetConfigWithoutDefaults(Model, "alt")"
+                               value="@displayService.GetConfigWithoutDefaults("alt")"
                                placeholder="@displayService.GetConfigDefaultsOnly("alt")">
                     </div>
                 </div>
@@ -84,16 +86,16 @@
                     <div class="col-md-4">
                         <label for="timezone">Time Zone</label>
                         <input id="timezone" name="timezone" type="text" class="form-control"
-                               value="@displayService.GetConfigWithoutDefaults(Model, "timezone")"
+                               value="@displayService.GetConfigWithoutDefaults("timezone")"
                                placeholder="@displayService.GetConfigDefaultsOnly("timezone")">
                     </div>
                     <div class="col-md-4">
                         <label for="date_culture">Date style</label>
                         <select id="date_culture" name="date_culture" class="form-select">
-                            <option value="" disabled selected="@(String.IsNullOrEmpty(displayService.GetConfigWithoutDefaults(Model, "date_culture")))">(@displayService.GetConfigDefaultsOnly("date_culture") - default)</option>
+                            <option value="" disabled selected="@(String.IsNullOrEmpty(displayService.GetConfigWithoutDefaults("date_culture")))">(@displayService.GetConfigDefaultsOnly("date_culture") - default)</option>
                             @foreach (var val in new[] { "en-US", "cs-CZ" })
                             {
-                                <option value="@val" selected="@(displayService.GetConfigWithoutDefaults(Model, "date_culture") == val)">@val</option>
+                                <option value="@val" selected="@(displayService.GetConfigWithoutDefaults("date_culture") == val)">@val</option>
                             }
                         </select>
                     </div>
@@ -107,7 +109,7 @@
                 <div class="col-md-12">
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" id="ota_mode" name="ota_mode" value="1"
-                               checked="@(displayService.GetConfig(Model, "ota_mode") == "1")">
+                               checked="@(displayService.GetConfig("ota_mode") == "1")">
                         <label class="form-check-label" for="ota_mode">OTA mode on</label>
                     </div>
                     <div class="form-text">
@@ -148,7 +150,7 @@
                 <div class="col-md-6">
                     <label for="wakeup_schedule">Wake up (redraw) schedule</label>
                     <input id="wakeup_schedule" name="wakeup_schedule" type="text" class="form-control"
-                           value="@displayService.GetConfigWithoutDefaults(Model, "wakeup_schedule")"
+                           value="@displayService.GetConfigWithoutDefaults("wakeup_schedule")"
                            placeholder="@displayService.GetConfigDefaultsOnly("wakeup_schedule")">
                     <div class="form-text">Crontab format, e.g. "0 * * * *"</div>
                 </div>
@@ -160,13 +162,13 @@
             <fieldset class="row mb-3">
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="web_calendar1" name="web_calendar1" value="1"
-                           checked="@(displayService.GetConfig(Model, "web_calendar1") == "1")">
+                           checked="@(displayService.GetConfig("web_calendar1") == "1")">
                     <label class="form-check-label" for="web_calendar1">ICS calendar #1 enabled</label>
                 </div>
                 <div class="col-md-12 mt-2">
                     <label for="web_calendar_ics_url1">URL</label>
                     <input id="web_calendar_ics_url1" name="web_calendar_ics_url1" type="text" class="form-control"
-                           value="@displayService.GetConfigWithoutDefaults(Model, "web_calendar_ics_url1")">
+                           value="@displayService.GetConfigWithoutDefaults("web_calendar_ics_url1")">
                 </div>
             </fieldset>
         </div>
@@ -176,7 +178,7 @@
             <fieldset class="row mb-3">
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="metnoweather" name="metnoweather" value="1"
-                           checked="@(displayService.GetConfig(Model, "metnoweather") == "1")">
+                           checked="@(displayService.GetConfig("metnoweather") == "1")">
                     <label class="form-check-label" for="metnoweather">Met.no Weather enabled</label>
                 </div>
             </fieldset>
@@ -187,7 +189,7 @@
             <fieldset class="row mb-3">
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="telegram" name="telegram" value="1"
-                           checked="@(displayService.GetConfig(Model, "telegram") == "1")">
+                           checked="@(displayService.GetConfig("telegram") == "1")">
                     <label class="form-check-label" for="telegram">Telegram enabled</label>
                 </div>
             </fieldset>
@@ -198,7 +200,7 @@
             <fieldset class="row mb-3">
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="mqtt" name="mqtt" value="1"
-                           checked="@(displayService.GetConfig(Model, "mqtt") == "1")">
+                           checked="@(displayService.GetConfig("mqtt") == "1")">
                     <label class="form-check-label" for="mqtt">MQTT enabled</label>
                 </div>
             </fieldset>
@@ -209,7 +211,7 @@
             <fieldset class="row mb-3">
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="googlefit" name="googlefit" value="1"
-                           checked="@(displayService.GetConfig(Model, "googlefit") == "1")">
+                           checked="@(displayService.GetConfig("googlefit") == "1")">
                     <label class="form-check-label" for="googlefit">Google Fit enabled</label>
                 </div>
 
@@ -220,12 +222,12 @@
                 <div class="col-md-12">
                     <label for="googlefit_client_id">Client ID</label>
                     <input id="googlefit_client_id" name="googlefit_client_id" type="text" class="form-control"
-                           value="@displayService.GetConfigWithoutDefaults(Model, "googlefit_client_id")">
+                           value="@displayService.GetConfigWithoutDefaults("googlefit_client_id")">
                 </div>
                 <div class="col-md-12 mt-2">
                     <label for="googlefit_client_secret">Client secret</label>
                     <input id="googlefit_client_secret" name="googlefit_client_secret" type="text" class="form-control"
-                           value="@displayService.GetConfigWithoutDefaults(Model, "googlefit_client_secret")">
+                           value="@displayService.GetConfigWithoutDefaults("googlefit_client_secret")">
                 </div>
             </fieldset>
         </div>

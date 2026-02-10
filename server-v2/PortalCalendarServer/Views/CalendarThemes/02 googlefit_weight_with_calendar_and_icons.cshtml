@@ -1,4 +1,4 @@
-@model PortalCalendarServer.Services.CalendarViewModel
+@model PortalCalendarServer.Services.PageViewModel
 @using PortalCalendarServer.Models
 @using PortalCalendarServer.Services
 @using System.Globalization
@@ -6,9 +6,10 @@
     Layout = null;
 
     var displayService = ViewContext.HttpContext.RequestServices.GetRequiredService<DisplayService>();
+    displayService.UseDisplay(Model.Display);
 
-    var dateCulture = new CultureInfo(displayService.GetConfig(Model.Display, "date_culture") ?? "en-US");
-    var timezone = TimeZoneInfo.FindSystemTimeZoneById(displayService.GetConfig(Model.Display, "timezone") ?? "UTC");
+    var dateCulture = new CultureInfo(displayService.GetConfig("date_culture") ?? "en-US");
+    var timezone = TimeZoneInfo.FindSystemTimeZoneById(displayService.GetConfig("timezone") ?? "UTC");
 
     var now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timezone);
     var wakeupInfo = Model.Display.NextWakeupTime();
@@ -20,7 +21,13 @@
     Func<string, string> decorator = text => text; // returns as-is by default
     decorator = text => text.ToUpperInvariant(); // UPPERCASE
     // decorator = text => culture.TextInfo.ToTitleCase(text); // Capitalized
-    
+
+
+    var iconsComponent = Model.PortalIcons;
+    var calendarComponent = Model.Calendar;
+
+    var calendar = calendarComponent.Details();
+    var icons = iconsComponent.GenerateIcons(calendar.HasEntries);
 }
 <!DOCTYPE html>
 <html>
@@ -36,7 +43,7 @@
     <link rel="stylesheet" href="/css/calendar_themes/googlefit.css" />
     
     @* EPD Colors *@
-    @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_EpdColors.cshtml", Model.Colors)
+    @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_EpdColors.cshtml", Model.CssColors)
     
     @* Google Charts Library *@
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -50,9 +57,9 @@
             data.addColumn('number', 'Weight');
 
             data.addRows([
-                @if (Model.WeightSeries != null)
+                @if (Model.Weight.WeightSeries != null)
                 {
-                    @foreach (var point in Model.WeightSeries)
+                    @foreach (var point in Model.Weight.WeightSeries)
                     {
                         <text>
                         [
@@ -81,9 +88,9 @@
                     minorGridlines: { color: 'transparent' },
                     textStyle: { fontSize: 10, color: '#000000' },
                     ticks: [
-                        @if (Model.WeightSeries != null)
+                        @if (Model.Weight.WeightSeries != null)
                         {
-                            @foreach (var point in Model.WeightSeries.Where(p => p.Date.Day == 1))
+                            @foreach (var point in Model.Weight.WeightSeries.Where(p => p.Date.Day == 1))
                             {
                                 <text>
                                 {
@@ -134,9 +141,9 @@
         </div>
 
         <div class="current-weight-big">
-            @if (Model.LastWeight.HasValue)
+            @if (Model.Weight.LastWeight.HasValue)
             {
-                <span>@Model.LastWeight.Value.ToString("F1", CultureInfo.InvariantCulture)</span>
+                <span>@Model.Weight.LastWeight.Value.ToString("F1", CultureInfo.InvariantCulture)</span>
             }
             else
             {
@@ -166,20 +173,20 @@
             </div>
         </div>
 
-        @if (Model.Icons?.Any() == true)
+        @if (icons?.Any() == true)
         {
             <div class="icons-container">
-                @foreach (var icon in Model.Icons)
+                @foreach (var icon in icons)
                 {
                     <img src="/images/portal_icons/@(icon.Name).png" class="icon@(icon.Grayed ? " grayed" : "")" alt="Portal icon" />
                 }
             </div>
         }
 
-        @if (Model.HasCalendarEntries && Model.TodayEvents?.Any() == true)
+        @if (calendar.HasEntries && calendar.TodayEvents?.Any() == true)
         {
             <div class="calendar-container">
-                @foreach (var evt in Model.TodayEvents)
+                @foreach (var evt in calendar.TodayEvents)
                 {
                     <div>
                         @if (evt.AllDay)

@@ -6,7 +6,7 @@ namespace PortalCalendarServer.Models.Constants
         public required string Original { get; init; }
     }
 
-    public static class EpdColors
+    public static class EPDColors
     {
         public static string EPD_Black => "epd_black";
         public static string EPD_White => "epd_white";

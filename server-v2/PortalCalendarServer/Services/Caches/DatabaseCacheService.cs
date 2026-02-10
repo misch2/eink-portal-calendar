@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.Entities;
 
-namespace PortalCalendarServer.Services;
+namespace PortalCalendarServer.Services.Caches;
 
 /// <summary>
 /// Database-backed cache service for long-term caching of integration data.

@@ -1,4 +1,4 @@
-namespace PortalCalendarServer.Services;
+namespace PortalCalendarServer.Services.Caches;
 
 /// <summary>
 /// Background service that periodically cleans expired cache entries.

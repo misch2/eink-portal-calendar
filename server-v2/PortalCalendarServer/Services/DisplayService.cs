@@ -1,10 +1,7 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic;
+﻿using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models;
-using PortalCalendarServer.Models.Constants;
+using PortalCalendarServer.Models.ColorTypes;
 using PortalCalendarServer.Models.Entities;
 
 namespace PortalCalendarServer.Services
@@ -15,8 +12,10 @@ namespace PortalCalendarServer.Services
         private readonly ILogger<DisplayService> _logger;
         private readonly ColorTypeRegistry _colorTypeRegistry;
 
+        private Display? _currentDisplay;
+
         public DisplayService(
-            CalendarContext context, 
+            CalendarContext context,
             ILogger<DisplayService> logger,
             ColorTypeRegistry colorTypeRegistry)
         {
@@ -24,7 +23,6 @@ namespace PortalCalendarServer.Services
             _logger = logger;
             _colorTypeRegistry = colorTypeRegistry;
         }
-
 
         public IEnumerable<Display> GetAllDisplays()
         {
@@ -41,13 +39,28 @@ namespace PortalCalendarServer.Services
                 .Single(d => d.Id == 0);
         }
 
+        public void UseDisplay(Display display)
+        {
+            _currentDisplay = display;
+        }
+
+        private void ValidateDisplayIsSet()
+        {
+            if (_currentDisplay == null)
+            {
+                throw new InvalidOperationException("No display is currently set. Call UseDisplay() first.");
+            }
+        }
+
         /// <summary>
         /// Get configuration value for a display, with fallback to default display (ID = 0)
         /// </summary>
-        public string? GetConfig(Display display, string name, string defaultValue = "")
+        public string? GetConfig(string name, string defaultValue = "")
         {
+            ValidateDisplayIsSet();
+
             // 1. real value (empty string usually means "unset" in HTML form)
-            var value = GetConfigWithoutDefaults(display, name);
+            var value = GetConfigWithoutDefaults(name);
             if (!string.IsNullOrEmpty(value))
             {
                 return value;
@@ -66,9 +79,10 @@ namespace PortalCalendarServer.Services
         /// <summary>
         /// Get configuration value without checking defaults (only for this specific display)
         /// </summary>
-        public string? GetConfigWithoutDefaults(Display display, string name)
+        public string? GetConfigWithoutDefaults(string name)
         {
-            var config = display.Configs?.FirstOrDefault(c => c.Name == name);
+            ValidateDisplayIsSet();
+            var config = _currentDisplay!.Configs?.FirstOrDefault(c => c.Name == name);
             return config?.Value;
         }
 
@@ -85,9 +99,11 @@ namespace PortalCalendarServer.Services
         /// <summary>
         /// Get configuration value as boolean
         /// </summary>
-        public bool GetConfigBool(Display display, string name, bool defaultValue = false)
+        public bool GetConfigBool(string name, bool defaultValue = false)
         {
-            var value = GetConfig(display, name);
+            ValidateDisplayIsSet();
+
+            var value = GetConfig(name);
             if (string.IsNullOrEmpty(value))
             {
                 return defaultValue;
@@ -99,10 +115,11 @@ namespace PortalCalendarServer.Services
         /// <summary>
         /// Set configuration value for a display
         /// </summary>
-        public void SetConfig(Display display, string name, string value)
+        public void SetConfig(string name, string value)
         {
+            ValidateDisplayIsSet();
             var config = _context.Configs
-                .FirstOrDefault(c => c.DisplayId == display.Id && c.Name == name);
+                .FirstOrDefault(c => c.DisplayId == _currentDisplay!.Id && c.Name == name);
 
             if (config != null)
             {
@@ -113,7 +130,7 @@ namespace PortalCalendarServer.Services
             {
                 _context.Configs.Add(new Config
                 {
-                    DisplayId = display.Id,
+                    DisplayId = _currentDisplay!.Id,
                     Name = name,
                     Value = value
                 });
@@ -128,22 +145,16 @@ namespace PortalCalendarServer.Services
             await _context.SaveChangesAsync();
         }
 
-        public string GetColorTypePretty(Display display)
+        public IColorType GetColorType()
         {
-            var colorType = _colorTypeRegistry.GetColorType(display.ColorType);
-            return colorType?.PrettyName ?? display.ColorType;
+            ValidateDisplayIsSet();
+            var ret = _colorTypeRegistry.GetColorType(_currentDisplay!.ColorType);
+            if (ret == null)
+            {
+                throw new InvalidOperationException($"Color type '{_currentDisplay.ColorType}' not found in registry.");
+            }
+            return ret;
         }
 
-        public int GetNumColors(Display display)
-        {
-            var colorType = _colorTypeRegistry.GetColorType(display.ColorType);
-            return colorType?.NumColors ?? 256;
-        }
-
-        public List<string> GetColorPalette(Display display, bool forPreview)
-        {
-            var colorType = _colorTypeRegistry.GetColorType(display.ColorType);
-            return colorType?.GetColorPalette(forPreview) ?? new List<string>();
-        }
     }
 }
