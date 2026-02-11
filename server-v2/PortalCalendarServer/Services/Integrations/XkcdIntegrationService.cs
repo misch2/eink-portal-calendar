@@ -2,8 +2,6 @@ using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models;
 using PortalCalendarServer.Models.DTOs;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 using System.Text.Json;
 
 namespace PortalCalendarServer.Services.Integrations;

@@ -66,7 +66,9 @@ public class PageGeneratorService
             portalIconsFactory: () => new PortalIconsComponent(_logger, _displayService, date),
             calendarFactory: () => new CalendarComponent(_logger, _displayService, date),
             weightFactory: () => new WeightComponent(_logger, date, random),
-            xkcdFactory: () => new XkcdComponent(_logger, _displayService, date, _httpClientFactory, _memoryCache, _context)
+            xkcdFactory: () => new XkcdComponent(_logger, _displayService, date, _httpClientFactory, _memoryCache, _context),
+            publicHolidayFactory: () => new PublicHolidayComponent(_logger, _displayService, date),
+            nameDayFactory: () => new NameDayComponent(_logger, _displayService, date)
         );
 
         return viewModel;
@@ -414,6 +416,8 @@ public class PageViewModel
     private Lazy<CalendarComponent>? _calendarComponent;
     private Lazy<WeightComponent>? _weightComponent;
     private Lazy<XkcdComponent>? _xkcdComponent;
+    private Lazy<PublicHolidayComponent>? _publicHolidayComponent;
+    private Lazy<NameDayComponent>? _nameDayComponent;
 
     // Component instances
     // FIXME make all mandatory?
@@ -421,17 +425,23 @@ public class PageViewModel
     public CalendarComponent? Calendar => _calendarComponent?.Value;
     public WeightComponent? Weight => _weightComponent?.Value;
     public XkcdComponent? Xkcd => _xkcdComponent?.Value;
+    public PublicHolidayComponent? PublicHoliday => _publicHolidayComponent?.Value;
+    public NameDayComponent? NameDay => _nameDayComponent?.Value;
 
     internal void InitializeComponents(
         Func<PortalIconsComponent> portalIconsFactory,
         Func<CalendarComponent> calendarFactory,
         Func<WeightComponent> weightFactory,
-        Func<XkcdComponent> xkcdFactory)
+        Func<XkcdComponent> xkcdFactory,
+        Func<PublicHolidayComponent> publicHolidayFactory,
+        Func<NameDayComponent> nameDayFactory)
     {
         _portalIconsComponent = new Lazy<PortalIconsComponent>(portalIconsFactory);
         _calendarComponent = new Lazy<CalendarComponent>(calendarFactory);
         _weightComponent = new Lazy<WeightComponent>(weightFactory);
         _xkcdComponent = new Lazy<XkcdComponent>(xkcdFactory);
+        _publicHolidayComponent = new Lazy<PublicHolidayComponent>(publicHolidayFactory);
+        _nameDayComponent = new Lazy<NameDayComponent>(nameDayFactory);
     }
 }
 

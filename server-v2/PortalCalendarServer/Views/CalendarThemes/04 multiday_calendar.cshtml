@@ -1,0 +1,156 @@
+﻿@model PortalCalendarServer.Services.PageViewModel
+@using PortalCalendarServer.Models
+@using PortalCalendarServer.Services
+@using PortalCalendarServer.Services.PageGeneratorComponents
+@using System.Globalization
+@{
+    Layout = null;
+
+    var displayService = ViewContext.HttpContext.RequestServices.GetRequiredService<DisplayService>();
+    displayService.UseDisplay(Model.Display);
+
+    var dateCulture = new CultureInfo(displayService.GetConfig("date_culture") ?? "en-US");
+    var timezone = TimeZoneInfo.FindSystemTimeZoneById(displayService.GetConfig("timezone") ?? "UTC");
+
+    var now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timezone);
+    var wakeupInfo = Model.Display.NextWakeupTime();
+    var nextWakeup = wakeupInfo.NextWakeup;
+    var sleepInSeconds = wakeupInfo.SleepInSeconds;
+    var schedule = wakeupInfo.Schedule;
+
+    var calendarComponent = Model.Calendar;
+    var calendar = calendarComponent?.Details();
+    var nearestEvents = calendar?.NearestEvents ?? new List<CalendarEvent>();
+
+    // Helper class for grouping events
+    var eventBlocks = new[]
+    {
+        new { 
+            Id = "2days", 
+            Title = "Dnes a zítra", 
+            Class = "calendar-event-block-today",
+            Condition = (Func<CalendarEvent, bool>)(evt => {
+                var deltaDays = (evt.StartTime.Date - now.Date).Days;
+                var deltaHours = (evt.StartTime - now).TotalHours;
+                return deltaHours >= 0 && deltaDays <= 1;
+            })
+        },
+        new { 
+            Id = "week", 
+            Title = "Nejbližších 7 dní", 
+            Class = "calendar-event-block-week",
+            Condition = (Func<CalendarEvent, bool>)(evt => {
+                var deltaDays = (evt.StartTime.Date - now.Date).Days;
+                return deltaDays > 1 && deltaDays <= 7;
+            })
+        },
+        new { 
+            Id = "rest", 
+            Title = "Pozdější události", 
+            Class = "calendar-event-block-rest",
+            Condition = (Func<CalendarEvent, bool>)(evt => {
+                var deltaDays = (evt.StartTime.Date - now.Date).Days;
+                return deltaDays > 7;
+            })
+        }
+    };
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Calendar - Multiday</title>
+    
+    @* Icon library *@
+    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+    
+    @* Stylesheets *@
+    <link rel="stylesheet" href="/css/calendar_themes/multiday_calendar.css" />
+    
+    @* EPD Colors *@
+    @await Html.PartialAsync("Includes/_EpdColors.cshtml", Model.CssColors)
+</head>
+
+<body>
+<div id="visible-area">
+    <h3 id="calendar-title">
+       @displayService.GetConfig("display_title")
+    </h3>
+
+    <div class="calendar-container">
+        @{
+            var lastTitle = "";
+        }
+        @foreach (var block in eventBlocks)
+        {
+            var eventsForBlock = nearestEvents.Where(block.Condition).ToList();
+            
+            if (eventsForBlock.Any())
+            {
+                <div class="calendar-event-block @block.Class">
+                    <div class="calendar-event-block-title">@block.Title</div>
+                    @{
+                        lastTitle = "";
+                    }
+                    <div class="calendar-event-block-content">
+                        @foreach (var evt in eventsForBlock)
+                        {
+                            var dt = evt.StartTime;
+                            var deltaDays = (dt.Date - now.Date).Days;
+                            var dayDescription = dateCulture.DateTimeFormat.GetDayName(dt.DayOfWeek);
+                            var title = $"{dayDescription}, {dt:d. M. y}";
+                            
+                            if (deltaDays > 0)
+                            {
+                                title += $" (+{deltaDays})";
+                            }
+                            
+                            if (title != lastTitle)
+                            {
+                                lastTitle = title;
+                                <div class="calendar-day-title">
+                                    @title
+                                </div>
+                            }
+                            
+                            <div class="calendar-event">
+                                @if (evt.IsRecurrent)
+                                {
+                                    <text>↻</text>
+                                }
+                                @if (evt.AllDay)
+                                {
+                                    @evt.Summary
+                                    <!-- (celý den) -->
+                                }
+                                else
+                                {
+                                    @dt.ToString("H:mm", dateCulture)
+                                    @evt.Summary
+                                    @if (evt.DurationHours.HasValue)
+                                    {
+                                        <text>(~@((int)(evt.DurationHours.Value + 0.5)) hod.)</text>
+                                    }
+                                }
+                            </div>
+                        }
+                    </div>  @* class="calendar-event-block-content" *@
+                </div>  @* class="calendar-event-block-..." *@
+            }
+        }
+    </div>
+
+    <div id="bottom-row">
+        <div id="bottom-signature">
+            @* Screen displayed at *@
+            <iconify-icon icon="material-symbols:add-to-home-screen-sharp"></iconify-icon>
+            @nextWakeup.ToString("H:mm", dateCulture).
+        </div>
+
+        <div id="battery-status">
+            @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_BatteryStatusIcon.cshtml", Model.Display)
+        </div>
+    </div>
+</div>
+</body>
+</html>

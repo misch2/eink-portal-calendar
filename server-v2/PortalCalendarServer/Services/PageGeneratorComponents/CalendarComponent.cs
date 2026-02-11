@@ -79,5 +79,6 @@ public class CalendarEvent
     public string Description { get; set; } = string.Empty;
     public string Location { get; set; } = string.Empty;
     public bool AllDay { get; set; }
+    public bool IsRecurrent { get; set; }
     public double? DurationHours { get; set; }
 }

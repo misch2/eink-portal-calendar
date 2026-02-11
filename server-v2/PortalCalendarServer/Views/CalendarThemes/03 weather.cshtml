@@ -1,0 +1,233 @@
+@model PortalCalendarServer.Services.PageViewModel
+@using PortalCalendarServer.Models
+@using PortalCalendarServer.Services
+@using System.Globalization
+@{
+    Layout = null;
+
+    var displayService = ViewContext.HttpContext.RequestServices.GetRequiredService<DisplayService>();
+    displayService.UseDisplay(Model.Display);
+
+    var dateCulture = new CultureInfo(displayService.GetConfig("date_culture") ?? "en-US");
+    var timezone = TimeZoneInfo.FindSystemTimeZoneById(displayService.GetConfig("timezone") ?? "UTC");
+
+    var now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timezone);
+    var wakeupInfo = Model.Display.NextWakeupTime();
+    var nextWakeup = wakeupInfo.NextWakeup;
+    var sleepInSeconds = wakeupInfo.SleepInSeconds;
+    var schedule = wakeupInfo.Schedule;
+
+    // Text decorator function (can be: lowercase, UPPERCASE, Capitalized)
+    Func<string, string> decorator = text => text; // returns as-is by default
+    decorator = text => text.ToUpperInvariant(); // UPPERCASE
+    // decorator = text => culture.TextInfo.ToTitleCase(text); // Capitalized
+
+    var publicHolidayComponent = Model.PublicHoliday;
+    var nameDayComponent = Model.NameDay;
+
+    var holidayInfo = publicHolidayComponent?.GetPublicHolidayInfo();
+    var nameDayInfo = nameDayComponent?.GetNameDayInfo();
+
+
+    // TODO: Implement weather components
+    // var currentWeather = Model.Weather?.CurrentWeather;
+    // var forecast = Model.Weather?.Forecast;
+    var currentWeather = (dynamic?)null;
+    var forecast = new List<dynamic>();
+    
+    var precipitationLimit = 0.5; // mm
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Calendar - Weather</title>
+    
+    @* Icon library *@
+    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+    
+    @* Stylesheets *@
+    <link rel="stylesheet" href="/css/weather-icons.min.css" />
+    <link rel="stylesheet" href="/css/calendar_themes/weather.css" />
+    
+    @* EPD Colors *@
+    @await Html.PartialAsync("Includes/_EpdColors.cshtml", Model.CssColors)
+</head>
+
+<body>
+    <div id="visible-area">
+        @if (currentWeather != null)
+        {
+            <div class="weather-current-big">
+                @{
+                    var temp = (int)(currentWeather.temperature_avg + 0.5);
+                    var wind = (int)(currentWeather.wind_speed_avg + 0.5);
+                    var totalPrecip = currentWeather.precipitation_sum;
+                    var dt = ((DateTime)currentWeather.time_start).ToUniversalTime();
+                    dt = TimeZoneInfo.ConvertTimeFromUtc(dt, timezone);
+
+                    var dayOrNight = currentWeather.time_is_day ? "day" : "night";
+                    var classRainOrSnow = totalPrecip >= precipitationLimit ? "weather-is-rain-or-snow" : "";
+                }
+
+                <div style="position: absolute; top: 0.25em; left: 0; margin: auto; width: 100%; text-align: center; font-size: 5rem" class="@classRainOrSnow">
+                    @temp °C
+                </div>
+
+                <div style="position: absolute; top: 0.5rem; left: 0; text-align: left">
+                    <p>
+                        <div>
+                            @* https://erikflowers.github.io/weather-icons/api-list.html *@
+                            <i class="wi wi-owm-@(dayOrNight)-@(currentWeather.wi_symbol_codes[0])"></i> @currentWeather.descriptions[0].ToString().ToUpper().Substring(0, 1)@currentWeather.descriptions[0].ToString().Substring(1)
+                        </div>
+                    </p>
+                </div>
+
+                <div style="position: absolute; top: 0.5rem; right: 0; text-align: right">
+                    <i class="wi wi-strong-wind" style="font-size: 1rem; margin-top: 0.2rem"></i> @wind m/s
+                    @{
+                        var windFrom = (int)(currentWeather.wind_from / 45 + 0.5) % 8; // 0 - 7, 0 = N, 1 = NE, ...
+                        var windNameCz = new[] { "S", "SV", "V", "JV", "J", "JZ", "Z", "SZ" }[windFrom];
+                    }
+                    <br>
+                    @windNameCz
+                </div>
+
+                <div style="position: absolute; bottom: 0; left: 0; text-align: left">
+                    <i class="wi wi-cloud" style="font-size: 1rem; margin-top: 0.15rem"></i> @(5 * (int)(currentWeather.cloud_percent_avg / 5 + 0.5)) <text>%</text>
+                    @if (currentWeather.fog_percent_avg > 0)
+                    {
+                        <i class="wi wi-fog" style="font-size: 1rem; margin-top: 0.15rem"></i> @(5 * (int)(currentWeather.fog_percent_avg / 5 + 0.5)) <text>%</text>
+                    }
+                </div>
+
+                @if (totalPrecip > 0)
+                {
+                    <div style="position: absolute; bottom: 0; right: 0; text-align: right" class="@classRainOrSnow">
+                        <i class="wi wi-rain FIXME-or-wi-snow" style="font-size: 1rem"></i> @totalPrecip mm
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="date-row top-date-row">
+            <div>
+                @Model.Date.Day. @decorator(Model.Date.ToString("MMMM", dateCulture))
+            </div>
+            <div>
+                @* Name day - TODO: implement svatky API *@
+                @* @decorator(Model.Date.ToString("dddd", dateCulture)) *@
+
+
+                @{
+                    string? nameForDay = null;
+                    if (holidayInfo != null)
+                    {
+                        nameForDay = holidayInfo.LocalName;
+                    }
+                    else if (nameDayInfo != null)
+                    {
+                        nameForDay = nameDayInfo.Name;
+                    }
+                    @decorator(nameForDay ?? "?")
+                }
+
+            </div>
+        </div>
+
+        <div class="horizontal-separator" style="top: 2rem"></div>
+
+        <div class="horizontal-separator" style="top: 11.5rem"></div>
+        <div class="weather-forecast-container-grid" style="top: 11.8rem">
+            @{
+                var cnt = 0;
+            }
+            @foreach (var item in forecast)
+            {
+                cnt++;
+                if (cnt > 6) break; // FIXME do it better, via flex wrap or so
+
+                var totalPrecip = item.precipitation_sum;
+                var dayOrNight = item.time_is_day ? "day" : "night";
+
+                var dt = ((DateTime)item.time_start).ToUniversalTime();
+                dt = TimeZoneInfo.ConvertTimeFromUtc(dt, timezone);
+                
+                string dayDescription;
+                if (dt.Date == now.Date)
+                {
+                    dayDescription = "dnes";
+                }
+                else if (dt.Date == now.Date.AddDays(1))
+                {
+                    dayDescription = "zítra";
+                }
+                else
+                {
+                    dayDescription = dateCulture.DateTimeFormat.GetDayName(dt.DayOfWeek);
+                }
+
+                <div class="weather-item weather-item-@(dayOrNight) @(totalPrecip >= precipitationLimit ? "weather-is-rain-or-snow" : "") weather-single-day-container-grid">
+                    <div>
+                        @dayDescription
+                        <br>
+                        @dt.ToString("HH:00")
+                    </div>
+                    <div>
+                        @foreach (var description in ((IEnumerable<string>)item.descriptions).Take(1))
+                        {
+                            <div style="font-weight: bold; max-height: 1em; overflow_visible">@description.ToLower()</div>
+                        }
+                    </div>
+                    <div>
+                        @foreach (var wiSymbolCode in ((IEnumerable<string>)item.wi_symbol_codes).Take(1))
+                        {
+                            @* https://erikflowers.github.io/weather-icons/api-list.html *@
+                            <i class="wi wi-owm-@(dayOrNight)-@(wiSymbolCode)" style="font-size: 2rem; margin-top: 0.5rem; margin-left: 0.5rem"></i>
+                        }
+                    </div>
+                    <div style="text-align: center">
+                        <div>
+                            @((int)(item.temperature_min - 0.5)) &deg;C
+                        </div>
+                        <div style="margin-top: -0.6em; margin-bottom: -0.3em">
+                            -
+                        </div>
+                        <div>
+                            @((int)(item.temperature_max + 0.5)) &deg;C
+                        </div>
+                    </div>
+                    <div style="text-align: center">
+                        @if (totalPrecip > 0)
+                        {
+                            <div>
+                                @if (((IEnumerable<string>)item.provider_symbol_codes).Any(c => c.Contains("rain")))
+                                {
+                                    <i class="wi wi-rain" style="font-size: 1rem"></i>
+                                }
+                                @if (((IEnumerable<string>)item.provider_symbol_codes).Any(c => c.Contains("snow")))
+                                {
+                                    <i class="wi wi-snow" style="font-size: 1rem"></i>
+                                }
+                            </div>
+                            <div style="margin-top: 0.2rem">
+                                @totalPrecip.ToString("F1", CultureInfo.InvariantCulture) mm
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div id="bottom-signature">
+            @* Screen displayed at *@
+            <iconify-icon icon="material-symbols:add-to-home-screen-sharp"></iconify-icon>
+            @nextWakeup.ToString("H:mm", dateCulture).
+        </div>
+
+        <div id="battery-status">
+            @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_BatteryStatusIcon.cshtml", Model.Display)
+        </div>
+    </div>
+</body>
+</html>
