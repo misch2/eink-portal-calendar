@@ -23,8 +23,4 @@
         <None Include="..\old-perl-server\**\*.*" Link="00_LegacyPerl\%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Models\DTOs\" />
-    </ItemGroup>
-
 </Project>

@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace PortalCalendarServer.Services;
 
@@ -20,6 +21,8 @@ public class PageGeneratorService
     private readonly IWebHostEnvironment _environment;
     private readonly DisplayService _displayService;
     private readonly Web2PngService _web2PngService;
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IMemoryCache _memoryCache;
     private readonly Display _display;
     private readonly int _minimalCacheExpiry;
 
@@ -29,6 +32,8 @@ public class PageGeneratorService
         IWebHostEnvironment environment,
         DisplayService displayService,
         Web2PngService web2PngService,
+        IHttpClientFactory httpClientFactory,
+        IMemoryCache memoryCache,
         Display display,
         int minimalCacheExpiry = 0)
     {
@@ -37,6 +42,8 @@ public class PageGeneratorService
         _environment = environment;
         _displayService = displayService;
         _web2PngService = web2PngService;
+        _httpClientFactory = httpClientFactory;
+        _memoryCache = memoryCache;
         _display = display;
         _minimalCacheExpiry = minimalCacheExpiry;
 
@@ -58,7 +65,8 @@ public class PageGeneratorService
         viewModel.InitializeComponents(
             portalIconsFactory: () => new PortalIconsComponent(_logger, _displayService, date),
             calendarFactory: () => new CalendarComponent(_logger, _displayService, date),
-            weightFactory: () => new WeightComponent(_logger, date, random)
+            weightFactory: () => new WeightComponent(_logger, date, random),
+            xkcdFactory: () => new XkcdComponent(_logger, _displayService, date, _httpClientFactory, _memoryCache, _context)
         );
 
         return viewModel;
@@ -405,21 +413,25 @@ public class PageViewModel
     private Lazy<PortalIconsComponent>? _portalIconsComponent;
     private Lazy<CalendarComponent>? _calendarComponent;
     private Lazy<WeightComponent>? _weightComponent;
+    private Lazy<XkcdComponent>? _xkcdComponent;
 
     // Component instances
     // FIXME make all mandatory?
     public PortalIconsComponent? PortalIcons => _portalIconsComponent?.Value;
     public CalendarComponent? Calendar => _calendarComponent?.Value;
     public WeightComponent? Weight => _weightComponent?.Value;
+    public XkcdComponent? Xkcd => _xkcdComponent?.Value;
 
     internal void InitializeComponents(
         Func<PortalIconsComponent> portalIconsFactory,
         Func<CalendarComponent> calendarFactory,
-        Func<WeightComponent> weightFactory)
+        Func<WeightComponent> weightFactory,
+        Func<XkcdComponent> xkcdFactory)
     {
         _portalIconsComponent = new Lazy<PortalIconsComponent>(portalIconsFactory);
         _calendarComponent = new Lazy<CalendarComponent>(calendarFactory);
         _weightComponent = new Lazy<WeightComponent>(weightFactory);
+        _xkcdComponent = new Lazy<XkcdComponent>(xkcdFactory);
     }
 }
 

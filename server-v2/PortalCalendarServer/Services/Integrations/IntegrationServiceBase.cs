@@ -73,7 +73,7 @@ public abstract class IntegrationServiceBase
         if (!client.DefaultRequestHeaders.Contains("User-Agent"))
         {
             client.DefaultRequestHeaders.Add("User-Agent", 
-                "PortalCalendar/2.0 github.com/misch2/eink-portal-calendar");
+                "PortalCalendar/2.0 (github.com/misch2/eink-portal-calendar)");
         }
 
         return client;

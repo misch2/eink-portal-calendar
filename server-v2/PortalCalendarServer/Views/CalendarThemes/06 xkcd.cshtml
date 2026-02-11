@@ -1,0 +1,67 @@
+@model PortalCalendarServer.Services.PageViewModel
+@using PortalCalendarServer.Models
+@using PortalCalendarServer.Services
+@using System.Globalization
+@{
+    Layout = null;
+
+    var displayService = ViewContext.HttpContext.RequestServices.GetRequiredService<DisplayService>();
+    displayService.UseDisplay(Model.Display);
+
+    var xkcd = Model.Xkcd;
+    string? mockOrientation = null; // or "landscape" for testing
+    
+    var isLandscape = (mockOrientation == "landscape") || (xkcd?.Info.ImageIsLandscape ?? false);
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Calendar - XKCD</title>
+    
+    @* Icon library *@
+    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
+    
+    @* Stylesheets *@
+    <link rel="stylesheet" href="/css/calendar_themes/xkcd.css" />
+    
+    @* EPD Colors *@
+    @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_EpdColors.cshtml", Model.CssColors)
+    
+    @* Google Fonts *@
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playpen+Sans:wght@100..800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+<div id="visible-area">
+    @if (isLandscape)
+    {
+        <div class="landscape">
+            <div class="image-and-alt">
+                <h1>@(xkcd?.Info.Title ?? "XKCD Comic")</h1>
+                <img src="@(mockOrientation == "landscape" ? "/images/landscape_example.jpg" : xkcd?.Info.ImageAsDataUrl ?? "")" alt="XKCD comic" />
+                <div class="alt">
+                    @(xkcd?.Info.Alt ?? "")
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="portrait">
+            <div class="image-and-alt">
+                <img src="@(mockOrientation == "portrait" ? "/images/portrait_example.jpg" : xkcd?.Info.ImageAsDataUrl ?? "")" alt="XKCD comic" />
+                <div class="title-and-alt">
+                    <h1>@(xkcd?.Info.Title ?? "XKCD Comic")</h1>
+                    <div class="alt">
+                        @(xkcd?.Info.Alt ?? "")
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+</body>
+</html>
