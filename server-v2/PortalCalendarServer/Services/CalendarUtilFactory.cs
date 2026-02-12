@@ -22,6 +22,7 @@ public class CalendarUtilFactory : ICalendarUtilFactory
     private readonly Web2PngService _web2PngService;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IMemoryCache _memoryCache;
+    private readonly ILoggerFactory _loggerFactory;
 
     public CalendarUtilFactory(
         ILogger<PageGeneratorService> logger,
@@ -30,7 +31,8 @@ public class CalendarUtilFactory : ICalendarUtilFactory
         DisplayService displayService,
         Web2PngService web2PngService,
         IHttpClientFactory httpClientFactory,
-        IMemoryCache memoryCache
+        IMemoryCache memoryCache,
+        ILoggerFactory loggerFactory
         )
     {
         _logger = logger;
@@ -40,6 +42,7 @@ public class CalendarUtilFactory : ICalendarUtilFactory
         _web2PngService = web2PngService;
         _httpClientFactory = httpClientFactory;
         _memoryCache = memoryCache;
+        _loggerFactory = loggerFactory;
     }
 
     public PageGeneratorService Create(Display display, int minimalCacheExpiry = 0)
@@ -52,6 +55,7 @@ public class CalendarUtilFactory : ICalendarUtilFactory
             _web2PngService,
             _httpClientFactory,
             _memoryCache,
+            _loggerFactory,
             display,
             minimalCacheExpiry);
     }

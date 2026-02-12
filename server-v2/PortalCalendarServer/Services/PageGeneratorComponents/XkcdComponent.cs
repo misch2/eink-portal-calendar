@@ -1,8 +1,6 @@
 using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Services.Integrations;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 
 namespace PortalCalendarServer.Services.PageGeneratorComponents;
 
@@ -22,16 +20,10 @@ public class XkcdComponent : BaseComponent
         DateTime date,
         IHttpClientFactory httpClientFactory,
         IMemoryCache memoryCache,
-        CalendarContext context)
+        CalendarContext context,
+        ILoggerFactory loggerFactory)
         : base(logger, displayService, date)
     {
-        // Create logger for XkcdIntegrationService
-        var loggerFactory = Microsoft.Extensions.Logging.LoggerFactory.Create(builder =>
-        {
-            builder.SetMinimumLevel(LogLevel.Debug);
-            builder.AddConsole();
-        });
-
         _integrationService = new XkcdIntegrationService(
             loggerFactory.CreateLogger<XkcdIntegrationService>(),
             httpClientFactory,
@@ -67,10 +59,11 @@ public class XkcdComponent : BaseComponent
         var comicData = _integrationService.GetLatestComicAsync().GetAwaiter().GetResult();
 
         // Determine orientation for display
-        var isLandscape = DetermineIsLandscape(comicData.ImageData);
+        var isLandscape = XkcdIntegrationService.DetermineIsLandscape(comicData.ImageData);
 
         // Convert to data URL for embedding in HTML
-        var imageAsDataUrl = ConvertToDataUrl(comicData.ImageData);
+        var imageAsDataUrl = XkcdIntegrationService.ConvertToDataUrl(comicData.ImageData);
+        
         return new XkcdInfo
         {
             Title = comicData.Title,
@@ -84,41 +77,6 @@ public class XkcdComponent : BaseComponent
             Day = comicData.Day
         };
     }
-
-    /// <summary>
-    /// Determine if image is landscape orientation
-    /// An image is considered landscape only if significantly wider (aspect ratio > 4:3)
-    /// </summary>
-    private bool DetermineIsLandscape(byte[] imageData)
-    {
-        try
-        {
-            using var image = Image.Load<Rgba32>(imageData);
-
-            if (image.Width == 0 || image.Height == 0)
-            {
-                return false;
-            }
-
-            // Only significantly wider images are considered landscape
-            var aspectRatio = (double)image.Width / image.Height;
-            return aspectRatio > (4.0 / 3.0);
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    /// <summary>
-    /// Convert image data to data URL (base64 encoded)
-    /// </summary>
-    private string ConvertToDataUrl(byte[] imageData)
-    {
-        var base64 = Convert.ToBase64String(imageData);
-        return $"data:image/png;base64,{base64}";
-    }
-
 }
 
 /// <summary>

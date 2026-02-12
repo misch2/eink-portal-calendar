@@ -23,6 +23,7 @@ public class PageGeneratorService
     private readonly Web2PngService _web2PngService;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IMemoryCache _memoryCache;
+    private readonly ILoggerFactory _loggerFactory;
     private readonly Display _display;
     private readonly int _minimalCacheExpiry;
 
@@ -34,6 +35,7 @@ public class PageGeneratorService
         Web2PngService web2PngService,
         IHttpClientFactory httpClientFactory,
         IMemoryCache memoryCache,
+        ILoggerFactory loggerFactory,
         Display display,
         int minimalCacheExpiry = 0)
     {
@@ -44,6 +46,7 @@ public class PageGeneratorService
         _web2PngService = web2PngService;
         _httpClientFactory = httpClientFactory;
         _memoryCache = memoryCache;
+        _loggerFactory = loggerFactory;
         _display = display;
         _minimalCacheExpiry = minimalCacheExpiry;
 
@@ -64,9 +67,9 @@ public class PageGeneratorService
 
         viewModel.InitializeComponents(
             portalIconsFactory: () => new PortalIconsComponent(_logger, _displayService, date),
-            calendarFactory: () => new CalendarComponent(_logger, _displayService, date),
+            calendarFactory: () => new CalendarComponent(_logger, _displayService, date, _httpClientFactory, _memoryCache, _context, _loggerFactory),
             weightFactory: () => new WeightComponent(_logger, date, random),
-            xkcdFactory: () => new XkcdComponent(_logger, _displayService, date, _httpClientFactory, _memoryCache, _context),
+            xkcdFactory: () => new XkcdComponent(_logger, _displayService, date, _httpClientFactory, _memoryCache, _context, _loggerFactory),
             publicHolidayFactory: () => new PublicHolidayComponent(_logger, _displayService, date),
             nameDayFactory: () => new NameDayComponent(_logger, _displayService, date)
         );

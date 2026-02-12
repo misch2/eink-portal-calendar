@@ -125,6 +125,40 @@ public class XkcdIntegrationService : IntegrationServiceBase
 
         return imageData;
     }
+
+    /// <summary>
+    /// Determine if image is landscape orientation
+    /// An image is considered landscape only if significantly wider (aspect ratio > 4:3)
+    /// </summary>
+    public static bool DetermineIsLandscape(byte[] imageData)
+    {
+        try
+        {
+            using var image = SixLabors.ImageSharp.Image.Load<SixLabors.ImageSharp.PixelFormats.Rgba32>(imageData);
+            
+            if (image.Width == 0 || image.Height == 0)
+            {
+                return false;
+            }
+
+            // Only significantly wider images are considered landscape
+            var aspectRatio = (double)image.Width / image.Height;
+            return aspectRatio > (4.0 / 3.0);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Convert image data to data URL (base64 encoded)
+    /// </summary>
+    public static string ConvertToDataUrl(byte[] imageData)
+    {
+        var base64 = Convert.ToBase64String(imageData);
+        return $"data:image/png;base64,{base64}";
+    }
 }
 
 /// <summary>
