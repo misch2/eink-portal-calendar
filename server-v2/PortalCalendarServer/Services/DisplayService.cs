@@ -3,6 +3,7 @@ using PortalCalendarServer.Data;
 using PortalCalendarServer.Models;
 using PortalCalendarServer.Models.ColorTypes;
 using PortalCalendarServer.Models.Entities;
+using System;
 
 namespace PortalCalendarServer.Services
 {
@@ -13,6 +14,7 @@ namespace PortalCalendarServer.Services
         private readonly ColorTypeRegistry _colorTypeRegistry;
 
         private Display? _currentDisplay;
+        private TimeZoneInfo? _timeZoneInfo;
 
         public DisplayService(
             CalendarContext context,
@@ -42,6 +44,21 @@ namespace PortalCalendarServer.Services
         public void UseDisplay(Display display)
         {
             _currentDisplay = display;
+            _timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(GetConfig("timezone") ?? "UTC");
+        }
+
+        /// <summary>
+        /// Get the currently set display
+        /// </summary>
+        public Display? GetCurrentDisplay()
+        {
+            return _currentDisplay;
+        }
+
+        public TimeZoneInfo GetTimeZoneInfo()
+        {
+            ValidateDisplayIsSet();
+            return _timeZoneInfo!;
         }
 
         private void ValidateDisplayIsSet()
@@ -161,6 +178,12 @@ namespace PortalCalendarServer.Services
             }
 
             return ret;
+        }
+
+        public DateTime GetNowWithTimeZone()
+        {
+            ValidateDisplayIsSet();
+            return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, GetTimeZoneInfo());
         }
 
     }
