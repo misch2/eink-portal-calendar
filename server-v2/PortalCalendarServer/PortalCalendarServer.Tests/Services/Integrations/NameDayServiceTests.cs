@@ -150,6 +150,7 @@ public class NameDayServiceTests
     [InlineData(7, 5, "Den slovanských vìrozvìstù Cyrila a Metodìje")]
     [InlineData(8, 15, "Hana")]
     [InlineData(9, 28, "Václav")]
+    [InlineData(9, 29, "Michal")]
     [InlineData(10, 28, "Alfréd")]
     [InlineData(11, 17, "Mahulena / Gertruda")]
     [InlineData(12, 6, "Mikuláš")]
@@ -257,172 +258,7 @@ public class NameDayServiceTests
         }
     }
 
-    [Fact]
-    public void FindNameDays_ForJosef_ReturnsMatch()
-    {
-        // Arrange
-        var year = 2024;
 
-        // Act
-        var result = _service.FindNameDays("Josef", year);
-
-        // Assert
-        Assert.NotEmpty(result);
-        Assert.Contains(result, nd => nd.Date.Month == 3 && nd.Date.Day == 19);
-        Assert.All(result, nd => Assert.Equal("CZ", nd.CountryCode));
-    }
-
-    [Fact]
-    public void FindNameDays_ForPetr_ReturnsMultipleMatches()
-    {
-        // Arrange
-        var year = 2024;
-
-        // Act
-        var result = _service.FindNameDays("Petr", year);
-
-        // Assert
-        Assert.NotEmpty(result);
-        // Petr appears on February 22 and June 29 (Petr a Pavel)
-        Assert.True(result.Count >= 2);
-        Assert.Contains(result, nd => nd.Date.Month == 2 && nd.Date.Day == 22);
-        Assert.Contains(result, nd => nd.Date.Month == 6 && nd.Date.Day == 29);
-    }
-
-    [Fact]
-    public void FindNameDays_CaseInsensitive_FindsMatches()
-    {
-        // Arrange
-        var year = 2024;
-
-        // Act
-        var resultLower = _service.FindNameDays("josef", year);
-        var resultUpper = _service.FindNameDays("JOSEF", year);
-        var resultMixed = _service.FindNameDays("JoSeF", year);
-
-        // Assert
-        Assert.NotEmpty(resultLower);
-        Assert.NotEmpty(resultUpper);
-        Assert.NotEmpty(resultMixed);
-        Assert.Equal(resultLower.Count, resultUpper.Count);
-        Assert.Equal(resultLower.Count, resultMixed.Count);
-    }
-
-    [Fact]
-    public void FindNameDays_ForPartialName_FindsMatches()
-    {
-        // Arrange
-        var year = 2024;
-
-        // Act
-        var result = _service.FindNameDays("Mar", year);
-
-        // Assert
-        Assert.NotEmpty(result);
-        // Should find Marika, Marie, Marián, Marcela, Marek, Marina, etc.
-        Assert.Contains(result, nd => nd.Name.Contains("Marika"));
-        Assert.Contains(result, nd => nd.Name.Contains("Marie"));
-    }
-
-    [Fact]
-    public void FindNameDays_WithEmptyString_ReturnsEmptyList()
-    {
-        // Arrange
-        var year = 2024;
-
-        // Act
-        var result = _service.FindNameDays("", year);
-
-        // Assert
-        Assert.Empty(result);
-    }
-
-    [Fact]
-    public void FindNameDays_WithNull_ReturnsEmptyList()
-    {
-        // Arrange
-        var year = 2024;
-
-        // Act
-        var result = _service.FindNameDays(null!, year);
-
-        // Assert
-        Assert.Empty(result);
-    }
-
-    [Fact]
-    public void FindNameDays_WithWhitespace_ReturnsEmptyList()
-    {
-        // Arrange
-        var year = 2024;
-
-        // Act
-        var result = _service.FindNameDays("   ", year);
-
-        // Assert
-        Assert.Empty(result);
-    }
-
-    [Fact]
-    public void FindNameDays_ForNonExistentName_ReturnsEmptyList()
-    {
-        // Arrange
-        var year = 2024;
-
-        // Act
-        var result = _service.FindNameDays("XyzNotAName", year);
-
-        // Assert
-        Assert.Empty(result);
-    }
-
-    [Fact]
-    public void FindNameDays_WithUnsupportedCountryCode_ReturnsEmptyList()
-    {
-        // Arrange
-        var year = 2024;
-
-        // Act
-        var result = _service.FindNameDays("Josef", year, "US");
-
-        // Assert
-        Assert.Empty(result);
-    }
-
-    [Fact]
-    public void FindNameDays_ResultsAreOrderedByDate()
-    {
-        // Arrange
-        var year = 2024;
-
-        // Act
-        var result = _service.FindNameDays("an", year); // Should find multiple names containing "an"
-
-        // Assert
-        Assert.NotEmpty(result);
-        for (int i = 0; i < result.Count - 1; i++)
-        {
-            Assert.True(result[i].Date <= result[i + 1].Date);
-        }
-    }
-
-    [Theory]
-    [InlineData("Václav", 9, 28)]
-    [InlineData("Martin", 11, 11)]
-    [InlineData("Kateøina", 11, 25)]
-    [InlineData("Lucie", 12, 13)]
-    public void FindNameDays_ForPopularNames_ReturnsCorrectDate(string name, int expectedMonth, int expectedDay)
-    {
-        // Arrange
-        var year = 2024;
-
-        // Act
-        var result = _service.FindNameDays(name, year);
-
-        // Assert
-        Assert.NotEmpty(result);
-        Assert.Contains(result, nd => nd.Date.Month == expectedMonth && nd.Date.Day == expectedDay);
-    }
 
     [Fact]
     public void GetNameDay_ForAllDaysInYear_ReturnsValidResults()
@@ -448,33 +284,5 @@ public class NameDayServiceTests
 
         // Verify we tested all 366 days (2024 is a leap year)
         Assert.Equal(366, count);
-    }
-
-    [Fact]
-    public void GetNameDay_CzechCharactersPreserved_InResults()
-    {
-        // Arrange - Test various dates with Czech-specific characters
-        var testCases = new[]
-        {
-            (Month: 1, Day: 23, ExpectedChar: 'ì'), // Zdenìk
-            (Month: 2, Day: 3, ExpectedChar: 'ž'),  // Blažej
-            (Month: 3, Day: 13, ExpectedChar: 'ù'), // Rùžena
-            (Month: 5, Day: 15, ExpectedChar: 'Ž'), // Žofie / Sofie
-            (Month: 9, Day: 28, ExpectedChar: 'á'), // Václav
-            (Month: 11, Day: 25, ExpectedChar: 'ø') // Kateøina
-        };
-
-        foreach (var (month, day, expectedChar) in testCases)
-        {
-            // Arrange
-            var date = new DateTime(2024, month, day);
-
-            // Act
-            var result = _service.GetNameDay(date);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Contains(expectedChar, result.Name);
-        }
     }
 }

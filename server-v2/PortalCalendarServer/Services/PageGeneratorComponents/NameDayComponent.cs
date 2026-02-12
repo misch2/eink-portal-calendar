@@ -38,12 +38,4 @@ public class NameDayComponent : BaseComponent
     {
         return _nameDayService.GetNameDaysForMonth(_date.Year, _date.Month);
     }
-
-    /// <summary>
-    /// Search for a specific name in the current year
-    /// </summary>
-    public List<NameDayInfo> SearchName(string name)
-    {
-        return _nameDayService.FindNameDays(name, _date.Year);
-    }
 }

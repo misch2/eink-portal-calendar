@@ -471,48 +471,6 @@ public class NameDayService
 
         return nameDays;
     }
-
-    /// <summary>
-    /// Search for dates celebrating a specific name
-    /// </summary>
-    /// <param name="name">Name to search for (case-insensitive)</param>
-    /// <param name="year">Year for the dates</param>
-    /// <param name="countryCode">Country code</param>
-    /// <returns>List of dates when the name is celebrated</returns>
-    public List<NameDayInfo> FindNameDays(string name, int year, string countryCode = "CZ")
-    {
-        if (string.IsNullOrWhiteSpace(name) || countryCode != "CZ")
-        {
-            return new List<NameDayInfo>();
-        }
-
-        _logger.LogDebug("Searching for name days matching '{Name}'", name);
-
-        var results = new List<NameDayInfo>();
-        var searchName = name.Trim().ToLowerInvariant();
-
-        foreach (var kvp in CzechNameDays)
-        {
-            // Split multiple names and check if any matches
-            var names = kvp.Value.Split('/', StringSplitOptions.TrimEntries);
-            if (names.Any(n => n.ToLowerInvariant().Contains(searchName)))
-            {
-                var month = int.Parse(kvp.Key.Substring(2, 2));
-                var day = int.Parse(kvp.Key.Substring(0, 2));
-                var date = new DateTime(year, month, day);
-
-                results.Add(new NameDayInfo
-                {
-                    Name = kvp.Value,
-                    Date = date,
-                    CountryCode = countryCode
-                });
-            }
-        }
-
-        _logger.LogDebug("Found {Count} matches for name '{Name}'", results.Count, name);
-        return results.OrderBy(nd => nd.Date).ToList();
-    }
 }
 
 /// <summary>

@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Moq;
 using PortalCalendarServer.Services.Integrations;
 using PortalCalendarServer.Tests.TestBase;
 using PortalCalendarServer.Tests.TestData;
@@ -41,7 +40,7 @@ public class IcalIntegrationServiceTests : IntegrationServiceTestBase
         // Assert
         Assert.NotNull(events);
         Assert.Equal(2, events.Count);
-        
+
         var event1 = events.FirstOrDefault(e => e.Uid == "event1@test.com");
         Assert.NotNull(event1);
         Assert.Equal("Simple Event", event1.Summary);
@@ -49,7 +48,7 @@ public class IcalIntegrationServiceTests : IntegrationServiceTestBase
         Assert.Equal("A simple test event", event1.Description);
         Assert.False(event1.IsAllDay);
         Assert.Equal(1.0, event1.DurationHours);
-        
+
         var event2 = events.FirstOrDefault(e => e.Uid == "event2@test.com");
         Assert.NotNull(event2);
         Assert.Equal("Another Event", event2.Summary);
@@ -164,7 +163,7 @@ public class IcalIntegrationServiceTests : IntegrationServiceTestBase
         Assert.Equal("Morning Event", events[0].Summary);
         Assert.Equal("Afternoon Event", events[1].Summary);
         Assert.Equal("Evening Event", events[2].Summary);
-        
+
         // Verify chronological order
         for (int i = 0; i < events.Count - 1; i++)
         {
@@ -183,13 +182,13 @@ public class IcalIntegrationServiceTests : IntegrationServiceTestBase
 
         // Act - First call
         var events1 = await service.GetEventsBetweenAsync(start, end);
-        
+
         // Act - Second call (should use cache)
         var events2 = await service.GetEventsBetweenAsync(start, end);
 
         // Assert
         Assert.Equal(events1.Count, events2.Count);
-        
+
         // Verify HTTP was called only once (second call used cache)
         VerifyHttpRequest(TestIcsUrl, Times.Once());
     }
@@ -247,7 +246,7 @@ public class IcalIntegrationServiceTests : IntegrationServiceTestBase
 
         // Assert
         Assert.Equal(2, events.Count);
-        Assert.All(events, e => 
+        Assert.All(events, e =>
         {
             Assert.True(e.StartTime >= from);
             Assert.True(e.StartTime < from.AddDays(daysAhead));
@@ -326,7 +325,7 @@ public class IcalIntegrationServiceTests : IntegrationServiceTestBase
         var logger = new Mock<ILogger<IcalIntegrationService>>().Object;
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => 
+        Assert.Throws<ArgumentNullException>(() =>
             new IcalIntegrationService(
                 logger,
                 MockHttpClientFactory.Object,
@@ -342,7 +341,7 @@ public class IcalIntegrationServiceTests : IntegrationServiceTestBase
         // Arrange
         SetupHttpResponse(TestIcsUrl, SampleIcsData.AllDayEventCalendar);
         var service = CreateService();
-        
+
         // Start time is in the middle of the day
         var start = new DateTime(2024, 1, 15, 12, 0, 0, DateTimeKind.Utc);
         var end = new DateTime(2024, 1, 17, 0, 0, 0, DateTimeKind.Utc);
@@ -362,7 +361,7 @@ public class IcalIntegrationServiceTests : IntegrationServiceTestBase
         // Arrange
         var cts = new CancellationTokenSource();
         cts.Cancel();
-        
+
         SetupHttpResponse(TestIcsUrl, SampleIcsData.SimpleCalendar);
         var service = CreateService();
         var start = new DateTime(2024, 1, 15, 0, 0, 0, DateTimeKind.Utc);

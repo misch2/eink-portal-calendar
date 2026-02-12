@@ -47,7 +47,7 @@ builder.Services.AddHttpClient("GoogleFitIntegrationService")
 
 // Register services
 builder.Services.AddScoped<DisplayService>();
-builder.Services.AddScoped<ICalendarUtilFactory, CalendarUtilFactory>();
+builder.Services.AddSingleton<PageGeneratorService>();
 builder.Services.AddScoped<CacheManagementService>();
 builder.Services.AddSingleton<Web2PngService>();
 builder.Services.AddSingleton<ColorTypeRegistry>();
@@ -56,6 +56,8 @@ builder.Services.AddSingleton<ColorTypeRegistry>();
 builder.Services.AddHostedService<CacheCleanupService>();
 
 // Register integration services
+builder.Services.AddScoped<NameDayService>();
+builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();
 builder.Services.AddScoped<GoogleFitIntegrationService>();
 // Add other integration services here as you create them:
 // builder.Services.AddScoped<WeatherIntegrationService>();

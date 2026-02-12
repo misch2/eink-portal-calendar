@@ -9,9 +9,8 @@
     displayService.UseDisplay(Model.Display);
 
     var dateCulture = new CultureInfo(displayService.GetConfig("date_culture") ?? "en-US");
-    var timezone = TimeZoneInfo.FindSystemTimeZoneById(displayService.GetConfig("timezone") ?? "UTC");
 
-    var now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timezone);
+    var now = displayService.GetNowWithTimeZone();
     var wakeupInfo = Model.Display.NextWakeupTime();
     var nextWakeup = wakeupInfo.NextWakeup;
     var sleepInSeconds = wakeupInfo.SleepInSeconds;

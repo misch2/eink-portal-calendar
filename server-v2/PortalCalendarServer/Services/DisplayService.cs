@@ -5,186 +5,185 @@ using PortalCalendarServer.Models.ColorTypes;
 using PortalCalendarServer.Models.Entities;
 using System;
 
-namespace PortalCalendarServer.Services
+namespace PortalCalendarServer.Services;
+
+public class DisplayService
 {
-    public class DisplayService
+    private readonly CalendarContext _context;
+    private readonly ILogger<DisplayService> _logger;
+    private readonly ColorTypeRegistry _colorTypeRegistry;
+
+    private Display? _currentDisplay;
+    private TimeZoneInfo? _timeZoneInfo;
+
+    public DisplayService(
+        CalendarContext context,
+        ILogger<DisplayService> logger,
+        ColorTypeRegistry colorTypeRegistry)
     {
-        private readonly CalendarContext _context;
-        private readonly ILogger<DisplayService> _logger;
-        private readonly ColorTypeRegistry _colorTypeRegistry;
+        _context = context;
+        _logger = logger;
+        _colorTypeRegistry = colorTypeRegistry;
+    }
 
-        private Display? _currentDisplay;
-        private TimeZoneInfo? _timeZoneInfo;
+    public IEnumerable<Display> GetAllDisplays()
+    {
+        return _context.Displays
+            .Include(d => d.Configs)
+            .OrderBy(d => d.Id)
+            .ToList();
+    }
 
-        public DisplayService(
-            CalendarContext context,
-            ILogger<DisplayService> logger,
-            ColorTypeRegistry colorTypeRegistry)
+    public Display GetDefaultDisplay()
+    {
+        return _context.Displays
+            .Include(d => d.Configs)
+            .Single(d => d.Id == 0);
+    }
+
+    public void UseDisplay(Display display)
+    {
+        _currentDisplay = display;
+        _timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(GetConfig("timezone") ?? "UTC");
+    }
+
+    /// <summary>
+    /// Get the currently set display
+    /// </summary>
+    public Display? GetCurrentDisplay()
+    {
+        return _currentDisplay;
+    }
+
+    public TimeZoneInfo GetTimeZoneInfo()
+    {
+        ValidateDisplayIsSet();
+        return _timeZoneInfo!;
+    }
+
+    private void ValidateDisplayIsSet()
+    {
+        if (_currentDisplay == null)
         {
-            _context = context;
-            _logger = logger;
-            _colorTypeRegistry = colorTypeRegistry;
+            throw new InvalidOperationException("No display is currently set. Call UseDisplay() first.");
+        }
+    }
+
+    /// <summary>
+    /// Get configuration value for a display, with fallback to default display (ID = 0)
+    /// </summary>
+    public string? GetConfig(string name, string defaultValue = "")
+    {
+        ValidateDisplayIsSet();
+
+        // 1. real value (empty string usually means "unset" in HTML form)
+        var value = GetConfigWithoutDefaults(name);
+        if (!string.IsNullOrEmpty(value))
+        {
+            return value;
         }
 
-        public IEnumerable<Display> GetAllDisplays()
+        // 2. default value (modifiable)
+        var default_value = GetConfigDefaultsOnly(name);
+        if (!string.IsNullOrEmpty(default_value))
         {
-            return _context.Displays
-                .Include(d => d.Configs)
-                .OrderBy(d => d.Id)
-                .ToList();
+            return default_value;
         }
 
-        public Display GetDefaultDisplay()
+        return null;
+    }
+
+    /// <summary>
+    /// Get configuration value without checking defaults (only for this specific display)
+    /// </summary>
+    public string? GetConfigWithoutDefaults(string name)
+    {
+        ValidateDisplayIsSet();
+        var config = _currentDisplay!.Configs?.FirstOrDefault(c => c.Name == name);
+        return config?.Value;
+    }
+
+    /// <summary>
+    /// Get configuration value from default display only (ID = 0)
+    /// </summary>
+    public string? GetConfigDefaultsOnly(string name)
+    {
+        var defaultConfig = GetDefaultDisplay().Configs?.FirstOrDefault(c => c.Name == name);
+
+        return defaultConfig?.Value;
+    }
+
+    /// <summary>
+    /// Get configuration value as boolean
+    /// </summary>
+    public bool GetConfigBool(string name, bool defaultValue = false)
+    {
+        ValidateDisplayIsSet();
+
+        var value = GetConfig(name);
+        if (string.IsNullOrEmpty(value))
         {
-            return _context.Displays
-                .Include(d => d.Configs)
-                .Single(d => d.Id == 0);
+            return defaultValue;
         }
 
-        public void UseDisplay(Display display)
-        {
-            _currentDisplay = display;
-            _timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(GetConfig("timezone") ?? "UTC");
-        }
+        return value == "1" || value.Equals("true", StringComparison.OrdinalIgnoreCase);
+    }
 
-        /// <summary>
-        /// Get the currently set display
-        /// </summary>
-        public Display? GetCurrentDisplay()
-        {
-            return _currentDisplay;
-        }
+    /// <summary>
+    /// Set configuration value for a display
+    /// </summary>
+    public void SetConfig(string name, string value)
+    {
+        ValidateDisplayIsSet();
+        var config = _context.Configs
+            .FirstOrDefault(c => c.DisplayId == _currentDisplay!.Id && c.Name == name);
 
-        public TimeZoneInfo GetTimeZoneInfo()
+        if (config != null)
         {
-            ValidateDisplayIsSet();
-            return _timeZoneInfo!;
+            config.Value = value;
+            _context.Update(config);
         }
-
-        private void ValidateDisplayIsSet()
+        else
         {
-            if (_currentDisplay == null)
+            _context.Configs.Add(new Config
             {
-                throw new InvalidOperationException("No display is currently set. Call UseDisplay() first.");
-            }
+                DisplayId = _currentDisplay!.Id,
+                Name = name,
+                Value = value
+            });
         }
+    }
 
-        /// <summary>
-        /// Get configuration value for a display, with fallback to default display (ID = 0)
-        /// </summary>
-        public string? GetConfig(string name, string defaultValue = "")
+    /// <summary>
+    /// Save all changes to the database
+    /// </summary>
+    public async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
+    }
+
+    public IColorType? GetColorType()
+    {
+        ValidateDisplayIsSet();
+
+        if (string.IsNullOrEmpty(_currentDisplay!.ColorType))
         {
-            ValidateDisplayIsSet();
-
-            // 1. real value (empty string usually means "unset" in HTML form)
-            var value = GetConfigWithoutDefaults(name);
-            if (!string.IsNullOrEmpty(value))
-            {
-                return value;
-            }
-
-            // 2. default value (modifiable)
-            var default_value = GetConfigDefaultsOnly(name);
-            if (!string.IsNullOrEmpty(default_value))
-            {
-                return default_value;
-            }
-
             return null;
         }
 
-        /// <summary>
-        /// Get configuration value without checking defaults (only for this specific display)
-        /// </summary>
-        public string? GetConfigWithoutDefaults(string name)
+        var ret = _colorTypeRegistry.GetColorType(_currentDisplay!.ColorType);
+        if (ret == null)
         {
-            ValidateDisplayIsSet();
-            var config = _currentDisplay!.Configs?.FirstOrDefault(c => c.Name == name);
-            return config?.Value;
+            throw new InvalidOperationException($"Color type '{_currentDisplay.ColorType}' not found in registry.");
         }
 
-        /// <summary>
-        /// Get configuration value from default display only (ID = 0)
-        /// </summary>
-        public string? GetConfigDefaultsOnly(string name)
-        {
-            var defaultConfig = GetDefaultDisplay().Configs?.FirstOrDefault(c => c.Name == name);
-
-            return defaultConfig?.Value;
-        }
-
-        /// <summary>
-        /// Get configuration value as boolean
-        /// </summary>
-        public bool GetConfigBool(string name, bool defaultValue = false)
-        {
-            ValidateDisplayIsSet();
-
-            var value = GetConfig(name);
-            if (string.IsNullOrEmpty(value))
-            {
-                return defaultValue;
-            }
-
-            return value == "1" || value.Equals("true", StringComparison.OrdinalIgnoreCase);
-        }
-
-        /// <summary>
-        /// Set configuration value for a display
-        /// </summary>
-        public void SetConfig(string name, string value)
-        {
-            ValidateDisplayIsSet();
-            var config = _context.Configs
-                .FirstOrDefault(c => c.DisplayId == _currentDisplay!.Id && c.Name == name);
-
-            if (config != null)
-            {
-                config.Value = value;
-                _context.Update(config);
-            }
-            else
-            {
-                _context.Configs.Add(new Config
-                {
-                    DisplayId = _currentDisplay!.Id,
-                    Name = name,
-                    Value = value
-                });
-            }
-        }
-
-        /// <summary>
-        /// Save all changes to the database
-        /// </summary>
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
-
-        public IColorType? GetColorType()
-        {
-            ValidateDisplayIsSet();
-
-            if (string.IsNullOrEmpty(_currentDisplay!.ColorType))
-            {
-                return null;
-            }
-
-            var ret = _colorTypeRegistry.GetColorType(_currentDisplay!.ColorType);
-            if (ret == null)
-            {
-                throw new InvalidOperationException($"Color type '{_currentDisplay.ColorType}' not found in registry.");
-            }
-
-            return ret;
-        }
-
-        public DateTime GetNowWithTimeZone()
-        {
-            ValidateDisplayIsSet();
-            return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, GetTimeZoneInfo());
-        }
-
+        return ret;
     }
+
+    public DateTime GetNowWithTimeZone()
+    {
+        ValidateDisplayIsSet();
+        return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, GetTimeZoneInfo());
+    }
+
 }

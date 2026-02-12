@@ -11,7 +11,7 @@
     var dateCulture = new CultureInfo(displayService.GetConfig("date_culture") ?? "en-US");
     var timezone = TimeZoneInfo.FindSystemTimeZoneById(displayService.GetConfig("timezone") ?? "UTC");
 
-    var now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timezone);
+    var now = displayService.GetNowWithTimeZone();
     var wakeupInfo = Model.Display.NextWakeupTime();
     var nextWakeup = wakeupInfo.NextWakeup;
     var sleepInSeconds = wakeupInfo.SleepInSeconds;
@@ -34,7 +34,7 @@
     // var forecast = Model.Weather?.Forecast;
     var currentWeather = (dynamic?)null;
     var forecast = new List<dynamic>();
-    
+
     var precipitationLimit = 0.5; // mm
 }
 <!DOCTYPE html>
@@ -42,14 +42,14 @@
 <head>
     <meta charset="utf-8" />
     <title>Calendar - Weather</title>
-    
+
     @* Icon library *@
     <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
-    
+
     @* Stylesheets *@
     <link rel="stylesheet" href="/css/weather-icons.min.css" />
     <link rel="stylesheet" href="/css/calendar_themes/weather.css" />
-    
+
     @* EPD Colors *@
     @await Html.PartialAsync("Includes/_EpdColors.cshtml", Model.CssColors)
 </head>
@@ -97,7 +97,8 @@
                     <i class="wi wi-cloud" style="font-size: 1rem; margin-top: 0.15rem"></i> @(5 * (int)(currentWeather.cloud_percent_avg / 5 + 0.5)) <text>%</text>
                     @if (currentWeather.fog_percent_avg > 0)
                     {
-                        <i class="wi wi-fog" style="font-size: 1rem; margin-top: 0.15rem"></i> @(5 * (int)(currentWeather.fog_percent_avg / 5 + 0.5)) <text>%</text>
+                        <i class="wi wi-fog" style="font-size: 1rem; margin-top: 0.15rem"></i> 
+                        @(5 * (int)(currentWeather.fog_percent_avg / 5 + 0.5)) <text>%</text>
                     }
                 </div>
 
@@ -115,10 +116,7 @@
                 @Model.Date.Day. @decorator(Model.Date.ToString("MMMM", dateCulture))
             </div>
             <div>
-                @* Name day - TODO: implement svatky API *@
-                @* @decorator(Model.Date.ToString("dddd", dateCulture)) *@
-
-
+                @* Name day *@
                 @{
                     string? nameForDay = null;
                     if (holidayInfo != null)
@@ -129,9 +127,9 @@
                     {
                         nameForDay = nameDayInfo.Name;
                     }
+
                     @decorator(nameForDay ?? "?")
                 }
-
             </div>
         </div>
 
@@ -152,7 +150,7 @@
 
                 var dt = ((DateTime)item.time_start).ToUniversalTime();
                 dt = TimeZoneInfo.ConvertTimeFromUtc(dt, timezone);
-                
+
                 string dayDescription;
                 if (dt.Date == now.Date)
                 {

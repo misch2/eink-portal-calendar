@@ -13,14 +13,14 @@ public class ApiController : ControllerBase
     private readonly CalendarContext _context;
     private readonly ILogger<ApiController> _logger;
     private readonly DisplayService _displayService;
-    private readonly ICalendarUtilFactory _calendarUtilFactory;
+    private readonly PageGeneratorService _pageGeneratorService;
 
-    public ApiController(CalendarContext context, ILogger<ApiController> logger, DisplayService displayService, ICalendarUtilFactory calendarUtilFactory, Web2PngService web2PngService, ColorTypeRegistry colorTypeRegistry)
+    public ApiController(CalendarContext context, ILogger<ApiController> logger, DisplayService displayService, PageGeneratorService pageGeneratorService, Web2PngService web2PngService, ColorTypeRegistry colorTypeRegistry)
     {
         _context = context;
         _logger = logger;
         _displayService = displayService;
-        _calendarUtilFactory = calendarUtilFactory;
+        _pageGeneratorService = pageGeneratorService;
     }
 
     // Helper to get display by MAC address
@@ -214,8 +214,7 @@ public class ApiController : ControllerBase
             colormap_name = "webmap";
         }
 
-        var util = _calendarUtilFactory.Create(display);
-        util.GenerateImageFromWeb(); // FIXME pre-generate
+        _pageGeneratorService.GenerateImageFromWeb(display); // FIXME pre-generate
 
         var bitmapOptions = new BitmapOptions
         {
@@ -229,7 +228,7 @@ public class ApiController : ControllerBase
             DisplayType = display.ColorType
         };
 
-        var bitmap = util.GenerateBitmap(bitmapOptions);
+        var bitmap = _pageGeneratorService.GenerateBitmap(display, bitmapOptions);
 
         if (bitmap == null)
         {

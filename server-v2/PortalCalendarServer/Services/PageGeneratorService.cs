@@ -26,8 +26,7 @@ public class PageGeneratorService
     private readonly IMemoryCache _memoryCache;
     private readonly ILoggerFactory _loggerFactory;
     private readonly NameDayService _nameDayService;
-    private readonly Display _display;
-    private readonly int _minimalCacheExpiry;
+    private readonly IPublicHolidayService _publicHolidayService;
 
     public PageGeneratorService(
         ILogger<PageGeneratorService> logger,
@@ -39,8 +38,7 @@ public class PageGeneratorService
         IMemoryCache memoryCache,
         ILoggerFactory loggerFactory,
         NameDayService nameDayService,
-        Display display,
-        int minimalCacheExpiry = 0)
+        IPublicHolidayService publicHolidayService)
     {
         _logger = logger;
         _context = context;
@@ -51,22 +49,21 @@ public class PageGeneratorService
         _memoryCache = memoryCache;
         _loggerFactory = loggerFactory;
         _nameDayService = nameDayService;
-        _display = display;
-        _minimalCacheExpiry = minimalCacheExpiry;
-
-        _displayService.UseDisplay(display);
+        _publicHolidayService = publicHolidayService;
     }
 
-    public PageViewModel PageViewModelForDate(DateTime date, bool previewColors = false)
+    public PageViewModel PageViewModelForDate(Display display, DateTime date, bool previewColors = false)
     {
+        _displayService.UseDisplay(display);
+        
         var seed = int.Parse(date.ToString("yyyyMMdd"));
         var random = new Random(seed);
 
         var viewModel = new PageViewModel
         {
-            Display = _display,
+            Display = display,
             Date = date,
-            CssColors = _display.CssColorMap(previewColors)
+            CssColors = display.CssColorMap(previewColors)
         };
 
         viewModel.InitializeComponents(
@@ -74,7 +71,7 @@ public class PageGeneratorService
             calendarFactory: () => new CalendarComponent(_logger, _displayService, date, _httpClientFactory, _memoryCache, _context, _loggerFactory),
             weightFactory: () => new WeightComponent(_logger, date, random),
             xkcdFactory: () => new XkcdComponent(_logger, _displayService, date, _httpClientFactory, _memoryCache, _context, _loggerFactory),
-            publicHolidayFactory: () => new PublicHolidayComponent(_logger, _displayService, date),
+            publicHolidayFactory: () => new PublicHolidayComponent(_logger, _displayService, date, _publicHolidayService),
             nameDayFactory: () => new NameDayComponent(_logger, _displayService, date, _nameDayService)
         );
 
@@ -82,41 +79,39 @@ public class PageGeneratorService
     }
 
 
-    public string DisplayImageName()
+    public string DisplayImageName(Display display)
     {
         var imagePath = Path.Combine(_environment.ContentRootPath, "..");
-
-        var subPath = $"generated_images/current_calendar_{_display.Id}.png";   // FIXME
-
+        var subPath = $"generated_images/current_calendar_{display.Id}.png";
         return Path.Combine(imagePath, subPath);
     }
 
-    public void GenerateImageFromWeb()
+    public void GenerateImageFromWeb(Display display)
     {
-        var url = $"http://localhost:5252/calendar/{_display.Id}/html?preview_colors=true";  // FIXME FIXME hardcoded port!
-        var outputPath = DisplayImageName();
+        _displayService.UseDisplay(display);
+        
+        var url = $"http://localhost:5252/calendar/{display.Id}/html?preview_colors=true";  // FIXME FIXME hardcoded port!
+        var outputPath = DisplayImageName(display);
         _logger.LogInformation("Generating calendar image from URL {Url} to {OutputPath}", url, outputPath);
 
         // FIXME await?
         // FIXME timeout?
         _web2PngService.ConvertUrlAsync(
             url,
-            _display.VirtualWidth(),
-            _display.VirtualHeight(),
+            display.VirtualWidth(),
+            display.VirtualHeight(),
             outputPath,
             2000).GetAwaiter().GetResult();
-
-        return;
     }
 
     /// <summary>
     /// Generate bitmap image from source PNG
     /// </summary>
-    public BitmapResult GenerateBitmap(BitmapOptions options)
+    public BitmapResult GenerateBitmap(Display display, BitmapOptions options)
     {
         _logger.LogDebug("Producing bitmap");
 
-        var imagePath = DisplayImageName();
+        var imagePath = DisplayImageName(display);
         if (!File.Exists(imagePath))
         {
             throw new FileNotFoundException($"Image file not found: {imagePath}");
@@ -125,9 +120,9 @@ public class PageGeneratorService
         using var img = Image.Load<Rgba32>(imagePath);
 
         // If the generated image is larger (probably due to invalid CSS), crop it
-        if (img.Height > _display.VirtualHeight())
+        if (img.Height > display.VirtualHeight())
         {
-            img.Mutate(x => x.Crop(new Rectangle(0, 0, _display.VirtualWidth(), _display.VirtualHeight())));
+            img.Mutate(x => x.Crop(new Rectangle(0, 0, display.VirtualWidth(), display.VirtualHeight())));
         }
 
         // Rotate
@@ -265,45 +260,6 @@ public class PageGeneratorService
         // Process each row of pixels
         img.ProcessPixelRows(accessor =>
         {
-            //if (displayType == "256G")
-            //{
-            //    // 8-bit grayscale, one byte per pixel
-            //    for (int y = 0; y < accessor.Height; y++)
-            //    {
-            //        var rowSpan = accessor.GetRowSpan(y);
-            //        foreach (var pixel in rowSpan)
-            //        {
-            //            var gray = (byte)((pixel.R + pixel.G + pixel.B) / 3);
-            //            ms.WriteByte(gray);
-            //        }
-            //    }
-            //}
-            //else if (displayType == "4G")
-            //{
-            //    // 2-bit grayscale, 4 pixels per byte
-            //    for (int y = 0; y < accessor.Height; y++)
-            //    {
-            //        var rowSpan = accessor.GetRowSpan(y);
-            //        byte currentByte = 0;
-            //        int bitCount = 0;
-
-            //        foreach (var pixel in rowSpan)
-            //        {
-            //            var gray = (byte)((pixel.R + pixel.G + pixel.B) / 3);
-            //            var bits = (byte)(gray >> 6); // 0-3 range
-            //            currentByte = (byte)((currentByte << 2) | bits);
-            //            bitCount += 2;
-
-            //            if (bitCount == 8)
-            //            {
-            //                ms.WriteByte(currentByte);
-            //                currentByte = 0;
-            //                bitCount = 0;
-            //            }
-            //        }
-            //    }
-            //}
-            //else 
             if (displayType == "BW") // FIXME constant
             {
                 // 1-bit black and white, 8 pixels per byte
@@ -392,8 +348,10 @@ public class PageGeneratorService
     }
 
     // TODO: Implement MQTT update methods
-    public void UpdateMqtt(string key, object value, bool forced = false)
+    public void UpdateMqtt(Display display, string key, object value, bool forced = false)
     {
+        _displayService.UseDisplay(display);
+        
         if (!_displayService.GetConfigBool("mqtt"))
             return;
 
@@ -401,8 +359,10 @@ public class PageGeneratorService
         _logger.LogDebug("MQTT update: {Key} = {Value}", key, value);
     }
 
-    public void DisconnectMqtt()
+    public void DisconnectMqtt(Display display)
     {
+        _displayService.UseDisplay(display);
+        
         if (!_displayService.GetConfigBool("mqtt"))
             return;
 

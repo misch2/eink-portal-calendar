@@ -1,50 +1,56 @@
-﻿namespace PortalCalendarServer.Services.PageGeneratorComponents;
+﻿using PortalCalendarServer.Services.Integrations;
 
-using PublicHoliday;
+namespace PortalCalendarServer.Services.PageGeneratorComponents;
 
+/// <summary>
+/// Component for retrieving public holiday information.
+/// Delegates to PublicHolidayService for actual holiday lookups.
+/// </summary>
 public class PublicHolidayComponent : BaseComponent
 {
+    private readonly IPublicHolidayService _publicHolidayService;
+
     public PublicHolidayComponent(
         ILogger<PageGeneratorService> logger,
         DisplayService? displayService,
-        DateTime date)
+        DateTime date,
+        IPublicHolidayService publicHolidayService)
         : base(logger, displayService, date)
     {
+        _publicHolidayService = publicHolidayService;
     }
 
-    // FIXME CZ only for now
+    /// <summary>
+    /// Get public holiday information for the current date.
+    /// Returns null if the date is not a public holiday.
+    /// </summary>
     public PublicHolidayInfo? GetPublicHolidayInfo()
     {
-        var provider = new CzechRepublicPublicHoliday();
-
-        if (!provider.IsPublicHoliday(_date))
-        {
-            return null;
-        }
-
-        var holidays = provider.PublicHolidaysInformation(_date.Year);
-
-        var holiday = holidays.FirstOrDefault(h => h.HolidayDate == _date);
-        if (holiday == null)
-        {
-            // FIXME - this should not happen, but if it does, we should handle it gracefully
-            return null;
-        }
-
-        return new PublicHolidayInfo
-        {
-            Name = holiday.EnglishName,
-            LocalName = holiday.Name,
-            Date = holiday.HolidayDate,
-            CountryCode = "CZ"
-        };
+        _logger.LogDebug("Getting public holiday information for {Date}", _date);
+        return _publicHolidayService.GetPublicHoliday(_date);
     }
-}
 
-public class PublicHolidayInfo
-{
-    public string Name { get; set; } = string.Empty;
-    public string LocalName { get; set; } = string.Empty;
-    public DateTime Date { get; set; }
-    public string CountryCode { get; set; } = string.Empty;
+    /// <summary>
+    /// Get all public holidays for the current year
+    /// </summary>
+    public List<PublicHolidayInfo> GetYearHolidays()
+    {
+        return _publicHolidayService.GetPublicHolidaysForYear(_date.Year);
+    }
+
+    /// <summary>
+    /// Check if the current date is a public holiday
+    /// </summary>
+    public bool IsPublicHoliday()
+    {
+        return _publicHolidayService.IsPublicHoliday(_date);
+    }
+
+    /// <summary>
+    /// Get the next public holiday after the current date
+    /// </summary>
+    public PublicHolidayInfo? GetNextHoliday()
+    {
+        return _publicHolidayService.GetNextPublicHoliday(_date);
+    }
 }

@@ -12,7 +12,7 @@ public class UiController : Controller
     private readonly CalendarContext _context;
     private readonly ILogger<UiController> _logger;
     private readonly IWebHostEnvironment _environment;
-    private readonly ICalendarUtilFactory _calendarUtilFactory;
+    private readonly PageGeneratorService _pageGeneratorService;
     private readonly DisplayService _displayService;
 
     // Config parameter names that can be saved from the UI
@@ -32,13 +32,13 @@ public class UiController : Controller
         CalendarContext context,
         ILogger<UiController> logger,
         IWebHostEnvironment environment,
-        ICalendarUtilFactory calendarUtilFactory,
+        PageGeneratorService pageGeneratorService,
         DisplayService displayService)
     {
         _context = context;
         _logger = logger;
         _environment = environment;
-        _calendarUtilFactory = calendarUtilFactory;
+        _pageGeneratorService = pageGeneratorService;
         _displayService = displayService;
     }
 
@@ -136,8 +136,7 @@ public class UiController : Controller
         }
         _displayService.UseDisplay(display);
 
-        var util = _calendarUtilFactory.Create(display);
-        var viewModel = util.PageViewModelForDate(DateTime.UtcNow, preview_colors);
+        var viewModel = _pageGeneratorService.PageViewModelForDate(display, DateTime.UtcNow, preview_colors);
 
         // TODO: Return calendar theme view
         var theme = _displayService.GetConfig("theme") ?? "default";
@@ -160,8 +159,7 @@ public class UiController : Controller
             return BadRequest(new { error = "Invalid date format" });
         }
 
-        var util = _calendarUtilFactory.Create(display);
-        var viewModel = util.PageViewModelForDate(parsedDate, preview_colors);
+        var viewModel = _pageGeneratorService.PageViewModelForDate(display, parsedDate, preview_colors);
 
         // TODO: Return calendar theme view
         var theme = _displayService.GetConfig("theme") ?? "default";
