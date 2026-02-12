@@ -95,16 +95,6 @@ public class CalendarComponent : BaseComponent
         };
     }
 
-    // FIXME: This method assumes that the input date is in UTC. If the input date can be in different time zones, we need to handle that properly.
-    private DateTime ConvertDateTimeToDisplayTimeZone(DateTime date)
-    {
-        var targetZone = _displayService.GetTimeZoneInfo();
-        var dateTimeOffset = new DateTimeOffset(date);
-        var dateTimeKind = date.Kind;
-        return TimeZoneInfo.ConvertTime(date, _displayService.GetTimeZoneInfo());
-        //return TimeZoneInfo.ConvertTimeFromUtc(date.ToUniversalTime(), _displayService.GetTimeZoneInfo());
-    }
-
     /// <summary>
     /// Convert CalendarEventData to CalendarEvent
     /// </summary>
@@ -112,8 +102,8 @@ public class CalendarComponent : BaseComponent
     {
         return new CalendarEvent
         {
-            StartTime = ConvertDateTimeToDisplayTimeZone(data.StartTime), // FIXME
-            EndTime = ConvertDateTimeToDisplayTimeZone(data.EndTime), // FIXME
+            StartTime = data.StartTime,
+            EndTime = data.EndTime,
             Summary = data.Summary,
             Description = data.Description,
             Location = data.Location,

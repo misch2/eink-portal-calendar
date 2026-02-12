@@ -3,6 +3,7 @@ using PortalCalendarServer.Services.Integrations;
 using PortalCalendarServer.Tests.TestBase;
 using PortalCalendarServer.Tests.TestData;
 using System.Net;
+using System.Runtime.ConstrainedExecution;
 
 namespace PortalCalendarServer.Tests.Services.Integrations;
 
@@ -389,5 +390,138 @@ public class IcalIntegrationServiceTests : IntegrationServiceTestBase
         Assert.NotNull(event1);
         Assert.NotNull(event1.DurationHours);
         Assert.Equal(1.0, event1.DurationHours.Value, 2);
+    }
+
+    [Fact]
+    public async Task GetEventsBetweenAsync_WithMultipleTimezoneCalendar_ReturnsAllEvents()
+    {
+        // Arrange
+        SetupHttpResponse(TestIcsUrl, SampleIcsData.MultipleTimezoneCalendar);
+        var service = CreateService();
+        var start = DateTime.Parse("2026-02-01T00:00:00+01:00");
+        var end = DateTime.Parse("2026-02-14T23:59:59+01:00");
+
+        // Act
+        var events = await service.GetEventsBetweenAsync(start, end);
+
+        // Assert
+        Assert.NotNull(events);
+        Assert.Equal(7, events.Count);
+    }
+
+    [Fact]
+    public async Task GetEventsBetweenAsync_WithMultipleTimezoneCalendar_ParsesEventDetails()
+    {
+        // Arrange
+        SetupHttpResponse(TestIcsUrl, SampleIcsData.MultipleTimezoneCalendar);
+        var service = CreateService();
+        var start = DateTime.Parse("2026-02-14T00:00:00+01:00");
+        var end = DateTime.Parse("2026-02-14T23:59:59+01:00");
+
+        // Act
+        var events = await service.GetEventsBetweenAsync(start, end);
+
+        // Assert
+        var event1 = events.FirstOrDefault(e => e.Uid == "576g2rbd7fkfsh1ae412vc5s5h@google.com");
+        Assert.NotNull(event1);
+        Assert.Equal("od 8 do 9 bez pasma", event1.Summary);
+        // 8-9 unspecified is 8-9 CET for this calendar which is 7-8 UTC
+        Assert.Equal(new DateTime(2026, 2, 14, 7, 0, 0, DateTimeKind.Utc), event1.StartTime);
+        Assert.Equal(new DateTime(2026, 2, 14, 8, 0, 0, DateTimeKind.Utc), event1.EndTime);
+        Assert.Equal(1.0, event1.DurationHours);
+
+        var event2 = events.FirstOrDefault(e => e.Uid == "2bntdhj7ko9e3nqkh20t8tnb7g@google.com");
+        Assert.NotNull(event2);
+        Assert.Equal("od 9 do 10 CET", event2.Summary);
+        // 9-10 CET is 8-9 UTC
+        Assert.Equal(new DateTime(2026, 2, 14, 8, 0, 0, DateTimeKind.Utc), event2.StartTime);
+        Assert.Equal(new DateTime(2026, 2, 14, 9, 0, 0, DateTimeKind.Utc), event2.EndTime);
+
+        var event3 = events.FirstOrDefault(e => e.Uid == "5om3f0e1not4eq9s99o9iktoju@google.com");
+        Assert.NotNull(event3);
+        Assert.Equal("od 10 do 11 UK time", event3.Summary);
+        // 10-11 UK time is 10-11 UTC
+        Assert.Equal(new DateTime(2026, 2, 14, 10, 0, 0, DateTimeKind.Utc), event3.StartTime);
+        Assert.Equal(new DateTime(2026, 2, 14, 11, 0, 0, DateTimeKind.Utc), event3.EndTime);
+    }
+
+    [Fact]
+    public async Task GetEventsBetweenAsync_WithMultipleTimezoneCalendar_OrdersByStartTime()
+    {
+        // Arrange
+        SetupHttpResponse(TestIcsUrl, SampleIcsData.MultipleTimezoneCalendar);
+        var service = CreateService();
+        var start = new DateTime(2026, 2, 14, 0, 0, 0, DateTimeKind.Utc);
+        var end = new DateTime(2026, 2, 15, 0, 0, 0, DateTimeKind.Utc);
+
+        // Act
+        var events = await service.GetEventsBetweenAsync(start, end);
+
+        // Assert
+        Assert.Equal(3, events.Count);
+        Assert.Equal("od 8 do 9 bez pasma", events[0].Summary);
+        Assert.Equal("od 9 do 10 CET", events[1].Summary);
+        Assert.Equal("od 10 do 11 UK time", events[2].Summary);
+
+        // Verify chronological order
+        for (int i = 0; i < events.Count - 1; i++)
+        {
+            Assert.True(events[i].StartTime <= events[i + 1].StartTime);
+        }
+    }
+
+    [Fact]
+    public async Task GetEventsBetweenAsync_WithMultipleTimezoneCalendar_HandlesUnicodeCharacters()
+    {
+        // Arrange
+        SetupHttpResponse(TestIcsUrl, SampleIcsData.MultipleTimezoneCalendar);
+        var service = CreateService();
+        var start = new DateTime(2026, 2, 14, 0, 0, 0, DateTimeKind.Utc);
+        var end = new DateTime(2026, 2, 15, 0, 0, 0, DateTimeKind.Utc);
+
+        // Act
+        var events = await service.GetEventsBetweenAsync(start, end);
+
+        // Assert - verify that Czech characters and emojis are handled correctly
+        Assert.NotNull(events);
+        Assert.All(events, e => Assert.NotNull(e.Summary));
+    }
+
+    [Fact]
+    public async Task GetEventsBetweenAsync_WithMultipleTimezoneCalendar_AllEventsHaveCorrectDuration()
+    {
+        // Arrange
+        SetupHttpResponse(TestIcsUrl, SampleIcsData.MultipleTimezoneCalendar);
+        var service = CreateService();
+        var start = new DateTime(2026, 2, 14, 0, 0, 0, DateTimeKind.Utc);
+        var end = new DateTime(2026, 2, 15, 0, 0, 0, DateTimeKind.Utc);
+
+        // Act
+        var events = await service.GetEventsBetweenAsync(start, end);
+
+        // Assert - all events are 1 hour long
+        Assert.All(events, e =>
+        {
+            Assert.NotNull(e.DurationHours);
+            Assert.Equal(1.0, e.DurationHours.Value, 2);
+        });
+    }
+
+    [Fact]
+    public async Task GetEventsBetweenAsync_WithMultipleTimezoneCalendar_FiltersPartialOverlap()
+    {
+        // Arrange
+        SetupHttpResponse(TestIcsUrl, SampleIcsData.MultipleTimezoneCalendar);
+        var service = CreateService();
+        var start = new DateTime(2026, 2, 14, 7, 30, 0, DateTimeKind.Utc);
+        var end = new DateTime(2026, 2, 14, 8, 30, 0, DateTimeKind.Utc);
+
+        // Act
+        var events = await service.GetEventsBetweenAsync(start, end);
+
+        // Assert - should include only the event that starts within or overlaps the range
+        Assert.Single(events);
+        Assert.Equal("od 9 do 10 CET", events[0].Summary);
+        Assert.Equal(new DateTime(2026, 2, 14, 8, 0, 0, DateTimeKind.Utc), events[0].StartTime);
     }
 }

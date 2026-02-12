@@ -98,9 +98,15 @@ public class IcalIntegrationService : IntegrationServiceBase
             {
                 try
                 {
+                    if (calEvent.Start == null || calEvent.End == null)
+                    {
+                        Logger.LogWarning("Event {Uid} has invalid start or end time", calEvent.Uid);
+                        continue;
+                    }
+
                     // Check if event falls within date range
-                    var eventStart = calEvent.Start?.Value ?? DateTime.MinValue;
-                    var eventEnd = calEvent.End?.Value ?? eventStart;
+                    var eventStart = calEvent.Start!.AsUtc;
+                    var eventEnd = calEvent.End!.AsUtc;
 
                     // Skip events outside the range
                     if (eventEnd < start || eventStart > end)
@@ -124,7 +130,7 @@ public class IcalIntegrationService : IntegrationServiceBase
                     var eventData = new CalendarEventData
                     {
                         Uid = calEvent.Uid ?? string.Empty,
-                        Summary = calEvent.Summary?.Replace("\\,", ",") ?? string.Empty,
+                        Summary = calEvent.Summary ?? string.Empty, // FIXME ?.Replace("\\,", ",") ?? string.Empty,
                         Description = calEvent.Description ?? string.Empty,
                         Location = calEvent.Location ?? string.Empty,
                         StartTime = eventStart,
