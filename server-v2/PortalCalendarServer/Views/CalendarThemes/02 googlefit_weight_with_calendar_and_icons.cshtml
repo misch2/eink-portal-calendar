@@ -10,7 +10,7 @@
 
     var dateCulture = new CultureInfo(displayService.GetConfig("date_culture") ?? "en-US");
 
-    var now = displayService.GetNowWithTimeZone();
+    var now = DateTime.UtcNow;
     var wakeupInfo = Model.Display.NextWakeupTime();
     var nextWakeup = wakeupInfo.NextWakeup;
     var sleepInSeconds = wakeupInfo.SleepInSeconds;

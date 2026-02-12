@@ -47,7 +47,7 @@ builder.Services.AddHttpClient("GoogleFitIntegrationService")
 
 // Register services
 builder.Services.AddScoped<DisplayService>();
-builder.Services.AddSingleton<PageGeneratorService>();
+builder.Services.AddScoped<PageGeneratorService>();
 builder.Services.AddScoped<CacheManagementService>();
 builder.Services.AddSingleton<Web2PngService>();
 builder.Services.AddSingleton<ColorTypeRegistry>();

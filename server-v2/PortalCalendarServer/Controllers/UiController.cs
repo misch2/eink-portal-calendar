@@ -7,17 +7,22 @@ using PortalCalendarServer.Services;
 namespace PortalCalendarServer.Controllers;
 
 [Controller]
-public class UiController : Controller
+public class UiController(
+    CalendarContext context,
+    ILogger<UiController> logger,
+    IWebHostEnvironment environment,
+    PageGeneratorService pageGeneratorService,
+    DisplayService displayService) : Controller
 {
-    private readonly CalendarContext _context;
-    private readonly ILogger<UiController> _logger;
-    private readonly IWebHostEnvironment _environment;
-    private readonly PageGeneratorService _pageGeneratorService;
-    private readonly DisplayService _displayService;
+    private readonly CalendarContext _context = context;
+    private readonly ILogger<UiController> _logger = logger;
+    private readonly IWebHostEnvironment _environment = environment;
+    private readonly PageGeneratorService _pageGeneratorService = pageGeneratorService;
+    private readonly DisplayService _displayService = displayService;
 
     // Config parameter names that can be saved from the UI
-    private static readonly string[] ConfigUiParameters = new[]
-    {
+    private static readonly string[] ConfigUiParameters =
+    [
         "alive_check_safety_lag_minutes", "alive_check_minimal_failure_count", "alt", "date_culture", "display_title",
         "googlefit", "googlefit_auth_callback", "googlefit_client_id", "googlefit_client_secret",
         "lat", "lon", "max_icons_with_calendar", "max_random_icons", "metnoweather",
@@ -26,21 +31,7 @@ public class UiController : Controller
         "ota_mode", "telegram", "telegram_api_key", "telegram_chat_id", "theme", "timezone",
         "totally_random_icon", "wakeup_schedule", "web_calendar_ics_url1", "web_calendar_ics_url2",
         "web_calendar_ics_url3", "web_calendar1", "web_calendar2", "web_calendar3"
-    };
-
-    public UiController(
-        CalendarContext context,
-        ILogger<UiController> logger,
-        IWebHostEnvironment environment,
-        PageGeneratorService pageGeneratorService,
-        DisplayService displayService)
-    {
-        _context = context;
-        _logger = logger;
-        _environment = environment;
-        _pageGeneratorService = pageGeneratorService;
-        _displayService = displayService;
-    }
+    ];
 
     // Helper to get display by ID
     private async Task<Display?> GetDisplayByIdAsync(int displayNumber)

@@ -10,8 +10,9 @@
     displayService.UseDisplay(Model.Display);
 
     var dateCulture = new CultureInfo(displayService.GetConfig("date_culture") ?? "en-US");
+    var tz = displayService.GetTimeZoneInfo();
 
-    var now = displayService.GetNowWithTimeZone();
+    var now = DateTime.UtcNow;
     var wakeupInfo = Model.Display.NextWakeupTime();
     var nextWakeup = wakeupInfo.NextWakeup;
     var sleepInSeconds = wakeupInfo.SleepInSeconds;
@@ -96,9 +97,11 @@
                         {
                             var dt = evt.StartTime;
                             var deltaDays = (dt.Date - now.Date).Days;
-                            var dayDescription = dateCulture.DateTimeFormat.GetDayName(dt.DayOfWeek);
-                            var title = $"{dayDescription}, {dt:d. M. y}";
-                            
+                            var dt_local = TimeZoneInfo.ConvertTimeFromUtc(dt, tz);
+
+                            var dayDescription = dateCulture.DateTimeFormat.GetDayName(dt_local.DayOfWeek);
+                            var title = $"{dayDescription}, {dt_local:d. M. yyyy}";
+
                             if (deltaDays > 0)
                             {
                                 title += $" (+{deltaDays})";
@@ -111,7 +114,7 @@
                                     @title
                                 </div>
                             }
-                            
+
                             <div class="calendar-event">
                                 @if (evt.IsRecurrent)
                                 {
@@ -124,11 +127,12 @@
                                 }
                                 else
                                 {
-                                    @dt.ToString("H:mm", dateCulture)
+                                    @dt_local.ToString("t", dateCulture)
+                                    <text> </text>
                                     @evt.Summary
                                     @if (evt.DurationHours.HasValue)
                                     {
-                                        <text>(~@((int)(evt.DurationHours.Value + 0.5)) hod.)</text>
+                                        <text> (~@((int)(evt.DurationHours.Value + 0.5)) hod.)</text>
                                     }
                                 }
                             </div>

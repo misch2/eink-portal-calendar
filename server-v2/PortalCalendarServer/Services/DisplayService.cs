@@ -7,28 +7,17 @@ using System;
 
 namespace PortalCalendarServer.Services;
 
-public class DisplayService
+public class DisplayService(
+    CalendarContext context,
+    ILogger<DisplayService> logger,
+    ColorTypeRegistry colorTypeRegistry)
 {
-    private readonly CalendarContext _context;
-    private readonly ILogger<DisplayService> _logger;
-    private readonly ColorTypeRegistry _colorTypeRegistry;
-
     private Display? _currentDisplay;
     private TimeZoneInfo? _timeZoneInfo;
 
-    public DisplayService(
-        CalendarContext context,
-        ILogger<DisplayService> logger,
-        ColorTypeRegistry colorTypeRegistry)
-    {
-        _context = context;
-        _logger = logger;
-        _colorTypeRegistry = colorTypeRegistry;
-    }
-
     public IEnumerable<Display> GetAllDisplays()
     {
-        return _context.Displays
+        return context.Displays
             .Include(d => d.Configs)
             .OrderBy(d => d.Id)
             .ToList();
@@ -36,7 +25,7 @@ public class DisplayService
 
     public Display GetDefaultDisplay()
     {
-        return _context.Displays
+        return context.Displays
             .Include(d => d.Configs)
             .Single(d => d.Id == 0);
     }
@@ -72,7 +61,7 @@ public class DisplayService
     /// <summary>
     /// Get configuration value for a display, with fallback to default display (ID = 0)
     /// </summary>
-    public string? GetConfig(string name, string defaultValue = "")
+    public string? GetConfig(string name)
     {
         ValidateDisplayIsSet();
 
@@ -135,17 +124,17 @@ public class DisplayService
     public void SetConfig(string name, string value)
     {
         ValidateDisplayIsSet();
-        var config = _context.Configs
+        var config = context.Configs
             .FirstOrDefault(c => c.DisplayId == _currentDisplay!.Id && c.Name == name);
 
         if (config != null)
         {
             config.Value = value;
-            _context.Update(config);
+            context.Update(config);
         }
         else
         {
-            _context.Configs.Add(new Config
+            context.Configs.Add(new Config
             {
                 DisplayId = _currentDisplay!.Id,
                 Name = name,
@@ -159,7 +148,7 @@ public class DisplayService
     /// </summary>
     public async Task SaveChangesAsync()
     {
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
     }
 
     public IColorType? GetColorType()
@@ -171,7 +160,7 @@ public class DisplayService
             return null;
         }
 
-        var ret = _colorTypeRegistry.GetColorType(_currentDisplay!.ColorType);
+        var ret = colorTypeRegistry.GetColorType(_currentDisplay!.ColorType);
         if (ret == null)
         {
             throw new InvalidOperationException($"Color type '{_currentDisplay.ColorType}' not found in registry.");
@@ -179,11 +168,4 @@ public class DisplayService
 
         return ret;
     }
-
-    public DateTime GetNowWithTimeZone()
-    {
-        ValidateDisplayIsSet();
-        return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, GetTimeZoneInfo());
-    }
-
 }

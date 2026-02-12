@@ -4,28 +4,15 @@ using PortalCalendarServer.Services.Integrations;
 
 namespace PortalCalendarServer.Services.PageGeneratorComponents;
 
-public class CalendarComponent : BaseComponent
+public class CalendarComponent(
+    ILogger<PageGeneratorService> logger,
+    DisplayService displayService,
+    DateTime date,
+    IHttpClientFactory httpClientFactory,
+    IMemoryCache memoryCache,
+    CalendarContext context,
+    ILoggerFactory loggerFactory) : BaseComponent(logger, displayService, date)
 {
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IMemoryCache _memoryCache;
-    private readonly CalendarContext _context;
-    private readonly ILoggerFactory _loggerFactory;
-
-    public CalendarComponent(
-        ILogger<PageGeneratorService> logger,
-        DisplayService displayService,
-        DateTime date,
-        IHttpClientFactory httpClientFactory,
-        IMemoryCache memoryCache,
-        CalendarContext context,
-        ILoggerFactory loggerFactory)
-        : base(logger, displayService, date)
-    {
-        _httpClientFactory = httpClientFactory;
-        _memoryCache = memoryCache;
-        _context = context;
-        _loggerFactory = loggerFactory;
-    }
 
     /// <summary>
     /// Get calendar component (icons and events)
@@ -50,10 +37,10 @@ public class CalendarComponent : BaseComponent
             {
                 // Create integration service for this calendar
                 var calendarService = new IcalIntegrationService(
-                    _loggerFactory.CreateLogger<IcalIntegrationService>(),
-                    _httpClientFactory,
-                    _memoryCache,
-                    _context,
+                    loggerFactory.CreateLogger<IcalIntegrationService>(),
+                    httpClientFactory,
+                    memoryCache,
+                    context,
                     url,
                     _displayService?.GetCurrentDisplay());
 
