@@ -1,12 +1,30 @@
-﻿namespace PortalCalendarServer.Services.PageGeneratorComponents;
+﻿using Microsoft.Extensions.Caching.Memory;
+using PortalCalendarServer.Data;
+using PortalCalendarServer.Services.Integrations;
+
+namespace PortalCalendarServer.Services.PageGeneratorComponents;
 
 public class CalendarComponent : BaseComponent
 {
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IMemoryCache _memoryCache;
+    private readonly CalendarContext _context;
+    private readonly ILoggerFactory _loggerFactory;
+
     public CalendarComponent(
         ILogger<PageGeneratorService> logger,
         DisplayService displayService,
-        DateTime date) : base(logger, displayService, date)
+        DateTime date,
+        IHttpClientFactory httpClientFactory,
+        IMemoryCache memoryCache,
+        CalendarContext context,
+        ILoggerFactory loggerFactory)
+        : base(logger, displayService, date)
     {
+        _httpClientFactory = httpClientFactory;
+        _memoryCache = memoryCache;
+        _context = context;
+        _loggerFactory = loggerFactory;
     }
 
     /// <summary>
@@ -20,24 +38,42 @@ public class CalendarComponent : BaseComponent
         // Load calendar events from up to 3 ICS calendars
         for (int calendarNo = 1; calendarNo <= 3; calendarNo++)
         {
-            var enabled = _displayService.GetConfigBool($"web_calendar{calendarNo}");
+            var enabled = _displayService?.GetConfigBool($"web_calendar{calendarNo}") ?? false;
             if (!enabled)
                 continue;
 
-            var url = _displayService.GetConfig($"web_calendar_ics_url{calendarNo}");
+            var url = _displayService?.GetConfig($"web_calendar_ics_url{calendarNo}");
             if (string.IsNullOrEmpty(url))
                 continue;
 
             try
             {
-                // TODO: Implement ICS calendar integration
-                // var calendar = new ICalIntegration(url, _display, _minimalCacheExpiry);
-                // todayEvents.AddRange(calendar.GetEventsBetween(date.Date, date.Date.AddDays(1).AddSeconds(-1)));
-                // nearestEvents.AddRange(calendar.GetEventsBetween(date.Date, date.Date.AddMonths(12)));
+                // Create integration service for this calendar
+                var calendarService = new IcalIntegrationService(
+                    _loggerFactory.CreateLogger<IcalIntegrationService>(),
+                    _httpClientFactory,
+                    _memoryCache,
+                    _context,
+                    url,
+                    _displayService?.GetCurrentDisplay());
+
+                // Get today's events
+                var today = _date.Date;
+                var endOfDay = today.AddDays(1).AddSeconds(-1);
+                var todayEventsData = calendarService.GetEventsBetweenAsync(today, endOfDay)
+                    .GetAwaiter().GetResult();
+
+                // Get events for the next 12 months
+                var futureEventsData = calendarService.GetEventsBetweenAsync(today, today.AddMonths(12))
+                    .GetAwaiter().GetResult();
+
+                // Convert to CalendarEvent objects
+                todayEvents.AddRange(todayEventsData.Select(ConvertToCalendarEvent));
+                nearestEvents.AddRange(futureEventsData.Select(ConvertToCalendarEvent));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading calendar {CalendarNo}", calendarNo);
+                _logger.LogError(ex, "Error loading calendar {CalendarNo} from {Url}", calendarNo, url);
             }
         }
 
@@ -50,15 +86,40 @@ public class CalendarComponent : BaseComponent
             .GroupBy(e => e.StartTime.Date.ToString("yyyy-MM-dd"))
             .ToDictionary(g => g.Key, g => g.ToList());
 
-        // Generate icons using the PortalIconsService
-        // FIXME var icons = _portalIconsService.GenerateIcons(date, hasCalendarEntries);
-
         return new CalendarInfo
         {
             TodayEvents = todayEvents,
             NearestEvents = nearestEvents,
             NearestEventsGrouped = nearestEventsGrouped,
             HasEntries = hasCalendarEntries
+        };
+    }
+
+    // FIXME: This method assumes that the input date is in UTC. If the input date can be in different time zones, we need to handle that properly.
+    private DateTime ConvertDateTimeToDisplayTimeZone(DateTime date)
+    {
+        var targetZone = _displayService.GetTimeZoneInfo();
+        var dateTimeOffset = new DateTimeOffset(date);
+        var dateTimeKind = date.Kind;
+        return TimeZoneInfo.ConvertTime(date, _displayService.GetTimeZoneInfo());
+        //return TimeZoneInfo.ConvertTimeFromUtc(date.ToUniversalTime(), _displayService.GetTimeZoneInfo());
+    }
+
+    /// <summary>
+    /// Convert CalendarEventData to CalendarEvent
+    /// </summary>
+    private CalendarEvent ConvertToCalendarEvent(CalendarEventData data)
+    {
+        return new CalendarEvent
+        {
+            StartTime = ConvertDateTimeToDisplayTimeZone(data.StartTime), // FIXME
+            EndTime = ConvertDateTimeToDisplayTimeZone(data.EndTime), // FIXME
+            Summary = data.Summary,
+            Description = data.Description,
+            Location = data.Location,
+            AllDay = data.IsAllDay,
+            IsRecurrent = data.IsRecurrent,
+            DurationHours = data.DurationHours
         };
     }
 }

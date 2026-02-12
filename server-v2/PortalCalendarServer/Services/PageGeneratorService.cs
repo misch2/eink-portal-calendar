@@ -2,6 +2,7 @@ using Microsoft.Playwright;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models;
 using PortalCalendarServer.Services.PageGeneratorComponents;
+using PortalCalendarServer.Services.Integrations;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -24,6 +25,7 @@ public class PageGeneratorService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IMemoryCache _memoryCache;
     private readonly ILoggerFactory _loggerFactory;
+    private readonly NameDayService _nameDayService;
     private readonly Display _display;
     private readonly int _minimalCacheExpiry;
 
@@ -36,6 +38,7 @@ public class PageGeneratorService
         IHttpClientFactory httpClientFactory,
         IMemoryCache memoryCache,
         ILoggerFactory loggerFactory,
+        NameDayService nameDayService,
         Display display,
         int minimalCacheExpiry = 0)
     {
@@ -47,6 +50,7 @@ public class PageGeneratorService
         _httpClientFactory = httpClientFactory;
         _memoryCache = memoryCache;
         _loggerFactory = loggerFactory;
+        _nameDayService = nameDayService;
         _display = display;
         _minimalCacheExpiry = minimalCacheExpiry;
 
@@ -71,7 +75,7 @@ public class PageGeneratorService
             weightFactory: () => new WeightComponent(_logger, date, random),
             xkcdFactory: () => new XkcdComponent(_logger, _displayService, date, _httpClientFactory, _memoryCache, _context, _loggerFactory),
             publicHolidayFactory: () => new PublicHolidayComponent(_logger, _displayService, date),
-            nameDayFactory: () => new NameDayComponent(_logger, _displayService, date)
+            nameDayFactory: () => new NameDayComponent(_logger, _displayService, date, _nameDayService)
         );
 
         return viewModel;

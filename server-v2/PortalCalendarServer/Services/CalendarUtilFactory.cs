@@ -1,6 +1,7 @@
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models;
 using PortalCalendarServer.Services.PageGeneratorComponents;
+using PortalCalendarServer.Services.Integrations;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace PortalCalendarServer.Services;
@@ -23,6 +24,7 @@ public class CalendarUtilFactory : ICalendarUtilFactory
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IMemoryCache _memoryCache;
     private readonly ILoggerFactory _loggerFactory;
+    private readonly NameDayService _nameDayService;
 
     public CalendarUtilFactory(
         ILogger<PageGeneratorService> logger,
@@ -32,7 +34,8 @@ public class CalendarUtilFactory : ICalendarUtilFactory
         Web2PngService web2PngService,
         IHttpClientFactory httpClientFactory,
         IMemoryCache memoryCache,
-        ILoggerFactory loggerFactory
+        ILoggerFactory loggerFactory,
+        NameDayService nameDayService
         )
     {
         _logger = logger;
@@ -43,6 +46,7 @@ public class CalendarUtilFactory : ICalendarUtilFactory
         _httpClientFactory = httpClientFactory;
         _memoryCache = memoryCache;
         _loggerFactory = loggerFactory;
+        _nameDayService = nameDayService;
     }
 
     public PageGeneratorService Create(Display display, int minimalCacheExpiry = 0)
@@ -56,6 +60,7 @@ public class CalendarUtilFactory : ICalendarUtilFactory
             _httpClientFactory,
             _memoryCache,
             _loggerFactory,
+            _nameDayService,
             display,
             minimalCacheExpiry);
     }
