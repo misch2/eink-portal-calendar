@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36811.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortalCalendarServer", "PortalCalendarServer.csproj", "{FB3F3AB8-0C5D-1882-3006-CE92C99B7232}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortalCalendarServer", "PortalCalendarServer\PortalCalendarServer.csproj", "{FB3F3AB8-0C5D-1882-3006-CE92C99B7232}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortalCalendarServer.Tests", "PortalCalendarServer.Tests\PortalCalendarServer.Tests.csproj", "{2F137018-F6E0-BE3B-9EF7-1FC96446DAE4}"
 EndProject

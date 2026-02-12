@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PortalCalendarServer.csproj" />
+    <ProjectReference Include="..\PortalCalendarServer\PortalCalendarServer.csproj" />
   </ItemGroup>
 
 </Project>
