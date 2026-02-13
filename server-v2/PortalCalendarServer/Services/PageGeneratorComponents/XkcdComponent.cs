@@ -12,17 +12,15 @@ namespace PortalCalendarServer.Services.PageGeneratorComponents;
 public class XkcdComponent : BaseComponent
 {
     private readonly XkcdIntegrationService _integrationService;
-    private XkcdInfo? _xkcdInfo;
 
     public XkcdComponent(
         ILogger<PageGeneratorService> logger,
-        DisplayService? displayService,
-        DateTime date,
+        DisplayService displayService,
         IHttpClientFactory httpClientFactory,
         IMemoryCache memoryCache,
         CalendarContext context,
         ILoggerFactory loggerFactory)
-        : base(logger, displayService, date)
+        : base(logger, displayService)
     {
         _integrationService = new XkcdIntegrationService(
             loggerFactory.CreateLogger<XkcdIntegrationService>(),
@@ -34,24 +32,9 @@ public class XkcdComponent : BaseComponent
     }
 
     /// <summary>
-    /// Get the XKCD comic information formatted for display (lazy loaded)
+    /// Get the XKCD comic information formatted for display
     /// </summary>
-    public XkcdInfo Info
-    {
-        get
-        {
-            if (_xkcdInfo == null)
-            {
-                _xkcdInfo = GetXkcdInfoForDisplay();
-            }
-            return _xkcdInfo;
-        }
-    }
-
-    /// <summary>
-    /// Fetch XKCD comic and prepare it for display
-    /// </summary>
-    private XkcdInfo GetXkcdInfoForDisplay()
+    public XkcdInfo GetInfo()
     {
         _logger.LogDebug("Preparing XKCD comic for display");
 

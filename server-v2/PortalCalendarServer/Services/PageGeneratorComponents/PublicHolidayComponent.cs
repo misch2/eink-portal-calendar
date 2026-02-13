@@ -4,7 +4,7 @@ namespace PortalCalendarServer.Services.PageGeneratorComponents;
 
 /// <summary>
 /// Component for retrieving public holiday information.
-/// Delegates to PublicHolidayService for actual holiday lookups.
+/// Delegates to IPublicHolidayService for actual holiday lookups.
 /// </summary>
 public class PublicHolidayComponent : BaseComponent
 {
@@ -12,45 +12,44 @@ public class PublicHolidayComponent : BaseComponent
 
     public PublicHolidayComponent(
         ILogger<PageGeneratorService> logger,
-        DisplayService? displayService,
-        DateTime date,
+        DisplayService displayService,
         IPublicHolidayService publicHolidayService)
-        : base(logger, displayService, date)
+        : base(logger, displayService)
     {
         _publicHolidayService = publicHolidayService;
     }
 
     /// <summary>
-    /// Get public holiday information for the current date.
+    /// Get public holiday information for the specified date.
     /// Returns null if the date is not a public holiday.
     /// </summary>
-    public PublicHolidayInfo? GetPublicHolidayInfo()
+    public PublicHolidayInfo? GetPublicHolidayInfo(DateTime date)
     {
-        _logger.LogDebug("Getting public holiday information for {Date}", _date);
-        return _publicHolidayService.GetPublicHoliday(_date);
+        _logger.LogDebug("Getting public holiday information for {Date}", date);
+        return _publicHolidayService.GetPublicHoliday(date);
     }
 
     /// <summary>
-    /// Get all public holidays for the current year
+    /// Get all public holidays for the year of the specified date
     /// </summary>
-    public List<PublicHolidayInfo> GetYearHolidays()
+    public List<PublicHolidayInfo> GetYearHolidays(DateTime date)
     {
-        return _publicHolidayService.GetPublicHolidaysForYear(_date.Year);
+        return _publicHolidayService.GetPublicHolidaysForYear(date.Year);
     }
 
     /// <summary>
-    /// Check if the current date is a public holiday
+    /// Check if the specified date is a public holiday
     /// </summary>
-    public bool IsPublicHoliday()
+    public bool IsPublicHoliday(DateTime date)
     {
-        return _publicHolidayService.IsPublicHoliday(_date);
+        return _publicHolidayService.IsPublicHoliday(date);
     }
 
     /// <summary>
-    /// Get the next public holiday after the current date
+    /// Get the next public holiday after the specified date
     /// </summary>
-    public PublicHolidayInfo? GetNextHoliday()
+    public PublicHolidayInfo? GetNextHoliday(DateTime date)
     {
-        return _publicHolidayService.GetNextPublicHoliday(_date);
+        return _publicHolidayService.GetNextPublicHoliday(date);
     }
 }

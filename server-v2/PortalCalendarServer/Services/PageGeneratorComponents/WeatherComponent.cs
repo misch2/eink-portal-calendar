@@ -19,12 +19,11 @@ public class WeatherComponent : BaseComponent
     public WeatherComponent(
         ILogger<PageGeneratorService> logger,
         DisplayService displayService,
-        DateTime date,
         IHttpClientFactory httpClientFactory,
         IMemoryCache memoryCache,
         CalendarContext context,
         ILoggerFactory loggerFactory)
-        : base(logger, displayService, date)
+        : base(logger, displayService)
     {
         _httpClientFactory = httpClientFactory;
         _memoryCache = memoryCache;
@@ -32,10 +31,10 @@ public class WeatherComponent : BaseComponent
         _loggerFactory = loggerFactory;
     }
 
-    public async Task<WeatherInfo?> GetWeatherAsync()
+    public async Task<WeatherInfo?> GetWeatherAsync(DateTime date)
     {
         // Try Met.no first
-        var metNoWeather = await GetMetNoWeatherAsync();
+        var metNoWeather = await GetMetNoWeatherAsync(date);
         if (metNoWeather != null)
         {
             return metNoWeather;
@@ -45,9 +44,9 @@ public class WeatherComponent : BaseComponent
     }
 
     /// <summary>
-    /// Get current weather and forecast from Met.no
+    /// Get current weather and forecast from Met.no for the specified date
     /// </summary>
-    public async Task<WeatherInfo?> GetMetNoWeatherAsync()
+    public async Task<WeatherInfo?> GetMetNoWeatherAsync(DateTime date)
     {
         if (!_displayService.GetConfigBool("metnoweather"))
             return null;
@@ -77,7 +76,7 @@ public class WeatherComponent : BaseComponent
 
             var detailedForecast = await service.GetForecastAsync();
             
-            var dtStart = _date.ToUniversalTime();
+            var dtStart = date.ToUniversalTime();
             dtStart = new DateTime(dtStart.Year, dtStart.Month, dtStart.Day, dtStart.Hour, 0, 0, DateTimeKind.Utc);
 
             // Current weather (1 hour aggregate from now)

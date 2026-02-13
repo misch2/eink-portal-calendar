@@ -9,9 +9,10 @@
     displayService.UseDisplay(Model.Display);
 
     var xkcd = Model.Xkcd;
+    var xkcdInfo = xkcd?.GetInfo();
     string? mockOrientation = null; // or "landscape" for testing
     
-    var isLandscape = (mockOrientation == "landscape") || (xkcd?.Info.ImageIsLandscape ?? false);
+    var isLandscape = (mockOrientation == "landscape") || (xkcdInfo?.ImageIsLandscape ?? false);
 }
 <!DOCTYPE html>
 <html>
@@ -40,10 +41,10 @@
     {
         <div class="landscape">
             <div class="image-and-alt">
-                <h1>@(xkcd?.Info.Title ?? "XKCD Comic")</h1>
-                <img src="@(mockOrientation == "landscape" ? "/images/landscape_example.jpg" : xkcd?.Info.ImageAsDataUrl ?? "")" alt="XKCD comic" />
+                <h1>@(xkcdInfo?.Title ?? "XKCD Comic")</h1>
+                <img src="@(mockOrientation == "landscape" ? "/images/landscape_example.jpg" : xkcdInfo?.ImageAsDataUrl ?? "")" alt="XKCD comic" />
                 <div class="alt">
-                    @(xkcd?.Info.Alt ?? "")
+                    @(xkcdInfo?.Alt ?? "")
                 </div>
             </div>
         </div>
@@ -52,11 +53,11 @@
     {
         <div class="portrait">
             <div class="image-and-alt">
-                <img src="@(mockOrientation == "portrait" ? "/images/portrait_example.jpg" : xkcd?.Info.ImageAsDataUrl ?? "")" alt="XKCD comic" />
+                <img src="@(mockOrientation == "portrait" ? "/images/portrait_example.jpg" : xkcdInfo?.ImageAsDataUrl ?? "")" alt="XKCD comic" />
                 <div class="title-and-alt">
-                    <h1>@(xkcd?.Info.Title ?? "XKCD Comic")</h1>
+                    <h1>@(xkcdInfo?.Title ?? "XKCD Comic")</h1>
                     <div class="alt">
-                        @(xkcd?.Info.Alt ?? "")
+                        @(xkcdInfo?.Alt ?? "")
                     </div>
                 </div>
             </div>

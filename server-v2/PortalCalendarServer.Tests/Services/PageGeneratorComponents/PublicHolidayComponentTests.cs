@@ -20,12 +20,11 @@ public class PublicHolidayComponentTests
         _mockPublicHolidayService = new Mock<IPublicHolidayService>();
     }
 
-    private PublicHolidayComponent CreateComponent(DateTime date)
+    private PublicHolidayComponent CreateComponent()
     {
         return new PublicHolidayComponent(
             _mockLogger.Object,
-            null, // DisplayService not needed for these tests
-            date,
+            null!, // DisplayService not needed for these tests
             _mockPublicHolidayService.Object);
     }
 
@@ -46,10 +45,10 @@ public class PublicHolidayComponentTests
             .Setup(s => s.GetPublicHoliday(date, It.IsAny<string>()))
             .Returns(expectedInfo);
 
-        var component = CreateComponent(date);
+        var component = CreateComponent();
 
         // Act
-        var result = component.GetPublicHolidayInfo();
+        var result = component.GetPublicHolidayInfo(date);
 
         // Assert
         Assert.NotNull(result);
@@ -68,17 +67,17 @@ public class PublicHolidayComponentTests
             .Setup(s => s.GetPublicHoliday(It.IsAny<DateTime>(), It.IsAny<string>()))
             .Returns((PublicHolidayInfo?)null);
 
-        var component = CreateComponent(date);
+        var component = CreateComponent();
 
         // Act
-        var result = component.GetPublicHolidayInfo();
+        var result = component.GetPublicHolidayInfo(date);
 
         // Assert
         Assert.Null(result);
     }
 
     [Fact]
-    public void GetPublicHolidayInfo_UsesComponentDate()
+    public void GetPublicHolidayInfo_UsesDifferentDates()
     {
         // Arrange
         var date1 = new DateTime(2024, 1, 1);
@@ -92,12 +91,11 @@ public class PublicHolidayComponentTests
             .Setup(s => s.GetPublicHoliday(date2, It.IsAny<string>()))
             .Returns(new PublicHolidayInfo { Name = "Christmas Day", Date = date2, CountryCode = "CZ" });
 
-        var component1 = CreateComponent(date1);
-        var component2 = CreateComponent(date2);
+        var component = CreateComponent();
 
         // Act
-        var result1 = component1.GetPublicHolidayInfo();
-        var result2 = component2.GetPublicHolidayInfo();
+        var result1 = component.GetPublicHolidayInfo(date1);
+        var result2 = component.GetPublicHolidayInfo(date2);
 
         // Assert
         Assert.NotNull(result1);
@@ -123,10 +121,10 @@ public class PublicHolidayComponentTests
             .Setup(s => s.GetPublicHolidaysForYear(2024, It.IsAny<string>()))
             .Returns(expectedList);
 
-        var component = CreateComponent(date);
+        var component = CreateComponent();
 
         // Act
-        var result = component.GetYearHolidays();
+        var result = component.GetYearHolidays(date);
 
         // Assert
         Assert.NotNull(result);
@@ -135,7 +133,7 @@ public class PublicHolidayComponentTests
     }
 
     [Fact]
-    public void GetYearHolidays_UsesCurrentYear()
+    public void GetYearHolidays_UsesDifferentYears()
     {
         // Arrange
         var date2024 = new DateTime(2024, 6, 1);
@@ -149,12 +147,11 @@ public class PublicHolidayComponentTests
             .Setup(s => s.GetPublicHolidaysForYear(2025, It.IsAny<string>()))
             .Returns(new List<PublicHolidayInfo>());
 
-        var component2024 = CreateComponent(date2024);
-        var component2025 = CreateComponent(date2025);
+        var component = CreateComponent();
 
         // Act
-        component2024.GetYearHolidays();
-        component2025.GetYearHolidays();
+        component.GetYearHolidays(date2024);
+        component.GetYearHolidays(date2025);
 
         // Assert
         _mockPublicHolidayService.Verify(s => s.GetPublicHolidaysForYear(2024, It.IsAny<string>()), Times.Once());
@@ -171,10 +168,10 @@ public class PublicHolidayComponentTests
             .Setup(s => s.IsPublicHoliday(date, It.IsAny<string>()))
             .Returns(true);
 
-        var component = CreateComponent(date);
+        var component = CreateComponent();
 
         // Act
-        var result = component.IsPublicHoliday();
+        var result = component.IsPublicHoliday(date);
 
         // Assert
         Assert.True(result);
@@ -191,10 +188,10 @@ public class PublicHolidayComponentTests
             .Setup(s => s.IsPublicHoliday(date, It.IsAny<string>()))
             .Returns(false);
 
-        var component = CreateComponent(date);
+        var component = CreateComponent();
 
         // Act
-        var result = component.IsPublicHoliday();
+        var result = component.IsPublicHoliday(date);
 
         // Assert
         Assert.False(result);
@@ -216,10 +213,10 @@ public class PublicHolidayComponentTests
             .Setup(s => s.GetNextPublicHoliday(date, It.IsAny<string>()))
             .Returns(expectedHoliday);
 
-        var component = CreateComponent(date);
+        var component = CreateComponent();
 
         // Act
-        var result = component.GetNextHoliday();
+        var result = component.GetNextHoliday(date);
 
         // Assert
         Assert.NotNull(result);
@@ -238,24 +235,28 @@ public class PublicHolidayComponentTests
             .Setup(s => s.GetNextPublicHoliday(date, It.IsAny<string>()))
             .Returns((PublicHolidayInfo?)null);
 
-        var component = CreateComponent(date);
+        var component = CreateComponent();
 
         // Act
-        var result = component.GetNextHoliday();
+        var result = component.GetNextHoliday(date);
 
         // Assert
         Assert.Null(result);
     }
 
     [Fact]
-    public void Constructor_InitializesWithProvidedDate()
+    public void GetPublicHolidayInfo_WithProvidedDate_CallsServiceWithThatDate()
     {
         // Arrange
         var date = new DateTime(2024, 5, 1);
+        _mockPublicHolidayService
+            .Setup(s => s.GetPublicHoliday(date, It.IsAny<string>()))
+            .Returns(new PublicHolidayInfo { Name = "Test Holiday", Date = date, CountryCode = "CZ" });
+
+        var component = CreateComponent();
 
         // Act
-        var component = CreateComponent(date);
-        var result = component.GetPublicHolidayInfo();
+        component.GetPublicHolidayInfo(date);
 
         // Assert
         _mockPublicHolidayService.Verify(s => s.GetPublicHoliday(date, It.IsAny<string>()), Times.Once());
@@ -270,10 +271,10 @@ public class PublicHolidayComponentTests
             .Setup(s => s.GetPublicHoliday(It.IsAny<DateTime>(), It.IsAny<string>()))
             .Returns(new PublicHolidayInfo { Name = "Test Holiday", Date = date, CountryCode = "CZ" });
 
-        var component = CreateComponent(date);
+        var component = CreateComponent();
 
         // Act
-        component.GetPublicHolidayInfo();
+        component.GetPublicHolidayInfo(date);
 
         // Assert
         _mockLogger.Verify(

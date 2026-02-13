@@ -25,8 +25,12 @@
     var iconsComponent = Model.PortalIcons;
     var calendarComponent = Model.Calendar;
 
-    var calendar = calendarComponent.Details();
-    var icons = iconsComponent.GenerateIcons(calendar.HasEntries);
+    var calendar = calendarComponent.GetDetails(Model.Date);
+    var icons = iconsComponent.GenerateIcons(Model.Date, calendar.HasEntries);
+    
+    // Generate weight data with consistent randomization based on date
+    var weightSeries = Model.Weight?.GetWeightSeries(Model.Date);
+    var lastWeight = Model.Weight?.GetLastWeight();
 }
 <!DOCTYPE html>
 <html>
@@ -56,9 +60,9 @@
             data.addColumn('number', 'Weight');
 
             data.addRows([
-                @if (Model.Weight.WeightSeries != null)
+                @if (weightSeries != null)
                 {
-                    @foreach (var point in Model.Weight.WeightSeries)
+                    @foreach (var point in weightSeries)
                     {
                         <text>
                         [
@@ -87,9 +91,9 @@
                     minorGridlines: { color: 'transparent' },
                     textStyle: { fontSize: 10, color: '#000000' },
                     ticks: [
-                        @if (Model.Weight.WeightSeries != null)
+                        @if (weightSeries != null)
                         {
-                            @foreach (var point in Model.Weight.WeightSeries.Where(p => p.Date.Day == 1))
+                            @foreach (var point in weightSeries.Where(p => p.Date.Day == 1))
                             {
                                 <text>
                                 {
@@ -140,9 +144,9 @@
         </div>
 
         <div class="current-weight-big">
-            @if (Model.Weight.LastWeight.HasValue)
+            @if (lastWeight.HasValue)
             {
-                <span>@Model.Weight.LastWeight.Value.ToString("F1", CultureInfo.InvariantCulture)</span>
+                <span>@lastWeight.Value.ToString("F1", CultureInfo.InvariantCulture)</span>
             }
             else
             {

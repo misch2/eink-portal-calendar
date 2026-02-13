@@ -38,22 +38,21 @@ public class PortalIconsComponent : BaseComponent
 
     public PortalIconsComponent(
         ILogger<PageGeneratorService> logger,
-        DisplayService displayService,
-        DateTime date) : base(logger, displayService, date)
+        DisplayService displayService) : base(logger, displayService)
     {
     }
 
     /// <summary>
     /// Generate Portal icons for the display based on date and calendar settings
     /// </summary>
-    public List<IconViewModel> GenerateIcons(bool hasCalendarEntries)
+    public List<IconViewModel> GenerateIcons(DateTime date, bool hasCalendarEntries)
     {
         var icons = new List<IconViewModel>();
         var totallyRandom = _displayService.GetConfigBool("totally_random_icon");
 
         if (!totallyRandom)
         {
-            icons = _generateChamberIcons();
+            icons = _generateChamberIcons(date);
 
             // Limit icons if calendar entries exist
             if (hasCalendarEntries)
@@ -67,7 +66,7 @@ public class PortalIconsComponent : BaseComponent
         }
         else
         {
-            icons = _generateRandomIcons(hasCalendarEntries);
+            icons = _generateRandomIcons(date, hasCalendarEntries);
         }
 
         return icons;
@@ -76,10 +75,10 @@ public class PortalIconsComponent : BaseComponent
     /// <summary>
     /// Generate icons based on Portal chamber configurations
     /// </summary>
-    private List<IconViewModel> _generateChamberIcons()
+    private List<IconViewModel> _generateChamberIcons(DateTime date)
     {
         var icons = new List<IconViewModel>();
-        var dayIndex = _date.Day - 1; // 0-based index
+        var dayIndex = date.Day - 1; // 0-based index
 
         if (dayIndex < ChamberIconsByDay.Count)
         {
@@ -103,10 +102,10 @@ public class PortalIconsComponent : BaseComponent
     /// <summary>
     /// Generate random icons with consistent seed based on date
     /// </summary>
-    private List<IconViewModel> _generateRandomIcons(bool hasCalendarEntries)
+    private List<IconViewModel> _generateRandomIcons(DateTime date, bool hasCalendarEntries)
     {
         var icons = new List<IconViewModel>();
-        var seed = int.Parse(_date.ToString("yyyyMMdd"));
+        var seed = int.Parse(date.ToString("yyyyMMdd"));
         var random = new Random(seed);
         var grayProbability = 0.25;
 

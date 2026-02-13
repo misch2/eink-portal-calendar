@@ -7,17 +7,16 @@ namespace PortalCalendarServer.Services.PageGeneratorComponents;
 public class CalendarComponent(
     ILogger<PageGeneratorService> logger,
     DisplayService displayService,
-    DateTime date,
     IHttpClientFactory httpClientFactory,
     IMemoryCache memoryCache,
     CalendarContext context,
-    ILoggerFactory loggerFactory) : BaseComponent(logger, displayService, date)
+    ILoggerFactory loggerFactory) : BaseComponent(logger, displayService)
 {
 
     /// <summary>
-    /// Get calendar component (icons and events)
+    /// Get calendar component (icons and events) for the specified date
     /// </summary>
-    public CalendarInfo Details()
+    public CalendarInfo GetDetails(DateTime date)
     {
         var todayEvents = new List<CalendarEvent>();
         var nearestEvents = new List<CalendarEvent>();
@@ -25,11 +24,11 @@ public class CalendarComponent(
         // Load calendar events from up to 3 ICS calendars
         for (int calendarNo = 1; calendarNo <= 3; calendarNo++)
         {
-            var enabled = _displayService?.GetConfigBool($"web_calendar{calendarNo}") ?? false;
+            var enabled = _displayService.GetConfigBool($"web_calendar{calendarNo}");
             if (!enabled)
                 continue;
 
-            var url = _displayService?.GetConfig($"web_calendar_ics_url{calendarNo}");
+            var url = _displayService.GetConfig($"web_calendar_ics_url{calendarNo}");
             if (string.IsNullOrEmpty(url))
                 continue;
 
@@ -42,10 +41,10 @@ public class CalendarComponent(
                     memoryCache,
                     context,
                     url,
-                    _displayService?.GetCurrentDisplay());
+                    _displayService.GetCurrentDisplay());
 
                 // Get today's events
-                var today = _date.Date;
+                var today = date.Date;
                 var endOfDay = today.AddDays(1).AddSeconds(-1);
                 var todayEventsData = calendarService.GetEventsBetweenAsync(today, endOfDay)
                     .GetAwaiter().GetResult();
@@ -85,7 +84,7 @@ public class CalendarComponent(
     /// <summary>
     /// Convert CalendarEventData to CalendarEvent
     /// </summary>
-    private CalendarEvent ConvertToCalendarEvent(CalendarEventData data)
+    private static CalendarEvent ConvertToCalendarEvent(CalendarEventData data)
     {
         return new CalendarEvent
         {

@@ -13,29 +13,28 @@ public class NameDayComponent : BaseComponent
 
     public NameDayComponent(
         ILogger<PageGeneratorService> logger,
-        DisplayService? displayService,
-        DateTime date,
+        DisplayService displayService,
         NameDayService nameDayService)
-        : base(logger, displayService, date)
+        : base(logger, displayService)
     {
         _nameDayService = nameDayService;
     }
 
     /// <summary>
-    /// Get name day information for the current date in Czech calendar.
+    /// Get name day information for the specified date in Czech calendar.
     /// Returns null if no name day is celebrated on this date.
     /// </summary>
-    public NameDayInfo? GetNameDayInfo()
+    public NameDayInfo? GetNameDayInfo(DateTime date)
     {
-        _logger.LogDebug("Getting name day information for {Date}", _date);
-        return _nameDayService.GetNameDay(_date);
+        _logger.LogDebug("Getting name day information for {Date}", date);
+        return _nameDayService.GetNameDay(date);
     }
 
     /// <summary>
-    /// Get all name days for the current month
+    /// Get all name days for the specified month
     /// </summary>
-    public List<NameDayInfo> GetMonthNameDays()
+    public List<NameDayInfo> GetMonthNameDays(DateTime date)
     {
-        return _nameDayService.GetNameDaysForMonth(_date.Year, _date.Month);
+        return _nameDayService.GetNameDaysForMonth(date.Year, date.Month);
     }
 }

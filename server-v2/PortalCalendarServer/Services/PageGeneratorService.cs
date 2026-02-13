@@ -55,9 +55,6 @@ public class PageGeneratorService
     public PageViewModel PageViewModelForDate(Display display, DateTime date, bool previewColors = false)
     {
         _displayService.UseDisplay(display);
-        
-        var seed = int.Parse(date.ToString("yyyyMMdd"));
-        var random = new Random(seed);
 
         var viewModel = new PageViewModel
         {
@@ -67,13 +64,13 @@ public class PageGeneratorService
         };
 
         viewModel.InitializeComponents(
-            portalIconsFactory: () => new PortalIconsComponent(_logger, _displayService, date),
-            calendarFactory: () => new CalendarComponent(_logger, _displayService, date, _httpClientFactory, _memoryCache, _context, _loggerFactory),
-            weightFactory: () => new WeightComponent(_logger, date, random),
-            xkcdFactory: () => new XkcdComponent(_logger, _displayService, date, _httpClientFactory, _memoryCache, _context, _loggerFactory),
-            publicHolidayFactory: () => new PublicHolidayComponent(_logger, _displayService, date, _publicHolidayService),
-            nameDayFactory: () => new NameDayComponent(_logger, _displayService, date, _nameDayService),
-            weatherFactory: () => new WeatherComponent(_logger, _displayService, date, _httpClientFactory, _memoryCache, _context, _loggerFactory)
+            portalIconsFactory: () => new PortalIconsComponent(_logger, _displayService),
+            calendarFactory: () => new CalendarComponent(_logger, _displayService, _httpClientFactory, _memoryCache, _context, _loggerFactory),
+            weightFactory: () => new WeightComponent(_logger),
+            xkcdFactory: () => new XkcdComponent(_logger, _displayService, _httpClientFactory, _memoryCache, _context, _loggerFactory),
+            publicHolidayFactory: () => new PublicHolidayComponent(_logger, _displayService, _publicHolidayService),
+            nameDayFactory: () => new NameDayComponent(_logger, _displayService, _nameDayService),
+            weatherFactory: () => new WeatherComponent(_logger, _displayService, _httpClientFactory, _memoryCache, _context, _loggerFactory)
         );
 
         return viewModel;
@@ -389,7 +386,6 @@ public class PageViewModel
     private Lazy<WeatherComponent>? _weatherComponent;
 
     // Component instances
-    // FIXME make all mandatory?
     public PortalIconsComponent? PortalIcons => _portalIconsComponent?.Value;
     public CalendarComponent? Calendar => _calendarComponent?.Value;
     public WeightComponent? Weight => _weightComponent?.Value;

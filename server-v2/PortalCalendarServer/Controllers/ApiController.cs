@@ -206,9 +206,9 @@ public class ApiController : ControllerBase
         var colortype = _displayService.GetColorType();
 
         gamma ??= display.Gamma;
-        colors ??= colortype.NumColors;
+        colors ??= colortype?.NumColors;
 
-        var color_palette = colortype.ColorPalette(preview_colors);
+        var color_palette = colortype?.ColorPalette(preview_colors) ?? new List<string>();
         if (color_palette.Count == 0)
         {
             colormap_name = "webmap";

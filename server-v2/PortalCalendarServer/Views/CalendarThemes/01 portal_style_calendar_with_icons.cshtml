@@ -24,8 +24,8 @@
     var iconsComponent = Model.PortalIcons;
     var calendarComponent = Model.Calendar;
 
-    var calendar = calendarComponent?.Details();
-    var icons = iconsComponent?.GenerateIcons(calendar?.HasEntries ?? false);
+    var calendar = calendarComponent?.GetDetails(Model.Date);
+    var icons = iconsComponent?.GenerateIcons(Model.Date, calendar?.HasEntries ?? false);
 }
 <!DOCTYPE html>
 <html>

@@ -1,4 +1,4 @@
-ï»¿@model PortalCalendarServer.Services.PageViewModel
+@model PortalCalendarServer.Services.PageViewModel
 @using PortalCalendarServer.Models
 @using PortalCalendarServer.Services
 @using PortalCalendarServer.Services.PageGeneratorComponents
@@ -19,7 +19,7 @@
     var schedule = wakeupInfo.Schedule;
 
     var calendarComponent = Model.Calendar;
-    var calendar = calendarComponent?.Details();
+    var calendar = calendarComponent?.GetDetails(Model.Date);
     var nearestEvents = calendar?.NearestEvents ?? new List<CalendarEvent>();
 
     // Helper class for grouping events
@@ -27,7 +27,7 @@
     {
         new { 
             Id = "2days", 
-            Title = "Dnes a zÃ­tra", 
+            Title = "Dnes a zítra", 
             Class = "calendar-event-block-today",
             Condition = (Func<CalendarEvent, bool>)(evt => {
                 var deltaDays = (evt.StartTime.Date - now.Date).Days;
@@ -37,7 +37,7 @@
         },
         new { 
             Id = "week", 
-            Title = "NejbliÅ¾Å¡Ã­ch 7 dnÃ­", 
+            Title = "Nejbližších 7 dní", 
             Class = "calendar-event-block-week",
             Condition = (Func<CalendarEvent, bool>)(evt => {
                 var deltaDays = (evt.StartTime.Date - now.Date).Days;
@@ -46,7 +46,7 @@
         },
         new { 
             Id = "rest", 
-            Title = "PozdÄ›jÅ¡Ã­ udÃ¡losti", 
+            Title = "Pozdìjší události", 
             Class = "calendar-event-block-rest",
             Condition = (Func<CalendarEvent, bool>)(evt => {
                 var deltaDays = (evt.StartTime.Date - now.Date).Days;
@@ -118,12 +118,12 @@
                             <div class="calendar-event">
                                 @if (evt.IsRecurrent)
                                 {
-                                    <text>â†»</text>
+                                    <text>?</text>
                                 }
                                 @if (evt.AllDay)
                                 {
                                     @evt.Summary
-                                    <!-- (celÃ½ den) -->
+                                    <!-- (celý den) -->
                                 }
                                 else
                                 {

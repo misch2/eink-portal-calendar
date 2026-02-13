@@ -27,11 +27,11 @@
     var nameDayComponent = Model.NameDay;
     var weatherComponent = Model.Weather;
 
-    var holidayInfo = publicHolidayComponent?.GetPublicHolidayInfo();
-    var nameDayInfo = nameDayComponent?.GetNameDayInfo();
+    var holidayInfo = publicHolidayComponent?.GetPublicHolidayInfo(Model.Date);
+    var nameDayInfo = nameDayComponent?.GetNameDayInfo(Model.Date);
 
     // Get weather data
-    var weatherInfo = weatherComponent == null ? null : await weatherComponent.GetWeatherAsync();
+    var weatherInfo = weatherComponent == null ? null : await weatherComponent.GetWeatherAsync(Model.Date);
     var currentWeather = weatherInfo?.CurrentWeather;
     var forecast = weatherInfo?.Forecast ?? new List<AggregatedWeatherData>();
 
