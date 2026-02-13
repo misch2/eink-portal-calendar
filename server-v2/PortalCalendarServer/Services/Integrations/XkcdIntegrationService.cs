@@ -74,9 +74,9 @@ public class XkcdIntegrationService : IntegrationServiceBase
         Logger.LogDebug("XKCD JSON cache MISS - fetching from web");
 
         // Fetch from web
-        var client = GetHttpClient();
         var url = "https://xkcd.com/info.0.json";
 
+        var client = GetHttpClient();
         var response = await client.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
 

@@ -25,12 +25,13 @@
 
     var publicHolidayComponent = Model.PublicHoliday;
     var nameDayComponent = Model.NameDay;
+    var weatherComponent = Model.Weather;
 
     var holidayInfo = publicHolidayComponent?.GetPublicHolidayInfo();
     var nameDayInfo = nameDayComponent?.GetNameDayInfo();
 
     // Get weather data
-    var weatherInfo = Model.Weather != null ? await Model.Weather.GetMetNoWeatherAsync() : null;
+    var weatherInfo = weatherComponent == null ? null : await weatherComponent.GetWeatherAsync();
     var currentWeather = weatherInfo?.CurrentWeather;
     var forecast = weatherInfo?.Forecast ?? new List<AggregatedWeatherData>();
 
@@ -112,7 +113,7 @@
 
         <div class="date-row top-date-row">
             <div>
-                @Model.Date.Day. @decorator(Model.Date.ToString("MMMM", dateCulture))
+                @decorator(Model.Date.ToString("M", dateCulture))
             </div>
             <div>
                 @* Name day *@

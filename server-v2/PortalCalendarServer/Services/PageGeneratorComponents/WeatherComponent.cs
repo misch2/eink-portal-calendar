@@ -32,6 +32,18 @@ public class WeatherComponent : BaseComponent
         _loggerFactory = loggerFactory;
     }
 
+    public async Task<WeatherInfo?> GetWeatherAsync()
+    {
+        // Try Met.no first
+        var metNoWeather = await GetMetNoWeatherAsync();
+        if (metNoWeather != null)
+        {
+            return metNoWeather;
+        }
+        // FIXME add fallback to OpenWeatherMap
+        return null;
+    }
+
     /// <summary>
     /// Get current weather and forecast from Met.no
     /// </summary>

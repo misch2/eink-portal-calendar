@@ -68,8 +68,6 @@ public class MetNoWeatherService : IntegrationServiceBase
         Logger.LogDebug("Met.no JSON cache MISS, fetching from {Url}", url);
 
         var client = GetHttpClient();
-        client.DefaultRequestHeaders.Add("User-Agent", "PortalCalendar/2.0 (github.com/misch2/eink-portal-calendar)");
-        
         var response = await client.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
 
