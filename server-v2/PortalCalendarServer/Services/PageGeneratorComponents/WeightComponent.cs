@@ -1,28 +1,70 @@
-﻿namespace PortalCalendarServer.Services.PageGeneratorComponents;
+﻿using PortalCalendarServer.Services.Integrations;
 
-public class WeightComponent(ILogger<PageGeneratorService> logger)
+namespace PortalCalendarServer.Services.PageGeneratorComponents;
+
+public class WeightComponent
 {
-    private readonly ILogger<PageGeneratorService> _logger = logger;
+    private readonly ILogger<PageGeneratorService> _logger;
+    private readonly GoogleFitIntegrationService _googleFitService;
+    private readonly bool _isAvailable;
+
+    public WeightComponent(
+        ILogger<PageGeneratorService> logger,
+        GoogleFitIntegrationService googleFitService)
+    {
+        _logger = logger;
+        _googleFitService = googleFitService;
+        _isAvailable = googleFitService.IsAvailable();
+    }
 
     public decimal? GetLastWeight()
     {
-        _logger.LogDebug("Computing LastWeight on demand");
-        // TODO: Replace with actual Google Fit integration
-        return 106.8m;
+        if (!_isAvailable)
+        {
+            _logger.LogDebug("Google Fit not available, returning null for LastWeight");
+            return null;
+        }
+
+        _logger.LogDebug("Computing LastWeight from Google Fit");
+
+        try
+        {
+            var task = _googleFitService.GetLastKnownWeightAsync();
+            task.Wait();
+            return task.Result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting last weight from Google Fit");
+            return null;
+        }
     }
 
     public List<WeightDataPoint> GetWeightSeries(DateTime date)
     {
-        _logger.LogDebug("Computing WeightSeries on demand");
-        // TODO: Replace with actual Google Fit integration
-        Random random = new Random(date.GetHashCode());
-        return Enumerable.Range(0, 90)
-            .Select(i => new WeightDataPoint
+        if (!_isAvailable)
+        {
+            _logger.LogDebug("Google Fit not available, returning empty WeightSeries");
+            return new List<WeightDataPoint>();
+        }
+
+        _logger.LogDebug("Computing WeightSeries from Google Fit");
+
+        try
+        {
+            var task = _googleFitService.GetWeightSeriesAsync();
+            task.Wait();
+            return task.Result.Select(w => new WeightDataPoint
             {
-                Date = date.AddDays(-89 + i),
-                Weight = 110m - i * 0.1m + (decimal)(random.NextDouble() * 2 - 1)
-            })
-            .ToList();
+                Date = w.Date,
+                Weight = w.Weight
+            }).ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting weight series from Google Fit");
+            return new List<WeightDataPoint>();
+        }
     }
 }
 

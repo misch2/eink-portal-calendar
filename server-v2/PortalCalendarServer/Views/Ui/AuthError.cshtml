@@ -1,0 +1,15 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Authentication Error";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="alert alert-danger">
+    <h4>Authentication Failed</h4>
+    <p>@ViewData["Error"]</p>
+</div>
+
+<p>
+    <a href="/" class="btn btn-primary">Return to Home</a>
+</p>

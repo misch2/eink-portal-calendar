@@ -66,7 +66,16 @@ public class PageGeneratorService
         viewModel.InitializeComponents(
             portalIconsFactory: () => new PortalIconsComponent(_displayService),
             calendarFactory: () => new CalendarComponent(_logger, _displayService, _httpClientFactory, _memoryCache, _context, _loggerFactory),
-            weightFactory: () => new WeightComponent(_logger),
+            weightFactory: () => {
+                var googleFitService = new GoogleFitIntegrationService(
+                    _loggerFactory.CreateLogger<GoogleFitIntegrationService>(),
+                    _httpClientFactory,
+                    _memoryCache,
+                    _context,
+                    display,
+                    0);
+                return new WeightComponent(_logger, googleFitService);
+            },
             xkcdFactory: () => new XkcdComponent(_logger, _httpClientFactory, _memoryCache, _context, _loggerFactory),
             publicHolidayFactory: () => new PublicHolidayComponent(_logger, _publicHolidayService),
             nameDayFactory: () => new NameDayComponent(_logger, _nameDayService),
