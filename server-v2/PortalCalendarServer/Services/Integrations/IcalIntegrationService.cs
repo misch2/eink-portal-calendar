@@ -100,7 +100,7 @@ public class IcalIntegrationService : IntegrationServiceBase
                 {
                     if (calEvent.Start == null || calEvent.End == null)
                     {
-                        Logger.LogWarning("Event {Uid} has invalid start or end time", calEvent.Uid);
+                        Logger.LogWarning("Event {Uid} has invalid start or end time: {Summart}", calEvent.Uid, calEvent.Summary);
                         continue;
                     }
 

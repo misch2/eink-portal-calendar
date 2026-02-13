@@ -44,6 +44,18 @@ public class DisplayService(
         return _currentDisplay;
     }
 
+    /// <summary>
+    /// Get the currently set display (throws if not set)
+    /// </summary>
+    public Display CurrentDisplay
+    {
+        get
+        {
+            ValidateDisplayIsSet();
+            return _currentDisplay!;
+        }
+    }
+
     public TimeZoneInfo GetTimeZoneInfo()
     {
         ValidateDisplayIsSet();
@@ -116,6 +128,48 @@ public class DisplayService(
         }
 
         return value == "1" || value.Equals("true", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Get configuration value as integer
+    /// </summary>
+    public int? GetConfigInt(string name)
+    {
+        ValidateDisplayIsSet();
+        
+        var value = GetConfig(name);
+        if (string.IsNullOrEmpty(value))
+        {
+            return null;
+        }
+
+        if (int.TryParse(value, out var result))
+        {
+            return result;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Get configuration value as double
+    /// </summary>
+    public double? GetConfigDouble(string name)
+    {
+        ValidateDisplayIsSet();
+        
+        var value = GetConfig(name);
+        if (string.IsNullOrEmpty(value))
+        {
+            return null;
+        }
+
+        if (double.TryParse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var result))
+        {
+            return result;
+        }
+
+        return null;
     }
 
     /// <summary>

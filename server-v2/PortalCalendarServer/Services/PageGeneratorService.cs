@@ -72,7 +72,8 @@ public class PageGeneratorService
             weightFactory: () => new WeightComponent(_logger, date, random),
             xkcdFactory: () => new XkcdComponent(_logger, _displayService, date, _httpClientFactory, _memoryCache, _context, _loggerFactory),
             publicHolidayFactory: () => new PublicHolidayComponent(_logger, _displayService, date, _publicHolidayService),
-            nameDayFactory: () => new NameDayComponent(_logger, _displayService, date, _nameDayService)
+            nameDayFactory: () => new NameDayComponent(_logger, _displayService, date, _nameDayService),
+            weatherFactory: () => new WeatherComponent(_logger, _displayService, date, _httpClientFactory, _memoryCache, _context, _loggerFactory)
         );
 
         return viewModel;
@@ -385,6 +386,7 @@ public class PageViewModel
     private Lazy<XkcdComponent>? _xkcdComponent;
     private Lazy<PublicHolidayComponent>? _publicHolidayComponent;
     private Lazy<NameDayComponent>? _nameDayComponent;
+    private Lazy<WeatherComponent>? _weatherComponent;
 
     // Component instances
     // FIXME make all mandatory?
@@ -394,6 +396,7 @@ public class PageViewModel
     public XkcdComponent? Xkcd => _xkcdComponent?.Value;
     public PublicHolidayComponent? PublicHoliday => _publicHolidayComponent?.Value;
     public NameDayComponent? NameDay => _nameDayComponent?.Value;
+    public WeatherComponent? Weather => _weatherComponent?.Value;
 
     internal void InitializeComponents(
         Func<PortalIconsComponent> portalIconsFactory,
@@ -401,7 +404,8 @@ public class PageViewModel
         Func<WeightComponent> weightFactory,
         Func<XkcdComponent> xkcdFactory,
         Func<PublicHolidayComponent> publicHolidayFactory,
-        Func<NameDayComponent> nameDayFactory)
+        Func<NameDayComponent> nameDayFactory,
+        Func<WeatherComponent> weatherFactory)
     {
         _portalIconsComponent = new Lazy<PortalIconsComponent>(portalIconsFactory);
         _calendarComponent = new Lazy<CalendarComponent>(calendarFactory);
@@ -409,6 +413,7 @@ public class PageViewModel
         _xkcdComponent = new Lazy<XkcdComponent>(xkcdFactory);
         _publicHolidayComponent = new Lazy<PublicHolidayComponent>(publicHolidayFactory);
         _nameDayComponent = new Lazy<NameDayComponent>(nameDayFactory);
+        _weatherComponent = new Lazy<WeatherComponent>(weatherFactory);
     }
 }
 
