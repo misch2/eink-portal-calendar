@@ -1,14 +1,15 @@
 namespace PortalCalendarServer.Services.PageGeneratorComponents;
 
-public class PortalIconsComponent : BaseComponent
+public class PortalIconsComponent(
+    DisplayService displayService)
 {
     // Portal icon constants
-    private static readonly string[] PortalIcons = new[]
-    {
+    private static readonly string[] PortalIcons =
+    [
         "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10",
         "a11", "a12", "a13", "a14", "a15", "b11", "b14", "c3", "c4",
         "c7", "d2", "d3", "d4", "d5", "e1", "e2", "e4"
-    };
+    ];
 
     private static readonly Dictionary<string, string> IconNameToFilename = new()
     {
@@ -34,30 +35,24 @@ public class PortalIconsComponent : BaseComponent
     };
 
     // Chamber icons by day (31 days worth of Portal 1 & 2 chamber configurations)
-    private static readonly List<List<(string name, bool enabled)>> ChamberIconsByDay = _initializeChamberIcons();
-
-    public PortalIconsComponent(
-        ILogger<PageGeneratorService> logger,
-        DisplayService displayService) : base(logger, displayService)
-    {
-    }
+    private static readonly List<List<(string name, bool enabled)>> ChamberIconsByDay = InitializeChamberIcons();
 
     /// <summary>
     /// Generate Portal icons for the display based on date and calendar settings
     /// </summary>
     public List<IconViewModel> GenerateIcons(DateTime date, bool hasCalendarEntries)
     {
-        var icons = new List<IconViewModel>();
-        var totallyRandom = _displayService.GetConfigBool("totally_random_icon");
+        List<IconViewModel> icons;
+        var totallyRandom = displayService.GetConfigBool("totally_random_icon");
 
         if (!totallyRandom)
         {
-            icons = _generateChamberIcons(date);
+            icons = GenerateChamberIcons(date);
 
             // Limit icons if calendar entries exist
             if (hasCalendarEntries)
             {
-                var maxIcons = int.Parse(_displayService.GetConfig("max_icons_with_calendar") ?? "5");
+                var maxIcons = int.Parse(displayService.GetConfig("max_icons_with_calendar") ?? "5");
                 if (icons.Count > maxIcons)
                 {
                     icons = icons.Take(maxIcons).ToList();
@@ -66,7 +61,7 @@ public class PortalIconsComponent : BaseComponent
         }
         else
         {
-            icons = _generateRandomIcons(date, hasCalendarEntries);
+            icons = GenerateRandomIcons(date, hasCalendarEntries);
         }
 
         return icons;
@@ -75,7 +70,7 @@ public class PortalIconsComponent : BaseComponent
     /// <summary>
     /// Generate icons based on Portal chamber configurations
     /// </summary>
-    private List<IconViewModel> _generateChamberIcons(DateTime date)
+    private static List<IconViewModel> GenerateChamberIcons(DateTime date)
     {
         var icons = new List<IconViewModel>();
         var dayIndex = date.Day - 1; // 0-based index
@@ -102,7 +97,7 @@ public class PortalIconsComponent : BaseComponent
     /// <summary>
     /// Generate random icons with consistent seed based on date
     /// </summary>
-    private List<IconViewModel> _generateRandomIcons(DateTime date, bool hasCalendarEntries)
+    private List<IconViewModel> GenerateRandomIcons(DateTime date, bool hasCalendarEntries)
     {
         var icons = new List<IconViewModel>();
         var seed = int.Parse(date.ToString("yyyyMMdd"));
@@ -125,10 +120,10 @@ public class PortalIconsComponent : BaseComponent
             icons.AddRange(icons.ToList());
         }
 
-        var minIcons = int.Parse(_displayService.GetConfig("min_random_icons") ?? "4");
+        var minIcons = int.Parse(displayService.GetConfig("min_random_icons") ?? "4");
         var maxIcons = hasCalendarEntries
-            ? int.Parse(_displayService.GetConfig("max_icons_with_calendar") ?? "5")
-            : int.Parse(_displayService.GetConfig("max_random_icons") ?? "10");
+            ? int.Parse(displayService.GetConfig("max_icons_with_calendar") ?? "5")
+            : int.Parse(displayService.GetConfig("max_random_icons") ?? "10");
 
         minIcons = Math.Min(minIcons, maxIcons);
         var iconCount = minIcons + random.Next(maxIcons - minIcons + 1);
@@ -140,10 +135,10 @@ public class PortalIconsComponent : BaseComponent
     /// <summary>
     /// Initialize Portal 1 and Portal 2 chamber icon configurations for all 31 days
     /// </summary>
-    private static List<List<(string, bool)>> _initializeChamberIcons()
+    private static List<List<(string, bool)>> InitializeChamberIcons()
     {
-        return new List<List<(string, bool)>>
-        {
+        return
+        [
             // Day 1 - P1 Chamber 1
             new() { ("CUBE_DISPENSER", false), ("CUBE_HAZARD", false), ("PELLET_HAZARD", false), ("PELLET_CATCHER", false), ("WATER_HAZARD", false),
                     ("FLING_ENTER", false), ("FLING_EXIT", false), ("TURRET_HAZARD", false), ("DIRTY_WATER", false), ("CAKE", false) },
@@ -267,7 +262,7 @@ public class PortalIconsComponent : BaseComponent
             // Day 31 - P2 The Surprise Chamber 19
             new() { ("CUBE_DISPENSER", false), ("CUBE_BUTTON", false), ("CUBE_HAZARD", false), ("PLAYER_BUTTON", false), ("LASER_SENSOR", true),
                     ("LASER_REDIRECTION", true), ("FAITH_PLATE", true), ("TURRET_HAZARD", true), ("LASER_HAZARD", true), ("DIRTY_WATER", false) },
-        };
+        ];
     }
 }
 

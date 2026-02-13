@@ -9,27 +9,18 @@ namespace PortalCalendarServer.Services.PageGeneratorComponents;
 /// <summary>
 /// Component for weather data
 /// </summary>
-public class WeatherComponent : BaseComponent
+public class WeatherComponent(
+    ILogger<PageGeneratorService> logger,
+    DisplayService displayService,
+    IHttpClientFactory httpClientFactory,
+    IMemoryCache memoryCache,
+    CalendarContext context,
+    ILoggerFactory loggerFactory)
 {
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IMemoryCache _memoryCache;
-    private readonly CalendarContext _context;
-    private readonly ILoggerFactory _loggerFactory;
-
-    public WeatherComponent(
-        ILogger<PageGeneratorService> logger,
-        DisplayService displayService,
-        IHttpClientFactory httpClientFactory,
-        IMemoryCache memoryCache,
-        CalendarContext context,
-        ILoggerFactory loggerFactory)
-        : base(logger, displayService)
-    {
-        _httpClientFactory = httpClientFactory;
-        _memoryCache = memoryCache;
-        _context = context;
-        _loggerFactory = loggerFactory;
-    }
+    private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
+    private readonly IMemoryCache _memoryCache = memoryCache;
+    private readonly CalendarContext _context = context;
+    private readonly ILoggerFactory _loggerFactory = loggerFactory;
 
     public async Task<WeatherInfo?> GetWeatherAsync(DateTime date)
     {
@@ -48,16 +39,16 @@ public class WeatherComponent : BaseComponent
     /// </summary>
     public async Task<WeatherInfo?> GetMetNoWeatherAsync(DateTime date)
     {
-        if (!_displayService.GetConfigBool("metnoweather"))
+        if (!displayService.GetConfigBool("metnoweather"))
             return null;
 
-        var lat = _displayService.GetConfigDouble("lat");
-        var lon = _displayService.GetConfigDouble("lon");
-        var alt = _displayService.GetConfigDouble("alt");
+        var lat = displayService.GetConfigDouble("lat");
+        var lon = displayService.GetConfigDouble("lon");
+        var alt = displayService.GetConfigDouble("alt");
 
         if (lat == null || lon == null || alt == null)
         {
-            _logger.LogWarning("Met.no weather enabled but lat/lon/alt not configured");
+            logger.LogWarning("Met.no weather enabled but lat/lon/alt not configured");
             return null;
         }
 
@@ -71,7 +62,7 @@ public class WeatherComponent : BaseComponent
                 lat.Value,
                 lon.Value,
                 alt.Value,
-                _displayService.CurrentDisplay
+                displayService.CurrentDisplay
             );
 
             var detailedForecast = await service.GetForecastAsync();
@@ -83,7 +74,7 @@ public class WeatherComponent : BaseComponent
             var currentWeather = service.Aggregate(detailedForecast, dtStart, 1);
 
             // Forecast (multiple aggregated periods)
-            var aggregateHours = _displayService.GetConfigInt("metnoweather_granularity_hours") ?? 2;
+            var aggregateHours = displayService.GetConfigInt("metnoweather_granularity_hours") ?? 2;
             var forecast = new List<AggregatedWeatherData>();
             
             dtStart = dtStart.AddHours(1);
@@ -105,7 +96,7 @@ public class WeatherComponent : BaseComponent
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching Met.no weather data");
+            logger.LogError(ex, "Error fetching Met.no weather data");
             return null;
         }
     }
@@ -115,17 +106,17 @@ public class WeatherComponent : BaseComponent
     /// </summary>
     public async Task<OpenWeatherInfo?> GetOpenWeatherAsync()
     {
-        if (!_displayService.GetConfigBool("openweather"))
+        if (!displayService.GetConfigBool("openweather"))
             return null;
 
-        var apiKey = _displayService.GetConfig("openweather_api_key");
-        var lat = _displayService.GetConfigDouble("lat");
-        var lon = _displayService.GetConfigDouble("lon");
-        var lang = _displayService.GetConfig("openweather_lang") ?? "en";
+        var apiKey = displayService.GetConfig("openweather_api_key");
+        var lat = displayService.GetConfigDouble("lat");
+        var lon = displayService.GetConfigDouble("lon");
+        var lang = displayService.GetConfig("openweather_lang") ?? "en";
 
         if (string.IsNullOrEmpty(apiKey) || lat == null || lon == null)
         {
-            _logger.LogWarning("OpenWeather enabled but API key or lat/lon not configured");
+            logger.LogWarning("OpenWeather enabled but API key or lat/lon not configured");
             return null;
         }
 
@@ -140,7 +131,7 @@ public class WeatherComponent : BaseComponent
                 lat.Value,
                 lon.Value,
                 lang,
-                _displayService.CurrentDisplay
+                displayService.CurrentDisplay
             );
 
             var current = await service.FetchCurrentFromWebAsync();
@@ -154,7 +145,7 @@ public class WeatherComponent : BaseComponent
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching OpenWeather data");
+            logger.LogError(ex, "Error fetching OpenWeather data");
             return null;
         }
     }
@@ -166,7 +157,7 @@ public class WeatherComponent : BaseComponent
 public class WeatherInfo
 {
     public AggregatedWeatherData? CurrentWeather { get; set; }
-    public List<AggregatedWeatherData> Forecast { get; set; } = new();
+    public List<AggregatedWeatherData> Forecast { get; set; } = [];
 }
 
 /// <summary>

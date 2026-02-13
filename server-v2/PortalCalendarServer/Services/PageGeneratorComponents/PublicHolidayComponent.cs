@@ -6,27 +6,18 @@ namespace PortalCalendarServer.Services.PageGeneratorComponents;
 /// Component for retrieving public holiday information.
 /// Delegates to IPublicHolidayService for actual holiday lookups.
 /// </summary>
-public class PublicHolidayComponent : BaseComponent
+public class PublicHolidayComponent(
+    ILogger<PageGeneratorService> logger,
+    IPublicHolidayService publicHolidayService)
 {
-    private readonly IPublicHolidayService _publicHolidayService;
-
-    public PublicHolidayComponent(
-        ILogger<PageGeneratorService> logger,
-        DisplayService displayService,
-        IPublicHolidayService publicHolidayService)
-        : base(logger, displayService)
-    {
-        _publicHolidayService = publicHolidayService;
-    }
-
     /// <summary>
     /// Get public holiday information for the specified date.
     /// Returns null if the date is not a public holiday.
     /// </summary>
     public PublicHolidayInfo? GetPublicHolidayInfo(DateTime date)
     {
-        _logger.LogDebug("Getting public holiday information for {Date}", date);
-        return _publicHolidayService.GetPublicHoliday(date);
+        logger.LogDebug("Getting public holiday information for {Date}", date);
+        return publicHolidayService.GetPublicHoliday(date);
     }
 
     /// <summary>
@@ -34,7 +25,7 @@ public class PublicHolidayComponent : BaseComponent
     /// </summary>
     public List<PublicHolidayInfo> GetYearHolidays(DateTime date)
     {
-        return _publicHolidayService.GetPublicHolidaysForYear(date.Year);
+        return publicHolidayService.GetPublicHolidaysForYear(date.Year);
     }
 
     /// <summary>
@@ -42,7 +33,7 @@ public class PublicHolidayComponent : BaseComponent
     /// </summary>
     public bool IsPublicHoliday(DateTime date)
     {
-        return _publicHolidayService.IsPublicHoliday(date);
+        return publicHolidayService.IsPublicHoliday(date);
     }
 
     /// <summary>
@@ -50,6 +41,6 @@ public class PublicHolidayComponent : BaseComponent
     /// </summary>
     public PublicHolidayInfo? GetNextHoliday(DateTime date)
     {
-        return _publicHolidayService.GetNextPublicHoliday(date);
+        return publicHolidayService.GetNextPublicHoliday(date);
     }
 }

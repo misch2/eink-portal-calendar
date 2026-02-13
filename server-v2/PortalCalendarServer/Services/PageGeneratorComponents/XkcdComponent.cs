@@ -9,34 +9,27 @@ namespace PortalCalendarServer.Services.PageGeneratorComponents;
 /// Uses XkcdIntegrationService for fetching comic data from the web.
 /// This component handles the presentation logic for the calendar display.
 /// </summary>
-public class XkcdComponent : BaseComponent
+public class XkcdComponent(
+    ILogger<PageGeneratorService> logger,
+    IHttpClientFactory httpClientFactory,
+    IMemoryCache memoryCache,
+    CalendarContext context,
+    ILoggerFactory loggerFactory)
 {
-    private readonly XkcdIntegrationService _integrationService;
-
-    public XkcdComponent(
-        ILogger<PageGeneratorService> logger,
-        DisplayService displayService,
-        IHttpClientFactory httpClientFactory,
-        IMemoryCache memoryCache,
-        CalendarContext context,
-        ILoggerFactory loggerFactory)
-        : base(logger, displayService)
-    {
-        _integrationService = new XkcdIntegrationService(
-            loggerFactory.CreateLogger<XkcdIntegrationService>(),
-            httpClientFactory,
-            memoryCache,
-            context,
-            null,  // Display is not needed for XKCD integration
-            0);
-    }
+    private readonly XkcdIntegrationService _integrationService = new(
+        loggerFactory.CreateLogger<XkcdIntegrationService>(),
+        httpClientFactory,
+        memoryCache,
+        context,
+        null,  // Display is not needed for XKCD integration
+        0);
 
     /// <summary>
     /// Get the XKCD comic information formatted for display
     /// </summary>
     public XkcdInfo GetInfo()
     {
-        _logger.LogDebug("Preparing XKCD comic for display");
+        logger.LogDebug("Preparing XKCD comic for display");
 
         // Fetch comic data from integration service
         var comicData = _integrationService.GetLatestComicAsync().GetAwaiter().GetResult();

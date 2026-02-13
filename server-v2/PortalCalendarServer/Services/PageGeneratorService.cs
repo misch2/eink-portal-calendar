@@ -64,12 +64,12 @@ public class PageGeneratorService
         };
 
         viewModel.InitializeComponents(
-            portalIconsFactory: () => new PortalIconsComponent(_logger, _displayService),
+            portalIconsFactory: () => new PortalIconsComponent(_displayService),
             calendarFactory: () => new CalendarComponent(_logger, _displayService, _httpClientFactory, _memoryCache, _context, _loggerFactory),
             weightFactory: () => new WeightComponent(_logger),
-            xkcdFactory: () => new XkcdComponent(_logger, _displayService, _httpClientFactory, _memoryCache, _context, _loggerFactory),
-            publicHolidayFactory: () => new PublicHolidayComponent(_logger, _displayService, _publicHolidayService),
-            nameDayFactory: () => new NameDayComponent(_logger, _displayService, _nameDayService),
+            xkcdFactory: () => new XkcdComponent(_logger, _httpClientFactory, _memoryCache, _context, _loggerFactory),
+            publicHolidayFactory: () => new PublicHolidayComponent(_logger, _publicHolidayService),
+            nameDayFactory: () => new NameDayComponent(_logger, _nameDayService),
             weatherFactory: () => new WeatherComponent(_logger, _displayService, _httpClientFactory, _memoryCache, _context, _loggerFactory)
         );
 

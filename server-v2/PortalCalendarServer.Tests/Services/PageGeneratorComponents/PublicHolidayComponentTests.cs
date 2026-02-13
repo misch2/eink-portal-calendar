@@ -24,7 +24,6 @@ public class PublicHolidayComponentTests
     {
         return new PublicHolidayComponent(
             _mockLogger.Object,
-            null!, // DisplayService not needed for these tests
             _mockPublicHolidayService.Object);
     }
 

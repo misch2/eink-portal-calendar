@@ -10,7 +10,7 @@ public class CalendarComponent(
     IHttpClientFactory httpClientFactory,
     IMemoryCache memoryCache,
     CalendarContext context,
-    ILoggerFactory loggerFactory) : BaseComponent(logger, displayService)
+    ILoggerFactory loggerFactory)
 {
 
     /// <summary>
@@ -24,11 +24,11 @@ public class CalendarComponent(
         // Load calendar events from up to 3 ICS calendars
         for (int calendarNo = 1; calendarNo <= 3; calendarNo++)
         {
-            var enabled = _displayService.GetConfigBool($"web_calendar{calendarNo}");
+            var enabled = displayService.GetConfigBool($"web_calendar{calendarNo}");
             if (!enabled)
                 continue;
 
-            var url = _displayService.GetConfig($"web_calendar_ics_url{calendarNo}");
+            var url = displayService.GetConfig($"web_calendar_ics_url{calendarNo}");
             if (string.IsNullOrEmpty(url))
                 continue;
 
@@ -41,7 +41,7 @@ public class CalendarComponent(
                     memoryCache,
                     context,
                     url,
-                    _displayService.GetCurrentDisplay());
+                    displayService.GetCurrentDisplay());
 
                 // Get today's events
                 var today = date.Date;
@@ -59,13 +59,13 @@ public class CalendarComponent(
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading calendar {CalendarNo} from {Url}", calendarNo, url);
+                logger.LogError(ex, "Error loading calendar {CalendarNo} from {Url}", calendarNo, url);
             }
         }
 
         todayEvents = todayEvents.OrderBy(e => e.StartTime).ToList();
         nearestEvents = nearestEvents.OrderBy(e => e.StartTime).ToList();
-        var hasCalendarEntries = todayEvents.Any();
+        var hasCalendarEntries = todayEvents.Count > 0;
 
         // Group nearest events by date
         var nearestEventsGrouped = nearestEvents
@@ -102,9 +102,9 @@ public class CalendarComponent(
 
 public class CalendarInfo
 {
-    public List<CalendarEvent> TodayEvents { get; set; } = new();
-    public List<CalendarEvent> NearestEvents { get; set; } = new();
-    public Dictionary<string, List<CalendarEvent>> NearestEventsGrouped { get; set; } = new();
+    public List<CalendarEvent> TodayEvents { get; set; } = [];
+    public List<CalendarEvent> NearestEvents { get; set; } = [];
+    public Dictionary<string, List<CalendarEvent>> NearestEventsGrouped { get; set; } = [];
     public bool HasEntries { get; set; }
 }
 

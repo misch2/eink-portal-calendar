@@ -10,18 +10,14 @@ namespace PortalCalendarServer.Services.Integrations;
 /// Integration service for fetching XKCD comics from the XKCD API.
 /// See documentation at https://xkcd.com/json.html
 /// </summary>
-public class XkcdIntegrationService : IntegrationServiceBase
+public class XkcdIntegrationService(
+    ILogger<XkcdIntegrationService> logger,
+    IHttpClientFactory httpClientFactory,
+    IMemoryCache memoryCache,
+    CalendarContext context,
+    Display? display = null,
+    int minimalCacheExpiry = 0) : IntegrationServiceBase(logger, httpClientFactory, memoryCache, context, display, minimalCacheExpiry)
 {
-    public XkcdIntegrationService(
-        ILogger<XkcdIntegrationService> logger,
-        IHttpClientFactory httpClientFactory,
-        IMemoryCache memoryCache,
-        CalendarContext context,
-        Display? display = null,
-        int minimalCacheExpiry = 0)
-        : base(logger, httpClientFactory, memoryCache, context, display, minimalCacheExpiry)
-    {
-    }
 
     /// <summary>
     /// Fetch the latest XKCD comic information
@@ -135,7 +131,7 @@ public class XkcdIntegrationService : IntegrationServiceBase
         try
         {
             using var image = SixLabors.ImageSharp.Image.Load<SixLabors.ImageSharp.PixelFormats.Rgba32>(imageData);
-            
+
             if (image.Width == 0 || image.Height == 0)
             {
                 return false;
@@ -170,7 +166,7 @@ public class XkcdComicData
     public string Title { get; set; } = string.Empty;
     public string Alt { get; set; } = string.Empty;
     public string ImageUrl { get; set; } = string.Empty;
-    public byte[] ImageData { get; set; } = Array.Empty<byte>();
+    public byte[] ImageData { get; set; } = [];
     public string Year { get; set; } = string.Empty;
     public string Month { get; set; } = string.Empty;
     public string Day { get; set; } = string.Empty;

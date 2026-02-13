@@ -1,13 +1,8 @@
 ﻿namespace PortalCalendarServer.Services.PageGeneratorComponents;
 
-public class WeightComponent
+public class WeightComponent(ILogger<PageGeneratorService> logger)
 {
-    private readonly ILogger<PageGeneratorService> _logger;
-
-    public WeightComponent(ILogger<PageGeneratorService> logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger<PageGeneratorService> _logger = logger;
 
     public decimal? GetLastWeight()
     {
