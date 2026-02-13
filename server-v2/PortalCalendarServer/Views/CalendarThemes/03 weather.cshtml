@@ -12,7 +12,6 @@
     var dateCulture = new CultureInfo(displayService.GetConfig("date_culture") ?? "en-US");
     var timezone = TimeZoneInfo.FindSystemTimeZoneById(displayService.GetConfig("timezone") ?? "UTC");
 
-    var now = DateTime.UtcNow;
     var wakeupInfo = Model.Display.NextWakeupTime();
     var nextWakeup = wakeupInfo.NextWakeup;
     var sleepInSeconds = wakeupInfo.SleepInSeconds;
@@ -152,11 +151,11 @@
                 dt = TimeZoneInfo.ConvertTimeFromUtc(dt, timezone);
 
                 string dayDescription;
-                if (dt.Date == now.Date)
+                if (dt.Date == Model.Date.Date)
                 {
                     dayDescription = "dnes";
                 }
-                else if (dt.Date == now.Date.AddDays(1))
+                else if (dt.Date == Model.Date.Date.AddDays(1))
                 {
                     dayDescription = "zítra";
                 }
@@ -174,7 +173,7 @@
                     <div>
                         @foreach (var description in item.Descriptions.Take(1))
                         {
-                            <div style="font-weight: bold; max-height: 1em; overflow_visible">@description.ToLower()</div>
+                            <div style="font-weight: bold; max-height: 1em; overflow:visible">@description.ToLower()</div>
                         }
                     </div>
                     <div>

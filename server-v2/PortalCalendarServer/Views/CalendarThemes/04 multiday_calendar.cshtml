@@ -12,7 +12,6 @@
     var dateCulture = new CultureInfo(displayService.GetConfig("date_culture") ?? "en-US");
     var tz = displayService.GetTimeZoneInfo();
 
-    var now = DateTime.UtcNow;
     var wakeupInfo = Model.Display.NextWakeupTime();
     var nextWakeup = wakeupInfo.NextWakeup;
     var sleepInSeconds = wakeupInfo.SleepInSeconds;
@@ -30,8 +29,8 @@
             Title = "Dnes a zítra", 
             Class = "calendar-event-block-today",
             Condition = (Func<CalendarEvent, bool>)(evt => {
-                var deltaDays = (evt.StartTime.Date - now.Date).Days;
-                var deltaHours = (evt.StartTime - now).TotalHours;
+                var deltaDays = (evt.StartTime.Date - Model.Date.Date).Days;
+                var deltaHours = (evt.StartTime - Model.Date).TotalHours;
                 return deltaHours >= 0 && deltaDays <= 1;
             })
         },
@@ -40,7 +39,7 @@
             Title = "Nejbližších 7 dní", 
             Class = "calendar-event-block-week",
             Condition = (Func<CalendarEvent, bool>)(evt => {
-                var deltaDays = (evt.StartTime.Date - now.Date).Days;
+                var deltaDays = (evt.StartTime.Date - Model.Date.Date).Days;
                 return deltaDays > 1 && deltaDays <= 7;
             })
         },
@@ -49,7 +48,7 @@
             Title = "Pozdìjší události", 
             Class = "calendar-event-block-rest",
             Condition = (Func<CalendarEvent, bool>)(evt => {
-                var deltaDays = (evt.StartTime.Date - now.Date).Days;
+                var deltaDays = (evt.StartTime.Date - Model.Date.Date).Days;
                 return deltaDays > 7;
             })
         }
@@ -96,7 +95,7 @@
                         @foreach (var evt in eventsForBlock)
                         {
                             var dt = evt.StartTime;
-                            var deltaDays = (dt.Date - now.Date).Days;
+                            var deltaDays = (dt.Date - Model.Date.Date).Days;
                             var dt_local = TimeZoneInfo.ConvertTimeFromUtc(dt, tz);
 
                             var dayDescription = dateCulture.DateTimeFormat.GetDayName(dt_local.DayOfWeek);

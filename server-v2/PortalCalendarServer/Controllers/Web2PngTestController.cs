@@ -3,6 +3,9 @@ using PortalCalendarServer.Services;
 
 namespace PortalCalendarServer.Controllers;
 
+
+// FIXME remove all of this?
+
 /// <summary>
 /// Example controller demonstrating Web2PngService usage
 /// </summary>

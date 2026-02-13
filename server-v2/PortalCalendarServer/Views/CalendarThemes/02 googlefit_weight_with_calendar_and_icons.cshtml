@@ -10,7 +10,6 @@
 
     var dateCulture = new CultureInfo(displayService.GetConfig("date_culture") ?? "en-US");
 
-    var now = DateTime.UtcNow;
     var wakeupInfo = Model.Display.NextWakeupTime();
     var nextWakeup = wakeupInfo.NextWakeup;
     var sleepInSeconds = wakeupInfo.SleepInSeconds;
@@ -198,11 +197,12 @@
                         }
                         else
                         {
-                            @evt.StartTime.ToString("H:mm", dateCulture)
+                            @evt.StartTime.ToString("t", dateCulture)
+                            <text> </text>
                             @evt.Summary
                             @if (evt.DurationHours.HasValue)
                             {
-                                <text>(~@((int)(evt.DurationHours.Value + 0.5)) hod.)</text>
+                                <text> (~@((int)(evt.DurationHours.Value + 0.5)) hod.)</text>
                             }
                         }
                     </div>
