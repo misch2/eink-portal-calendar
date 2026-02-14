@@ -130,7 +130,7 @@
                 const integrationName = $(this).data('integration');
                 const integrationToggle = $(`#${integrationName}`);
                 const isOverrideChecked = $(this).is(':checked');
-                const defaultChecked = integrationToggle.data('default-checked') === 'true';
+                const defaultChecked = integrationToggle.attr('data-default-checked') === 'true';
                 
                 if (isOverrideChecked) {
                     // Enable the integration toggle and restore the configured value
@@ -147,7 +147,8 @@
                 const integrationName = $(this).data('integration');
                 const integrationToggle = $(`#${integrationName}`);
                 const isOverrideChecked = $(this).is(':checked');
-                const defaultChecked = integrationToggle.data('default-checked') === 'true';
+                const defaultChecked = integrationToggle.attr('data-default-checked') === 'true';
+
                 
                 if (!isOverrideChecked) {
                     // If not overriding, show default value and disable the toggle
