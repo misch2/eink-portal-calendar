@@ -59,6 +59,7 @@ public class UiController(
 
         ViewData["NavLink"] = "index";
         ViewData["Title"] = "Displays";
+        // ViewBag.Display remains null for global layout, so it can show a generic title
 
         return View("DisplayList", displays);
     }
@@ -92,6 +93,7 @@ public class UiController(
 
         ViewData["NavLink"] = "compare";
         ViewData["Title"] = $"Test - {display.Name}";
+        ViewBag.Display = display; // for global layout
 
         return View("Test", display);
     }
@@ -186,9 +188,10 @@ public class UiController(
         ViewData["CurrentTheme"] = _displayService.GetConfig("theme");
         ViewData["LastVoltage"] = display.Voltage();
         ViewData["LastVoltageRaw"] = _displayService.GetConfig("_last_voltage_raw");
+        ViewBag.Display = display; // for global layout
 
         // Pass DisplayService to the view through ViewData
-        ViewData["DisplayService"] = _displayService;
+        ViewData["DisplayService"] = _displayService;   // for this specific view
 
         return View("ConfigUi", display);
     }
@@ -369,6 +372,7 @@ public class UiController(
         ViewData["Title"] = "Google Fit Authentication Successful";
         ViewData["AccessToken"] = accessToken;
         ViewData["RefreshToken"] = _displayService.GetConfig("_googlefit_refresh_token");
+        ViewBag.Display = display; // for global layout
 
         return View("AuthSuccess", display);
     }
