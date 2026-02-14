@@ -4,7 +4,7 @@ namespace PortalCalendarServer.Services.Caches;
 
 public interface IDatabaseCacheServiceFactory
 {
-    DatabaseCacheService Create(string creator, int minimalCacheExpiry = 0);
+    DatabaseCacheService Create(string creator, TimeSpan expiration);
 }
 
 public class DatabaseCacheServiceFactory : IDatabaseCacheServiceFactory
@@ -20,8 +20,8 @@ public class DatabaseCacheServiceFactory : IDatabaseCacheServiceFactory
         _logger = logger;
     }
 
-    public DatabaseCacheService Create(string creator, int minimalCacheExpiry = 0)
+    public DatabaseCacheService Create(string creator, TimeSpan expiration)
     {
-        return new DatabaseCacheService(_context, _logger, creator, minimalCacheExpiry);
+        return new DatabaseCacheService(_context, _logger, creator, expiration);
     }
 }

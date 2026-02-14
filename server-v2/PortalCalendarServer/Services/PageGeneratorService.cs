@@ -73,8 +73,7 @@ public class PageGeneratorService
                     _memoryCache,
                     _databaseCacheFactory,
                     _context,
-                    display,
-                    0);
+                    display);
                 return new WeightComponent(_logger, googleFitService);
             },
             xkcdFactory: () => new XkcdComponent(_logger, _httpClientFactory, _memoryCache, _databaseCacheFactory, _context, _loggerFactory),

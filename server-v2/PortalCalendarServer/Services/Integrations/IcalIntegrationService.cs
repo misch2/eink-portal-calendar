@@ -21,18 +21,18 @@ public class IcalIntegrationService : IntegrationServiceBase
         IDatabaseCacheServiceFactory databaseCacheFactory,
         CalendarContext context,
         string icsUrl,
-        Display? display = null,
-        int minimalCacheExpiry = 0)
-        : base(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display, minimalCacheExpiry)
+        Display? display = null)
+        : base(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(icsUrl);
         _icsUrl = icsUrl;
     }
 
-    /// <summary>
-    /// Maximum HTTP cache age: 2 hours (matching Perl implementation)
-    /// </summary>
-    protected override int HttpMaxCacheAge => 2 * 60 * 60; // 2 hours
+    // FIXME
+    ///// <summary>
+    ///// Maximum HTTP cache age: 2 hours (matching Perl implementation)
+    ///// </summary>
+    //protected override int HttpMaxCacheAge => 2 * 60 * 60; // 2 hours
 
     /// <summary>
     /// Fetch raw ICS data from the web

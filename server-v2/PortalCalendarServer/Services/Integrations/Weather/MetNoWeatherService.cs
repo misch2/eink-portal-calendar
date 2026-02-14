@@ -28,9 +28,8 @@ public class MetNoWeatherService : IntegrationServiceBase
         double latitude,
         double longitude,
         double altitude,
-        Display? display = null,
-        int minimalCacheExpiry = 0)
-        : base(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display, minimalCacheExpiry)
+        Display? display = null)
+        : base(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display)
     {
         _latitude = latitude;
         _longitude = longitude;
@@ -38,10 +37,8 @@ public class MetNoWeatherService : IntegrationServiceBase
         _iconMapping = new MetNoIconsMapping();
     }
 
-    /// <summary>
-    /// HTTP cache age: 15 minutes (matching Perl implementation)
-    /// </summary>
-    protected override int HttpMaxCacheAge => 15 * 60;
+    // FIXME
+    //protected override int HttpMaxCacheAge => 15 * 60;
 
     private string GetUrl()
     {

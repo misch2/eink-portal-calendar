@@ -21,7 +21,6 @@ public class CachingHttpMessageHandler : DelegatingHandler
         _cache = cache;
         _logger = logger;
         _defaultCacheSeconds = defaultCacheSeconds;
-        //InnerHandler = new HttpClientHandler();
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(

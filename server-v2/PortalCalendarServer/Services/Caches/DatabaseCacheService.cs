@@ -16,24 +16,20 @@ public class DatabaseCacheService
     private readonly CalendarContext _context;
     private readonly ILogger<DatabaseCacheService> _logger;
     private readonly string _creator;
-    private readonly int _minimalCacheExpiry;
+    private readonly TimeSpan _expiration;
+
 
     public DatabaseCacheService(
         CalendarContext context,
         ILogger<DatabaseCacheService> logger,
         string creator,
-        int minimalCacheExpiry = 0)
+        TimeSpan expiration)
     {
         _context = context;
         _logger = logger;
         _creator = creator;
-        _minimalCacheExpiry = minimalCacheExpiry;
+        _expiration = expiration;
     }
-
-    /// <summary>
-    /// Default cache expiration time in seconds
-    /// </summary>
-    public int MaxAge { get; set; } = 5 * 60; // 5 minutes
 
     /// <summary>
     /// Get or set a value in the cache. If the cache entry exists and is not expired,
@@ -82,7 +78,7 @@ public class DatabaseCacheService
         // Store in cache
         _logger.LogDebug("{LogPrefix}storing serialized data into the DB", logPrefix);
         var serializedData = JsonSerializer.SerializeToUtf8Bytes(freshData);
-        var expiresAt = now.AddSeconds(MaxAge);
+        var expiresAt = now.Add(_expiration);
 
         var record = await _context.Caches
             .Where(c => c.Creator == _creator && c.Key == cacheKeyAsDigest)
@@ -109,24 +105,6 @@ public class DatabaseCacheService
         }
 
         await _context.SaveChangesAsync(cancellationToken);
-
-        // Enforce minimal cache expiry if configured
-        if (_minimalCacheExpiry > 0)
-        {
-            _logger.LogDebug(
-                "{LogPrefix}enforcing cache expiry at least in {Seconds} seconds",
-                logPrefix, _minimalCacheExpiry);
-            var futureExpiry = now.AddSeconds(_minimalCacheExpiry);
-            if (record.ExpiresAt < futureExpiry)
-            {
-                _logger.LogDebug(
-                    "{LogPrefix}updating cache expiry from {OldExpiry} to {NewExpiry}",
-                    logPrefix, record.ExpiresAt, futureExpiry);
-                record.ExpiresAt = futureExpiry;
-                _context.Update(record);
-                await _context.SaveChangesAsync(cancellationToken);
-            }
-        }
 
         return freshData;
     }

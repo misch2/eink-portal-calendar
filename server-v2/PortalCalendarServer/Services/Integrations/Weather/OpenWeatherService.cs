@@ -28,9 +28,8 @@ public class OpenWeatherService : IntegrationServiceBase
         double latitude,
         double longitude,
         string language = "en",
-        Display? display = null,
-        int minimalCacheExpiry = 0)
-        : base(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display, minimalCacheExpiry)
+        Display? display = null)
+        : base(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(apiKey);
         _apiKey = apiKey;
@@ -39,10 +38,8 @@ public class OpenWeatherService : IntegrationServiceBase
         _language = language;
     }
 
-    /// <summary>
-    /// HTTP cache age: 30 minutes (matching Perl implementation)
-    /// </summary>
-    protected override int HttpMaxCacheAge => 30 * 60;
+    // FIXME
+    //protected override int HttpMaxCacheAge => 30 * 60;
 
     /// <summary>
     /// Fetch current weather from OpenWeather API

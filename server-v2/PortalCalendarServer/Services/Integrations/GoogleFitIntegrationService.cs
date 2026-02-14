@@ -26,13 +26,10 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
         IMemoryCache memoryCache,
         IDatabaseCacheServiceFactory databaseCacheFactory,
         CalendarContext context,
-        Display? display = null,
-        int minimalCacheExpiry = 0)
-        : base(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display, minimalCacheExpiry)
+        Display? display = null)
+        : base(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display)
     {
     }
-
-    protected override int HttpMaxCacheAge => 60 * 60; // 1 hour
 
     public bool IsAvailable()
     {
@@ -138,13 +135,12 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
             return null;
         }
 
-        var dbCache = GetDatabaseCache();
-        dbCache.MaxAge = 60 * 60; // 1 hour cache
+        var dbCacheService = DatabaseCacheFactory.Create(nameof(GoogleFitIntegrationService), TimeSpan.FromMinutes(60));
 
         var globalDtStart = DateTime.UtcNow.AddDays(-(FetchDays - 1)).Date;
         var globalDtEnd = DateTime.UtcNow;
 
-        return await dbCache.GetOrSetAsync(
+        return await dbCacheService.GetOrSetAsync(
             async () => await FetchFromWebInternalAsync(globalDtStart, globalDtEnd, cancellationToken),
             new { start = globalDtStart, end = globalDtEnd.Date },
             cancellationToken);

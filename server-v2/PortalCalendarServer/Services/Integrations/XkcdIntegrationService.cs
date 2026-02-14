@@ -18,7 +18,7 @@ public class XkcdIntegrationService(
     IDatabaseCacheServiceFactory databaseCacheFactory,
     CalendarContext context,
     Display? display = null,
-    int minimalCacheExpiry = 0) : IntegrationServiceBase(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display, minimalCacheExpiry)
+    int minimalCacheExpiry = 0) : IntegrationServiceBase(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display)
 {
 
     /// <summary>
@@ -59,32 +59,20 @@ public class XkcdIntegrationService(
     /// </summary>
     private async Task<string> GetCachedJsonFromWebAsync(CancellationToken cancellationToken)
     {
-        var cacheKey = "xkcd:json";
-        var cacheExpiration = TimeSpan.FromMinutes(15);
+        var dbCacheService = DatabaseCacheFactory.Create(nameof(XkcdIntegrationService), TimeSpan.FromMinutes(15));
 
-        // Try to get from memory cache first
-        if (MemoryCache.TryGetValue<string>(cacheKey, out var cachedJson) && cachedJson != null)
-        {
-            Logger.LogDebug("XKCD JSON cache HIT");
-            return cachedJson;
-        }
-
-        Logger.LogDebug("XKCD JSON cache MISS - fetching from web");
-
-        // Fetch from web
         var url = "https://xkcd.com/info.0.json";
-
-        var response = await httpClient.GetAsync(url, cancellationToken);
-        response.EnsureSuccessStatusCode();
-
-        var json = await response.Content.ReadAsStringAsync(cancellationToken);
-
-        // Cache the result
-        MemoryCache.Set(cacheKey, json, new MemoryCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = cacheExpiration,
-            Size = json.Length
-        });
+        var json = await dbCacheService.GetOrSetAsync(
+            async () =>
+            {
+                Logger.LogDebug("XKCD JSON database cache MISS - fetching from web");
+                var response = await httpClient.GetAsync(url, cancellationToken);
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadAsStringAsync(cancellationToken);
+            },
+            new { url = url },
+            cancellationToken
+        );
 
         return json;
     }
@@ -94,30 +82,19 @@ public class XkcdIntegrationService(
     /// </summary>
     private async Task<byte[]> GetCachedImageDataAsync(string imageUrl, CancellationToken cancellationToken)
     {
-        var cacheKey = $"xkcd:image:{imageUrl}";
-        var cacheExpiration = TimeSpan.FromDays(14);
+        var dbCacheService = DatabaseCacheFactory.Create(nameof(XkcdIntegrationService), TimeSpan.FromDays(14));
 
-        // Try to get from memory cache first
-        if (MemoryCache.TryGetValue<byte[]>(cacheKey, out var cachedImage) && cachedImage != null)
-        {
-            Logger.LogDebug("XKCD image cache HIT for {Url}", imageUrl);
-            return cachedImage;
-        }
-
-        Logger.LogDebug("XKCD image cache MISS - fetching from web: {Url}", imageUrl);
-
-        // Fetch from web
-        var response = await httpClient.GetAsync(imageUrl, cancellationToken);
-        response.EnsureSuccessStatusCode();
-
-        var imageData = await response.Content.ReadAsByteArrayAsync(cancellationToken);
-
-        // Cache the result
-        MemoryCache.Set(cacheKey, imageData, new MemoryCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = cacheExpiration,
-            Size = imageData.Length
-        });
+        var imageData = await dbCacheService.GetOrSetAsync(
+            async () =>
+            {
+                Logger.LogDebug("XKCD image database cache MISS - fetching from web");
+                var response = await httpClient.GetAsync(imageUrl, cancellationToken);
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadAsByteArrayAsync(cancellationToken);
+            },
+            new { url = imageUrl },
+            cancellationToken
+        );
 
         return imageData;
     }

@@ -53,9 +53,9 @@ public abstract class IntegrationServiceTestBase : IDisposable
 
         // Setup mock database cache service factory
         MockDatabaseCacheServiceFactory = new Mock<IDatabaseCacheServiceFactory>();
-        var databaseCache = new DatabaseCacheService(Context, loggerFactory.CreateLogger<DatabaseCacheService>(), "");
+        var databaseCache = new DatabaseCacheService(Context, loggerFactory.CreateLogger<DatabaseCacheService>(), "", TimeSpan.Zero);
         MockDatabaseCacheServiceFactory
-            .Setup(f => f.Create(It.IsAny<string>(), It.IsAny<int>()))
+            .Setup(f => f.Create(It.IsAny<string>(), It.IsAny<TimeSpan>()))
             .Returns(databaseCache);
     }
 

@@ -23,8 +23,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
             MemoryCache,
             MockDatabaseCacheServiceFactory.Object,
             Context,
-            display,
-            minimalCacheExpiry: 0);
+            display);
     }
 
     private Display CreateDisplayWithGoogleFitTokens()
