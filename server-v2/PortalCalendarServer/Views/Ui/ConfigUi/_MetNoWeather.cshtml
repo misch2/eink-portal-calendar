@@ -3,14 +3,12 @@
 
 @{
     var displayService = (DisplayService)ViewData["DisplayService"]!;
+    ViewData["IntegrationName"] = "metnoweather";
 }
 
-<fieldset class="row mb-3">
-    <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" id="metnoweather" name="metnoweather" value="1"
-               checked="@(displayService.GetConfig("metnoweather") == "1")">
-        <label class="form-check-label" for="metnoweather">Met.no Weather enabled</label>
-    </div>
+<fieldset class="row mb-3" id="@(ViewData["IntegrationName"])_fieldset">
+    @await Html.PartialAsync("ConfigUi/_IntegrationToggle", Model, ViewData)
+    
     <div class="col-md-4 mt-3">
         <label for="metnoweather_granularity_hours">Aggregate forecast by how many hours</label>
         <input id="metnoweather_granularity_hours" name="metnoweather_granularity_hours" type="text" class="form-control"

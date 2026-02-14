@@ -3,14 +3,11 @@
 
 @{
     var displayService = (DisplayService)ViewData["DisplayService"]!;
+    ViewData["IntegrationName"] = "googlefit";
 }
 
-<fieldset class="row mb-3">
-    <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" id="googlefit" name="googlefit" value="1"
-               checked="@(displayService.GetConfig("googlefit") == "1")">
-        <label class="form-check-label" for="googlefit">Google Fit enabled</label>
-    </div>
+<fieldset class="row mb-3" id="@(ViewData["IntegrationName"])_fieldset">
+    @await Html.PartialAsync("ConfigUi/_IntegrationToggle", Model, ViewData)
 
     <div class="col-md-12 mt-3 mb-3">
         <a class="btn btn-primary" href="/auth/googlefit/@Model.Id">Authorize calendar to use Google Fit with the values below</a>

@@ -3,14 +3,12 @@
 
 @{
     var displayService = (DisplayService)ViewData["DisplayService"]!;
+    ViewData["IntegrationName"] = "mqtt";
 }
 
-<fieldset class="row mb-3">
-    <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" id="mqtt" name="mqtt" value="1"
-               checked="@(displayService.GetConfig("mqtt") == "1")">
-        <label class="form-check-label" for="mqtt">MQTT enabled</label>
-    </div>
+<fieldset class="row mb-3" id="@(ViewData["IntegrationName"])_fieldset">
+    @await Html.PartialAsync("ConfigUi/_IntegrationToggle", Model, ViewData)
+    
     <div class="form-group row mt-3">
         <div class="col-md-3">
             <label for="mqtt_server">Server</label>

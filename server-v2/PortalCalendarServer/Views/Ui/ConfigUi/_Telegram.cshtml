@@ -3,14 +3,12 @@
 
 @{
     var displayService = (DisplayService)ViewData["DisplayService"]!;
+    ViewData["IntegrationName"] = "telegram";
 }
 
-<fieldset class="row mb-3">
-    <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" id="telegram" name="telegram" value="1"
-               checked="@(displayService.GetConfig("telegram") == "1")">
-        <label class="form-check-label" for="telegram">Telegram enabled</label>
-    </div>
+<fieldset class="row mb-3" id="@(ViewData["IntegrationName"])_fieldset">
+    @await Html.PartialAsync("ConfigUi/_IntegrationToggle", Model, ViewData)
+    
     <div class="col-md-12 mt-3">
         <label for="telegram_api_key">API key</label>
         <input id="telegram_api_key" name="telegram_api_key" type="text" class="form-control"

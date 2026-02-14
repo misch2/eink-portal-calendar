@@ -124,6 +124,36 @@
             window.addEventListener('hashchange', function() {
                 activateTabFromHash();
             });
+
+            // Integration override toggle handler
+            $('.override-toggle').on('change', function() {
+                const integrationName = $(this).data('integration');
+                const integrationToggle = $(`#${integrationName}`);
+                const isOverrideChecked = $(this).is(':checked');
+                const defaultChecked = integrationToggle.data('default-checked') === 'true';
+                
+                if (isOverrideChecked) {
+                    // Enable the integration toggle and restore the configured value
+                    integrationToggle.prop('disabled', false);
+                    // The checkbox will maintain its current checked state
+                } else {
+                    // Disable the integration toggle and show default value
+                    integrationToggle.prop('checked', defaultChecked).prop('disabled', true);
+                }
+            });
+
+            // Initialize state on page load for all integrations
+            $('.override-toggle').each(function() {
+                const integrationName = $(this).data('integration');
+                const integrationToggle = $(`#${integrationName}`);
+                const isOverrideChecked = $(this).is(':checked');
+                const defaultChecked = integrationToggle.data('default-checked') === 'true';
+                
+                if (!isOverrideChecked) {
+                    // If not overriding, show default value and disable the toggle
+                    integrationToggle.prop('checked', defaultChecked).prop('disabled', true);
+                }
+            });
         });
     </script>
 }
