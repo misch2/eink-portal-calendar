@@ -1,8 +1,7 @@
-﻿using PortalCalendarServer.Models.Entities;
-using System;
-using System.Collections.Generic;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
-namespace PortalCalendarServer.Models;
+namespace PortalCalendarServer.Models.Entities;
 
 public partial class Display
 {

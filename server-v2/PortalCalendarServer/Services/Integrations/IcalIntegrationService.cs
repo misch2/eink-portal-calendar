@@ -5,7 +5,7 @@ using Ical.Net.Serialization;
 using Microsoft.Extensions.Caching.Memory;
 using NodaTime;
 using PortalCalendarServer.Data;
-using PortalCalendarServer.Models;
+using PortalCalendarServer.Models.Entities;
 
 namespace PortalCalendarServer.Services.Integrations;
 

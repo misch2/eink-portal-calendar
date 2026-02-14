@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Moq.Protected;
 using PortalCalendarServer.Data;
-using PortalCalendarServer.Models;
+using PortalCalendarServer.Models.Entities;
 using System.Net;
 
 namespace PortalCalendarServer.Tests.TestBase;

@@ -1,6 +1,6 @@
 using Microsoft.Playwright;
 using PortalCalendarServer.Data;
-using PortalCalendarServer.Models;
+using PortalCalendarServer.Models.Entities;
 using PortalCalendarServer.Services.PageGeneratorComponents;
 using PortalCalendarServer.Services.Integrations;
 using SixLabors.ImageSharp;

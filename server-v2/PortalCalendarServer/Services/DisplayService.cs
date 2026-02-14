@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Data;
-using PortalCalendarServer.Models;
 using PortalCalendarServer.Models.ColorTypes;
 using PortalCalendarServer.Models.Entities;
 using System;

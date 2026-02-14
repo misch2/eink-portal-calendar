@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using PortalCalendarServer.Models.POCOs.Board;
 
-namespace PortalCalendarServer.Models
+namespace PortalCalendarServer.Models.Entities
 {
 
     public partial class Display
