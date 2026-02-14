@@ -127,7 +127,7 @@ public class OtherController : Controller
                 _displayService.SetConfig(display, "_googlefit_refresh_token", refreshToken.GetString() ?? "");
             }
 
-            await _displayService.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             _logger.LogInformation("Successfully stored Google Fit tokens for display {DisplayId}", displayId);
 

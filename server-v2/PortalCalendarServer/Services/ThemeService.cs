@@ -46,7 +46,7 @@ public class ThemeService
     public async Task<Theme> GetDefaultThemeAsync()
     {
         var defaultTheme = await _context.Themes
-            .FirstOrDefaultAsync(t => t.FileName == "default" && t.IsActive);
+            .FirstOrDefaultAsync(t => t.Id == Models.Constants.Themes.DefaultId && t.IsActive);
 
         if (defaultTheme != null)
         {

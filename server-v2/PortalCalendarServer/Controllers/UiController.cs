@@ -224,7 +224,7 @@ public class UiController(
             _context.Update(display);
         }
 
-        await _displayService.SaveChangesAsync();
+        await _context.SaveChangesAsync();
 
         _logger.LogInformation("Configuration saved for display {DisplayId}", displayNumber);
 

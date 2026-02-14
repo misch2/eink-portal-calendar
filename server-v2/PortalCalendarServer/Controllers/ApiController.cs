@@ -157,7 +157,7 @@ public class ApiController : ControllerBase
         _displayService.SetConfig(display, "_reset_reason", reset ?? string.Empty);
         _displayService.SetConfig(display, "_wakeup_reason", wakeup ?? string.Empty);
 
-        await _displayService.SaveChangesAsync();
+        await _context.SaveChangesAsync();
 
         // Calculate next wakeup time
         var wakeupInfo = display.NextWakeupTime();

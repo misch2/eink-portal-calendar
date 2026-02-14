@@ -144,14 +144,6 @@ public class DisplayService(
         }
     }
 
-    /// <summary>
-    /// Save all changes to the database
-    /// </summary>
-    public async Task SaveChangesAsync()
-    {
-        await context.SaveChangesAsync();
-    }
-
     public IColorType? GetColorType(Display display)
     {
         if (string.IsNullOrEmpty(display.ColorType))

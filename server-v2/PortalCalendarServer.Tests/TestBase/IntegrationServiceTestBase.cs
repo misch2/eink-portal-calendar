@@ -123,7 +123,8 @@ public abstract class IntegrationServiceTestBase : IDisposable
             BorderRight = 0,
             BorderBottom = 0,
             BorderLeft = 0,
-            Firmware = "1.0.0"
+            Firmware = "1.0.0",
+            ThemeId = Models.Constants.Themes.DefaultId
         };
 
         Context.Displays.Add(display);
