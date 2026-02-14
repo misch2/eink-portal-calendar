@@ -3,8 +3,6 @@
 @using PortalCalendarServer.Services
 
 @{
-    var templateNames = (List<string>)ViewData["TemplateNames"]!;
-    var currentTheme = (string?)ViewData["CurrentTheme"];
     var displayService = (DisplayService)ViewData["DisplayService"]!;
 }
 
@@ -73,20 +71,33 @@
     <script>
         $(document).ready(function() {
             // Theme selection handler
-            $('#theme').on('change', function() {
-                const theme = $(this).val();
-                if (!theme) {
-                    $('#theme-customization').html('');
+            $('#theme_id').on('change', function() {
+                const themeId = $(this).val();
+                const $customization = $('#theme-customization');
+                const $selectedOption = $(this).find('option:selected');
+                const hasConfig = $selectedOption.data('has-config') === true;
+                
+                if (!themeId) {
+                    $customization.html('<div class="text-muted fst-italic"><small>Select a theme above to see available customization options</small></div>');
                     return;
                 }
-                const url = '/config_ui/theme/@Model.Id?theme=' + encodeURIComponent(theme);
+                
+                if (!hasConfig) {
+                    $customization.html('<div class="text-muted fst-italic"><small>This theme has no customization options</small></div>');
+                    return;
+                }
+                
+                const url = '/config_ui/theme/@Model.Id?themeId=' + encodeURIComponent(themeId);
                 $.ajax({
                     url: url,
                     success: function(data) {
-                        $('#theme-customization').html(data);
+                        $customization.html(data);
+                    },
+                    error: function() {
+                        $customization.html('<div class="text-danger"><small>Error loading theme configuration</small></div>');
                     }
                 });
-            });
+            }).trigger('change');
 
             // Hash-based tab navigation
             function activateTabFromHash() {

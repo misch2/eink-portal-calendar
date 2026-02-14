@@ -50,6 +50,7 @@ builder.Services.AddTransient<CachingHttpMessageHandler>();
 builder.Services.AddScoped<DisplayService>();
 builder.Services.AddScoped<PageGeneratorService>();
 builder.Services.AddScoped<CacheManagementService>();
+builder.Services.AddScoped<ThemeService>();
 builder.Services.AddSingleton<Web2PngService>();
 builder.Services.AddSingleton<ColorTypeRegistry>();
 
@@ -104,6 +105,27 @@ builder.Services.AddOpenApi(options =>
 });
 
 var app = builder.Build();
+
+// Run migrations on startup
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+
+    try
+    {
+        logger.LogInformation("Starting database migrations");
+        // Apply database migrations
+        var context = services.GetRequiredService<CalendarContext>();
+        await context.Database.MigrateAsync();
+        logger.LogInformation("Database migrations applied successfully");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "An error occurred during startup initialization");
+        throw;
+    }
+}
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())

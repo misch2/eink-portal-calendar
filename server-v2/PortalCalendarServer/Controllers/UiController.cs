@@ -12,23 +12,26 @@ public class UiController(
     ILogger<UiController> logger,
     IWebHostEnvironment environment,
     PageGeneratorService pageGeneratorService,
-    DisplayService displayService) : Controller
+    DisplayService displayService,
+    ThemeService themeService) : Controller
 {
     private readonly CalendarContext _context = context;
     private readonly ILogger<UiController> _logger = logger;
     private readonly IWebHostEnvironment _environment = environment;
     private readonly PageGeneratorService _pageGeneratorService = pageGeneratorService;
     private readonly DisplayService _displayService = displayService;
+    private readonly ThemeService _themeService = themeService;
 
     // Config parameter names that can be saved from the UI
     private static readonly string[] ConfigUiParameters =
     [
+        // FIXME this is not ideal, every config class should have a list of its own parameters, and we should only save those instead of this big hardcoded list
         "alive_check_safety_lag_minutes", "alive_check_minimal_failure_count", "alt", "date_culture", "display_title",
         "googlefit", "googlefit_auth_callback", "googlefit_client_id", "googlefit_client_secret",
         "lat", "lon", "max_icons_with_calendar", "max_random_icons", "metnoweather",
         "metnoweather_granularity_hours", "min_random_icons", "mqtt", "mqtt_password", "mqtt_server",
         "mqtt_topic", "mqtt_username", "openweather", "openweather_api_key", "openweather_lang",
-        "ota_mode", "telegram", "telegram_api_key", "telegram_chat_id", "theme", "timezone",
+        "ota_mode", "telegram", "telegram_api_key", "telegram_chat_id", "theme_id", "timezone",
         "totally_random_icon", "wakeup_schedule", "web_calendar_ics_url1", "web_calendar_ics_url2",
         "web_calendar_ics_url3", "web_calendar1", "web_calendar2", "web_calendar3"
     ];
@@ -131,9 +134,10 @@ public class UiController(
 
         var viewModel = _pageGeneratorService.PageViewModelForDate(display, DateTime.UtcNow, preview_colors);
 
-        // TODO: Return calendar theme view
-        var theme = _displayService.GetConfig("theme") ?? "default";
-        return View($"~/Views/CalendarThemes/{theme}.cshtml", viewModel);
+        var themeId = _displayService.GetThemeId();
+        var theme = await _themeService.GetThemeByIdAsync(themeId!.Value);
+
+        return View($"~/Views/CalendarThemes/{theme!.FileName}.cshtml", viewModel);
     }
 
     // GET /calendar/{display_number}/html/{date}
@@ -154,9 +158,30 @@ public class UiController(
 
         var viewModel = _pageGeneratorService.PageViewModelForDate(display, parsedDate, preview_colors);
 
-        // TODO: Return calendar theme view
-        var theme = _displayService.GetConfig("theme") ?? "default";
-        return View($"~/Views/CalendarThemes/{theme}.cshtml", viewModel);
+        // FIXME unify this with the default date method!!!
+
+        // Get theme from config and validate it exists
+        var themeId = _displayService.GetThemeId();
+        Theme theme;
+
+        if (themeId.HasValue)
+        {
+            theme = await _themeService.GetThemeByIdAsync(themeId.Value)
+                    ?? await _themeService.GetDefaultThemeAsync();
+
+            if (theme.Id != themeId.Value)
+            {
+                _logger.LogWarning("Theme ID {ThemeId} not found, falling back to {DefaultTheme}",
+                    themeId.Value, theme.FileName);
+            }
+        }
+        else
+        {
+            theme = await _themeService.GetDefaultThemeAsync();
+            _logger.LogDebug("No theme configured, using default: {DefaultTheme}", theme.FileName);
+        }
+
+        return View($"~/Views/CalendarThemes/{theme.FileName}.cshtml", viewModel);
     }
 
     // GET /config_ui/{display_number}
@@ -170,22 +195,9 @@ public class UiController(
         }
         _displayService.UseDisplay(display);
 
-        // Get available template names from filesystem
-        var themesPath = Path.Combine(_environment.ContentRootPath, "Views", "CalendarThemes");
-        var templateNames = new List<string>();
-
-        if (Directory.Exists(themesPath))
-        {
-            templateNames = Directory.GetFiles(themesPath, "*.cshtml")
-                .Select(f => Path.GetFileNameWithoutExtension(f))
-                .Where(n => !n.StartsWith("_"))
-                .ToList();
-        }
-
         ViewData["NavLink"] = "config_ui";
         ViewData["Title"] = $"Configuration - {display.Name}";
-        ViewData["TemplateNames"] = templateNames;
-        ViewData["CurrentTheme"] = _displayService.GetConfig("theme");
+        ViewData["Themes"] = await _themeService.GetActiveThemesAsync();
         ViewData["LastVoltage"] = display.Voltage();
         ViewData["LastVoltageRaw"] = _displayService.GetConfig("_last_voltage_raw");
         ViewBag.Display = display; // for global layout
@@ -276,7 +288,7 @@ public class UiController(
 
     // GET /config_ui/theme/{display_number}?theme=portal_with_icons
     [HttpGet("/config_ui/theme/{displayNumber:int}")]
-    public async Task<IActionResult> ConfigUiThemeShow(int displayNumber, [FromQuery] string? theme)
+    public async Task<IActionResult> ConfigUiThemeShow(int displayNumber, [FromQuery] int? themeId)
     {
         var display = await GetDisplayByIdAsync(displayNumber);
         if (display == null)
@@ -285,27 +297,48 @@ public class UiController(
         }
         _displayService.UseDisplay(display);
 
-        if (string.IsNullOrWhiteSpace(theme))
+        if (!themeId.HasValue)
         {
             return Content(string.Empty);
         }
 
-        // Sanitize theme name
-        var sanitizedTheme = new string(theme.Where(c =>
-            char.IsLetterOrDigit(c) || c == '_' || c == '-' || c == ' ').ToArray());
+        // Get theme metadata from database using ThemeService
+        var themeEntity = await _themeService.GetThemeByIdAsync(themeId.Value);
+
+        if (themeEntity == null)
+        {
+            _logger.LogWarning("Theme ID {ThemeId} not found in database", themeId);
+            return Content(string.Empty);
+        }
+
+        // Only try to load config if theme has custom config
+        if (!themeEntity.HasCustomConfig)
+        {
+            _logger.LogDebug("Theme [{ThemeName}] has no custom configuration", themeEntity.DisplayName);
+            return Content(string.Empty);
+        }
 
         try
         {
             // Try to render the theme configuration partial view
-            var viewPath = $"~/Views/CalendarThemes/Configs/{sanitizedTheme}.cshtml";
+            var viewPath = $"~/Views/CalendarThemes/Configs/{themeEntity.FileName}.cshtml";
 
-            _logger.LogInformation("Rendering theme configuration for theme: {Theme}", sanitizedTheme);
+            _logger.LogInformation("Rendering theme configuration for theme: {ThemeName}", themeEntity.DisplayName);
+
+            // Pass DisplayService through ViewData for the partial view
+            ViewData["DisplayService"] = _displayService;
 
             return PartialView(viewPath, display);
         }
+        catch (InvalidOperationException ex)
+        {
+            // View not found - log as warning since theme says it should have config
+            _logger.LogWarning(ex, "Configuration view not found for theme [{ThemeName}] that claims to have custom config", themeEntity.DisplayName);
+            return Content(string.Empty);
+        }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error rendering theme [{Theme}]", sanitizedTheme);
+            _logger.LogError(ex, "Error rendering theme [{ThemeName}]", themeEntity.DisplayName);
             return Content(string.Empty);
         }
     }

@@ -14,13 +14,15 @@ public class ApiController : ControllerBase
     private readonly ILogger<ApiController> _logger;
     private readonly DisplayService _displayService;
     private readonly PageGeneratorService _pageGeneratorService;
+    private readonly ThemeService _themeService;
 
-    public ApiController(CalendarContext context, ILogger<ApiController> logger, DisplayService displayService, PageGeneratorService pageGeneratorService, Web2PngService web2PngService, ColorTypeRegistry colorTypeRegistry)
+    public ApiController(CalendarContext context, ILogger<ApiController> logger, DisplayService displayService, PageGeneratorService pageGeneratorService, ThemeService themeService, Web2PngService web2PngService, ColorTypeRegistry colorTypeRegistry)
     {
         _context = context;
         _logger = logger;
         _displayService = displayService;
         _pageGeneratorService = pageGeneratorService;
+        _themeService = themeService;
     }
 
     // Helper to get display by MAC address
@@ -126,8 +128,9 @@ public class ApiController : ControllerBase
             await _context.SaveChangesAsync();
 
             // Set default theme
+            var defaultTheme = await _themeService.GetDefaultThemeAsync();
             _displayService.UseDisplay(display);
-            _displayService.SetConfig("theme", "default");
+            _displayService.SetThemeId(defaultTheme.Id);
             await _displayService.SaveChangesAsync();
 
             _logger.LogInformation("New display created with MAC {Mac}, ID: {Id}", mac, display.Id);

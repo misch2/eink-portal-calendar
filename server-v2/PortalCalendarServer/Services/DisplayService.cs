@@ -151,6 +151,22 @@ public class DisplayService(
     }
 
     /// <summary>
+    /// Get the theme ID from configuration
+    /// </summary>
+    public int? GetThemeId()
+    {
+        return GetConfigInt("theme_id");
+    }
+
+    /// <summary>
+    /// Set the theme ID in configuration
+    /// </summary>
+    public void SetThemeId(int themeId)
+    {
+        SetConfig("theme_id", themeId.ToString());
+    }
+
+    /// <summary>
     /// Get configuration value as double
     /// </summary>
     public double? GetConfigDouble(string name)
