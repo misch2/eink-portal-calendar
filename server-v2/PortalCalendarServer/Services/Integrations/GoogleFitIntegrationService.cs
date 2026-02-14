@@ -1,11 +1,10 @@
+using Microsoft.Extensions.Caching.Memory;
+using PortalCalendarServer.Data;
+using PortalCalendarServer.Models.Entities;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.Extensions.Caching.Memory;
-using PortalCalendarServer.Data;
-using PortalCalendarServer.Models;
-using PortalCalendarServer.Models.Entities;
 
 namespace PortalCalendarServer.Services.Integrations;
 

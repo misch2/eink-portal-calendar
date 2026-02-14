@@ -1,17 +1,14 @@
-using Microsoft.Playwright;
+using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.Entities;
-using PortalCalendarServer.Services.PageGeneratorComponents;
 using PortalCalendarServer.Services.Integrations;
+using PortalCalendarServer.Services.PageGeneratorComponents;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Processors.Quantization;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace PortalCalendarServer.Services;
 
@@ -66,7 +63,8 @@ public class PageGeneratorService
         viewModel.InitializeComponents(
             portalIconsFactory: () => new PortalIconsComponent(_displayService),
             calendarFactory: () => new CalendarComponent(_logger, _displayService, _httpClientFactory, _memoryCache, _context, _loggerFactory),
-            weightFactory: () => {
+            weightFactory: () =>
+            {
                 var googleFitService = new GoogleFitIntegrationService(
                     _loggerFactory.CreateLogger<GoogleFitIntegrationService>(),
                     _httpClientFactory,
@@ -96,7 +94,7 @@ public class PageGeneratorService
     public void GenerateImageFromWeb(Display display)
     {
         _displayService.UseDisplay(display);
-        
+
         var url = $"http://localhost:5252/calendar/{display.Id}/html?preview_colors=true";  // FIXME FIXME hardcoded port!
         var outputPath = DisplayImageName(display);
         _logger.LogInformation("Generating calendar image from URL {Url} to {OutputPath}", url, outputPath);
@@ -358,7 +356,7 @@ public class PageGeneratorService
     public void UpdateMqtt(Display display, string key, object value, bool forced = false)
     {
         _displayService.UseDisplay(display);
-        
+
         if (!_displayService.GetConfigBool("mqtt"))
             return;
 
@@ -369,7 +367,7 @@ public class PageGeneratorService
     public void DisconnectMqtt(Display display)
     {
         _displayService.UseDisplay(display);
-        
+
         if (!_displayService.GetConfigBool("mqtt"))
             return;
 

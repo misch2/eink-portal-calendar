@@ -3,7 +3,6 @@ using PortalCalendarServer.Services.Integrations;
 using PortalCalendarServer.Tests.TestBase;
 using PortalCalendarServer.Tests.TestData;
 using System.Net;
-using System.Runtime.ConstrainedExecution;
 
 namespace PortalCalendarServer.Tests.Services.Integrations;
 

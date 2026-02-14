@@ -1,13 +1,10 @@
-using System.Net;
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Moq;
-using Moq.Protected;
-using PortalCalendarServer.Models;
 using PortalCalendarServer.Models.Entities;
 using PortalCalendarServer.Services.Integrations;
 using PortalCalendarServer.Tests.TestBase;
+using System.Net;
+using System.Text.Json;
 
 namespace PortalCalendarServer.Tests.Services.Integrations;
 
@@ -31,7 +28,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
     private Display CreateDisplayWithGoogleFitTokens()
     {
         var display = CreateTestDisplay();
-        
+
         Context.Configs.AddRange(
             new Config
             {
@@ -63,12 +60,12 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
                 Name = "googlefit_auth_callback",
                 Value = "https://example.com/callback"
             });
-        
+
         Context.SaveChanges();
-        
+
         // Reload the display with configs
         Context.Entry(display).Collection(d => d.Configs).Load();
-        
+
         return display;
     }
 
@@ -103,9 +100,9 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
     public void IsAvailable_WhenNoDisplay_ReturnsFalse()
     {
         var service = CreateService(display: null);
-        
+
         var result = service.IsAvailable();
-        
+
         Assert.False(result);
     }
 
@@ -114,9 +111,9 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
     {
         var display = CreateTestDisplay();
         var service = CreateService(display);
-        
+
         var result = service.IsAvailable();
-        
+
         Assert.False(result);
     }
 
@@ -132,11 +129,11 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
         });
         Context.SaveChanges();
         Context.Entry(display).Collection(d => d.Configs).Load();
-        
+
         var service = CreateService(display);
-        
+
         var result = service.IsAvailable();
-        
+
         Assert.False(result);
     }
 
@@ -145,9 +142,9 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
     {
         var display = CreateDisplayWithGoogleFitTokens();
         var service = CreateService(display);
-        
+
         var result = service.IsAvailable();
-        
+
         Assert.True(result);
     }
 
@@ -169,7 +166,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
         var result = await service.GetNewAccessTokenFromRefreshTokenAsync();
 
         Assert.Equal("new_access_token_789", result);
-        
+
         // Verify token was saved to database
         Context.Entry(display).Collection(d => d.Configs).Query().Load();
         var savedToken = display.Configs?.FirstOrDefault(c => c.Name == "_googlefit_access_token")?.Value;
@@ -221,7 +218,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
 
         var testDate = DateTime.UtcNow.Date.AddDays(-5);
         var mockResponse = CreateMockGoogleFitResponse((testDate, 75.5));
-        
+
         // Set up response for all the chunked requests (3 requests for 90 days = 3x30-day chunks)
         SetupHttpResponseForAnyUrl(mockResponse, HttpStatusCode.OK);
 

@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Moq;
 using PortalCalendarServer.Services.Integrations;
 
 namespace PortalCalendarServer.Tests.Services.Integrations;

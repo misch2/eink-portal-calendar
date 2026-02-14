@@ -91,7 +91,7 @@ public class Web2PngService : IAsyncDisposable
             try
             {
                 var page = await context.NewPageAsync();
-                
+
                 try
                 {
                     // Navigate to the URL

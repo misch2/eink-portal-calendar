@@ -1,9 +1,9 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.Entities;
 using PortalCalendarServer.Models.Weather;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace PortalCalendarServer.Services.Integrations.Weather;
 
@@ -46,7 +46,7 @@ public class MetNoWeatherService : IntegrationServiceBase
         // Truncate coordinates to max 3 decimals (Met.no requirement)
         var lat = Math.Round(_latitude, 3);
         var lon = Math.Round(_longitude, 3);
-        
+
         return $"https://api.met.no/weatherapi/locationforecast/2.0/complete?lat={lat:F3}&lon={lon:F3}&altitude={_altitude}";
     }
 
@@ -72,7 +72,7 @@ public class MetNoWeatherService : IntegrationServiceBase
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync(cancellationToken);
-        var data = JsonSerializer.Deserialize<MetNoResponse>(json) 
+        var data = JsonSerializer.Deserialize<MetNoResponse>(json)
             ?? throw new InvalidOperationException("Failed to deserialize Met.no response");
 
         // Cache for 15 minutes
@@ -131,7 +131,7 @@ public class MetNoWeatherService : IntegrationServiceBase
     {
         var json = await GetRawJsonFromWebAsync(cancellationToken);
         var current = json.Properties?.Timeseries?.FirstOrDefault();
-        
+
         if (current == null)
             return null;
 
@@ -164,7 +164,7 @@ public class MetNoWeatherService : IntegrationServiceBase
     public AggregatedWeatherData? Aggregate(List<WeatherData> forecast, DateTime start, int hours)
     {
         var end = start.AddHours(hours);
-        
+
         var usable = forecast
             .Where(f => f.TimeEnd > start && f.TimeStart < end)
             .ToList();
@@ -179,7 +179,7 @@ public class MetNoWeatherService : IntegrationServiceBase
         {
             Provider = usable[0].Provider,
             AggregatedCount = usable.Count,
-            
+
             TemperatureMin = usable.Min(w => w.Temperature),
             TemperatureMax = usable.Max(w => w.Temperature),
             TemperatureAvg = usable.Average(w => w.Temperature),
@@ -229,7 +229,7 @@ public class MetNoWeatherService : IntegrationServiceBase
         // This is a simplified calculation. For production, consider using a library like SunCalc
         var dayOfYear = time.DayOfYear;
         var solarDeclination = 23.45 * Math.Sin((360.0 / 365.0) * (dayOfYear - 81) * Math.PI / 180);
-        
+
         var hourAngle = 15 * (time.Hour + time.Minute / 60.0 - 12);
         var solarElevation = Math.Asin(
             Math.Sin(latitude * Math.PI / 180) * Math.Sin(solarDeclination * Math.PI / 180) +

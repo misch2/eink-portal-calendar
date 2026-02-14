@@ -1,9 +1,9 @@
-using System.Text;
-using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Services;
+using System.Text;
+using System.Text.Json;
 
 namespace PortalCalendarServer.Controllers;
 
@@ -57,7 +57,7 @@ public class OtherController : Controller
             var stateBytes = Convert.FromBase64String(state);
             var stateJson = Encoding.UTF8.GetString(stateBytes);
             var stateData = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(stateJson);
-            
+
             if (stateData == null || !stateData.TryGetValue("display_number", out var displayNumberElement))
             {
                 _logger.LogError("Invalid state parameter - missing display_number");

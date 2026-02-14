@@ -2,7 +2,6 @@
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.ColorTypes;
 using PortalCalendarServer.Models.Entities;
-using System;
 
 namespace PortalCalendarServer.Services;
 
@@ -135,7 +134,7 @@ public class DisplayService(
     public int? GetConfigInt(string name)
     {
         ValidateDisplayIsSet();
-        
+
         var value = GetConfig(name);
         if (string.IsNullOrEmpty(value))
         {
@@ -172,7 +171,7 @@ public class DisplayService(
     public double? GetConfigDouble(string name)
     {
         ValidateDisplayIsSet();
-        
+
         var value = GetConfig(name);
         if (string.IsNullOrEmpty(value))
         {

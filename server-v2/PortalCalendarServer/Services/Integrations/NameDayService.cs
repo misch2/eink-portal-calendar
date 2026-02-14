@@ -9,7 +9,7 @@ namespace PortalCalendarServer.Services.Integrations;
 public class NameDayService
 {
     private readonly ILogger<NameDayService> _logger;
-    
+
     private static readonly Dictionary<string, string> CzechNameDays = new()
     {
         // January

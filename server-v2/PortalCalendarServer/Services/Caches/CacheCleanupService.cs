@@ -17,7 +17,7 @@ public class CacheCleanupService : BackgroundService
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
-        
+
         // Read cleanup interval from configuration, default to 1 hour
         var intervalMinutes = configuration.GetValue<int?>("Cache:CleanupIntervalMinutes") ?? 60;
         _interval = TimeSpan.FromMinutes(intervalMinutes);
@@ -67,7 +67,7 @@ public class CacheCleanupService : BackgroundService
             var cacheManagement = scope.ServiceProvider.GetRequiredService<CacheManagementService>();
 
             var stats = await cacheManagement.GetCacheStatisticsAsync(cancellationToken);
-            
+
             _logger.LogInformation(
                 "Current cache stats: {Total} total entries, {Expired} expired, {Active} active, {SizeMB:F2} MB",
                 stats.TotalEntries,

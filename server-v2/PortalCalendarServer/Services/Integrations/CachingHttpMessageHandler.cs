@@ -52,10 +52,10 @@ public class CachingHttpMessageHandler : DelegatingHandler
         if (response.IsSuccessStatusCode)
         {
             var cached = await CreateCachedResponseAsync(response);
-            
+
             // Determine cache duration from Cache-Control header or use default
             var cacheSeconds = GetCacheDuration(response) ?? _defaultCacheSeconds;
-            
+
             var cacheOptions = new MemoryCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(cacheSeconds),
@@ -89,7 +89,7 @@ public class CachingHttpMessageHandler : DelegatingHandler
 
         if (cached.ContentType != null)
         {
-            response.Content.Headers.ContentType = 
+            response.Content.Headers.ContentType =
                 System.Net.Http.Headers.MediaTypeHeaderValue.Parse(cached.ContentType);
         }
 

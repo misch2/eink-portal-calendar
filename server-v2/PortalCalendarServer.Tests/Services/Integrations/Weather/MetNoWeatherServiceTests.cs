@@ -1,8 +1,5 @@
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using Moq;
 using Moq.Protected;
-using PortalCalendarServer.Data;
 using PortalCalendarServer.Services.Integrations.Weather;
 using PortalCalendarServer.Tests.TestBase;
 using System.Net;
@@ -68,8 +65,8 @@ public class MetNoWeatherServiceTests : IntegrationServiceTestBase
             .Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
-                ItExpr.Is<HttpRequestMessage>(req => 
-                    req.RequestUri != null && 
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    req.RequestUri != null &&
                     req.RequestUri.ToString().Contains("api.met.no/weatherapi/locationforecast")),
                 ItExpr.IsAny<CancellationToken>())
             .ReturnsAsync(new HttpResponseMessage
@@ -125,8 +122,8 @@ public class MetNoWeatherServiceTests : IntegrationServiceTestBase
             .Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
-                ItExpr.Is<HttpRequestMessage>(req => 
-                    req.RequestUri != null && 
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    req.RequestUri != null &&
                     req.RequestUri.ToString().Contains("api.met.no/weatherapi/locationforecast")),
                 ItExpr.IsAny<CancellationToken>())
             .ReturnsAsync(new HttpResponseMessage
@@ -168,8 +165,8 @@ public class MetNoWeatherServiceTests : IntegrationServiceTestBase
             .Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
-                ItExpr.Is<HttpRequestMessage>(req => 
-                    req.RequestUri != null && 
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    req.RequestUri != null &&
                     req.RequestUri.ToString().Contains("api.met.no/weatherapi/locationforecast")),
                 ItExpr.IsAny<CancellationToken>())
             .ReturnsAsync(new HttpResponseMessage
@@ -281,8 +278,8 @@ public class MetNoWeatherServiceTests : IntegrationServiceTestBase
             .Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
-                ItExpr.Is<HttpRequestMessage>(req => 
-                    req.RequestUri != null && 
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    req.RequestUri != null &&
                     req.RequestUri.ToString().Contains("api.met.no/weatherapi/locationforecast")),
                 ItExpr.IsAny<CancellationToken>())
             .ReturnsAsync(new HttpResponseMessage
@@ -308,8 +305,8 @@ public class MetNoWeatherServiceTests : IntegrationServiceTestBase
             .Verify(
                 "SendAsync",
                 Times.Once(),
-                ItExpr.Is<HttpRequestMessage>(req => 
-                    req.RequestUri != null && 
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    req.RequestUri != null &&
                     req.RequestUri.ToString().Contains("api.met.no/weatherapi/locationforecast")),
                 ItExpr.IsAny<CancellationToken>());
     }

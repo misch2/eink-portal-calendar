@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
-using PortalCalendarServer.Models.Entities;
 using PortalCalendarServer.Models.Weather;
 using PortalCalendarServer.Services.Integrations.Weather;
 
@@ -66,7 +65,7 @@ public class WeatherComponent(
             );
 
             var detailedForecast = await service.GetForecastAsync();
-            
+
             var dtStart = date.ToUniversalTime();
             dtStart = new DateTime(dtStart.Year, dtStart.Month, dtStart.Day, dtStart.Hour, 0, 0, DateTimeKind.Utc);
 
@@ -76,7 +75,7 @@ public class WeatherComponent(
             // Forecast (multiple aggregated periods)
             var aggregateHours = displayService.GetConfigInt("metnoweather_granularity_hours") ?? 2;
             var forecast = new List<AggregatedWeatherData>();
-            
+
             dtStart = dtStart.AddHours(1);
             for (int i = 0; i < 8; i++)
             {

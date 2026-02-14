@@ -18,7 +18,7 @@ public class Web2PngTestController : ControllerBase
     private readonly IWebHostEnvironment _environment;
 
     public Web2PngTestController(
-        Web2PngService web2PngService, 
+        Web2PngService web2PngService,
         ILogger<Web2PngTestController> logger,
         IWebHostEnvironment environment)
     {
@@ -48,7 +48,7 @@ public class Web2PngTestController : ControllerBase
             // Create a temporary output path
             var outputDir = Path.Combine(_environment.ContentRootPath, "generated_images");
             Directory.CreateDirectory(outputDir);
-            
+
             var fileName = $"test_{DateTime.UtcNow:yyyyMMddHHmmss}.png";
             var outputPath = Path.Combine(outputDir, fileName);
 
@@ -88,13 +88,13 @@ public class Web2PngTestController : ControllerBase
             // 1. Get the display from database
             // 2. Build the URL for the display's HTML view
             // 3. Call Web2PngService to generate the PNG
-            
+
             var baseUrl = $"{Request.Scheme}://{Request.Host}";
             var url = $"{baseUrl}/calendar/{displayId}/html";
-            
+
             var outputDir = Path.Combine(_environment.ContentRootPath, "generated_images");
             Directory.CreateDirectory(outputDir);
-            
+
             var outputPath = Path.Combine(outputDir, $"current_calendar_{displayId}.png");
 
             _logger.LogInformation("Regenerating image for display {DisplayId} from {Url}", displayId, url);
@@ -108,8 +108,8 @@ public class Web2PngTestController : ControllerBase
                 delayMs: 2000,
                 HttpContext.RequestAborted);
 
-            return Ok(new 
-            { 
+            return Ok(new
+            {
                 message = "Image regenerated successfully",
                 displayId,
                 outputPath,

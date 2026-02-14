@@ -49,11 +49,11 @@ public abstract class IntegrationServiceBase
     protected DatabaseCacheService GetDatabaseCache()
     {
         // Create a logger factory for the DatabaseCacheService
-        var loggerFactory = Microsoft.Extensions.Logging.LoggerFactory.Create(builder => 
+        var loggerFactory = Microsoft.Extensions.Logging.LoggerFactory.Create(builder =>
         {
             builder.AddConsole();
         });
-        
+
         return new DatabaseCacheService(
             Context,
             loggerFactory.CreateLogger<DatabaseCacheService>(),
@@ -68,11 +68,11 @@ public abstract class IntegrationServiceBase
     protected HttpClient GetHttpClient()
     {
         var client = HttpClientFactory.CreateClient(GetType().Name);
-        
+
         // Set a default User-Agent if not already set
         if (!client.DefaultRequestHeaders.Contains("User-Agent"))
         {
-            client.DefaultRequestHeaders.Add("User-Agent", 
+            client.DefaultRequestHeaders.Add("User-Agent",
                 "PortalCalendar/2.0 (github.com/misch2/eink-portal-calendar)");
         }
 

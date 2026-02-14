@@ -1,9 +1,8 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.Entities;
-using PortalCalendarServer.Models.Weather;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace PortalCalendarServer.Services.Integrations.Weather;
 

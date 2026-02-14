@@ -83,7 +83,7 @@ public class PublicHolidayService : IPublicHolidayService
         var (englishName, czechName) = CzechHolidayNames.GetValueOrDefault(dateKey,
             (holiday.EnglishName ?? "Public Holiday", holiday.Name ?? "Státní svátek"));
 
-        _logger.LogDebug("Found public holiday: {EnglishName} ({CzechName}) on {Date}", 
+        _logger.LogDebug("Found public holiday: {EnglishName} ({CzechName}) on {Date}",
             englishName, czechName, date);
 
         return new PublicHolidayInfo
@@ -148,7 +148,7 @@ public class PublicHolidayService : IPublicHolidayService
             return new List<PublicHolidayInfo>();
         }
 
-        _logger.LogDebug("Getting public holidays between {StartDate} and {EndDate} in {CountryCode}", 
+        _logger.LogDebug("Getting public holidays between {StartDate} and {EndDate} in {CountryCode}",
             startDate, endDate, countryCode);
 
         var allHolidays = new List<PublicHolidayInfo>();

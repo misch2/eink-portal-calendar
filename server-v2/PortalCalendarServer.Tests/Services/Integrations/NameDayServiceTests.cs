@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Moq;
 using PortalCalendarServer.Services.Integrations;
 
 namespace PortalCalendarServer.Tests.Services.Integrations;
@@ -35,7 +34,7 @@ public class NameDayServiceTests
     {
         var date = new DateTime(2024, month, day);
         var result = _service.GetNameDay(date);
-        
+
         Assert.NotNull(result);
         Assert.Equal(expectedName, result.Name);
         Assert.Equal(date, result.Date);
@@ -51,16 +50,16 @@ public class NameDayServiceTests
         int year, int month, int expectedCount, string? containsFirst, string? containsLast)
     {
         var result = _service.GetNameDaysForMonth(year, month);
-        
+
         Assert.Equal(expectedCount, result.Count);
         Assert.All(result, nd => Assert.Equal(month, nd.Date.Month));
         Assert.All(result, nd => Assert.Equal(year, nd.Date.Year));
-        
+
         if (containsFirst != null)
             Assert.Contains(result, nd => nd.Name == containsFirst);
         if (containsLast != null)
             Assert.Contains(result, nd => nd.Name == containsLast);
-        
+
         // Verify chronological ordering
         for (int i = 0; i < result.Count - 1; i++)
             Assert.True(result[i].Date < result[i + 1].Date);
@@ -104,7 +103,7 @@ public class NameDayServiceTests
             Assert.Equal(date, result.Date);
             Assert.Equal("CZ", result.CountryCode);
             Assert.False(string.IsNullOrWhiteSpace(result.Name));
-            
+
             count++;
             date = date.AddDays(1);
         }

@@ -39,7 +39,7 @@ public class XkcdComponent(
 
         // Convert to data URL for embedding in HTML
         var imageAsDataUrl = XkcdIntegrationService.ConvertToDataUrl(comicData.ImageData);
-        
+
         return new XkcdInfo
         {
             Title = comicData.Title,

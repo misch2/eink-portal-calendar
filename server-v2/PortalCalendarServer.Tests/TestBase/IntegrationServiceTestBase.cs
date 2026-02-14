@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using Moq;
 using Moq.Protected;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.Entities;
@@ -32,7 +31,7 @@ public abstract class IntegrationServiceTestBase : IDisposable
 
         // Setup mock HTTP message handler
         MockHttpMessageHandler = new Mock<HttpMessageHandler>();
-        
+
         // Setup mock HTTP client factory
         MockHttpClientFactory = new Mock<IHttpClientFactory>();
         var httpClient = new HttpClient(MockHttpMessageHandler.Object);

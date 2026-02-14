@@ -1,9 +1,5 @@
 using Ical.Net;
-using Ical.Net.CalendarComponents;
-using Ical.Net.DataTypes;
-using Ical.Net.Serialization;
 using Microsoft.Extensions.Caching.Memory;
-using NodaTime;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.Entities;
 

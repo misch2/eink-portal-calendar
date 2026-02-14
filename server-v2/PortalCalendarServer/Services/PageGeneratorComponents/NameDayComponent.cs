@@ -1,4 +1,3 @@
-using System.Globalization;
 using PortalCalendarServer.Services.Integrations;
 
 namespace PortalCalendarServer.Services.PageGeneratorComponents;
