@@ -2,7 +2,7 @@ using Microsoft.Extensions.Caching.Memory;
 using System.Net;
 
 namespace PortalCalendarServer.Services.Integrations;
-
+ 
 /// <summary>
 /// HTTP message handler that provides caching for HTTP responses using IMemoryCache.
 /// This is a lightweight alternative to LWP::UserAgent::Caching from Perl.
@@ -21,7 +21,7 @@ public class CachingHttpMessageHandler : DelegatingHandler
         _cache = cache;
         _logger = logger;
         _defaultCacheSeconds = defaultCacheSeconds;
-        InnerHandler = new HttpClientHandler();
+        //InnerHandler = new HttpClientHandler();
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(

@@ -67,8 +67,7 @@ public class MetNoWeatherService : IntegrationServiceBase
 
         Logger.LogDebug("Met.no JSON cache MISS, fetching from {Url}", url);
 
-        var client = GetHttpClient();
-        var response = await client.GetAsync(url, cancellationToken);
+        var response = await httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync(cancellationToken);

@@ -14,11 +14,13 @@ namespace PortalCalendarServer.Services.Integrations;
 public abstract class IntegrationServiceBase
 {
     protected readonly ILogger Logger;
-    protected readonly IHttpClientFactory HttpClientFactory;
     protected readonly IMemoryCache MemoryCache;
+    protected readonly IHttpClientFactory HttpClientFactory;
     protected readonly CalendarContext Context;
     protected readonly Display? Display;
     private readonly int _minimalCacheExpiry;
+
+    protected HttpClient httpClient => HttpClientFactory.CreateClient();
 
     protected IntegrationServiceBase(
         ILogger logger,
@@ -28,8 +30,8 @@ public abstract class IntegrationServiceBase
         Display? display = null,
         int minimalCacheExpiry = 0)
     {
-        Logger = logger;
         HttpClientFactory = httpClientFactory;
+        Logger = logger;
         MemoryCache = memoryCache;
         Context = context;
         Display = display;
@@ -59,24 +61,6 @@ public abstract class IntegrationServiceBase
             loggerFactory.CreateLogger<DatabaseCacheService>(),
             GetType().FullName ?? GetType().Name,
             _minimalCacheExpiry);
-    }
-
-    /// <summary>
-    /// Get an HttpClient instance configured for this integration.
-    /// The client is configured with appropriate timeouts and headers.
-    /// </summary>
-    protected HttpClient GetHttpClient()
-    {
-        var client = HttpClientFactory.CreateClient(GetType().Name);
-
-        // Set a default User-Agent if not already set
-        if (!client.DefaultRequestHeaders.Contains("User-Agent"))
-        {
-            client.DefaultRequestHeaders.Add("User-Agent",
-                "PortalCalendar/2.0 (github.com/misch2/eink-portal-calendar)");
-        }
-
-        return client;
     }
 
     /// <summary>

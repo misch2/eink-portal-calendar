@@ -3,10 +3,9 @@
 @using PortalCalendarServer.Services
 @using PortalCalendarServer.Services.PageGeneratorComponents
 @using System.Globalization
+@inject IDisplayService displayService
 @{
     Layout = null;
-
-    var displayService = ViewContext.HttpContext.RequestServices.GetRequiredService<DisplayService>();
 
     var dateCulture = new CultureInfo(displayService.GetConfig(Model.Display, "date_culture") ?? "en-US");
     var tz = displayService.GetTimeZoneInfo(Model.Display);

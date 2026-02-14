@@ -56,7 +56,6 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
             return null;
         }
 
-        var httpClient = GetHttpClient();
         var parameters = new Dictionary<string, string>
         {
             { "client_id", clientId },
@@ -105,7 +104,6 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
         var accessToken = GetConfigValue("_googlefit_access_token");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-        var httpClient = GetHttpClient();
         var response = await httpClient.SendAsync(request, cancellationToken);
 
         if (!response.IsSuccessStatusCode)

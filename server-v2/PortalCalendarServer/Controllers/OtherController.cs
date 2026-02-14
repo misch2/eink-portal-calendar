@@ -13,15 +13,20 @@ public class OtherController : Controller
     private readonly CalendarContext _context;
     private readonly ILogger<OtherController> _logger;
     private readonly IDisplayService _displayService;
+    private readonly IHttpClientFactory _httpClientFactory;
+
+    private HttpClient _httpClient => _httpClientFactory.CreateClient();
 
     public OtherController(
         CalendarContext context,
         ILogger<OtherController> logger,
-        IDisplayService displayService)
+        IDisplayService displayService,
+        IHttpClientFactory httpClientFactory)
     {
         _context = context;
         _logger = logger;
         _displayService = displayService;
+        _httpClientFactory = httpClientFactory;
     }
 
     // GET /auth/googlefit/cb
@@ -85,7 +90,6 @@ public class OtherController : Controller
             }
 
             // Exchange authorization code for tokens
-            using var httpClient = new HttpClient();
             var tokenRequest = new Dictionary<string, string>
             {
                 { "code", code },
@@ -95,7 +99,7 @@ public class OtherController : Controller
                 { "grant_type", "authorization_code" }
             };
 
-            var tokenResponse = await httpClient.PostAsync(
+            var tokenResponse = await _httpClient.PostAsync(
                 "https://oauth2.googleapis.com/token",
                 new FormUrlEncodedContent(tokenRequest));
 

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using PortalCalendarServer.Controllers.ModelBinders;
 using PortalCalendarServer.Data;
@@ -34,6 +35,14 @@ builder.Services.AddMemoryCache(options =>
 // Configure HttpClient with caching
 builder.Services.AddHttpClient();
 builder.Services.AddTransient<CachingHttpMessageHandler>();
+
+builder.Services.AddHttpClient(Options.DefaultName, client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(10);
+    client.DefaultRequestHeaders.Add("User-Agent", 
+        "PortalCalendar/2.0 (github.com/misch2/eink-portal-calendar)");
+})
+.AddHttpMessageHandler<CachingHttpMessageHandler>();
 
 // Register services
 builder.Services.AddScoped<IDisplayService, DisplayService>();

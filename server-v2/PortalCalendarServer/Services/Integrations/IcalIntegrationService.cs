@@ -39,8 +39,7 @@ public class IcalIntegrationService : IntegrationServiceBase
     {
         Logger.LogDebug("Fetching ICS data from {Url}", _icsUrl);
 
-        var client = GetHttpClient();
-        var response = await client.GetAsync(_icsUrl, cancellationToken);
+        var response = await httpClient.GetAsync(_icsUrl, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadAsStringAsync(cancellationToken);

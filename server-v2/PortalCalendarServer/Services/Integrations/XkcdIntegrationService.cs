@@ -72,8 +72,7 @@ public class XkcdIntegrationService(
         // Fetch from web
         var url = "https://xkcd.com/info.0.json";
 
-        var client = GetHttpClient();
-        var response = await client.GetAsync(url, cancellationToken);
+        var response = await httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -106,8 +105,7 @@ public class XkcdIntegrationService(
         Logger.LogDebug("XKCD image cache MISS - fetching from web: {Url}", imageUrl);
 
         // Fetch from web
-        var client = GetHttpClient();
-        var response = await client.GetAsync(imageUrl, cancellationToken);
+        var response = await httpClient.GetAsync(imageUrl, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var imageData = await response.Content.ReadAsByteArrayAsync(cancellationToken);

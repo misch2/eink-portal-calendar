@@ -2,10 +2,10 @@
 @using PortalCalendarServer.Models.Entities
 @using PortalCalendarServer.Services
 @using System.Globalization
+@inject IDisplayService displayService
+
 @{
     Layout = null;
-
-    var displayService = ViewContext.HttpContext.RequestServices.GetRequiredService<DisplayService>();
 
     var xkcd = Model.Xkcd;
     var xkcdInfo = xkcd?.GetInfo();

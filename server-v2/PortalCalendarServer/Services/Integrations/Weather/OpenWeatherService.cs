@@ -65,8 +65,7 @@ public class OpenWeatherService : IntegrationServiceBase
 
         Logger.LogDebug("OpenWeather current cache MISS, fetching from API");
 
-        var client = GetHttpClient();
-        var response = await client.GetAsync(url, cancellationToken);
+        var response = await httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -108,8 +107,7 @@ public class OpenWeatherService : IntegrationServiceBase
 
         Logger.LogDebug("OpenWeather forecast cache MISS, fetching from API");
 
-        var client = GetHttpClient();
-        var response = await client.GetAsync(url, cancellationToken);
+        var response = await httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync(cancellationToken);
