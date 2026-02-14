@@ -1,0 +1,90 @@
+@model PortalCalendarServer.Models.Display
+@using PortalCalendarServer.Services
+
+@{
+    var templateNames = (List<string>)ViewData["TemplateNames"]!;
+    var currentTheme = (string?)ViewData["CurrentTheme"];
+    var displayService = (DisplayService)ViewData["DisplayService"]!;
+}
+
+@if (!Model.IsDefault())
+{
+    <fieldset class="row mb-3">
+        <legend class="w-auto">Name (title)</legend>
+        <div class="col-md-12">
+            <input id="display_name" name="display_name" type="text" class="form-control" value="@Model.Name">
+        </div>
+    </fieldset>
+
+    <fieldset class="row mb-3">
+        <legend class="w-auto">Theme</legend>
+        <div class="col-md-12">
+            <select id="theme" name="theme" class="form-select">
+                <option value=""></option>
+                @foreach (var theme in templateNames)
+                {
+                    <option value="@theme" selected="@(displayService.GetConfigWithoutDefaults("theme") == theme)">@theme</option>
+                }
+            </select>
+        </div>
+    </fieldset>
+
+    <fieldset class="row mb-3">
+        <legend class="w-auto">Theme customization</legend>
+        <div id="theme-customization" class="form-group row">
+            @if (!string.IsNullOrEmpty(currentTheme))
+            {
+                try
+                {
+                    @await Html.PartialAsync($"~/Views/CalendarThemes/Configs/{currentTheme}.cshtml", Model)
+                }
+                catch
+                {
+                    @* Theme configuration partial doesn't exist *@
+                }
+            }
+        </div>
+    </fieldset>
+}
+
+<fieldset class="row mb-3">
+    <legend class="w-auto">Location and locale</legend>
+    <div class="form-group row">
+        <div class="col-md-4">
+            <label for="lat">Latitude (+N/-S)</label>
+            <input id="lat" name="lat" type="text" class="form-control"
+                   value="@displayService.GetConfigWithoutDefaults("lat")"
+                   placeholder="@displayService.GetConfigDefaultsOnly("lat")">
+        </div>
+        <div class="col-md-4">
+            <label for="lon">Longitude (+E/-W)</label>
+            <input id="lon" name="lon" type="text" class="form-control"
+                   value="@displayService.GetConfigWithoutDefaults("lon")"
+                   placeholder="@displayService.GetConfigDefaultsOnly("lon")">
+        </div>
+        <div class="col-md-4">
+            <label for="alt">Altitude (m)</label>
+            <input id="alt" name="alt" type="text" class="form-control"
+                   value="@displayService.GetConfigWithoutDefaults("alt")"
+                   placeholder="@displayService.GetConfigDefaultsOnly("alt")">
+        </div>
+    </div>
+    <div class="form-group row mt-2">
+        <div class="col-md-4">
+            <label for="timezone">Time Zone</label>
+            <input id="timezone" name="timezone" type="text" class="form-control"
+                   value="@displayService.GetConfigWithoutDefaults("timezone")"
+                   placeholder="@displayService.GetConfigDefaultsOnly("timezone")">
+        </div>
+        <div class="col-md-4">
+            <label for="date_culture">Date style</label>
+            <select id="date_culture" name="date_culture" class="form-select">
+                <option value="" disabled selected="@(String.IsNullOrEmpty(displayService.GetConfigWithoutDefaults("date_culture")))">(@displayService.GetConfigDefaultsOnly("date_culture") - default)</option>
+                @foreach (var val in new[] { "en-US", "cs-CZ" })
+                {
+                    <option value="@val" selected="@(displayService.GetConfigWithoutDefaults("date_culture") == val)">@val</option>
+                }
+            </select>
+        </div>
+    </div>
+</fieldset>

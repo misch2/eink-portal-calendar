@@ -1,0 +1,45 @@
+@model PortalCalendarServer.Models.Display
+@using PortalCalendarServer.Services
+
+@{
+    var displayService = (DisplayService)ViewData["DisplayService"]!;
+}
+
+<fieldset class="row mb-3">
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="web_calendar1" name="web_calendar1" value="1"
+               checked="@(displayService.GetConfig("web_calendar1") == "1")">
+        <label class="form-check-label" for="web_calendar1">ICS calendar #1 enabled</label>
+    </div>
+    <div class="col-md-12 mt-2">
+        <label for="web_calendar_ics_url1">URL</label>
+        <input id="web_calendar_ics_url1" name="web_calendar_ics_url1" type="text" class="form-control"
+               value="@displayService.GetConfigWithoutDefaults("web_calendar_ics_url1")">
+    </div>
+</fieldset>
+
+<fieldset class="row mb-3">
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="web_calendar2" name="web_calendar2" value="1"
+               checked="@(displayService.GetConfig("web_calendar2") == "1")">
+        <label class="form-check-label" for="web_calendar2">ICS calendar #2 enabled</label>
+    </div>
+    <div class="col-md-12 mt-2">
+        <label for="web_calendar_ics_url2">URL</label>
+        <input id="web_calendar_ics_url2" name="web_calendar_ics_url2" type="text" class="form-control"
+               value="@displayService.GetConfigWithoutDefaults("web_calendar_ics_url2")">
+    </div>
+</fieldset>
+
+<fieldset class="row mb-3">
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="web_calendar3" name="web_calendar3" value="1"
+               checked="@(displayService.GetConfig("web_calendar3") == "1")">
+        <label class="form-check-label" for="web_calendar3">ICS calendar #3 enabled</label>
+    </div>
+    <div class="col-md-12 mt-2">
+        <label for="web_calendar_ics_url3">URL</label>
+        <input id="web_calendar_ics_url3" name="web_calendar_ics_url3" type="text" class="form-control"
+               value="@displayService.GetConfigWithoutDefaults("web_calendar_ics_url3")">
+    </div>
+</fieldset>

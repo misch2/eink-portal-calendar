@@ -8,6 +8,13 @@
     var displayService = (DisplayService)ViewData["DisplayService"]!;
 }
 
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Message"]
+    </div>
+}
+
 <h3 class="mb-3">Configuration</h3>
 
 <form action="/config_ui/@Model.Id" method="post">
@@ -15,219 +22,48 @@
 
     <nav>
         <div class="nav nav-tabs" id="nav-tab" role="tablist">
-            <button class="nav-link active" id="nav-main-tab" data-bs-toggle="tab" data-bs-target="#nav-main" type="button" role="tab">Main</button>
-            <button class="nav-link" id="nav-client-tab" data-bs-toggle="tab" data-bs-target="#nav-client" type="button" role="tab">ePaper display (client)</button>
-            <button class="nav-link" id="nav-calendar-tab" data-bs-toggle="tab" data-bs-target="#nav-calendar" type="button" role="tab">Calendar (ICS)</button>
-            <button class="nav-link" id="nav-metnoweather-tab" data-bs-toggle="tab" data-bs-target="#nav-metnoweather" type="button" role="tab">Met.no weather</button>
-            <button class="nav-link" id="nav-telegram-tab" data-bs-toggle="tab" data-bs-target="#nav-telegram" type="button" role="tab">Telegram</button>
-            <button class="nav-link" id="nav-mqtt-tab" data-bs-toggle="tab" data-bs-target="#nav-mqtt" type="button" role="tab">MQTT</button>
-            <button class="nav-link" id="nav-fit-tab" data-bs-toggle="tab" data-bs-target="#nav-fit" type="button" role="tab">Google Fit</button>
+            <button class="nav-link active" id="nav-main-tab" data-bs-toggle="tab" data-bs-target="#nav-main" type="button" role="tab" data-tab-hash="nav-main">Main</button>
+            <button class="nav-link" id="nav-client-tab" data-bs-toggle="tab" data-bs-target="#nav-client" type="button" role="tab" data-tab-hash="nav-client">ePaper display (client)</button>
+            <button class="nav-link" id="nav-calendar-tab" data-bs-toggle="tab" data-bs-target="#nav-calendar" type="button" role="tab" data-tab-hash="nav-calendar">Calendar (ICS)</button>
+            <button class="nav-link" id="nav-metnoweather-tab" data-bs-toggle="tab" data-bs-target="#nav-metnoweather" type="button" role="tab" data-tab-hash="nav-metnoweather">Met.no weather</button>
+            <button class="nav-link" id="nav-openweather-tab" data-bs-toggle="tab" data-bs-target="#nav-openweather" type="button" role="tab" data-tab-hash="nav-openweather">OpenWeather</button>
+            <button class="nav-link" id="nav-telegram-tab" data-bs-toggle="tab" data-bs-target="#nav-telegram" type="button" role="tab" data-tab-hash="nav-telegram">Telegram</button>
+            <button class="nav-link" id="nav-mqtt-tab" data-bs-toggle="tab" data-bs-target="#nav-mqtt" type="button" role="tab" data-tab-hash="nav-mqtt">MQTT</button>
+            <button class="nav-link" id="nav-fit-tab" data-bs-toggle="tab" data-bs-target="#nav-fit" type="button" role="tab" data-tab-hash="nav-fit">Google Fit</button>
         </div>
     </nav>
 
     <div class="tab-content p-3 border border-top-0" id="nav-tabContent">
-        <!-- Main Tab -->
         <div class="tab-pane show active" id="nav-main" role="tabpanel">
-            @if (!Model.IsDefault())
-            {
-                <fieldset class="row mb-3">
-                    <legend class="w-auto">Name (title)</legend>
-                    <div class="col-md-12">
-                        <input id="display_name" name="display_name" type="text" class="form-control" value="@Model.Name">
-                    </div>
-                </fieldset>
-
-                <fieldset class="row mb-3">
-                    <legend class="w-auto">Theme</legend>
-                    <div class="col-md-12">
-                        <select id="theme" name="theme" class="form-select">
-                            <option value=""></option>
-                            @foreach (var theme in templateNames)
-                            {
-                                <option value="@theme" selected="@(displayService.GetConfig("theme") == theme)">@theme</option>
-                            }
-                        </select>
-                    </div>
-                </fieldset>
-
-                <fieldset class="row mb-3">
-                    <legend class="w-auto">Theme customization</legend>
-                    <div id="theme-customization" class="form-group row">
-                        @* Theme-specific configuration will be loaded here dynamically *@
-                    </div>
-                </fieldset>
-            }
-
-            <fieldset class="row mb-3">
-                <legend class="w-auto">Location and locale</legend>
-                <div class="form-group row">
-                    <div class="col-md-4">
-                        <label for="lat">Latitude (+N/-S)</label>
-                        <input id="lat" name="lat" type="text" class="form-control"
-                               value="@displayService.GetConfigWithoutDefaults("lat")"
-                               placeholder="@displayService.GetConfigDefaultsOnly("lat")">
-                    </div>
-                    <div class="col-md-4">
-                        <label for="lon">Longitude (+E/-W)</label>
-                        <input id="lon" name="lon" type="text" class="form-control"
-                               value="@displayService.GetConfigWithoutDefaults("lon")"
-                               placeholder="@displayService.GetConfigDefaultsOnly("lon")">
-                    </div>
-                    <div class="col-md-4">
-                        <label for="alt">Altitude (m)</label>
-                        <input id="alt" name="alt" type="text" class="form-control"
-                               value="@displayService.GetConfigWithoutDefaults("alt")"
-                               placeholder="@displayService.GetConfigDefaultsOnly("alt")">
-                    </div>
-                </div>
-                <div class="form-group row mt-2">
-                    <div class="col-md-4">
-                        <label for="timezone">Time Zone</label>
-                        <input id="timezone" name="timezone" type="text" class="form-control"
-                               value="@displayService.GetConfigWithoutDefaults("timezone")"
-                               placeholder="@displayService.GetConfigDefaultsOnly("timezone")">
-                    </div>
-                    <div class="col-md-4">
-                        <label for="date_culture">Date style</label>
-                        <select id="date_culture" name="date_culture" class="form-select">
-                            <option value="" disabled selected="@(String.IsNullOrEmpty(displayService.GetConfigWithoutDefaults("date_culture")))">(@displayService.GetConfigDefaultsOnly("date_culture") - default)</option>
-                            @foreach (var val in new[] { "en-US", "cs-CZ" })
-                            {
-                                <option value="@val" selected="@(displayService.GetConfigWithoutDefaults("date_culture") == val)">@val</option>
-                            }
-                        </select>
-                    </div>
-                </div>
-            </fieldset>
+            @await Html.PartialAsync("ConfigUI/_Main", Model, ViewData)
         </div>
 
-        <!-- Client Tab -->
         <div class="tab-pane" id="nav-client" role="tabpanel">
-            <fieldset class="row mb-3">
-                <div class="col-md-12">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="ota_mode" name="ota_mode" value="1"
-                               checked="@(displayService.GetConfig("ota_mode") == "1")">
-                        <label class="form-check-label" for="ota_mode">OTA mode on</label>
-                    </div>
-                    <div class="form-text">
-                        (Required for firmware update. ?? It disables standard functionality!)
-                    </div>
-                </div>
-            </fieldset>
-
-            @if (!Model.IsDefault())
-            {
-                <fieldset class="row mb-3">
-                    <div class="col-md-12">
-                        <label for="display_mac">MAC address</label>
-                        <input id="display_mac" name="display_mac" type="text" class="form-control" value="@Model.Mac">
-                        <div class="form-text">MAC address in the aa:bb:cc:dd:ee:ff format.</div>
-                    </div>
-                </fieldset>
-
-                <fieldset class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="display_rotation">Rotation</label>
-                        <select id="display_rotation" name="display_rotation" class="form-select">
-                            <option value="0" selected="@(Model.Rotation == 0)">0° (@Model.Width × @Model.Height)</option>
-                            <option value="1" selected="@(Model.Rotation == 1)">90° (@Model.Height × @Model.Width)</option>
-                            <option value="2" selected="@(Model.Rotation == 2)">180° (@Model.Width × @Model.Height upside down)</option>
-                            <option value="3" selected="@(Model.Rotation == 3)">270° (@Model.Height × @Model.Width)</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="display_gamma">Gamma</label>
-                        <input id="display_gamma" name="display_gamma" type="number" step="0.01" class="form-control" value="@Model.Gamma">
-                        <div class="form-text">Grayscale mapping (&gt;2.2 = darker, &lt;1.8 = lighter)</div>
-                    </div>
-                </fieldset>
-            }
-
-            <fieldset class="row mb-3">
-                <div class="col-md-6">
-                    <label for="wakeup_schedule">Wake up (redraw) schedule</label>
-                    <input id="wakeup_schedule" name="wakeup_schedule" type="text" class="form-control"
-                           value="@displayService.GetConfigWithoutDefaults("wakeup_schedule")"
-                           placeholder="@displayService.GetConfigDefaultsOnly("wakeup_schedule")">
-                    <div class="form-text">Crontab format, e.g. "0 * * * *"</div>
-                </div>
-            </fieldset>
+            @await Html.PartialAsync("ConfigUI/_Client", Model, ViewData)
         </div>
 
-        <!-- Calendar Tab -->
         <div class="tab-pane" id="nav-calendar" role="tabpanel">
-            <fieldset class="row mb-3">
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="web_calendar1" name="web_calendar1" value="1"
-                           checked="@(displayService.GetConfig("web_calendar1") == "1")">
-                    <label class="form-check-label" for="web_calendar1">ICS calendar #1 enabled</label>
-                </div>
-                <div class="col-md-12 mt-2">
-                    <label for="web_calendar_ics_url1">URL</label>
-                    <input id="web_calendar_ics_url1" name="web_calendar_ics_url1" type="text" class="form-control"
-                           value="@displayService.GetConfigWithoutDefaults("web_calendar_ics_url1")">
-                </div>
-            </fieldset>
+            @await Html.PartialAsync("ConfigUI/_Calendar", Model, ViewData)
         </div>
 
-        <!-- Weather Tab -->
         <div class="tab-pane" id="nav-metnoweather" role="tabpanel">
-            <fieldset class="row mb-3">
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="metnoweather" name="metnoweather" value="1"
-                           checked="@(displayService.GetConfig("metnoweather") == "1")">
-                    <label class="form-check-label" for="metnoweather">Met.no Weather enabled</label>
-                </div>
-            </fieldset>
+            @await Html.PartialAsync("ConfigUI/_MetNoWeather", Model, ViewData)
         </div>
 
-        <!-- Telegram Tab -->
+        <div class="tab-pane" id="nav-openweather" role="tabpanel">
+            @await Html.PartialAsync("ConfigUI/_OpenWeather", Model, ViewData)
+        </div>
+
         <div class="tab-pane" id="nav-telegram" role="tabpanel">
-            <fieldset class="row mb-3">
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="telegram" name="telegram" value="1"
-                           checked="@(displayService.GetConfig("telegram") == "1")">
-                    <label class="form-check-label" for="telegram">Telegram enabled</label>
-                </div>
-            </fieldset>
+            @await Html.PartialAsync("ConfigUI/_Telegram", Model, ViewData)
         </div>
 
-        <!-- MQTT Tab -->
         <div class="tab-pane" id="nav-mqtt" role="tabpanel">
-            <fieldset class="row mb-3">
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="mqtt" name="mqtt" value="1"
-                           checked="@(displayService.GetConfig("mqtt") == "1")">
-                    <label class="form-check-label" for="mqtt">MQTT enabled</label>
-                </div>
-            </fieldset>
+            @await Html.PartialAsync("ConfigUI/_Mqtt", Model, ViewData)
         </div>
 
-        <!-- Google Fit Tab -->
         <div class="tab-pane" id="nav-fit" role="tabpanel">
-            <fieldset class="row mb-3">
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="googlefit" name="googlefit" value="1"
-                           checked="@(displayService.GetConfig("googlefit") == "1")">
-                    <label class="form-check-label" for="googlefit">Google Fit enabled</label>
-                </div>
-
-                <div class="col-md-12 mt-3 mb-3">
-                    <a class="btn btn-primary" href="/auth/googlefit/@Model.Id">Authorize Google Fit</a>
-                </div>
-
-                <div class="col-md-12">
-                    <label for="googlefit_client_id">Client ID</label>
-                    <input id="googlefit_client_id" name="googlefit_client_id" type="text" class="form-control"
-                           value="@displayService.GetConfigWithoutDefaults("googlefit_client_id")">
-                </div>
-                <div class="col-md-12 mt-2">
-                    <label for="googlefit_client_secret">Client secret</label>
-                    <input id="googlefit_client_secret" name="googlefit_client_secret" type="text" class="form-control"
-                           value="@displayService.GetConfigWithoutDefaults("googlefit_client_secret")">
-                </div>
-            </fieldset>
+            @await Html.PartialAsync("ConfigUI/_GoogleFit", Model, ViewData)
         </div>
     </div>
 
@@ -243,6 +79,7 @@
 
     <script>
         $(document).ready(function() {
+            // Theme selection handler
             $('#theme').on('change', function() {
                 const theme = $(this).val();
                 if (!theme) {
@@ -256,6 +93,36 @@
                         $('#theme-customization').html(data);
                     }
                 });
+            });
+
+            // Hash-based tab navigation
+            function activateTabFromHash() {
+                const hash = window.location.hash;
+                if (hash) {
+                    const tabId = hash.substring(1); // Remove the '#' character
+                    const tabButton = document.querySelector(`button[data-tab-hash="${tabId}"]`);
+                    if (tabButton) {
+                        const tab = new bootstrap.Tab(tabButton);
+                        tab.show();
+                    }
+                }
+            }
+
+            // Activate tab on page load if hash is present
+            activateTabFromHash();
+
+            // Update URL hash when tab is shown
+            $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+                const tabHash = $(e.target).attr('data-tab-hash');
+                if (tabHash) {
+                    // Update URL without scrolling
+                    history.replaceState(null, null, '#' + tabHash);
+                }
+            });
+
+            // Handle browser back/forward buttons
+            window.addEventListener('hashchange', function() {
+                activateTabFromHash();
             });
         });
     </script>

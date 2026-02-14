@@ -1,0 +1,20 @@
+@model PortalCalendarServer.Models.Display
+@using PortalCalendarServer.Services
+
+@{
+    var displayService = (DisplayService)ViewData["DisplayService"]!;
+}
+
+<fieldset class="row mb-3">
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="metnoweather" name="metnoweather" value="1"
+               checked="@(displayService.GetConfig("metnoweather") == "1")">
+        <label class="form-check-label" for="metnoweather">Met.no Weather enabled</label>
+    </div>
+    <div class="col-md-4 mt-3">
+        <label for="metnoweather_granularity_hours">Aggregate forecast by how many hours</label>
+        <input id="metnoweather_granularity_hours" name="metnoweather_granularity_hours" type="text" class="form-control"
+               value="@displayService.GetConfigWithoutDefaults("metnoweather_granularity_hours")"
+               placeholder="@displayService.GetConfigDefaultsOnly("metnoweather_granularity_hours")">
+    </div>
+</fieldset>

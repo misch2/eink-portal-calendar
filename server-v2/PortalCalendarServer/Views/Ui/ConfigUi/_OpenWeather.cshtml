@@ -1,0 +1,27 @@
+@model PortalCalendarServer.Models.Display
+@using PortalCalendarServer.Services
+
+@{
+    var displayService = (DisplayService)ViewData["DisplayService"]!;
+}
+
+<fieldset class="row mb-3">
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="openweather" name="openweather" value="1"
+               checked="@(displayService.GetConfig("openweather") == "1")">
+        <label class="form-check-label" for="openweather">OpenWeather enabled</label>
+    </div>
+    <div class="col-md-12 mt-3">
+        <label for="openweather_api_key">API key</label>
+        <input id="openweather_api_key" name="openweather_api_key" type="text" class="form-control"
+               value="@displayService.GetConfigWithoutDefaults("openweather_api_key")"
+               placeholder="@displayService.GetConfigDefaultsOnly("openweather_api_key")">
+    </div>
+    <div class="col-md-4 mt-3">
+        <label for="openweather_lang">Language</label>
+        <input id="openweather_lang" name="openweather_lang" type="text" class="form-control"
+               value="@displayService.GetConfigWithoutDefaults("openweather_lang")"
+               placeholder="@displayService.GetConfigDefaultsOnly("openweather_lang")">
+        <div class="form-text">Language code, for example "en", "cs", etc.</div>
+    </div>
+</fieldset>

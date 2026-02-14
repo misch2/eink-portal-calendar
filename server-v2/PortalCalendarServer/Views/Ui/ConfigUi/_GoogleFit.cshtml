@@ -1,0 +1,53 @@
+@model PortalCalendarServer.Models.Display
+@using PortalCalendarServer.Services
+
+@{
+    var displayService = (DisplayService)ViewData["DisplayService"]!;
+}
+
+<fieldset class="row mb-3">
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="googlefit" name="googlefit" value="1"
+               checked="@(displayService.GetConfig("googlefit") == "1")">
+        <label class="form-check-label" for="googlefit">Google Fit enabled</label>
+    </div>
+
+    <div class="col-md-12 mt-3 mb-3">
+        <a class="btn btn-primary" href="/auth/googlefit/@Model.Id">Authorize calendar to use Google Fit with the values below</a>
+    </div>
+
+    <div class="col-md-12">
+        See <a href="https://console.cloud.google.com/apis/">https://console.cloud.google.com/apis/</a> to get client ID and secret values:
+    </div>
+    <div class="col-md-12 mt-2">
+        <label for="googlefit_client_id">Client ID</label>
+        <input id="googlefit_client_id" name="googlefit_client_id" type="text" class="form-control"
+               value="@displayService.GetConfigWithoutDefaults("googlefit_client_id")"
+               placeholder="@displayService.GetConfigDefaultsOnly("googlefit_client_id")">
+    </div>
+    <div class="col-md-12 mt-2">
+        <label for="googlefit_client_secret">Client secret</label>
+        <input id="googlefit_client_secret" name="googlefit_client_secret" type="text" class="form-control"
+               value="@displayService.GetConfigWithoutDefaults("googlefit_client_secret")"
+               placeholder="@displayService.GetConfigDefaultsOnly("googlefit_client_secret")">
+    </div>
+    <div class="col-md-12 mt-2">
+        <label for="googlefit_auth_callback">Callback URL</label>
+        <input id="googlefit_auth_callback" name="googlefit_auth_callback" type="text" class="form-control"
+               value="@displayService.GetConfigWithoutDefaults("googlefit_auth_callback")"
+               placeholder="@displayService.GetConfigDefaultsOnly("googlefit_auth_callback")">
+    </div>
+    <div class="col-md-12 mt-3">
+        <hr>
+    </div>
+    <div class="col-md-12">
+        <label for="_googlefit_refresh_token">Refresh token</label>
+        <input id="_googlefit_refresh_token" name="_googlefit_refresh_token" type="text" class="form-control"
+               value="@displayService.GetConfigWithoutDefaults("_googlefit_refresh_token")" disabled>
+    </div>
+    <div class="col-md-12 mt-2">
+        <label for="_googlefit_access_token">Auth token</label>
+        <input id="_googlefit_access_token" name="_googlefit_access_token" type="text" class="form-control"
+               value="@displayService.GetConfigWithoutDefaults("_googlefit_access_token")" disabled>
+    </div>
+</fieldset>

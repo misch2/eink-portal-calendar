@@ -1,0 +1,40 @@
+@model PortalCalendarServer.Models.Display
+@using PortalCalendarServer.Services
+
+@{
+    var displayService = (DisplayService)ViewData["DisplayService"]!;
+}
+
+<fieldset class="row mb-3">
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="mqtt" name="mqtt" value="1"
+               checked="@(displayService.GetConfig("mqtt") == "1")">
+        <label class="form-check-label" for="mqtt">MQTT enabled</label>
+    </div>
+    <div class="form-group row mt-3">
+        <div class="col-md-3">
+            <label for="mqtt_server">Server</label>
+            <input id="mqtt_server" name="mqtt_server" type="text" class="form-control"
+                   value="@displayService.GetConfigWithoutDefaults("mqtt_server")"
+                   placeholder="@displayService.GetConfigDefaultsOnly("mqtt_server")">
+        </div>
+        <div class="col-md-3">
+            <label for="mqtt_username">Username</label>
+            <input id="mqtt_username" name="mqtt_username" type="text" class="form-control"
+                   value="@displayService.GetConfigWithoutDefaults("mqtt_username")"
+                   placeholder="@displayService.GetConfigDefaultsOnly("mqtt_username")">
+        </div>
+        <div class="col-md-3">
+            <label for="mqtt_password">Password</label>
+            <input id="mqtt_password" name="mqtt_password" type="text" class="form-control"
+                   value="@displayService.GetConfigWithoutDefaults("mqtt_password")"
+                   placeholder="@displayService.GetConfigDefaultsOnly("mqtt_password")">
+        </div>
+        <div class="col-md-3">
+            <label for="mqtt_topic">Device topic</label>
+            <input id="mqtt_topic" name="mqtt_topic" type="text" class="form-control"
+                   value="@displayService.GetConfigWithoutDefaults("mqtt_topic")"
+                   placeholder="@displayService.GetConfigDefaultsOnly("mqtt_topic")">
+        </div>
+    </div>
+</fieldset>
