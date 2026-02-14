@@ -4,8 +4,8 @@
 @{
     var displayService = (DisplayService)ViewData["DisplayService"]!;
     var integrationName = (string)ViewData["IntegrationName"]!;
-    var hasOverride = !string.IsNullOrEmpty(displayService.GetConfigWithoutDefaults(integrationName));
-    var currentValue = displayService.GetConfig(integrationName) == "1";
+    var hasOverride = !string.IsNullOrEmpty(displayService.GetConfigWithoutDefaults(Model, integrationName));
+    var currentValue = displayService.GetConfig(Model, integrationName) == "1";
     var defaultValue = displayService.GetConfigDefaultsOnly(integrationName) == "1";
     var isDisabled = !Model.IsDefault() && !hasOverride;
 }

@@ -9,6 +9,6 @@
 <div class="col-12 mb-3">
     <label for="display_title">Title</label>
     <input id="display_title" name="display_title" class="form-control"
-           value="@displayService.GetConfigWithoutDefaults("display_title")"
+           value="@displayService.GetConfigWithoutDefaults(Model, "display_title")"
            placeholder="@displayService.GetConfigDefaultsOnly("display_title")">
 </div>

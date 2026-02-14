@@ -1,5 +1,7 @@
 namespace PortalCalendarServer.Services.PageGeneratorComponents;
 
+using PortalCalendarServer.Models.Entities;
+
 public class PortalIconsComponent(
     DisplayService displayService)
 {
@@ -40,10 +42,10 @@ public class PortalIconsComponent(
     /// <summary>
     /// Generate Portal icons for the display based on date and calendar settings
     /// </summary>
-    public List<IconViewModel> GenerateIcons(DateTime date, bool hasCalendarEntries)
+    public List<IconViewModel> GenerateIcons(Display display, DateTime date, bool hasCalendarEntries)
     {
         List<IconViewModel> icons;
-        var totallyRandom = displayService.GetConfigBool("totally_random_icon");
+        var totallyRandom = displayService.GetConfigBool(display, "totally_random_icon");
 
         if (!totallyRandom)
         {
@@ -52,7 +54,7 @@ public class PortalIconsComponent(
             // Limit icons if calendar entries exist
             if (hasCalendarEntries)
             {
-                var maxIcons = int.Parse(displayService.GetConfig("max_icons_with_calendar") ?? "5");
+                var maxIcons = int.Parse(displayService.GetConfig(display, "max_icons_with_calendar") ?? "5");
                 if (icons.Count > maxIcons)
                 {
                     icons = icons.Take(maxIcons).ToList();
@@ -61,7 +63,7 @@ public class PortalIconsComponent(
         }
         else
         {
-            icons = GenerateRandomIcons(date, hasCalendarEntries);
+            icons = GenerateRandomIcons(display, date, hasCalendarEntries);
         }
 
         return icons;
@@ -97,7 +99,7 @@ public class PortalIconsComponent(
     /// <summary>
     /// Generate random icons with consistent seed based on date
     /// </summary>
-    private List<IconViewModel> GenerateRandomIcons(DateTime date, bool hasCalendarEntries)
+    private List<IconViewModel> GenerateRandomIcons(Display display, DateTime date, bool hasCalendarEntries)
     {
         var icons = new List<IconViewModel>();
         var seed = int.Parse(date.ToString("yyyyMMdd"));
@@ -120,10 +122,10 @@ public class PortalIconsComponent(
             icons.AddRange(icons.ToList());
         }
 
-        var minIcons = int.Parse(displayService.GetConfig("min_random_icons") ?? "4");
+        var minIcons = int.Parse(displayService.GetConfig(display, "min_random_icons") ?? "4");
         var maxIcons = hasCalendarEntries
-            ? int.Parse(displayService.GetConfig("max_icons_with_calendar") ?? "5")
-            : int.Parse(displayService.GetConfig("max_random_icons") ?? "10");
+            ? int.Parse(displayService.GetConfig(display, "max_icons_with_calendar") ?? "5")
+            : int.Parse(displayService.GetConfig(display, "max_random_icons") ?? "10");
 
         minIcons = Math.Min(minIcons, maxIcons);
         var iconCount = minIcons + random.Next(maxIcons - minIcons + 1);

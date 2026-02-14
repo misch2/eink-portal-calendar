@@ -12,7 +12,7 @@
     <div class="col-md-4 mt-3">
         <label for="metnoweather_granularity_hours">Aggregate forecast by how many hours</label>
         <input id="metnoweather_granularity_hours" name="metnoweather_granularity_hours" type="text" class="form-control"
-               value="@displayService.GetConfigWithoutDefaults("metnoweather_granularity_hours")"
+               value="@displayService.GetConfigWithoutDefaults(Model, "metnoweather_granularity_hours")"
                placeholder="@displayService.GetConfigDefaultsOnly("metnoweather_granularity_hours")">
     </div>
 </fieldset>

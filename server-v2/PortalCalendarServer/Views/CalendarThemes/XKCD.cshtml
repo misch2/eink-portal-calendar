@@ -6,7 +6,6 @@
     Layout = null;
 
     var displayService = ViewContext.HttpContext.RequestServices.GetRequiredService<DisplayService>();
-    displayService.UseDisplay(Model.Display);
 
     var xkcd = Model.Xkcd;
     var xkcdInfo = xkcd?.GetInfo();

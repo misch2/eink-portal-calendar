@@ -34,9 +34,7 @@ public class ApiController : ControllerBase
         }
 
         mac = mac.ToLowerInvariant();
-        var display = await _context.Displays
-            .Include(d => d.Configs)
-            .FirstOrDefaultAsync(d => d.Mac == mac);
+        var display = await _context.Displays.FirstOrDefaultAsync(d => d.Mac == mac);
 
         if (display == null)
         {
@@ -107,6 +105,8 @@ public class ApiController : ControllerBase
 
         if (display == null)
         {
+            var defaultTheme = await _themeService.GetDefaultThemeAsync();
+
             // Create new display
             display = new Display
             {
@@ -121,17 +121,12 @@ public class ApiController : ControllerBase
                 BorderTop = 0,
                 BorderRight = 0,
                 BorderBottom = 0,
-                BorderLeft = 0
+                BorderLeft = 0,
+                ThemeId = defaultTheme.Id
             };
 
             _context.Displays.Add(display);
             await _context.SaveChangesAsync();
-
-            // Set default theme
-            var defaultTheme = await _themeService.GetDefaultThemeAsync();
-            _displayService.UseDisplay(display);
-            _displayService.SetThemeId(defaultTheme.Id);
-            await _displayService.SaveChangesAsync();
 
             _logger.LogInformation("New display created with MAC {Mac}, ID: {Id}", mac, display.Id);
 
@@ -146,23 +141,21 @@ public class ApiController : ControllerBase
                 _context.Update(display);
                 await _context.SaveChangesAsync();
             }
-
-            _displayService.UseDisplay(display);
         }
 
 
         // Update last visit timestamp
-        _displayService.SetConfig("_last_visit", DateTime.UtcNow.ToString("O"));
+        _displayService.SetConfig(display, "_last_visit", DateTime.UtcNow.ToString("O"));
 
         // Store voltage and diagnostic data
-        _displayService.SetConfig("_last_voltage_raw", adc ?? voltage_raw ?? string.Empty);
-        _displayService.SetConfig("_last_voltage", v ?? string.Empty);
-        _displayService.SetConfig("_min_voltage", vmin ?? string.Empty);
-        _displayService.SetConfig("_max_voltage", vmax ?? string.Empty);
-        _displayService.SetConfig("_min_linear_voltage", vlmin ?? string.Empty);
-        _displayService.SetConfig("_max_linear_voltage", vlmax ?? string.Empty);
-        _displayService.SetConfig("_reset_reason", reset ?? string.Empty);
-        _displayService.SetConfig("_wakeup_reason", wakeup ?? string.Empty);
+        _displayService.SetConfig(display, "_last_voltage_raw", adc ?? voltage_raw ?? string.Empty);
+        _displayService.SetConfig(display, "_last_voltage", v ?? string.Empty);
+        _displayService.SetConfig(display, "_min_voltage", vmin ?? string.Empty);
+        _displayService.SetConfig(display, "_max_voltage", vmax ?? string.Empty);
+        _displayService.SetConfig(display, "_min_linear_voltage", vlmin ?? string.Empty);
+        _displayService.SetConfig(display, "_max_linear_voltage", vlmax ?? string.Empty);
+        _displayService.SetConfig(display, "_reset_reason", reset ?? string.Empty);
+        _displayService.SetConfig(display, "_wakeup_reason", wakeup ?? string.Empty);
 
         await _displayService.SaveChangesAsync();
 
@@ -180,7 +173,7 @@ public class ApiController : ControllerBase
         {
             sleep = wakeupInfo.SleepInSeconds,
             battery_percent = display.BatteryPercent(),
-            ota_mode = _displayService.GetConfigBool("ota_mode")
+            ota_mode = _displayService.GetConfigBool(display, "ota_mode")
         };
 
         return Ok(response);
@@ -205,8 +198,7 @@ public class ApiController : ControllerBase
             return NotFound(new { error = "Display not found" });
         }
 
-        _displayService.UseDisplay(display);
-        var colortype = _displayService.GetColorType();
+        var colortype = _displayService.GetColorType(display);
 
         gamma ??= display.Gamma;
         colors ??= colortype?.NumColors;

@@ -1,4 +1,7 @@
-﻿namespace PortalCalendarServer.Models.Entities;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace PortalCalendarServer.Models.Entities;
 
 public partial class Display
 {
@@ -28,5 +31,10 @@ public partial class Display
 
     public string? Firmware { get; set; }
 
+    [Column("theme_id")]
+    public int? ThemeId { get; set; }
+
     public virtual ICollection<Config> Configs { get; set; } = new List<Config>();
+
+    public virtual Theme? Theme { get; set; }
 }

@@ -24,8 +24,6 @@
     <tbody>
         @foreach (var d in Model)
         {
-            displayService.UseDisplay(d);
-
             <tr>
                 <td>@d.Id</td>
                 <td>
@@ -45,7 +43,7 @@
                         @($"{d.VirtualWidth()} × {d.VirtualHeight()}")
                     }
                 </td>
-                <td>@displayService.GetColorType()?.PrettyName</td>
+                <td>@displayService.GetColorType(d)?.PrettyName</td>
                 <td>@d.Firmware</td>
                 <td class="text-end">
                     @if (!d.IsDefault())
@@ -76,7 +74,7 @@
                         var missedConnects = d.MissedConnects();
                         if (missedConnects > 0)
                         {
-                            var minFailuresStr = displayService.GetConfig("alive_check_minimal_failure_count");
+                            var minFailuresStr = displayService.GetConfig(d, "alive_check_minimal_failure_count");
                             var minFailures = int.TryParse(minFailuresStr, out var mf) ? mf : 1;
                             var lastVisit = d.LastVisit();
 

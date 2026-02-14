@@ -12,13 +12,13 @@
     <div class="col-md-12 mt-3">
         <label for="openweather_api_key">API key</label>
         <input id="openweather_api_key" name="openweather_api_key" type="text" class="form-control"
-               value="@displayService.GetConfigWithoutDefaults("openweather_api_key")"
+               value="@displayService.GetConfigWithoutDefaults(Model, "openweather_api_key")"
                placeholder="@displayService.GetConfigDefaultsOnly("openweather_api_key")">
     </div>
     <div class="col-md-4 mt-3">
         <label for="openweather_lang">Language</label>
         <input id="openweather_lang" name="openweather_lang" type="text" class="form-control"
-               value="@displayService.GetConfigWithoutDefaults("openweather_lang")"
+               value="@displayService.GetConfigWithoutDefaults(Model, "openweather_lang")"
                placeholder="@displayService.GetConfigDefaultsOnly("openweather_lang")">
         <div class="form-text">Language code, for example "en", "cs", etc.</div>
     </div>

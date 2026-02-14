@@ -1,6 +1,6 @@
 @using PortalCalendarServer.Models.Entities
 @using PortalCalendarServer.Services
-@inject DisplayService DisplayService
+@inject DisplayService displayService
 
 <!DOCTYPE html>
 <html lang="en">
@@ -39,7 +39,6 @@
 
         @if (display != null)
         {
-            DisplayService.UseDisplay(display);
             TimeSpan? last_contact_ago = null;
             if (display.LastVisit() != null)
             {
@@ -83,7 +82,7 @@
 
                     Voltage: @(last_voltage?.ToString("F2") ?? "(unknown)") V (@(battery_percent?.ToString("F0") ?? "unknown") %).
 
-                    OTA mode: @(DisplayService.GetConfigBool("ota_mode") ? "on" : "off").
+                    OTA mode: @(displayService.GetConfigBool(display, "ota_mode") ? "on" : "off").
 
                 </p>
             }

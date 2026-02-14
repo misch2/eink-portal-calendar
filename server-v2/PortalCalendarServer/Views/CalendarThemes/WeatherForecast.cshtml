@@ -7,10 +7,9 @@
     Layout = null;
 
     var displayService = ViewContext.HttpContext.RequestServices.GetRequiredService<DisplayService>();
-    displayService.UseDisplay(Model.Display);
 
-    var dateCulture = new CultureInfo(displayService.GetConfig("date_culture") ?? "en-US");
-    var timezone = TimeZoneInfo.FindSystemTimeZoneById(displayService.GetConfig("timezone") ?? "UTC");
+    var dateCulture = new CultureInfo(displayService.GetConfig(Model.Display, "date_culture") ?? "en-US");
+    var timezone = TimeZoneInfo.FindSystemTimeZoneById(displayService.GetConfig(Model.Display, "timezone") ?? "UTC");
 
     var wakeupInfo = Model.Display.NextWakeupTime();
     var nextWakeup = wakeupInfo.NextWakeup;
@@ -30,7 +29,7 @@
     var nameDayInfo = nameDayComponent?.GetNameDayInfo(Model.Date);
 
     // Get weather data
-    var weatherInfo = weatherComponent == null ? null : await weatherComponent.GetWeatherAsync(Model.Date);
+    var weatherInfo = weatherComponent == null ? null : await weatherComponent.GetWeatherAsync(Model.Display, Model.Date);
     var currentWeather = weatherInfo?.CurrentWeather;
     var forecast = weatherInfo?.Forecast ?? new List<AggregatedWeatherData>();
 

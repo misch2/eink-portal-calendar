@@ -10,73 +10,30 @@ public class DisplayService(
     ILogger<DisplayService> logger,
     ColorTypeRegistry colorTypeRegistry)
 {
-    private Display? _currentDisplay;
-    private TimeZoneInfo? _timeZoneInfo;
-
     public IEnumerable<Display> GetAllDisplays()
     {
         return context.Displays
-            .Include(d => d.Configs)
             .OrderBy(d => d.Id)
             .ToList();
     }
 
     public Display GetDefaultDisplay()
     {
-        return context.Displays
-            .Include(d => d.Configs)
-            .Single(d => d.Id == 0);
+        return context.Displays.Single(d => d.Id == 0);
     }
 
-    public void UseDisplay(Display display)
+    public TimeZoneInfo GetTimeZoneInfo(Display display)
     {
-        _currentDisplay = display;
-        _timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(GetConfig("timezone") ?? "UTC");
-    }
-
-    /// <summary>
-    /// Get the currently set display
-    /// </summary>
-    public Display? GetCurrentDisplay()
-    {
-        return _currentDisplay;
-    }
-
-    /// <summary>
-    /// Get the currently set display (throws if not set)
-    /// </summary>
-    public Display CurrentDisplay
-    {
-        get
-        {
-            ValidateDisplayIsSet();
-            return _currentDisplay!;
-        }
-    }
-
-    public TimeZoneInfo GetTimeZoneInfo()
-    {
-        ValidateDisplayIsSet();
-        return _timeZoneInfo!;
-    }
-
-    private void ValidateDisplayIsSet()
-    {
-        if (_currentDisplay == null)
-        {
-            throw new InvalidOperationException("No display is currently set. Call UseDisplay() first.");
-        }
+        return TimeZoneInfo.FindSystemTimeZoneById(GetConfig(display, "timezone") ?? "UTC");
     }
 
     /// <summary>
     /// Get configuration value for a display, with fallback to default display (ID = 0)
     /// </summary>
-    public string? GetConfig(string name)
+    public string? GetConfig(Display display, string name)
     {
-        ValidateDisplayIsSet();
-
         // 1. real value (empty string usually means "unset" in HTML form)
-        var value = GetConfigWithoutDefaults(name);
+        var value = GetConfigWithoutDefaults(display, name);
         if (!string.IsNullOrEmpty(value))
         {
             return value;
@@ -95,10 +52,9 @@ public class DisplayService(
     /// <summary>
     /// Get configuration value without checking defaults (only for this specific display)
     /// </summary>
-    public string? GetConfigWithoutDefaults(string name)
+    public string? GetConfigWithoutDefaults(Display display, string name)
     {
-        ValidateDisplayIsSet();
-        var config = _currentDisplay!.Configs?.FirstOrDefault(c => c.Name == name);
+        var config = display.Configs?.FirstOrDefault(c => c.Name == name);
         return config?.Value;
     }
 
@@ -115,11 +71,9 @@ public class DisplayService(
     /// <summary>
     /// Get configuration value as boolean
     /// </summary>
-    public bool GetConfigBool(string name, bool defaultValue = false)
+    public bool GetConfigBool(Display display, string name, bool defaultValue = false)
     {
-        ValidateDisplayIsSet();
-
-        var value = GetConfig(name);
+        var value = GetConfig(display, name);
         if (string.IsNullOrEmpty(value))
         {
             return defaultValue;
@@ -131,11 +85,9 @@ public class DisplayService(
     /// <summary>
     /// Get configuration value as integer
     /// </summary>
-    public int? GetConfigInt(string name)
+    public int? GetConfigInt(Display display, string name)
     {
-        ValidateDisplayIsSet();
-
-        var value = GetConfig(name);
+        var value = GetConfig(display, name);
         if (string.IsNullOrEmpty(value))
         {
             return null;
@@ -150,29 +102,11 @@ public class DisplayService(
     }
 
     /// <summary>
-    /// Get the theme ID from configuration
-    /// </summary>
-    public int? GetThemeId()
-    {
-        return GetConfigInt("theme_id");
-    }
-
-    /// <summary>
-    /// Set the theme ID in configuration
-    /// </summary>
-    public void SetThemeId(int themeId)
-    {
-        SetConfig("theme_id", themeId.ToString());
-    }
-
-    /// <summary>
     /// Get configuration value as double
     /// </summary>
-    public double? GetConfigDouble(string name)
+    public double? GetConfigDouble(Display display, string name)
     {
-        ValidateDisplayIsSet();
-
-        var value = GetConfig(name);
+        var value = GetConfig(display, name);
         if (string.IsNullOrEmpty(value))
         {
             return null;
@@ -189,11 +123,10 @@ public class DisplayService(
     /// <summary>
     /// Set configuration value for a display
     /// </summary>
-    public void SetConfig(string name, string value)
+    public void SetConfig(Display display, string name, string value)
     {
-        ValidateDisplayIsSet();
         var config = context.Configs
-            .FirstOrDefault(c => c.DisplayId == _currentDisplay!.Id && c.Name == name);
+            .FirstOrDefault(c => c.DisplayId == display.Id && c.Name == name);
 
         if (config != null)
         {
@@ -204,7 +137,7 @@ public class DisplayService(
         {
             context.Configs.Add(new Config
             {
-                DisplayId = _currentDisplay!.Id,
+                DisplayId = display.Id,
                 Name = name,
                 Value = value
             });
@@ -219,19 +152,17 @@ public class DisplayService(
         await context.SaveChangesAsync();
     }
 
-    public IColorType? GetColorType()
+    public IColorType? GetColorType(Display display)
     {
-        ValidateDisplayIsSet();
-
-        if (string.IsNullOrEmpty(_currentDisplay!.ColorType))
+        if (string.IsNullOrEmpty(display.ColorType))
         {
             return null;
         }
 
-        var ret = colorTypeRegistry.GetColorType(_currentDisplay!.ColorType);
+        var ret = colorTypeRegistry.GetColorType(display.ColorType);
         if (ret == null)
         {
-            throw new InvalidOperationException($"Color type '{_currentDisplay.ColorType}' not found in registry.");
+            throw new InvalidOperationException($"Color type '{display.ColorType}' not found in registry.");
         }
 
         return ret;

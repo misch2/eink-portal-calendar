@@ -9,7 +9,7 @@
     <div class="col-md-12">
         <div class="form-check form-switch">
             <input class="form-check-input" type="checkbox" id="ota_mode" name="ota_mode" value="1"
-                   checked="@(displayService.GetConfig("ota_mode") == "1")">
+                   checked="@(displayService.GetConfig(Model, "ota_mode") == "1")">
             <label class="form-check-label" for="ota_mode">OTA mode on</label>
         </div>
         <div class="form-text">
@@ -72,21 +72,21 @@
     <div class="col-md-4">
         <label for="wakeup_schedule">Wake up (redraw) schedule</label>
         <input id="wakeup_schedule" name="wakeup_schedule" type="text" class="form-control"
-               value="@displayService.GetConfigWithoutDefaults("wakeup_schedule")"
+               value="@displayService.GetConfigWithoutDefaults(Model, "wakeup_schedule")"
                placeholder="@displayService.GetConfigDefaultsOnly("wakeup_schedule")">
         <div class="form-text">Schedule is in the <a href="https://crontab.guru/">crontab format</a>, for example "0 * * * *"</div>
     </div>
     <div class="col-md-4">
         <label for="alive_check_safety_lag_minutes">Enforced lag when checking if display is alive (minutes)</label>
         <input id="alive_check_safety_lag_minutes" name="alive_check_safety_lag_minutes" type="number" class="form-control"
-               value="@displayService.GetConfigWithoutDefaults("alive_check_safety_lag_minutes")"
+               value="@displayService.GetConfigWithoutDefaults(Model, "alive_check_safety_lag_minutes")"
                placeholder="@displayService.GetConfigDefaultsOnly("alive_check_safety_lag_minutes")">
         <div class="form-text">How many minutes to delay the check after the expected contact time</div>
     </div>
     <div class="col-md-4">
         <label for="alive_check_minimal_failure_count">Min. number of alive check failures</label>
         <input id="alive_check_minimal_failure_count" name="alive_check_minimal_failure_count" type="number" class="form-control"
-               value="@displayService.GetConfigWithoutDefaults("alive_check_minimal_failure_count")"
+               value="@displayService.GetConfigWithoutDefaults(Model, "alive_check_minimal_failure_count")"
                placeholder="@displayService.GetConfigDefaultsOnly("alive_check_minimal_failure_count")">
         <div class="form-text">Minimal number of failures the display is considered to be frozen and before a notification is sent.</div>
     </div>

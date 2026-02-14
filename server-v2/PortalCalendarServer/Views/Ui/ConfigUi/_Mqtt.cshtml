@@ -13,25 +13,25 @@
         <div class="col-md-3">
             <label for="mqtt_server">Server</label>
             <input id="mqtt_server" name="mqtt_server" type="text" class="form-control"
-                   value="@displayService.GetConfigWithoutDefaults("mqtt_server")"
+                   value="@displayService.GetConfigWithoutDefaults(Model, "mqtt_server")"
                    placeholder="@displayService.GetConfigDefaultsOnly("mqtt_server")">
         </div>
         <div class="col-md-3">
             <label for="mqtt_username">Username</label>
             <input id="mqtt_username" name="mqtt_username" type="text" class="form-control"
-                   value="@displayService.GetConfigWithoutDefaults("mqtt_username")"
+                   value="@displayService.GetConfigWithoutDefaults(Model, "mqtt_username")"
                    placeholder="@displayService.GetConfigDefaultsOnly("mqtt_username")">
         </div>
         <div class="col-md-3">
             <label for="mqtt_password">Password</label>
             <input id="mqtt_password" name="mqtt_password" type="text" class="form-control"
-                   value="@displayService.GetConfigWithoutDefaults("mqtt_password")"
+                   value="@displayService.GetConfigWithoutDefaults(Model, "mqtt_password")"
                    placeholder="@displayService.GetConfigDefaultsOnly("mqtt_password")">
         </div>
         <div class="col-md-3">
             <label for="mqtt_topic">Device topic</label>
             <input id="mqtt_topic" name="mqtt_topic" type="text" class="form-control"
-                   value="@displayService.GetConfigWithoutDefaults("mqtt_topic")"
+                   value="@displayService.GetConfigWithoutDefaults(Model, "mqtt_topic")"
                    placeholder="@displayService.GetConfigDefaultsOnly("mqtt_topic")">
         </div>
     </div>

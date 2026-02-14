@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.Weather;
+using PortalCalendarServer.Models.Entities;
 using PortalCalendarServer.Services.Integrations.Weather;
 
 namespace PortalCalendarServer.Services.PageGeneratorComponents;
@@ -21,10 +22,10 @@ public class WeatherComponent(
     private readonly CalendarContext _context = context;
     private readonly ILoggerFactory _loggerFactory = loggerFactory;
 
-    public async Task<WeatherInfo?> GetWeatherAsync(DateTime date)
+    public async Task<WeatherInfo?> GetWeatherAsync(Display display, DateTime date)
     {
         // Try Met.no first
-        var metNoWeather = await GetMetNoWeatherAsync(date);
+        var metNoWeather = await GetMetNoWeatherAsync(display, date);
         if (metNoWeather != null)
         {
             return metNoWeather;
@@ -36,14 +37,14 @@ public class WeatherComponent(
     /// <summary>
     /// Get current weather and forecast from Met.no for the specified date
     /// </summary>
-    public async Task<WeatherInfo?> GetMetNoWeatherAsync(DateTime date)
+    public async Task<WeatherInfo?> GetMetNoWeatherAsync(Display display, DateTime date)
     {
-        if (!displayService.GetConfigBool("metnoweather"))
+        if (!displayService.GetConfigBool(display, "metnoweather"))
             return null;
 
-        var lat = displayService.GetConfigDouble("lat");
-        var lon = displayService.GetConfigDouble("lon");
-        var alt = displayService.GetConfigDouble("alt");
+        var lat = displayService.GetConfigDouble(display, "lat");
+        var lon = displayService.GetConfigDouble(display, "lon");
+        var alt = displayService.GetConfigDouble(display, "alt");
 
         if (lat == null || lon == null || alt == null)
         {
@@ -61,7 +62,7 @@ public class WeatherComponent(
                 lat.Value,
                 lon.Value,
                 alt.Value,
-                displayService.CurrentDisplay
+                display
             );
 
             var detailedForecast = await service.GetForecastAsync();
@@ -73,7 +74,7 @@ public class WeatherComponent(
             var currentWeather = service.Aggregate(detailedForecast, dtStart, 1);
 
             // Forecast (multiple aggregated periods)
-            var aggregateHours = displayService.GetConfigInt("metnoweather_granularity_hours") ?? 2;
+            var aggregateHours = displayService.GetConfigInt(display, "metnoweather_granularity_hours") ?? 2;
             var forecast = new List<AggregatedWeatherData>();
 
             dtStart = dtStart.AddHours(1);
@@ -103,15 +104,15 @@ public class WeatherComponent(
     /// <summary>
     /// Get current weather and forecast from OpenWeatherMap
     /// </summary>
-    public async Task<OpenWeatherInfo?> GetOpenWeatherAsync()
+    public async Task<OpenWeatherInfo?> GetOpenWeatherAsync(Display display)
     {
-        if (!displayService.GetConfigBool("openweather"))
+        if (!displayService.GetConfigBool(display, "openweather"))
             return null;
 
-        var apiKey = displayService.GetConfig("openweather_api_key");
-        var lat = displayService.GetConfigDouble("lat");
-        var lon = displayService.GetConfigDouble("lon");
-        var lang = displayService.GetConfig("openweather_lang") ?? "en";
+        var apiKey = displayService.GetConfig(display, "openweather_api_key");
+        var lat = displayService.GetConfigDouble(display, "lat");
+        var lon = displayService.GetConfigDouble(display, "lon");
+        var lang = displayService.GetConfig(display, "openweather_lang") ?? "en";
 
         if (string.IsNullOrEmpty(apiKey) || lat == null || lon == null)
         {
@@ -130,7 +131,7 @@ public class WeatherComponent(
                 lat.Value,
                 lon.Value,
                 lang,
-                displayService.CurrentDisplay
+                display
             );
 
             var current = await service.FetchCurrentFromWebAsync();

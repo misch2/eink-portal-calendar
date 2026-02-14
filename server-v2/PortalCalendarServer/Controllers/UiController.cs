@@ -37,17 +37,9 @@ public class UiController(
     ];
 
     // Helper to get display by ID
-    private async Task<Display?> GetDisplayByIdAsync(int displayNumber)
+    private async Task<Display> GetDisplayByIdAsync(int displayNumber)
     {
-        var display = await _context.Displays
-            .Include(d => d.Configs)
-            .FirstOrDefaultAsync(d => d.Id == displayNumber);
-
-        if (display == null)
-        {
-            _logger.LogWarning("Display with ID {DisplayNumber} not found", displayNumber);
-        }
-
+        var display = await _context.Displays.FirstAsync(d => d.Id == displayNumber);
         return display;
     }
 
@@ -56,13 +48,11 @@ public class UiController(
     public async Task<IActionResult> SelectDisplay()
     {
         var displays = await _context.Displays
-            .Include(d => d.Configs)
             .OrderBy(d => d.Id)
             .ToListAsync();
 
         ViewData["NavLink"] = "index";
         ViewData["Title"] = "Displays";
-        // ViewBag.Display remains null for global layout, so it can show a generic title
 
         return View("DisplayList", displays);
     }
@@ -137,14 +127,10 @@ public class UiController(
         {
             return NotFound();
         }
-        _displayService.UseDisplay(display);
 
         var viewModel = _pageGeneratorService.PageViewModelForDate(display, date, preview_colors);
 
-        var themeId = _displayService.GetThemeId();
-        var theme = await _themeService.GetThemeByIdAsync(themeId!.Value);
-
-        return View($"~/Views/CalendarThemes/{theme!.FileName}.cshtml", viewModel);
+        return View($"~/Views/CalendarThemes/{display.Theme.FileName}.cshtml", viewModel);
     }
 
     // GET /config_ui/{display_number}
@@ -156,17 +142,17 @@ public class UiController(
         {
             return NotFound();
         }
-        _displayService.UseDisplay(display);
 
         ViewData["NavLink"] = "config_ui";
         ViewData["Title"] = $"Configuration - {display.Name}";
         ViewData["Themes"] = await _themeService.GetActiveThemesAsync();
         ViewData["LastVoltage"] = display.Voltage();
-        ViewData["LastVoltageRaw"] = _displayService.GetConfig("_last_voltage_raw");
+        ViewData["LastVoltageRaw"] = _displayService.GetConfig(display, "_last_voltage_raw");
         ViewBag.Display = display; // for global layout
 
-        // Pass DisplayService to the view through ViewData
-        ViewData["DisplayService"] = _displayService;   // for this specific view
+        // Pass DisplayService and Display to the view through ViewData
+        ViewData["DisplayService"] = _displayService;
+        ViewData["Display"] = display;
 
         return View("ConfigUi", display);
     }
@@ -181,7 +167,6 @@ public class UiController(
         {
             return NotFound();
         }
-        _displayService.UseDisplay(display);
 
         // Save generic config parameters
         foreach (var paramName in ConfigUiParameters)
@@ -189,14 +174,14 @@ public class UiController(
             if (form.ContainsKey(paramName))
             {
                 var value = form[paramName].ToString();
-                _displayService.SetConfig(paramName, value);
+                _displayService.SetConfig(display, paramName, value);
             }
             else if (paramName.StartsWith("web_calendar") || paramName == "googlefit" ||
                      paramName == "metnoweather" || paramName == "openweather" ||
                      paramName == "telegram" || paramName == "mqtt" || paramName == "ota_mode")
             {
                 // Checkboxes: if not present, set to empty/false
-                _displayService.SetConfig(paramName, "");
+                _displayService.SetConfig(display, paramName, "");
             }
         }
 
@@ -258,7 +243,6 @@ public class UiController(
         {
             return NotFound();
         }
-        _displayService.UseDisplay(display);
 
         if (!themeId.HasValue)
         {
@@ -288,8 +272,9 @@ public class UiController(
 
             _logger.LogInformation("Rendering theme configuration for theme: {ThemeName}", themeEntity.DisplayName);
 
-            // Pass DisplayService through ViewData for the partial view
+            // Pass DisplayService and Display through ViewData for the partial view
             ViewData["DisplayService"] = _displayService;
+            ViewData["Display"] = display;
 
             return PartialView(viewPath, display);
         }
@@ -315,11 +300,10 @@ public class UiController(
         {
             return BadRequest(new { error = "Display not found" });
         }
-        _displayService.UseDisplay(display);
 
         // Build Google OAuth2 URL
-        var clientId = _displayService.GetConfig("googlefit_client_id");
-        var callback = _displayService.GetConfig("googlefit_auth_callback");
+        var clientId = _displayService.GetConfig(display, "googlefit_client_id");
+        var callback = _displayService.GetConfig(display, "googlefit_auth_callback");
         var scope = "https://www.googleapis.com/auth/fitness.body.read";
 
         if (clientId == null || callback == null)
@@ -356,9 +340,8 @@ public class UiController(
         {
             return NotFound();
         }
-        _displayService.UseDisplay(display);
 
-        var accessToken = _displayService.GetConfig("_googlefit_access_token");
+        var accessToken = _displayService.GetConfig(display, "_googlefit_access_token");
         if (string.IsNullOrEmpty(accessToken))
         {
             return BadRequest(new { error = "No access token found" });
@@ -367,7 +350,7 @@ public class UiController(
         ViewData["NavLink"] = "config_ui";
         ViewData["Title"] = "Google Fit Authentication Successful";
         ViewData["AccessToken"] = accessToken;
-        ViewData["RefreshToken"] = _displayService.GetConfig("_googlefit_refresh_token");
+        ViewData["RefreshToken"] = _displayService.GetConfig(display, "_googlefit_refresh_token");
         ViewBag.Display = display; // for global layout
 
         return View("AuthSuccess", display);

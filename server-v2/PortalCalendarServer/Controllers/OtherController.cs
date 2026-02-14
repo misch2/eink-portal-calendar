@@ -65,9 +65,7 @@ public class OtherController : Controller
             }
 
             var displayId = displayNumberElement.GetInt32();
-            var display = await _context.Displays
-                .Include(d => d.Configs)
-                .FirstOrDefaultAsync(d => d.Id == displayId);
+            var display = await _context.Displays.FirstOrDefaultAsync(d => d.Id == displayId);
 
             if (display == null)
             {
@@ -75,12 +73,10 @@ public class OtherController : Controller
                 return View("~/Views/Ui/AuthError.cshtml", new { Error = "Display not found" });
             }
 
-            _displayService.UseDisplay(display);
-
             // Get OAuth configuration
-            var clientId = _displayService.GetConfig("googlefit_client_id");
-            var clientSecret = _displayService.GetConfig("googlefit_client_secret");
-            var redirectUri = _displayService.GetConfig("googlefit_auth_callback");
+            var clientId = _displayService.GetConfig(display, "googlefit_client_id");
+            var clientSecret = _displayService.GetConfig(display, "googlefit_client_secret");
+            var redirectUri = _displayService.GetConfig(display, "googlefit_auth_callback");
 
             if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret) || string.IsNullOrEmpty(redirectUri))
             {
@@ -123,12 +119,12 @@ public class OtherController : Controller
             // Store tokens
             if (tokens.TryGetValue("access_token", out var accessToken))
             {
-                _displayService.SetConfig("_googlefit_access_token", accessToken.GetString() ?? "");
+                _displayService.SetConfig(display, "_googlefit_access_token", accessToken.GetString() ?? "");
             }
 
             if (tokens.TryGetValue("refresh_token", out var refreshToken))
             {
-                _displayService.SetConfig("_googlefit_refresh_token", refreshToken.GetString() ?? "");
+                _displayService.SetConfig(display, "_googlefit_refresh_token", refreshToken.GetString() ?? "");
             }
 
             await _displayService.SaveChangesAsync();

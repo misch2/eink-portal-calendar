@@ -16,7 +16,8 @@ var relativePath = rawConnectionString!.Replace("Data Source=", "");
 var absolutePath = Path.Combine(builder.Environment.ContentRootPath, "..", relativePath);
 var absoluteConnectionString = $"Data Source={absolutePath}";
 builder.Services.AddDbContext<CalendarContext>(options =>
-    options.UseSqlite(absoluteConnectionString));
+    options.UseLazyLoadingProxies()
+    .UseSqlite(absoluteConnectionString));
 
 // Add services to the container
 // Support for both API and MVC controllers

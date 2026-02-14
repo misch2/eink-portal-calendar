@@ -5,8 +5,6 @@
 @{
     var themes = (List<Theme>)ViewData["Themes"]!;
     var displayService = (DisplayService)ViewData["DisplayService"]!;
-
-    var currentThemeId = displayService.GetConfigInt("theme_id");
 }
 
 @if (!Model.IsDefault())
@@ -27,7 +25,7 @@
                 {
                     <option value="@theme.Id"
                             data-has-config="@theme.HasCustomConfig.ToString().ToLower()"
-                            selected="@(currentThemeId == theme.Id)">
+                            selected="@(Model.ThemeId == theme.Id)">
                         @theme.DisplayName
                     </option>
                 }
@@ -58,19 +56,19 @@
         <div class="col-md-4">
             <label for="lat">Latitude (+N/-S)</label>
             <input id="lat" name="lat" type="text" class="form-control"
-                   value="@displayService.GetConfigWithoutDefaults("lat")"
+                   value="@displayService.GetConfigWithoutDefaults(Model, "lat")"
                    placeholder="@displayService.GetConfigDefaultsOnly("lat")">
         </div>
         <div class="col-md-4">
             <label for="lon">Longitude (+E/-W)</label>
             <input id="lon" name="lon" type="text" class="form-control"
-                   value="@displayService.GetConfigWithoutDefaults("lon")"
+                   value="@displayService.GetConfigWithoutDefaults(Model, "lon")"
                    placeholder="@displayService.GetConfigDefaultsOnly("lon")">
         </div>
         <div class="col-md-4">
             <label for="alt">Altitude (m)</label>
             <input id="alt" name="alt" type="text" class="form-control"
-                   value="@displayService.GetConfigWithoutDefaults("alt")"
+                   value="@displayService.GetConfigWithoutDefaults(Model, "alt")"
                    placeholder="@displayService.GetConfigDefaultsOnly("alt")">
         </div>
     </div>
@@ -78,7 +76,7 @@
         <div class="col-md-4">
             <label for="timezone">Time Zone</label>
             <input id="timezone" name="timezone" type="text" class="form-control"
-                   value="@displayService.GetConfigWithoutDefaults("timezone")"
+                   value="@displayService.GetConfigWithoutDefaults(Model, "timezone")"
                    placeholder="@displayService.GetConfigDefaultsOnly("timezone")">
         </div>
         <div class="col-md-4">
@@ -86,11 +84,11 @@
             <select id="date_culture" name="date_culture" class="form-select">
                 @if (!Model.IsDefault())
                 {
-                    <option value="" disabled selected="@(String.IsNullOrEmpty(displayService.GetConfigWithoutDefaults("date_culture")))">(@displayService.GetConfigDefaultsOnly("date_culture") - default)</option>
+                    <option value="" disabled selected="@(String.IsNullOrEmpty(displayService.GetConfigWithoutDefaults(Model, "date_culture")))">(@displayService.GetConfigDefaultsOnly("date_culture") - default)</option>
                 }
                 @foreach (var val in new[] { "en-US", "cs-CZ" })
                 {
-                    <option value="@val" selected="@(displayService.GetConfigWithoutDefaults("date_culture") == val)">@val</option>
+                    <option value="@val" selected="@(displayService.GetConfigWithoutDefaults(Model, "date_culture") == val)">@val</option>
                 }
             </select>
         </div>

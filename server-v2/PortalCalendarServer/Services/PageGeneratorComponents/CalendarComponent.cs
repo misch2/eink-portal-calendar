@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
+using PortalCalendarServer.Models.Entities;
 using PortalCalendarServer.Services.Integrations;
 
 namespace PortalCalendarServer.Services.PageGeneratorComponents;
@@ -16,7 +17,7 @@ public class CalendarComponent(
     /// <summary>
     /// Get calendar component (icons and events) for the specified date
     /// </summary>
-    public CalendarInfo GetDetails(DateTime date)
+    public CalendarInfo GetDetails(Display display, DateTime date)
     {
         var todayEvents = new List<CalendarEvent>();
         var nearestEvents = new List<CalendarEvent>();
@@ -24,11 +25,11 @@ public class CalendarComponent(
         // Load calendar events from up to 3 ICS calendars
         for (int calendarNo = 1; calendarNo <= 3; calendarNo++)
         {
-            var enabled = displayService.GetConfigBool($"web_calendar{calendarNo}");
+            var enabled = displayService.GetConfigBool(display, $"web_calendar{calendarNo}");
             if (!enabled)
                 continue;
 
-            var url = displayService.GetConfig($"web_calendar_ics_url{calendarNo}");
+            var url = displayService.GetConfig(display, $"web_calendar_ics_url{calendarNo}");
             if (string.IsNullOrEmpty(url))
                 continue;
 
@@ -41,7 +42,7 @@ public class CalendarComponent(
                     memoryCache,
                     context,
                     url,
-                    displayService.GetCurrentDisplay());
+                    display);
 
                 // Get today's events
                 var today = date.Date;

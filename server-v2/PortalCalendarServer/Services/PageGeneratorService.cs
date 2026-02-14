@@ -51,8 +51,6 @@ public class PageGeneratorService
 
     public PageViewModel PageViewModelForDate(Display display, DateTime date, bool previewColors = false)
     {
-        _displayService.UseDisplay(display);
-
         var viewModel = new PageViewModel
         {
             Display = display,
@@ -93,8 +91,6 @@ public class PageGeneratorService
 
     public void GenerateImageFromWeb(Display display)
     {
-        _displayService.UseDisplay(display);
-
         var url = $"http://localhost:5252/calendar/{display.Id}/html?preview_colors=true";  // FIXME FIXME hardcoded port!
         var outputPath = DisplayImageName(display);
         _logger.LogInformation("Generating calendar image from URL {Url} to {OutputPath}", url, outputPath);
@@ -355,9 +351,7 @@ public class PageGeneratorService
     // TODO: Implement MQTT update methods
     public void UpdateMqtt(Display display, string key, object value, bool forced = false)
     {
-        _displayService.UseDisplay(display);
-
-        if (!_displayService.GetConfigBool("mqtt"))
+        if (!_displayService.GetConfigBool(display, "mqtt"))
             return;
 
         // TODO: Implement MQTT publishing
@@ -366,9 +360,7 @@ public class PageGeneratorService
 
     public void DisconnectMqtt(Display display)
     {
-        _displayService.UseDisplay(display);
-
-        if (!_displayService.GetConfigBool("mqtt"))
+        if (!_displayService.GetConfigBool(display, "mqtt"))
             return;
 
         // TODO: Implement MQTT disconnection
