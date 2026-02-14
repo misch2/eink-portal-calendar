@@ -32,4 +32,13 @@
       <None Remove="PortalCalendarServer.Tests\**" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="Theme.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="__20260209000000_AddThemesTable.cs_" />
+      <Content Include="__20260209000100_ConvertThemeToThemeId.cs_" />
+    </ItemGroup>
+
 </Project>

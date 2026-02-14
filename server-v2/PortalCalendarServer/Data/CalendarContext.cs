@@ -22,6 +22,8 @@ public partial class CalendarContext : DbContext
 
     public virtual DbSet<Display> Displays { get; set; }
 
+    public virtual DbSet<Theme> Themes { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Cache>(entity =>
