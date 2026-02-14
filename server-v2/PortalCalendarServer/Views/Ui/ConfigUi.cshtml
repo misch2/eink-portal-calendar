@@ -8,13 +8,6 @@
     var displayService = (DisplayService)ViewData["DisplayService"]!;
 }
 
-@if (TempData["Message"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["Message"]
-    </div>
-}
-
 <h3 class="mb-3">Configuration</h3>
 
 <form action="/config_ui/@Model.Id" method="post">
@@ -123,6 +116,17 @@
             // Handle browser back/forward buttons
             window.addEventListener('hashchange', function() {
                 activateTabFromHash();
+            });
+
+            // Preserve hash on form submission
+            $('form').on('submit', function(e) {
+                const currentHash = window.location.hash;
+                if (currentHash) {
+                    const form = $(this);
+                    const currentAction = form.attr('action');
+                    // Update form action to include the hash
+                    form.attr('action', currentAction + currentHash);
+                }
             });
 
             // Integration override toggle handler
