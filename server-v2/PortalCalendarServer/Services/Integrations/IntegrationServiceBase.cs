@@ -16,6 +16,7 @@ public abstract class IntegrationServiceBase
     protected readonly ILogger Logger;
     protected readonly IMemoryCache MemoryCache;
     protected readonly IHttpClientFactory HttpClientFactory;
+    protected readonly IDatabaseCacheServiceFactory DatabaseCacheFactory;
     protected readonly CalendarContext Context;
     protected readonly Display? Display;
     private readonly int _minimalCacheExpiry;
@@ -26,6 +27,7 @@ public abstract class IntegrationServiceBase
         ILogger logger,
         IHttpClientFactory httpClientFactory,
         IMemoryCache memoryCache,
+        IDatabaseCacheServiceFactory databaseCacheFactory,
         CalendarContext context,
         Display? display = null,
         int minimalCacheExpiry = 0)
@@ -33,6 +35,7 @@ public abstract class IntegrationServiceBase
         HttpClientFactory = httpClientFactory;
         Logger = logger;
         MemoryCache = memoryCache;
+        DatabaseCacheFactory = databaseCacheFactory;
         Context = context;
         Display = display;
         _minimalCacheExpiry = minimalCacheExpiry;
@@ -50,17 +53,7 @@ public abstract class IntegrationServiceBase
     /// </summary>
     protected DatabaseCacheService GetDatabaseCache()
     {
-        // Create a logger factory for the DatabaseCacheService
-        var loggerFactory = Microsoft.Extensions.Logging.LoggerFactory.Create(builder =>
-        {
-            builder.AddConsole();
-        });
-
-        return new DatabaseCacheService(
-            Context,
-            loggerFactory.CreateLogger<DatabaseCacheService>(),
-            GetType().FullName ?? GetType().Name,
-            _minimalCacheExpiry);
+        return DatabaseCacheFactory.Create(GetType().FullName ?? GetType().Name, _minimalCacheExpiry);
     }
 
     /// <summary>

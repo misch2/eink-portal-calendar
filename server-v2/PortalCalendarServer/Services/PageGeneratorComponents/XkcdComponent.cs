@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
+using PortalCalendarServer.Services.Caches;
 using PortalCalendarServer.Services.Integrations;
 
 namespace PortalCalendarServer.Services.PageGeneratorComponents;
@@ -13,6 +14,7 @@ public class XkcdComponent(
     ILogger<PageGeneratorService> logger,
     IHttpClientFactory httpClientFactory,
     IMemoryCache memoryCache,
+    IDatabaseCacheServiceFactory databaseCacheFactory,
     CalendarContext context,
     ILoggerFactory loggerFactory)
 {
@@ -20,6 +22,7 @@ public class XkcdComponent(
         loggerFactory.CreateLogger<XkcdIntegrationService>(),
         httpClientFactory,
         memoryCache,
+        databaseCacheFactory,
         context,
         null,  // Display is not needed for XKCD integration
         0);

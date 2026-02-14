@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.Entities;
+using PortalCalendarServer.Services.Caches;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -21,6 +22,7 @@ public class OpenWeatherService : IntegrationServiceBase
         ILogger<OpenWeatherService> logger,
         IHttpClientFactory httpClientFactory,
         IMemoryCache memoryCache,
+        IDatabaseCacheServiceFactory databaseCacheFactory,
         CalendarContext context,
         string apiKey,
         double latitude,
@@ -28,7 +30,7 @@ public class OpenWeatherService : IntegrationServiceBase
         string language = "en",
         Display? display = null,
         int minimalCacheExpiry = 0)
-        : base(logger, httpClientFactory, memoryCache, context, display, minimalCacheExpiry)
+        : base(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display, minimalCacheExpiry)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(apiKey);
         _apiKey = apiKey;

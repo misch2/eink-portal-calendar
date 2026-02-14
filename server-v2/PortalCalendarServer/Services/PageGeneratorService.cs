@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.Entities;
+using PortalCalendarServer.Services.Caches;
 using PortalCalendarServer.Services.Integrations;
 using PortalCalendarServer.Services.PageGeneratorComponents;
 using SixLabors.ImageSharp;
@@ -21,6 +22,7 @@ public class PageGeneratorService
     private readonly IWeb2PngService _web2PngService;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IMemoryCache _memoryCache;
+    private readonly IDatabaseCacheServiceFactory _databaseCacheFactory;
     private readonly ILoggerFactory _loggerFactory;
     private readonly INameDayService _nameDayService;
     private readonly IPublicHolidayService _publicHolidayService;
@@ -33,6 +35,7 @@ public class PageGeneratorService
         IWeb2PngService web2PngService,
         IHttpClientFactory httpClientFactory,
         IMemoryCache memoryCache,
+        IDatabaseCacheServiceFactory databaseCacheFactory,
         ILoggerFactory loggerFactory,
         INameDayService nameDayService,
         IPublicHolidayService publicHolidayService)
@@ -44,6 +47,7 @@ public class PageGeneratorService
         _web2PngService = web2PngService;
         _httpClientFactory = httpClientFactory;
         _memoryCache = memoryCache;
+        _databaseCacheFactory = databaseCacheFactory;
         _loggerFactory = loggerFactory;
         _nameDayService = nameDayService;
         _publicHolidayService = publicHolidayService;
@@ -60,22 +64,23 @@ public class PageGeneratorService
 
         viewModel.InitializeComponents(
             portalIconsFactory: () => new PortalIconsComponent(_displayService),
-            calendarFactory: () => new CalendarComponent(_logger, _displayService, _httpClientFactory, _memoryCache, _context, _loggerFactory),
+            calendarFactory: () => new CalendarComponent(_logger, _displayService, _httpClientFactory, _memoryCache, _databaseCacheFactory, _context, _loggerFactory),
             weightFactory: () =>
             {
                 var googleFitService = new GoogleFitIntegrationService(
                     _loggerFactory.CreateLogger<GoogleFitIntegrationService>(),
                     _httpClientFactory,
                     _memoryCache,
+                    _databaseCacheFactory,
                     _context,
                     display,
                     0);
                 return new WeightComponent(_logger, googleFitService);
             },
-            xkcdFactory: () => new XkcdComponent(_logger, _httpClientFactory, _memoryCache, _context, _loggerFactory),
+            xkcdFactory: () => new XkcdComponent(_logger, _httpClientFactory, _memoryCache, _databaseCacheFactory, _context, _loggerFactory),
             publicHolidayFactory: () => new PublicHolidayComponent(_logger, _publicHolidayService),
             nameDayFactory: () => new NameDayComponent(_logger, _nameDayService),
-            weatherFactory: () => new WeatherComponent(_logger, _displayService, _httpClientFactory, _memoryCache, _context, _loggerFactory)
+            weatherFactory: () => new WeatherComponent(_logger, _displayService, _httpClientFactory, _memoryCache, _databaseCacheFactory, _context, _loggerFactory)
         );
 
         return viewModel;

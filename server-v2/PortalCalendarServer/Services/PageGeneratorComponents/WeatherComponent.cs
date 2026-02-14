@@ -1,7 +1,8 @@
 using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
-using PortalCalendarServer.Models.Weather;
 using PortalCalendarServer.Models.Entities;
+using PortalCalendarServer.Models.Weather;
+using PortalCalendarServer.Services.Caches;
 using PortalCalendarServer.Services.Integrations.Weather;
 
 namespace PortalCalendarServer.Services.PageGeneratorComponents;
@@ -14,14 +15,10 @@ public class WeatherComponent(
     IDisplayService displayService,
     IHttpClientFactory httpClientFactory,
     IMemoryCache memoryCache,
+    IDatabaseCacheServiceFactory databaseCacheFactory,
     CalendarContext context,
     ILoggerFactory loggerFactory)
 {
-    private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
-    private readonly IMemoryCache _memoryCache = memoryCache;
-    private readonly CalendarContext _context = context;
-    private readonly ILoggerFactory _loggerFactory = loggerFactory;
-
     public async Task<WeatherInfo?> GetWeatherAsync(Display display, DateTime date)
     {
         // Try Met.no first
@@ -55,10 +52,11 @@ public class WeatherComponent(
         try
         {
             var service = new MetNoWeatherService(
-                _loggerFactory.CreateLogger<MetNoWeatherService>(),
-                _httpClientFactory,
-                _memoryCache,
-                _context,
+                loggerFactory.CreateLogger<MetNoWeatherService>(),
+                httpClientFactory,
+                memoryCache,
+                databaseCacheFactory,
+                context,
                 lat.Value,
                 lon.Value,
                 alt.Value,
@@ -123,10 +121,11 @@ public class WeatherComponent(
         try
         {
             var service = new OpenWeatherService(
-                _loggerFactory.CreateLogger<OpenWeatherService>(),
-                _httpClientFactory,
-                _memoryCache,
-                _context,
+                loggerFactory.CreateLogger<OpenWeatherService>(),
+                httpClientFactory,
+                memoryCache,
+                databaseCacheFactory,
+                context,
                 apiKey,
                 lat.Value,
                 lon.Value,

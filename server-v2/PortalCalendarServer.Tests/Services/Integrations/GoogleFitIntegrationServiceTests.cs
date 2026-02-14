@@ -16,10 +16,12 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
     private GoogleFitIntegrationService CreateService(Display? display = null)
     {
         var logger = new Mock<ILogger<GoogleFitIntegrationService>>().Object;
+        
         return new GoogleFitIntegrationService(
             logger,
             MockHttpClientFactory.Object,
             MemoryCache,
+            MockDatabaseCacheServiceFactory.Object,
             Context,
             display,
             minimalCacheExpiry: 0);

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.Entities;
+using PortalCalendarServer.Services.Caches;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -23,10 +24,11 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
         ILogger<GoogleFitIntegrationService> logger,
         IHttpClientFactory httpClientFactory,
         IMemoryCache memoryCache,
+        IDatabaseCacheServiceFactory databaseCacheFactory,
         CalendarContext context,
         Display? display = null,
         int minimalCacheExpiry = 0)
-        : base(logger, httpClientFactory, memoryCache, context, display, minimalCacheExpiry)
+        : base(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display, minimalCacheExpiry)
     {
     }
 

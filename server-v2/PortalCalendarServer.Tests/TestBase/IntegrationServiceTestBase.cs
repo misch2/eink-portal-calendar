@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Moq.Protected;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.Entities;
+using PortalCalendarServer.Services.Caches;
 using System.Net;
 
 namespace PortalCalendarServer.Tests.TestBase;
@@ -17,6 +18,7 @@ public abstract class IntegrationServiceTestBase : IDisposable
     protected CalendarContext Context { get; }
     protected Mock<IHttpClientFactory> MockHttpClientFactory { get; }
     protected Mock<HttpMessageHandler> MockHttpMessageHandler { get; }
+    protected Mock<IDatabaseCacheServiceFactory> MockDatabaseCacheServiceFactory { get; }
     protected IMemoryCache MemoryCache { get; }
     protected ILogger Logger { get; }
     protected Display? TestDisplay { get; set; }
@@ -48,6 +50,13 @@ public abstract class IntegrationServiceTestBase : IDisposable
         // Setup logger
         var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
         Logger = loggerFactory.CreateLogger(GetType());
+
+        // Setup mock database cache service factory
+        MockDatabaseCacheServiceFactory = new Mock<IDatabaseCacheServiceFactory>();
+        var databaseCache = new DatabaseCacheService(Context, loggerFactory.CreateLogger<DatabaseCacheService>(), "");
+        MockDatabaseCacheServiceFactory
+            .Setup(f => f.Create(It.IsAny<string>(), It.IsAny<int>()))
+            .Returns(databaseCache);
     }
 
     /// <summary>

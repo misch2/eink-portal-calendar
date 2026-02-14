@@ -2,6 +2,7 @@ using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.Entities;
 using PortalCalendarServer.Models.Weather;
+using PortalCalendarServer.Services.Caches;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -22,13 +23,14 @@ public class MetNoWeatherService : IntegrationServiceBase
         ILogger<MetNoWeatherService> logger,
         IHttpClientFactory httpClientFactory,
         IMemoryCache memoryCache,
+        IDatabaseCacheServiceFactory databaseCacheFactory,
         CalendarContext context,
         double latitude,
         double longitude,
         double altitude,
         Display? display = null,
         int minimalCacheExpiry = 0)
-        : base(logger, httpClientFactory, memoryCache, context, display, minimalCacheExpiry)
+        : base(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display, minimalCacheExpiry)
     {
         _latitude = latitude;
         _longitude = longitude;

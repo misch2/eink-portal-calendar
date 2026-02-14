@@ -51,6 +51,7 @@ builder.Services.AddScoped<CacheManagementService>();
 builder.Services.AddScoped<ThemeService>();
 builder.Services.AddSingleton<IWeb2PngService, Web2PngService>();
 builder.Services.AddSingleton<ColorTypeRegistry>();
+builder.Services.AddScoped<IDatabaseCacheServiceFactory, DatabaseCacheServiceFactory>();
 
 // Register background services
 builder.Services.AddHostedService<CacheCleanupService>();
@@ -59,9 +60,6 @@ builder.Services.AddHostedService<CacheCleanupService>();
 builder.Services.AddScoped<INameDayService, NameDayService>();
 builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();
 builder.Services.AddScoped<GoogleFitIntegrationService>();
-// Add other integration services here as you create them:
-// builder.Services.AddScoped<WeatherIntegrationService>();
-// builder.Services.AddScoped<ICalIntegrationService>();
 
 // Configure localization to not disturb number formatting in HTML forms etc.
 var invariant = CultureInfo.InvariantCulture;

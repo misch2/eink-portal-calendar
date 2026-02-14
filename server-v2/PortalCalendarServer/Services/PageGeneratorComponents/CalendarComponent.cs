@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.Entities;
+using PortalCalendarServer.Services.Caches;
 using PortalCalendarServer.Services.Integrations;
 
 namespace PortalCalendarServer.Services.PageGeneratorComponents;
@@ -10,6 +11,7 @@ public class CalendarComponent(
     IDisplayService displayService,
     IHttpClientFactory httpClientFactory,
     IMemoryCache memoryCache,
+    IDatabaseCacheServiceFactory databaseCacheFactory,
     CalendarContext context,
     ILoggerFactory loggerFactory)
 {
@@ -40,6 +42,7 @@ public class CalendarComponent(
                     loggerFactory.CreateLogger<IcalIntegrationService>(),
                     httpClientFactory,
                     memoryCache,
+                    databaseCacheFactory,
                     context,
                     url,
                     display);

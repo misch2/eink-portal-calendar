@@ -2,6 +2,7 @@ using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.DTOs;
 using PortalCalendarServer.Models.Entities;
+using PortalCalendarServer.Services.Caches;
 using System.Text.Json;
 
 namespace PortalCalendarServer.Services.Integrations;
@@ -14,9 +15,10 @@ public class XkcdIntegrationService(
     ILogger<XkcdIntegrationService> logger,
     IHttpClientFactory httpClientFactory,
     IMemoryCache memoryCache,
+    IDatabaseCacheServiceFactory databaseCacheFactory,
     CalendarContext context,
     Display? display = null,
-    int minimalCacheExpiry = 0) : IntegrationServiceBase(logger, httpClientFactory, memoryCache, context, display, minimalCacheExpiry)
+    int minimalCacheExpiry = 0) : IntegrationServiceBase(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display, minimalCacheExpiry)
 {
 
     /// <summary>

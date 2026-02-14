@@ -2,6 +2,7 @@ using Ical.Net;
 using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.Entities;
+using PortalCalendarServer.Services.Caches;
 
 namespace PortalCalendarServer.Services.Integrations;
 
@@ -17,11 +18,12 @@ public class IcalIntegrationService : IntegrationServiceBase
         ILogger<IcalIntegrationService> logger,
         IHttpClientFactory httpClientFactory,
         IMemoryCache memoryCache,
+        IDatabaseCacheServiceFactory databaseCacheFactory,
         CalendarContext context,
         string icsUrl,
         Display? display = null,
         int minimalCacheExpiry = 0)
-        : base(logger, httpClientFactory, memoryCache, context, display, minimalCacheExpiry)
+        : base(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display, minimalCacheExpiry)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(icsUrl);
         _icsUrl = icsUrl;

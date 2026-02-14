@@ -16,10 +16,12 @@ public class IcalIntegrationServiceTests : IntegrationServiceTestBase
     private IcalIntegrationService CreateService(string? icsUrl = null)
     {
         var logger = new Mock<ILogger<IcalIntegrationService>>().Object;
+        
         return new IcalIntegrationService(
             logger,
             MockHttpClientFactory.Object,
             MemoryCache,
+            MockDatabaseCacheServiceFactory.Object,
             Context,
             icsUrl ?? TestIcsUrl,
             TestDisplay);
@@ -330,6 +332,7 @@ public class IcalIntegrationServiceTests : IntegrationServiceTestBase
                 logger,
                 MockHttpClientFactory.Object,
                 MemoryCache,
+                MockDatabaseCacheServiceFactory.Object,
                 Context,
                 null!,
                 TestDisplay));
