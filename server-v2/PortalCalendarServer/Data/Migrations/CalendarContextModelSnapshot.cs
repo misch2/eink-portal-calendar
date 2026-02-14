@@ -187,7 +187,7 @@ namespace PortalCalendarServer.Migrations
                     b.HasIndex("FileName")
                         .IsUnique();
 
-                    b.ToTable("Themes");
+                    b.ToTable("themes");
                 });
 
             modelBuilder.Entity("PortalCalendarServer.Models.Entities.Config", b =>

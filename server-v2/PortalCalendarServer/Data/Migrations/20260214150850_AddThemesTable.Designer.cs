@@ -11,7 +11,7 @@ using PortalCalendarServer.Data;
 namespace PortalCalendarServer.Migrations
 {
     [DbContext(typeof(CalendarContext))]
-    [Migration("20260214150416_AddThemesTable")]
+    [Migration("20260214150850_AddThemesTable")]
     partial class AddThemesTable
     {
         /// <inheritdoc />
@@ -190,7 +190,7 @@ namespace PortalCalendarServer.Migrations
                     b.HasIndex("FileName")
                         .IsUnique();
 
-                    b.ToTable("Themes");
+                    b.ToTable("themes");
                 });
 
             modelBuilder.Entity("PortalCalendarServer.Models.Entities.Config", b =>

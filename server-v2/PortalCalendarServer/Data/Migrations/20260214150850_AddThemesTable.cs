@@ -11,7 +11,7 @@ namespace PortalCalendarServer.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Themes",
+                name: "themes",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
@@ -24,12 +24,12 @@ namespace PortalCalendarServer.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Themes", x => x.Id);
+                    table.PrimaryKey("PK_themes", x => x.Id);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Themes_FileName",
-                table: "Themes",
+                name: "IX_themes_FileName",
+                table: "themes",
                 column: "FileName",
                 unique: true);
         }
@@ -38,7 +38,7 @@ namespace PortalCalendarServer.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Themes");
+                name: "themes");
         }
     }
 }
