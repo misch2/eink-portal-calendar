@@ -8,7 +8,7 @@ namespace PortalCalendarServer.Services.PageGeneratorComponents;
 /// </summary>
 public class NameDayComponent(
     ILogger<PageGeneratorService> logger,
-    NameDayService nameDayService)
+    INameDayService nameDayService)
 {
     /// <summary>
     /// Get name day information for the specified date in Czech calendar.

@@ -7,7 +7,7 @@ namespace PortalCalendarServer.Services.PageGeneratorComponents;
 
 public class CalendarComponent(
     ILogger<PageGeneratorService> logger,
-    DisplayService displayService,
+    IDisplayService displayService,
     IHttpClientFactory httpClientFactory,
     IMemoryCache memoryCache,
     CalendarContext context,

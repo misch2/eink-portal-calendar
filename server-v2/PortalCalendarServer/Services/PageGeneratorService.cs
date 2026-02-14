@@ -17,24 +17,24 @@ public class PageGeneratorService
     private readonly ILogger<PageGeneratorService> _logger;
     private readonly CalendarContext _context;
     private readonly IWebHostEnvironment _environment;
-    private readonly DisplayService _displayService;
-    private readonly Web2PngService _web2PngService;
+    private readonly IDisplayService _displayService;
+    private readonly IWeb2PngService _web2PngService;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IMemoryCache _memoryCache;
     private readonly ILoggerFactory _loggerFactory;
-    private readonly NameDayService _nameDayService;
+    private readonly INameDayService _nameDayService;
     private readonly IPublicHolidayService _publicHolidayService;
 
     public PageGeneratorService(
         ILogger<PageGeneratorService> logger,
         CalendarContext context,
         IWebHostEnvironment environment,
-        DisplayService displayService,
-        Web2PngService web2PngService,
+        IDisplayService displayService,
+        IWeb2PngService web2PngService,
         IHttpClientFactory httpClientFactory,
         IMemoryCache memoryCache,
         ILoggerFactory loggerFactory,
-        NameDayService nameDayService,
+        INameDayService nameDayService,
         IPublicHolidayService publicHolidayService)
     {
         _logger = logger;

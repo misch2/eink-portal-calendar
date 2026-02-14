@@ -12,11 +12,11 @@ public class ApiController : ControllerBase
 {
     private readonly CalendarContext _context;
     private readonly ILogger<ApiController> _logger;
-    private readonly DisplayService _displayService;
+    private readonly IDisplayService _displayService;
     private readonly PageGeneratorService _pageGeneratorService;
     private readonly ThemeService _themeService;
 
-    public ApiController(CalendarContext context, ILogger<ApiController> logger, DisplayService displayService, PageGeneratorService pageGeneratorService, ThemeService themeService, Web2PngService web2PngService, ColorTypeRegistry colorTypeRegistry)
+    public ApiController(CalendarContext context, ILogger<ApiController> logger, IDisplayService displayService, PageGeneratorService pageGeneratorService, ThemeService themeService, Web2PngService web2PngService, ColorTypeRegistry colorTypeRegistry)
     {
         _context = context;
         _logger = logger;

@@ -3,7 +3,7 @@ namespace PortalCalendarServer.Services.PageGeneratorComponents;
 using PortalCalendarServer.Models.Entities;
 
 public class PortalIconsComponent(
-    DisplayService displayService)
+    IDisplayService displayService)
 {
     // Portal icon constants
     private static readonly string[] PortalIcons =

@@ -36,18 +36,18 @@ builder.Services.AddHttpClient();
 builder.Services.AddTransient<CachingHttpMessageHandler>();
 
 // Register services
-builder.Services.AddScoped<DisplayService>();
+builder.Services.AddScoped<IDisplayService, DisplayService>();
 builder.Services.AddScoped<PageGeneratorService>();
 builder.Services.AddScoped<CacheManagementService>();
 builder.Services.AddScoped<ThemeService>();
-builder.Services.AddSingleton<Web2PngService>();
+builder.Services.AddSingleton<IWeb2PngService, Web2PngService>();
 builder.Services.AddSingleton<ColorTypeRegistry>();
 
 // Register background services
 builder.Services.AddHostedService<CacheCleanupService>();
 
 // Register integration services
-builder.Services.AddScoped<NameDayService>();
+builder.Services.AddScoped<INameDayService, NameDayService>();
 builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();
 builder.Services.AddScoped<GoogleFitIntegrationService>();
 // Add other integration services here as you create them:

@@ -11,7 +11,7 @@ namespace PortalCalendarServer.Services.PageGeneratorComponents;
 /// </summary>
 public class WeatherComponent(
     ILogger<PageGeneratorService> logger,
-    DisplayService displayService,
+    IDisplayService displayService,
     IHttpClientFactory httpClientFactory,
     IMemoryCache memoryCache,
     CalendarContext context,

@@ -8,7 +8,7 @@ namespace PortalCalendarServer.Tests.Services.Integrations;
 /// </summary>
 public class NameDayServiceTests
 {
-    private readonly NameDayService _service = new(new Mock<ILogger<NameDayService>>().Object);
+    private readonly INameDayService _service = new NameDayService(new Mock<ILogger<NameDayService>>().Object);
 
     [Theory]
     [InlineData(1, 1, "Nový rok")]

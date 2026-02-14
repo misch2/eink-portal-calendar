@@ -12,14 +12,14 @@ public class UiController(
     ILogger<UiController> logger,
     IWebHostEnvironment environment,
     PageGeneratorService pageGeneratorService,
-    DisplayService displayService,
+    IDisplayService displayService,
     ThemeService themeService) : Controller
 {
     private readonly CalendarContext _context = context;
     private readonly ILogger<UiController> _logger = logger;
     private readonly IWebHostEnvironment _environment = environment;
     private readonly PageGeneratorService _pageGeneratorService = pageGeneratorService;
-    private readonly DisplayService _displayService = displayService;
+    private readonly IDisplayService _displayService = displayService;
     private readonly ThemeService _themeService = themeService;
 
     // Config parameter names that can be saved from the UI

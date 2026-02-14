@@ -12,12 +12,12 @@ public class OtherController : Controller
 {
     private readonly CalendarContext _context;
     private readonly ILogger<OtherController> _logger;
-    private readonly DisplayService _displayService;
+    private readonly IDisplayService _displayService;
 
     public OtherController(
         CalendarContext context,
         ILogger<OtherController> logger,
-        DisplayService displayService)
+        IDisplayService displayService)
     {
         _context = context;
         _logger = logger;

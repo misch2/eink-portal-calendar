@@ -8,7 +8,7 @@ namespace PortalCalendarServer.Services;
 public class DisplayService(
     CalendarContext context,
     ILogger<DisplayService> logger,
-    ColorTypeRegistry colorTypeRegistry)
+    ColorTypeRegistry colorTypeRegistry) : IDisplayService
 {
     public IEnumerable<Display> GetAllDisplays()
     {

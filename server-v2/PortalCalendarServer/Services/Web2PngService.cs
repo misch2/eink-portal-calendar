@@ -6,7 +6,7 @@ namespace PortalCalendarServer.Services;
 /// Service to convert web pages to PNG images using Playwright.
 /// Adapted from the Perl Web2Png module.
 /// </summary>
-public class Web2PngService : IAsyncDisposable
+public class Web2PngService : IWeb2PngService, IAsyncDisposable
 {
     private readonly ILogger<Web2PngService> _logger;
     private IPlaywright? _playwright;
