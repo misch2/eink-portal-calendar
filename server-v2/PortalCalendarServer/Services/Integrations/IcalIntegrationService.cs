@@ -130,7 +130,7 @@ public class IcalIntegrationService : IntegrationServiceBase
                     var eventData = new CalendarEventData
                     {
                         Uid = calEvent.Uid ?? string.Empty,
-                        Summary = calEvent.Summary ?? string.Empty, // FIXME ?.Replace("\\,", ",") ?? string.Empty,
+                        Summary = calEvent.Summary ?? string.Empty,
                         Description = calEvent.Description ?? string.Empty,
                         Location = calEvent.Location ?? string.Empty,
                         StartTime = eventStart,

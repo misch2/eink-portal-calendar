@@ -73,7 +73,7 @@ namespace PortalCalendarServer.Models.Entities
 
         public WakeUpInfo NextWakeupTime()
         {
-            var now = DateTime.UtcNow; // TODO: Use display timezone
+            var now = DateTime.UtcNow;
             var schedule = Configs?.FirstOrDefault(c => c.Name == "wakeup_schedule")?.Value ?? string.Empty;
             DateTime nextWakeup;
             if (string.IsNullOrEmpty(schedule))

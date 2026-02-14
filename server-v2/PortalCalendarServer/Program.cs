@@ -37,15 +37,6 @@ builder.Services.AddMemoryCache(options =>
 builder.Services.AddHttpClient();
 builder.Services.AddTransient<CachingHttpMessageHandler>();
 
-//// FIXME is this needed? Couldn't I just keep a single HttpClient instance?
-//// Configure named HttpClients for different integrations
-//builder.Services.AddHttpClient("GoogleFitIntegrationService")
-//    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-//    {
-//        AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate
-//    })
-//    .AddHttpMessageHandler<CachingHttpMessageHandler>();
-
 // Register services
 builder.Services.AddScoped<DisplayService>();
 builder.Services.AddScoped<PageGeneratorService>();
