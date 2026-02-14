@@ -125,24 +125,12 @@ public class UiController(
     [HttpGet("/calendar/{displayNumber:int}/html")]
     public async Task<IActionResult> CalendarHtmlDefaultDate(int displayNumber, [FromQuery] bool preview_colors = false)
     {
-        var display = await GetDisplayByIdAsync(displayNumber);
-        if (display == null)
-        {
-            return NotFound();
-        }
-        _displayService.UseDisplay(display);
-
-        var viewModel = _pageGeneratorService.PageViewModelForDate(display, DateTime.UtcNow, preview_colors);
-
-        var themeId = _displayService.GetThemeId();
-        var theme = await _themeService.GetThemeByIdAsync(themeId!.Value);
-
-        return View($"~/Views/CalendarThemes/{theme!.FileName}.cshtml", viewModel);
+        return await CalendarHtmlSpecificDate(displayNumber, DateTime.UtcNow, preview_colors);
     }
 
     // GET /calendar/{display_number}/html/{date}
     [HttpGet("/calendar/{displayNumber:int}/html/{date}")]
-    public async Task<IActionResult> CalendarHtmlSpecificDate(int displayNumber, string date, [FromQuery] bool preview_colors = false)
+    public async Task<IActionResult> CalendarHtmlSpecificDate(int displayNumber, DateTime date, [FromQuery] bool preview_colors = false)
     {
         var display = await GetDisplayByIdAsync(displayNumber);
         if (display == null)
@@ -151,37 +139,12 @@ public class UiController(
         }
         _displayService.UseDisplay(display);
 
-        if (!DateTime.TryParse(date, out var parsedDate))
-        {
-            return BadRequest(new { error = "Invalid date format" });
-        }
+        var viewModel = _pageGeneratorService.PageViewModelForDate(display, date, preview_colors);
 
-        var viewModel = _pageGeneratorService.PageViewModelForDate(display, parsedDate, preview_colors);
-
-        // FIXME unify this with the default date method!!!
-
-        // Get theme from config and validate it exists
         var themeId = _displayService.GetThemeId();
-        Theme theme;
+        var theme = await _themeService.GetThemeByIdAsync(themeId!.Value);
 
-        if (themeId.HasValue)
-        {
-            theme = await _themeService.GetThemeByIdAsync(themeId.Value)
-                    ?? await _themeService.GetDefaultThemeAsync();
-
-            if (theme.Id != themeId.Value)
-            {
-                _logger.LogWarning("Theme ID {ThemeId} not found, falling back to {DefaultTheme}",
-                    themeId.Value, theme.FileName);
-            }
-        }
-        else
-        {
-            theme = await _themeService.GetDefaultThemeAsync();
-            _logger.LogDebug("No theme configured, using default: {DefaultTheme}", theme.FileName);
-        }
-
-        return View($"~/Views/CalendarThemes/{theme.FileName}.cshtml", viewModel);
+        return View($"~/Views/CalendarThemes/{theme!.FileName}.cshtml", viewModel);
     }
 
     // GET /config_ui/{display_number}
