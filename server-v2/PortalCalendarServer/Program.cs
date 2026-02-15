@@ -29,7 +29,8 @@ builder.Logging.AddSimpleConsole(options =>
 // Configure the SQLite connection string to use an absolute path
 var rawConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 var relativePath = rawConnectionString!.Replace("Data Source=", "");
-var absolutePath = Path.Combine(builder.Environment.ContentRootPath, "..", relativePath);
+var absolutePath = Path.Combine(builder.Environment.ContentRootPath, relativePath);
+absolutePath = Path.GetFullPath(absolutePath); // Ensure it's an absolute path
 var absoluteConnectionString = $"Data Source={absolutePath}";
 builder.Services.AddDbContext<CalendarContext>(options =>
     options.UseLazyLoadingProxies()
