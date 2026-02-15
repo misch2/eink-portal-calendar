@@ -96,13 +96,16 @@ public class ImageRegenerationService : BackgroundService
                 return;
             }
 
+            var realStartTime = DateTime.UtcNow;
+
             // Generate the image
             await pageGeneratorService.GenerateImageFromWebAsync(display);
 
             _logger.LogInformation(
-                "Successfully regenerated image for display {DisplayId} (took {Duration}ms)",
+                "Successfully regenerated image for display {DisplayId} (took {Duration} ms since request, {RealDuration} ms real time)",
                 request.DisplayId,
-                (DateTime.UtcNow - request.RequestedAt).TotalMilliseconds);
+                (DateTime.UtcNow - request.RequestedAt).TotalMilliseconds,
+                (DateTime.UtcNow - realStartTime).TotalMilliseconds);
         }
         catch (Exception ex)
         {

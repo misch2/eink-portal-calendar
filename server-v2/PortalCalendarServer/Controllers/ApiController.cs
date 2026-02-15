@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.Entities;
 using PortalCalendarServer.Services;
-using PortalCalendarServer.Services.BackgroundJobs;
 using PortalCalendarServer.Services.Integrations;
 
 namespace PortalCalendarServer.Controllers;
@@ -18,7 +17,6 @@ public class ApiController : ControllerBase
     private readonly PageGeneratorService _pageGeneratorService;
     private readonly ThemeService _themeService;
     private readonly IMqttService _mqttService;
-    private readonly ImageRegenerationService _imageRegenerationService;
 
     public ApiController(
         CalendarContext context,
@@ -28,8 +26,7 @@ public class ApiController : ControllerBase
         ThemeService themeService,
         IWeb2PngService web2PngService,
         ColorTypeRegistry colorTypeRegistry,
-        IMqttService mqttService,
-        ImageRegenerationService imageRegenerationService)
+        IMqttService mqttService)
     {
         _context = context;
         _logger = logger;
@@ -37,7 +34,6 @@ public class ApiController : ControllerBase
         _pageGeneratorService = pageGeneratorService;
         _themeService = themeService;
         _mqttService = mqttService;
-        _imageRegenerationService = imageRegenerationService;
     }
 
     // Helper to get display by MAC address
@@ -146,8 +142,7 @@ public class ApiController : ControllerBase
 
             _logger.LogInformation("New display created with MAC {Mac}, ID: {Id}", mac, display.Id);
 
-            // Enqueue image regeneration in background
-            _imageRegenerationService.EnqueueRequest(display.Id);
+            _displayService.EnqueueImageRegenerationRequest(display);
         }
         else
         {

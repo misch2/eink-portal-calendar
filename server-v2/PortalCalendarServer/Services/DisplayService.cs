@@ -1,13 +1,15 @@
 ﻿using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.ColorTypes;
 using PortalCalendarServer.Models.Entities;
+using PortalCalendarServer.Services.BackgroundJobs;
 
 namespace PortalCalendarServer.Services;
 
 public class DisplayService(
     CalendarContext context,
     ILogger<DisplayService> logger,
-    ColorTypeRegistry colorTypeRegistry) : IDisplayService
+    ColorTypeRegistry colorTypeRegistry,
+    ImageRegenerationService imageRegenerationService) : IDisplayService
 {
     public IEnumerable<Display> GetAllDisplays()
     {
@@ -169,5 +171,20 @@ public class DisplayService(
         }
 
         return ret;
+    }
+
+    public void EnqueueImageRegenerationRequest(Display display)
+    {
+        // Enqueue image regeneration in background
+        imageRegenerationService.EnqueueRequest(display.Id);
+    }
+
+    public void EnqueueAllImageRegenerationRequest()
+    {
+        var displays = GetAllDisplays().Where(d => !d.IsDefault()).ToList();
+        foreach (var display in displays)
+        {
+            EnqueueImageRegenerationRequest(display);
+        }
     }
 }

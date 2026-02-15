@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Services;
-using PortalCalendarServer.Services.BackgroundJobs;
 
 namespace PortalCalendarServer.Controllers;
 
@@ -13,8 +12,7 @@ public class UiController(
     IWebHostEnvironment environment,
     PageGeneratorService pageGeneratorService,
     IDisplayService displayService,
-    ThemeService themeService,
-    ImageRegenerationService imageRegenerationService
+    ThemeService themeService
     ) : Controller
 {
     private readonly CalendarContext _context = context;
@@ -23,7 +21,6 @@ public class UiController(
     private readonly PageGeneratorService _pageGeneratorService = pageGeneratorService;
     private readonly IDisplayService _displayService = displayService;
     private readonly ThemeService _themeService = themeService;
-    private readonly ImageRegenerationService _imageRegenerationService = imageRegenerationService;
 
     // Config parameter names that can be saved from the UI
     private static readonly string[] ConfigUiParameters =
@@ -224,7 +221,7 @@ public class UiController(
 
         _logger.LogInformation("Configuration saved for display {DisplayId}", displayNumber);
 
-        _imageRegenerationService.EnqueueRequest(displayNumber);
+        _displayService.EnqueueImageRegenerationRequest(display);
 
         TempData["Message"] = "Parameters saved.";
         return RedirectToAction(nameof(ConfigUiShow), new { displayNumber });

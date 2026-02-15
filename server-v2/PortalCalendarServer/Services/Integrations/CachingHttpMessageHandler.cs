@@ -55,6 +55,12 @@ public class CachingHttpMessageHandler : DelegatingHandler
             // Determine cache duration from Cache-Control header or use default
             var cacheSeconds = GetCacheDuration(response) ?? _defaultCacheSeconds;
 
+            if (cacheSeconds <= 0)
+            {
+                _logger.LogDebug("Response for {Uri} is not cacheable (Cache-Control: no-cache)", request.RequestUri);
+                return response;
+            }
+
             var cacheOptions = new MemoryCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(cacheSeconds),

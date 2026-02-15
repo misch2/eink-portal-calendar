@@ -3,7 +3,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using PortalCalendarServer.Controllers.ModelBinders;
 using PortalCalendarServer.Data;
-using PortalCalendarServer.Logging;
 using PortalCalendarServer.Services;
 using PortalCalendarServer.Services.BackgroundJobs;
 using PortalCalendarServer.Services.Caches;
@@ -15,17 +14,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Configure logging
 builder.Logging.ClearProviders();
-builder.Logging.AddConsole(options =>
-{
-    options.FormatterName = "custom";
-});
-builder.Logging.AddConsoleFormatter<CustomConsoleFormatter, CustomConsoleFormatterOptions>();
-//builder.Logging.AddSimpleConsole(options =>
+//builder.Logging.AddConsole(options =>
 //{
-//    options.SingleLine = true;
-//    options.TimestampFormat = "HH:mm:ss ";
-//    options.IncludeScopes = false;
+//    options.FormatterName = "custom";
 //});
+//builder.Logging.AddConsoleFormatter<CustomConsoleFormatter, CustomConsoleFormatterOptions>();
+builder.Logging.AddSimpleConsole(options =>
+{
+    options.SingleLine = true;
+    options.TimestampFormat = "HH:mm:ss ";
+    options.IncludeScopes = false;
+});
 
 // Configure the SQLite connection string to use an absolute path
 var rawConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -130,9 +129,10 @@ using (var scope = app.Services.CreateScope())
 
     try
     {
-        logger.LogInformation("Starting database migrations");
-        // Apply database migrations
         var context = services.GetRequiredService<CalendarContext>();
+        var connectionString = context.Database.GetConnectionString();
+        logger.LogInformation("Starting database migrations on {absoluteConnectionString}", connectionString);
+
         await context.Database.MigrateAsync();
         logger.LogInformation("Database migrations applied successfully");
     }
@@ -141,6 +141,10 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(ex, "An error occurred during startup initialization");
         throw;
     }
+
+    var displayService = services.GetRequiredService<IDisplayService>();
+    logger.LogInformation("Enqueuing initial image regeneration for all displays on startup");
+    displayService.EnqueueAllImageRegenerationRequest();
 }
 
 // Configure the HTTP request pipeline

@@ -67,4 +67,15 @@ public interface IDisplayService
     /// Get the color type implementation for a display
     /// </summary>
     IColorType? GetColorType(Display display);
+
+    /// <summary>
+    /// Enqueue a request to regenerate the display image for a display.
+    /// </summary>
+    /// <param name="display"></param>
+    void EnqueueImageRegenerationRequest(Display display);
+
+    /// <summary>
+    /// Enqueue a request to regenerate the display image for all displays.
+    /// </summary>
+    void EnqueueAllImageRegenerationRequest();
 }
