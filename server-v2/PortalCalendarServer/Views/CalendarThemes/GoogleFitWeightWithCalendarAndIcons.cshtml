@@ -22,8 +22,8 @@
     var iconsComponent = Model.PortalIcons;
     var calendarComponent = Model.Calendar;
 
-    var calendar = calendarComponent.GetDetails(Model.Display, Model.Date);
-    var icons = iconsComponent.GenerateIcons(Model.Display, Model.Date, calendar.HasEntries);
+    var calendar = calendarComponent!.GetDetails(Model.Display, Model.Date);
+    var icons = iconsComponent!.GenerateIcons(Model.Display, Model.Date, calendar.HasEntries);
     
     // Generate weight data with consistent randomization based on date
     var weightSeries = Model.Weight?.GetWeightSeries(Model.Date);

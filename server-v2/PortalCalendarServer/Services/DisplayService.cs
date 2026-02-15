@@ -29,7 +29,13 @@ public class DisplayService(
 
     public TimeZoneInfo GetTimeZoneInfo(Display display)
     {
-        return TimeZoneInfo.FindSystemTimeZoneById(GetConfig(display, "timezone") ?? "UTC");
+        var tzname = GetConfig(display, "timezone");
+        if (tzname is null)
+        {
+            tzname = "UTC";
+            logger.LogWarning("Timezone not set for display {DisplayId}, defaulting to {tzname}", display.Id, tzname);
+        }
+        return TimeZoneInfo.FindSystemTimeZoneById(tzname);
     }
 
     /// <summary>

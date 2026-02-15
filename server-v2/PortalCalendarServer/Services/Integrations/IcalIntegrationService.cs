@@ -74,7 +74,7 @@ public class IcalIntegrationService : IntegrationServiceBase
             var calendar = Calendar.Load(icsContent);
 
             // Get all calendar events
-            foreach (var calEvent in calendar.Events)
+            foreach (var calEvent in calendar!.Events)
             {
                 try
                 {

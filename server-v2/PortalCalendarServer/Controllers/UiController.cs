@@ -51,7 +51,7 @@ public class UiController(
 
     // GET /home/{display_number}
     [HttpGet("/home/{displayNumber:int}")]
-    public async Task<IActionResult> Home(int displayNumber)
+    public IActionResult Home(int displayNumber)
     {
         var display = _displayService.GetDisplayById(displayNumber);
         if (display == null)
@@ -68,7 +68,7 @@ public class UiController(
 
     // GET /test/{display_number}
     [HttpGet("/test/{displayNumber:int}")]
-    public async Task<IActionResult> Test(int displayNumber)
+    public IActionResult Test(int displayNumber)
     {
         var display = _displayService.GetDisplayById(displayNumber);
         if (display == null)
@@ -105,17 +105,17 @@ public class UiController(
 
     // GET /calendar/{display_number}/html
     [HttpGet("/calendar/{displayNumber:int}/html")]
-    public async Task<IActionResult> CalendarHtmlDefaultDate(int displayNumber, [FromQuery] bool preview_colors = false)
+    public IActionResult CalendarHtmlDefaultDate(int displayNumber, [FromQuery] bool preview_colors = false)
     {
-        return await CalendarHtmlSpecificDate(displayNumber, DateTime.UtcNow, preview_colors);
+        return CalendarHtmlSpecificDate(displayNumber, DateTime.UtcNow, preview_colors);
     }
 
     // GET /calendar/{display_number}/html/{date}
     [HttpGet("/calendar/{displayNumber:int}/html/{date}")]
-    public async Task<IActionResult> CalendarHtmlSpecificDate(int displayNumber, DateTime date, [FromQuery] bool preview_colors = false)
+    public IActionResult CalendarHtmlSpecificDate(int displayNumber, DateTime date, [FromQuery] bool preview_colors = false)
     {
         var display = _displayService.GetDisplayById(displayNumber);
-        if (display == null)
+        if (display == null || display.Theme == null)
         {
             return NotFound();
         }

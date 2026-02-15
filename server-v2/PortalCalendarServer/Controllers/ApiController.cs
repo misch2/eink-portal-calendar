@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.Entities;
 using PortalCalendarServer.Services;
+using PortalCalendarServer.Services.Integrations;
 
 namespace PortalCalendarServer.Controllers;
 
@@ -15,14 +16,16 @@ public class ApiController : ControllerBase
     private readonly IDisplayService _displayService;
     private readonly PageGeneratorService _pageGeneratorService;
     private readonly ThemeService _themeService;
+    private readonly IMqttService _mqttService;
 
-    public ApiController(CalendarContext context, ILogger<ApiController> logger, IDisplayService displayService, PageGeneratorService pageGeneratorService, ThemeService themeService, Web2PngService web2PngService, ColorTypeRegistry colorTypeRegistry)
+    public ApiController(CalendarContext context, ILogger<ApiController> logger, IDisplayService displayService, PageGeneratorService pageGeneratorService, ThemeService themeService, IWeb2PngService web2PngService, ColorTypeRegistry colorTypeRegistry, IMqttService mqttService)
     {
         _context = context;
         _logger = logger;
         _displayService = displayService;
         _pageGeneratorService = pageGeneratorService;
         _themeService = themeService;
+        _mqttService = mqttService;
     }
 
     // Helper to get display by MAC address
@@ -30,6 +33,7 @@ public class ApiController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(mac))
         {
+            _logger.LogWarning("MAC address is missing or empty");
             return null;
         }
 
@@ -165,7 +169,22 @@ public class ApiController : ControllerBase
             "Next wakeup at {NextWakeup} (in {SleepSeconds} seconds) according to crontab schedule '{Schedule}'",
             wakeupInfo.NextWakeup, wakeupInfo.SleepInSeconds, wakeupInfo.Schedule);
 
-        // TODO: Update MQTT values
+        // Update MQTT values
+        await _mqttService.PublishSensorAsync(display, "voltage", display.Voltage(), true);
+        await _mqttService.PublishSensorAsync(display, "battery_percent", display.BatteryPercent(), true);
+        await _mqttService.PublishSensorAsync(display, "voltage_raw", _displayService.GetConfig(display, "_last_voltage_raw"), true);
+        await _mqttService.PublishSensorAsync(display, "min_voltage", _displayService.GetConfig(display, "_min_voltage"), true);
+        await _mqttService.PublishSensorAsync(display, "max_voltage", _displayService.GetConfig(display, "_max_voltage"), true);
+        await _mqttService.PublishSensorAsync(display, "min_linear_voltage", _displayService.GetConfig(display, "_min_linear_voltage"), true);
+        await _mqttService.PublishSensorAsync(display, "max_linear_voltage", _displayService.GetConfig(display, "_max_linear_voltage"), true);
+        await _mqttService.PublishSensorAsync(display, "last_visit", DateTime.UtcNow.ToString("O"));
+        await _mqttService.PublishSensorAsync(display, "sleep_time", wakeupInfo.SleepInSeconds, true);
+        await _mqttService.PublishSensorAsync(display, "reset_reason", _displayService.GetConfig(display, "_reset_reason"), true);
+        await _mqttService.PublishSensorAsync(display, "wakeup_reason", _displayService.GetConfig(display, "_wakeup_reason"), true);
+
+        // Final message (workaround for wakeup_reason not being updated)
+        await _mqttService.PublishSensorAsync(display, "last_visit", DateTime.UtcNow.ToString("O"));
+        await _mqttService.DisconnectAsync();
 
         // TODO: Handle missed connects and notifications
 

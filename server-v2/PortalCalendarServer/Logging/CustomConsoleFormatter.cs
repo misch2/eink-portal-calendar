@@ -7,7 +7,7 @@ namespace PortalCalendarServer.Logging;
 
 public class CustomConsoleFormatterOptions : ConsoleFormatterOptions
 {
-    public bool IncludeScopes { get; set; } = false;
+    public new bool IncludeScopes { get; set; } = false;
 }
 
 public class CustomConsoleFormatter : ConsoleFormatter

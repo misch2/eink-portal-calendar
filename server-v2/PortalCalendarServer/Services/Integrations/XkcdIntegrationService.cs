@@ -12,13 +12,15 @@ namespace PortalCalendarServer.Services.Integrations;
 /// See documentation at https://xkcd.com/json.html
 /// </summary>
 public class XkcdIntegrationService(
-    ILogger<XkcdIntegrationService> logger,
+    ILogger<XkcdIntegrationService> loggerParam,
     IHttpClientFactory httpClientFactory,
     IMemoryCache memoryCache,
     IDatabaseCacheServiceFactory databaseCacheFactory,
     CalendarContext context,
-    Display? display = null) : IntegrationServiceBase(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display)
+    Display? display = null) : IntegrationServiceBase(loggerParam, httpClientFactory, memoryCache, databaseCacheFactory, context, display)
 {
+    private new readonly ILogger<XkcdIntegrationService> logger = loggerParam;
+
     public override bool IsConfigured()
     {
         // No configuration needed for XKCD API

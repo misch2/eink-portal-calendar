@@ -60,21 +60,21 @@ builder.Services.AddHttpClient(Options.DefaultName, client =>
 .AddHttpMessageHandler<CachingHttpMessageHandler>();
 
 // Register services
+builder.Services.AddSingleton<IWeb2PngService, Web2PngService>();
+builder.Services.AddSingleton<ColorTypeRegistry>();
 builder.Services.AddScoped<IDisplayService, DisplayService>();
 builder.Services.AddScoped<PageGeneratorService>();
 builder.Services.AddScoped<CacheManagementService>();
 builder.Services.AddScoped<ThemeService>();
-builder.Services.AddSingleton<IWeb2PngService, Web2PngService>();
-builder.Services.AddSingleton<ColorTypeRegistry>();
 builder.Services.AddScoped<IDatabaseCacheServiceFactory, DatabaseCacheServiceFactory>();
+builder.Services.AddScoped<IMqttService, MqttService>();
+builder.Services.AddScoped<INameDayService, NameDayService>();
+builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();
+builder.Services.AddScoped<GoogleFitIntegrationService>();
 
 // Register background services
 builder.Services.AddHostedService<CacheCleanupService>();
 
-// Register integration services
-builder.Services.AddScoped<INameDayService, NameDayService>();
-builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();
-builder.Services.AddScoped<GoogleFitIntegrationService>();
 
 // Configure localization to not disturb number formatting in HTML forms etc.
 var invariant = CultureInfo.InvariantCulture;

@@ -65,7 +65,7 @@ public class GoogleFitAuthController : Controller
         };
 
         var baseUrl = codeRequestUrl.Build();
-        
+
         // Add additional parameters using UriBuilder
         var uriBuilder = new UriBuilder(baseUrl);
         var query = System.Web.HttpUtility.ParseQueryString(uriBuilder.Query);
