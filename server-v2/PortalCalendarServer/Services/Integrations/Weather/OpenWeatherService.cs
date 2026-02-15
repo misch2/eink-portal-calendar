@@ -61,13 +61,13 @@ public class OpenWeatherService : IntegrationServiceBase
         var cacheKey = $"openweather:current:{url}";
 
         // Try memory cache first
-        if (MemoryCache.TryGetValue<OpenWeatherCurrent>(cacheKey, out var cached) && cached != null)
+        if (memoryCache.TryGetValue<OpenWeatherCurrent>(cacheKey, out var cached) && cached != null)
         {
-            Logger.LogDebug("OpenWeather current cache HIT");
+            logger.LogDebug("OpenWeather current cache HIT");
             return cached;
         }
 
-        Logger.LogDebug("OpenWeather current cache MISS, fetching from API");
+        logger.LogDebug("OpenWeather current cache MISS, fetching from API");
 
         var response = await httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -78,7 +78,7 @@ public class OpenWeatherService : IntegrationServiceBase
         if (data != null)
         {
             // Cache for 30 minutes
-            MemoryCache.Set(cacheKey, data, new MemoryCacheEntryOptions
+            memoryCache.Set(cacheKey, data, new MemoryCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30),
                 Size = 1024
@@ -103,13 +103,13 @@ public class OpenWeatherService : IntegrationServiceBase
         var cacheKey = $"openweather:forecast:{url}";
 
         // Try memory cache first
-        if (MemoryCache.TryGetValue<OpenWeatherForecast>(cacheKey, out var cached) && cached != null)
+        if (memoryCache.TryGetValue<OpenWeatherForecast>(cacheKey, out var cached) && cached != null)
         {
-            Logger.LogDebug("OpenWeather forecast cache HIT");
+            logger.LogDebug("OpenWeather forecast cache HIT");
             return cached;
         }
 
-        Logger.LogDebug("OpenWeather forecast cache MISS, fetching from API");
+        logger.LogDebug("OpenWeather forecast cache MISS, fetching from API");
 
         var response = await httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -120,7 +120,7 @@ public class OpenWeatherService : IntegrationServiceBase
         if (data != null)
         {
             // Cache for 30 minutes
-            MemoryCache.Set(cacheKey, data, new MemoryCacheEntryOptions
+            memoryCache.Set(cacheKey, data, new MemoryCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30),
                 Size = 2048

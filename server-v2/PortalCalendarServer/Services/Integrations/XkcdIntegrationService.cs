@@ -30,7 +30,7 @@ public class XkcdIntegrationService(
     /// </summary>
     public async Task<XkcdComicData> GetLatestComicAsync(CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("Fetching latest XKCD comic information");
+        logger.LogDebug("Fetching latest XKCD comic information");
 
         // Get JSON from cache or web
         var json = await GetCachedJsonFromWebAsync(cancellationToken);
@@ -63,13 +63,13 @@ public class XkcdIntegrationService(
     /// </summary>
     private async Task<string> GetCachedJsonFromWebAsync(CancellationToken cancellationToken)
     {
-        var dbCacheService = DatabaseCacheFactory.Create(nameof(XkcdIntegrationService), TimeSpan.FromMinutes(15));
+        var dbCacheService = databaseCacheFactory.Create(nameof(XkcdIntegrationService), TimeSpan.FromMinutes(15));
 
         var url = "https://xkcd.com/info.0.json";
         var json = await dbCacheService.GetOrSetAsync(
             async () =>
             {
-                Logger.LogDebug("XKCD JSON database cache MISS - fetching from web");
+                logger.LogDebug("XKCD JSON database cache MISS - fetching from web");
                 var response = await httpClient.GetAsync(url, cancellationToken);
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadAsStringAsync(cancellationToken);
@@ -86,12 +86,12 @@ public class XkcdIntegrationService(
     /// </summary>
     private async Task<byte[]> GetCachedImageDataAsync(string imageUrl, CancellationToken cancellationToken)
     {
-        var dbCacheService = DatabaseCacheFactory.Create(nameof(XkcdIntegrationService), TimeSpan.FromDays(14));
+        var dbCacheService = databaseCacheFactory.Create(nameof(XkcdIntegrationService), TimeSpan.FromDays(14));
 
         var imageData = await dbCacheService.GetOrSetAsync(
             async () =>
             {
-                Logger.LogDebug("XKCD image database cache MISS - fetching from web");
+                logger.LogDebug("XKCD image database cache MISS - fetching from web");
                 var response = await httpClient.GetAsync(imageUrl, cancellationToken);
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadAsByteArrayAsync(cancellationToken);

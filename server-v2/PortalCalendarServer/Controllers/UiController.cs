@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Data;
-using PortalCalendarServer.Models.Entities;
 using PortalCalendarServer.Services;
 
 namespace PortalCalendarServer.Controllers;
@@ -36,13 +35,6 @@ public class UiController(
         "web_calendar_ics_url3", "web_calendar1", "web_calendar2", "web_calendar3"
     ];
 
-    // Helper to get display by ID
-    private async Task<Display> GetDisplayByIdAsync(int displayNumber)
-    {
-        var display = await _context.Displays.FirstAsync(d => d.Id == displayNumber);
-        return display;
-    }
-
     // GET /
     [HttpGet("/")]
     public async Task<IActionResult> SelectDisplay()
@@ -61,7 +53,7 @@ public class UiController(
     [HttpGet("/home/{displayNumber:int}")]
     public async Task<IActionResult> Home(int displayNumber)
     {
-        var display = await GetDisplayByIdAsync(displayNumber);
+        var display = _displayService.GetDisplayById(displayNumber);
         if (display == null)
         {
             return NotFound();
@@ -78,7 +70,7 @@ public class UiController(
     [HttpGet("/test/{displayNumber:int}")]
     public async Task<IActionResult> Test(int displayNumber)
     {
-        var display = await GetDisplayByIdAsync(displayNumber);
+        var display = _displayService.GetDisplayById(displayNumber);
         if (display == null)
         {
             return NotFound();
@@ -96,7 +88,7 @@ public class UiController(
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteDisplay(int displayNumber)
     {
-        var display = await GetDisplayByIdAsync(displayNumber);
+        var display = _displayService.GetDisplayById(displayNumber);
         if (display == null)
         {
             return NotFound();
@@ -122,7 +114,7 @@ public class UiController(
     [HttpGet("/calendar/{displayNumber:int}/html/{date}")]
     public async Task<IActionResult> CalendarHtmlSpecificDate(int displayNumber, DateTime date, [FromQuery] bool preview_colors = false)
     {
-        var display = await GetDisplayByIdAsync(displayNumber);
+        var display = _displayService.GetDisplayById(displayNumber);
         if (display == null)
         {
             return NotFound();
@@ -137,7 +129,7 @@ public class UiController(
     [HttpGet("/config_ui/{displayNumber:int}")]
     public async Task<IActionResult> ConfigUiShow(int displayNumber)
     {
-        var display = await GetDisplayByIdAsync(displayNumber);
+        var display = _displayService.GetDisplayById(displayNumber);
         if (display == null)
         {
             return NotFound();
@@ -162,7 +154,7 @@ public class UiController(
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ConfigUiSave(int displayNumber, [FromForm] IFormCollection form)
     {
-        var display = await GetDisplayByIdAsync(displayNumber);
+        var display = _displayService.GetDisplayById(displayNumber);
         if (display == null)
         {
             return NotFound();
@@ -238,7 +230,7 @@ public class UiController(
     [HttpGet("/config_ui/theme/{displayNumber:int}")]
     public async Task<IActionResult> ConfigUiThemeShow(int displayNumber, [FromQuery] int? themeId)
     {
-        var display = await GetDisplayByIdAsync(displayNumber);
+        var display = _displayService.GetDisplayById(displayNumber);
         if (display == null)
         {
             return NotFound();
@@ -289,70 +281,5 @@ public class UiController(
             _logger.LogError(ex, "Error rendering theme [{ThemeName}]", themeEntity.DisplayName);
             return Content(string.Empty);
         }
-    }
-
-    // GET /auth/googlefit/{display_number}
-    [HttpGet("/auth/googlefit/{displayNumber:int}")]
-    public async Task<IActionResult> GoogleFitRedirect(int displayNumber)
-    {
-        var display = await GetDisplayByIdAsync(displayNumber);
-        if (display == null)
-        {
-            return BadRequest(new { error = "Display not found" });
-        }
-
-        // Build Google OAuth2 URL
-        var clientId = _displayService.GetConfig(display, "googlefit_client_id");
-        var callback = _displayService.GetConfig(display, "googlefit_auth_callback");
-        var scope = "https://www.googleapis.com/auth/fitness.body.read";
-
-        if (clientId == null || callback == null)
-        {
-            return BadRequest(new { error = "Google Fit client ID or callback URL not configured" });
-        }
-
-        var state = Convert.ToBase64String(
-            System.Text.Encoding.UTF8.GetBytes(
-                System.Text.Json.JsonSerializer.Serialize(new { display_number = displayNumber })
-            )
-        );
-
-        var url = "https://accounts.google.com/o/oauth2/v2/auth" +
-                  $"?client_id={Uri.EscapeDataString(clientId)}" +
-                  "&access_type=offline&prompt=consent" +
-                  "&response_type=code" +
-                  $"&scope={Uri.EscapeDataString(scope)}" +
-                  $"&state={Uri.EscapeDataString(state)}" +
-                  "&include_granted_scopes=true" +
-                  $"&redirect_uri={Uri.EscapeDataString(callback)}";
-
-        _logger.LogInformation("Redirecting to Google Fit OAuth for display {DisplayId}", displayNumber);
-
-        return Redirect(url);
-    }
-
-    // GET /auth/googlefit/success/{display_number}
-    [HttpGet("/auth/googlefit/success/{displayNumber:int}")]
-    public async Task<IActionResult> GoogleFitSuccess(int displayNumber)
-    {
-        var display = await GetDisplayByIdAsync(displayNumber);
-        if (display == null)
-        {
-            return NotFound();
-        }
-
-        var accessToken = _displayService.GetConfig(display, "_googlefit_access_token");
-        if (string.IsNullOrEmpty(accessToken))
-        {
-            return BadRequest(new { error = "No access token found" });
-        }
-
-        ViewData["NavLink"] = "config_ui";
-        ViewData["Title"] = "Google Fit Authentication Successful";
-        ViewData["AccessToken"] = accessToken;
-        ViewData["RefreshToken"] = _displayService.GetConfig(display, "_googlefit_refresh_token");
-        ViewBag.Display = display; // for global layout
-
-        return View("AuthSuccess", display);
     }
 }

@@ -7,14 +7,14 @@ namespace PortalCalendarServer.Services.Integrations;
 
 public abstract class IntegrationServiceBase : IIntegrationService
 {
-    protected readonly ILogger Logger;
-    protected readonly IMemoryCache MemoryCache;
-    protected readonly IHttpClientFactory HttpClientFactory;
-    protected readonly IDatabaseCacheServiceFactory DatabaseCacheFactory;
-    protected readonly CalendarContext Context;
-    protected readonly Display? Display;
+    protected readonly ILogger logger;
+    protected readonly IMemoryCache memoryCache;
+    protected readonly IHttpClientFactory httpClientFactory;
+    protected readonly IDatabaseCacheServiceFactory databaseCacheFactory;
+    protected readonly CalendarContext context;
+    protected readonly Display? display;
 
-    protected HttpClient httpClient => HttpClientFactory.CreateClient();
+    protected HttpClient httpClient => httpClientFactory.CreateClient();
 
     protected IntegrationServiceBase(
         ILogger logger,
@@ -25,12 +25,12 @@ public abstract class IntegrationServiceBase : IIntegrationService
         Display? display = null
         )
     {
-        HttpClientFactory = httpClientFactory;
-        Logger = logger;
-        MemoryCache = memoryCache;
-        DatabaseCacheFactory = databaseCacheFactory;
-        Context = context;
-        Display = display;
+        this.httpClientFactory = httpClientFactory;
+        this.logger = logger;
+        this.memoryCache = memoryCache;
+        this.databaseCacheFactory = databaseCacheFactory;
+        this.context = context;
+        this.display = display;
     }
 
     public abstract bool IsConfigured();

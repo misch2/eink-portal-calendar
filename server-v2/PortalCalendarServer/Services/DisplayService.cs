@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using PortalCalendarServer.Data;
+﻿using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.ColorTypes;
 using PortalCalendarServer.Models.Entities;
 
@@ -15,6 +14,12 @@ public class DisplayService(
         return context.Displays
             .OrderBy(d => d.Id)
             .ToList();
+    }
+
+    public Display? GetDisplayById(int displayNumber)
+    {
+        var display = context.Displays.FirstOrDefault(d => d.Id == displayNumber);
+        return display;
     }
 
     public Display GetDefaultDisplay()

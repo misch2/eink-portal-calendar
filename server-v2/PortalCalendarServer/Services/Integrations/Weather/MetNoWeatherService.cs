@@ -63,13 +63,13 @@ public class MetNoWeatherService : IntegrationServiceBase
         var cacheKey = $"metno:json:{url}";
 
         // Try memory cache first
-        if (MemoryCache.TryGetValue<MetNoResponse>(cacheKey, out var cached) && cached != null)
+        if (memoryCache.TryGetValue<MetNoResponse>(cacheKey, out var cached) && cached != null)
         {
-            Logger.LogDebug("Met.no JSON cache HIT");
+            logger.LogDebug("Met.no JSON cache HIT");
             return cached;
         }
 
-        Logger.LogDebug("Met.no JSON cache MISS, fetching from {Url}", url);
+        logger.LogDebug("Met.no JSON cache MISS, fetching from {Url}", url);
 
         var response = await httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -79,7 +79,7 @@ public class MetNoWeatherService : IntegrationServiceBase
             ?? throw new InvalidOperationException("Failed to deserialize Met.no response");
 
         // Cache for 15 minutes
-        MemoryCache.Set(cacheKey, data, new MemoryCacheEntryOptions
+        memoryCache.Set(cacheKey, data, new MemoryCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15),
             Size = 1024 // Rough estimate in bytes

@@ -7,6 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Google.Apis.Auth" Version="1.73.0" />
+    <PackageReference Include="Google.Apis.Fitness.v1" Version="1.70.0.3883" />
+    <PackageReference Include="Google.Apis.Oauth2.v2" Version="1.68.0.1869" />
     <PackageReference Include="Ical.Net" Version="5.2.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.12">

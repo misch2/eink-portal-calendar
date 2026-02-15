@@ -14,6 +14,11 @@ public interface IDisplayService
     IEnumerable<Display> GetAllDisplays();
 
     /// <summary>
+    /// Get a display by its ID
+    /// </summary>
+    Display? GetDisplayById(int displayNumber);
+
+    /// <summary>
     /// Get the default display (ID = 0) which holds default configuration values
     /// </summary>
     Display GetDefaultDisplay();

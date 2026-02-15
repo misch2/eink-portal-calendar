@@ -1,4 +1,5 @@
-﻿using PortalCalendarServer.Services.Integrations;
+﻿using PortalCalendarServer.Models.DTOs;
+using PortalCalendarServer.Services.Integrations;
 
 namespace PortalCalendarServer.Services.PageGeneratorComponents;
 
@@ -54,11 +55,7 @@ public class WeightComponent
         {
             var task = _googleFitService.GetWeightSeriesAsync();
             task.Wait();
-            return task.Result.Select(w => new WeightDataPoint
-            {
-                Date = w.Date,
-                Weight = w.Weight
-            }).ToList();
+            return task.Result;
         }
         catch (Exception ex)
         {
@@ -66,10 +63,4 @@ public class WeightComponent
             return new List<WeightDataPoint>();
         }
     }
-}
-
-public class WeightDataPoint
-{
-    public DateTime Date { get; set; }
-    public decimal Weight { get; set; }
 }

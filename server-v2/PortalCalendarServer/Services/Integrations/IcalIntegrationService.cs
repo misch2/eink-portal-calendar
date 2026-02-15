@@ -37,7 +37,7 @@ public class IcalIntegrationService : IntegrationServiceBase
     /// </summary>
     private async Task<string> GetRawDetailsFromWebAsync(CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("Fetching ICS data from {Url}", _icsUrl);
+        logger.LogDebug("Fetching ICS data from {Url}", _icsUrl);
 
         var response = await httpClient.GetAsync(_icsUrl, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -50,7 +50,7 @@ public class IcalIntegrationService : IntegrationServiceBase
     /// </summary>
     private async Task<string> GetCachedRawDetailsFromWebAsync(CancellationToken cancellationToken = default)
     {
-        var dbCacheService = DatabaseCacheFactory.Create(nameof(IcalIntegrationService), TimeSpan.FromHours(2));
+        var dbCacheService = databaseCacheFactory.Create(nameof(IcalIntegrationService), TimeSpan.FromHours(2));
 
         var content = await dbCacheService.GetOrSetAsync(
             async () => await GetRawDetailsFromWebAsync(cancellationToken),
@@ -65,7 +65,7 @@ public class IcalIntegrationService : IntegrationServiceBase
     /// </summary>
     private List<CalendarEventData> ParseCalendarEvents(string icsContent, DateTime start, DateTime end)
     {
-        Logger.LogDebug("Parsing calendar data for range {Start} to {End}", start, end);
+        logger.LogDebug("Parsing calendar data for range {Start} to {End}", start, end);
 
         var events = new List<CalendarEventData>();
 
@@ -80,7 +80,7 @@ public class IcalIntegrationService : IntegrationServiceBase
                 {
                     if (calEvent.Start == null || calEvent.End == null)
                     {
-                        Logger.LogWarning("Event {Uid} has invalid start or end time: {Summart}", calEvent.Uid, calEvent.Summary);
+                        logger.LogWarning("Event {Uid} has invalid start or end time: {Summart}", calEvent.Uid, calEvent.Summary);
                         continue;
                     }
 
@@ -124,15 +124,15 @@ public class IcalIntegrationService : IntegrationServiceBase
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogWarning(ex, "Error processing event {Uid}", calEvent.Uid);
+                    logger.LogWarning(ex, "Error processing event {Uid}", calEvent.Uid);
                 }
             }
 
-            Logger.LogDebug("Parsed {Count} events from calendar", events.Count);
+            logger.LogDebug("Parsed {Count} events from calendar", events.Count);
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error parsing calendar data from {Url}", _icsUrl);
+            logger.LogError(ex, "Error parsing calendar data from {Url}", _icsUrl);
         }
 
         return events;
@@ -150,13 +150,13 @@ public class IcalIntegrationService : IntegrationServiceBase
         var cacheExpiration = TimeSpan.FromHours(2);
 
         // Try to get from memory cache
-        if (MemoryCache.TryGetValue<List<CalendarEventData>>(cacheKey, out var cachedEvents) && cachedEvents != null)
+        if (memoryCache.TryGetValue<List<CalendarEventData>>(cacheKey, out var cachedEvents) && cachedEvents != null)
         {
-            Logger.LogDebug("ICS events cache HIT for {Url}", _icsUrl);
+            logger.LogDebug("ICS events cache HIT for {Url}", _icsUrl);
             return cachedEvents;
         }
 
-        Logger.LogDebug("ICS events cache MISS for {Url}", _icsUrl);
+        logger.LogDebug("ICS events cache MISS for {Url}", _icsUrl);
 
         // Get raw ICS content
         var icsContent = await GetCachedRawDetailsFromWebAsync(cancellationToken);
@@ -175,7 +175,7 @@ public class IcalIntegrationService : IntegrationServiceBase
             .ToList();
 
         // Cache the result
-        MemoryCache.Set(cacheKey, filteredEvents, new MemoryCacheEntryOptions
+        memoryCache.Set(cacheKey, filteredEvents, new MemoryCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = cacheExpiration,
             Size = filteredEvents.Count * 1024 // Rough estimate

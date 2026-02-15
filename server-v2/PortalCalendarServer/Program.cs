@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using PortalCalendarServer.Controllers.ModelBinders;
 using PortalCalendarServer.Data;
+using PortalCalendarServer.Logging;
 using PortalCalendarServer.Services;
 using PortalCalendarServer.Services.Caches;
 using PortalCalendarServer.Services.Integrations;
@@ -10,6 +11,20 @@ using Scalar.AspNetCore;
 using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure logging
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole(options =>
+{
+    options.FormatterName = "custom";
+});
+builder.Logging.AddConsoleFormatter<CustomConsoleFormatter, CustomConsoleFormatterOptions>();
+//builder.Logging.AddSimpleConsole(options =>
+//{
+//    options.SingleLine = true;
+//    options.TimestampFormat = "HH:mm:ss ";
+//    options.IncludeScopes = false;
+//});
 
 // Configure the SQLite connection string to use an absolute path
 var rawConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -39,7 +54,7 @@ builder.Services.AddTransient<CachingHttpMessageHandler>();
 builder.Services.AddHttpClient(Options.DefaultName, client =>
 {
     client.Timeout = TimeSpan.FromSeconds(10);
-    client.DefaultRequestHeaders.Add("User-Agent", 
+    client.DefaultRequestHeaders.Add("User-Agent",
         "PortalCalendar/2.0 (github.com/misch2/eink-portal-calendar)");
 })
 .AddHttpMessageHandler<CachingHttpMessageHandler>();

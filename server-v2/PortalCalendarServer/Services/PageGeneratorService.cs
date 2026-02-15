@@ -73,6 +73,7 @@ public class PageGeneratorService
                     _memoryCache,
                     _databaseCacheFactory,
                     _context,
+                    _displayService,
                     display);
                 return new WeightComponent(_logger, googleFitService);
             },

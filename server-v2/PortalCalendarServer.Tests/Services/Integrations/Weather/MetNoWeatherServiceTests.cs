@@ -18,7 +18,7 @@ public class MetNoWeatherServiceTests : IntegrationServiceTestBase
     private MetNoWeatherService CreateService()
     {
         var logger = new Mock<ILogger<MetNoWeatherService>>().Object;
-        
+
         return new MetNoWeatherService(
             logger,
             MockHttpClientFactory.Object,
