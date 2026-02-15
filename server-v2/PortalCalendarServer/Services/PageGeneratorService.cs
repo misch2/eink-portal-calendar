@@ -16,6 +16,7 @@ namespace PortalCalendarServer.Services;
 public class PageGeneratorService
 {
     private readonly ILogger<PageGeneratorService> _logger;
+    private readonly IConfiguration _configuration;
     private readonly CalendarContext _context;
     private readonly IWebHostEnvironment _environment;
     private readonly IDisplayService _displayService;
@@ -29,6 +30,7 @@ public class PageGeneratorService
 
     public PageGeneratorService(
         ILogger<PageGeneratorService> logger,
+        IConfiguration configuration,
         CalendarContext context,
         IWebHostEnvironment environment,
         IDisplayService displayService,
@@ -41,6 +43,7 @@ public class PageGeneratorService
         IPublicHolidayService publicHolidayService)
     {
         _logger = logger;
+        _configuration = configuration;
         _context = context;
         _environment = environment;
         _displayService = displayService;
@@ -86,7 +89,6 @@ public class PageGeneratorService
         return viewModel;
     }
 
-
     public string DisplayImageName(Display display)
     {
         var imagePath = Path.Combine(_environment.ContentRootPath, "..");
@@ -94,26 +96,37 @@ public class PageGeneratorService
         return Path.Combine(imagePath, subPath);
     }
 
-    public void GenerateImageFromWeb(Display display)
+    public async Task GenerateImageFromWebAsync(Display display)
     {
-        var url = $"http://localhost:5252/calendar/{display.Id}/html?preview_colors=true";  // FIXME FIXME hardcoded port!
+        var baseUrl = _configuration["URLs:BaseURL"];
+        if (baseUrl == null)
+        {
+            throw new InvalidOperationException("BaseURL is not configured");
+        }
+
+        var urlBuilder = new UriBuilder(baseUrl)
+        {
+            Path = $"calendar/{display.Id}/html",
+            Query = "preview_colors=true"
+        };
+        var url = urlBuilder.ToString();
+
         var outputPath = DisplayImageName(display);
         _logger.LogInformation("Generating calendar image from URL {Url} to {OutputPath}", url, outputPath);
 
-        // FIXME await?
-        // FIXME timeout?
-        _web2PngService.ConvertUrlAsync(
+        await _web2PngService.ConvertUrlAsync(
             url,
             display.VirtualWidth(),
             display.VirtualHeight(),
-            outputPath,
-            2000).GetAwaiter().GetResult();
+            outputPath);
+
+        _logger.LogInformation("Image generation completed for display {DisplayId}", display.Id);
     }
 
     /// <summary>
     /// Generate bitmap image from source PNG
     /// </summary>
-    public BitmapResult GenerateBitmap(Display display, BitmapOptions options)
+    public BitmapResult ConvertStoredBitmap(Display display, BitmapOptions options)
     {
         _logger.LogDebug("Producing bitmap");
 
@@ -351,25 +364,6 @@ public class PageGeneratorService
         using var sha1 = SHA1.Create();
         var hash = sha1.ComputeHash(data);
         return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-    }
-
-    // TODO: Implement MQTT update methods
-    public void UpdateMqtt(Display display, string key, object value, bool forced = false)
-    {
-        if (!_displayService.GetConfigBool(display, "mqtt"))
-            return;
-
-        // TODO: Implement MQTT publishing
-        _logger.LogDebug("MQTT update: {Key} = {Value}", key, value);
-    }
-
-    public void DisconnectMqtt(Display display)
-    {
-        if (!_displayService.GetConfigBool(display, "mqtt"))
-            return;
-
-        // TODO: Implement MQTT disconnection
-        _logger.LogDebug("Disconnecting MQTT");
     }
 }
 

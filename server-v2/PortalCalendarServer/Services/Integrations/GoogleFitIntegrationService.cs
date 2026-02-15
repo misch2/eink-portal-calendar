@@ -176,7 +176,7 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
                     {
                         Type = "day",
                         Value = 1,
-                        TimeZoneId = "Europe/Prague" // FIXME: Should use display timezone
+                        TimeZoneId = _displayService.GetTimeZoneInfo(display!).Id
                     }
                 },
                 StartTimeMillis = new DateTimeOffset(dtStart).ToUnixTimeMilliseconds(),

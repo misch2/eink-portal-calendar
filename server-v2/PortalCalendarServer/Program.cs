@@ -5,6 +5,7 @@ using PortalCalendarServer.Controllers.ModelBinders;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Logging;
 using PortalCalendarServer.Services;
+using PortalCalendarServer.Services.BackgroundJobs;
 using PortalCalendarServer.Services.Caches;
 using PortalCalendarServer.Services.Integrations;
 using Scalar.AspNetCore;
@@ -74,7 +75,11 @@ builder.Services.AddScoped<GoogleFitIntegrationService>();
 
 // Register background services
 builder.Services.AddHostedService<CacheCleanupService>();
+builder.Services.AddHostedService<BitmapGenerationService>();
 
+// Register Image Regeneration Service (singleton + hosted)
+builder.Services.AddSingleton<ImageRegenerationService>();
+builder.Services.AddHostedService(provider => provider.GetRequiredService<ImageRegenerationService>());
 
 // Configure localization to not disturb number formatting in HTML forms etc.
 var invariant = CultureInfo.InvariantCulture;

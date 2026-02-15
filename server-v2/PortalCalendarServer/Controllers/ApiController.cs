@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.Entities;
 using PortalCalendarServer.Services;
+using PortalCalendarServer.Services.BackgroundJobs;
 using PortalCalendarServer.Services.Integrations;
 
 namespace PortalCalendarServer.Controllers;
@@ -17,8 +18,18 @@ public class ApiController : ControllerBase
     private readonly PageGeneratorService _pageGeneratorService;
     private readonly ThemeService _themeService;
     private readonly IMqttService _mqttService;
+    private readonly ImageRegenerationService _imageRegenerationService;
 
-    public ApiController(CalendarContext context, ILogger<ApiController> logger, IDisplayService displayService, PageGeneratorService pageGeneratorService, ThemeService themeService, IWeb2PngService web2PngService, ColorTypeRegistry colorTypeRegistry, IMqttService mqttService)
+    public ApiController(
+        CalendarContext context,
+        ILogger<ApiController> logger,
+        IDisplayService displayService,
+        PageGeneratorService pageGeneratorService,
+        ThemeService themeService,
+        IWeb2PngService web2PngService,
+        ColorTypeRegistry colorTypeRegistry,
+        IMqttService mqttService,
+        ImageRegenerationService imageRegenerationService)
     {
         _context = context;
         _logger = logger;
@@ -26,6 +37,7 @@ public class ApiController : ControllerBase
         _pageGeneratorService = pageGeneratorService;
         _themeService = themeService;
         _mqttService = mqttService;
+        _imageRegenerationService = imageRegenerationService;
     }
 
     // Helper to get display by MAC address
@@ -134,7 +146,8 @@ public class ApiController : ControllerBase
 
             _logger.LogInformation("New display created with MAC {Mac}, ID: {Id}", mac, display.Id);
 
-            // TODO: Enqueue regenerate_image task
+            // Enqueue image regeneration in background
+            _imageRegenerationService.EnqueueRequest(display.Id);
         }
         else
         {
@@ -228,8 +241,6 @@ public class ApiController : ControllerBase
             colormap_name = "webmap";
         }
 
-        _pageGeneratorService.GenerateImageFromWeb(display); // FIXME pre-generate
-
         var bitmapOptions = new BitmapOptions
         {
             Rotate = rotate,
@@ -242,11 +253,64 @@ public class ApiController : ControllerBase
             DisplayType = display.ColorType
         };
 
-        var bitmap = _pageGeneratorService.GenerateBitmap(display, bitmapOptions);
+        var bitmap = _pageGeneratorService.ConvertStoredBitmap(display, bitmapOptions);
 
+        return ReturnBitmap(bitmap);
+    }
+
+
+    // GET /api/calendar/bitmap/epaper?mac=XX:XX:XX:XX:XX:XX&web_format=false&preview_colors=false
+    [HttpGet("calendar/bitmap/epaper")]
+    [Tags("Device API", "Image Generation")]
+    public async Task<IActionResult> BitmapEpaper(
+        [FromQuery] string? mac,
+        [FromQuery] bool web_format = false,
+        [FromQuery] bool preview_colors = false
+        )
+    {
+        var display = await GetDisplayByMacAsync(mac);
+        if (display == null)
+        {
+            return NotFound(new { error = "Display not found" });
+        }
+
+        var colortype = _displayService.GetColorType(display);
+
+        var rotate = display.Rotation;
+        var numcolors = colortype!.NumColors;
+        var format = "epaper_native";
+
+        var color_palette = colortype?.ColorPalette(preview_colors) ?? new List<string>();
+        var colormap_name = color_palette.Count > 0 ? "none" : "webmap";
+
+        if (web_format)
+        {
+            format = "png";
+            rotate = 0;
+        }
+
+        var bitmapOptions = new BitmapOptions
+        {
+            Rotate = rotate,
+            Flip = "",
+            Gamma = display!.Gamma.Value,
+            NumColors = numcolors,
+            ColormapName = colormap_name,
+            ColormapColors = color_palette,
+            Format = format,
+            DisplayType = display.ColorType
+        };
+
+        var bitmap = _pageGeneratorService.ConvertStoredBitmap(display, bitmapOptions);
+
+        return ReturnBitmap(bitmap);
+    }
+
+    private IActionResult ReturnBitmap(BitmapResult bitmap)
+    {
         if (bitmap == null)
         {
-            return StatusCode(500, new { error = "Failed to generate bitmap" });
+            return StatusCode(500, new { error = "Failed to convert bitmap" });
         }
 
         // Return the bitmap data with proper headers
@@ -261,27 +325,6 @@ public class ApiController : ControllerBase
         return File(bitmap.Data, bitmap.ContentType);
     }
 
-    // GET /api/calendar/bitmap/epaper?mac=XX:XX:XX:XX:XX:XX&web_format=false&preview_colors=false
-    [HttpGet("calendar/bitmap/epaper")]
-    [Tags("Device API", "Image Generation")]
-    public async Task<IActionResult> BitmapEpaper(
-        [FromQuery] string? mac,
-        [FromQuery] bool web_format = false,
-        [FromQuery] bool preview_colors = false)
-    {
-        var display = await GetDisplayByMacAsync(mac);
-        if (display == null)
-        {
-            return NotFound(new { error = "Display not found" });
-        }
 
-        var rotate = web_format ? 0 : display.Rotation;
-        var format = web_format ? "png" : "epaper_native";
-
-        // TODO: Implement epaper bitmap generation
-        // This will require porting the Perl image generation logic
-        _logger.LogWarning("E-paper bitmap generation not yet implemented");
-
-        return NotFound(new { error = "E-paper bitmap generation not yet implemented" });
-    }
 }
+

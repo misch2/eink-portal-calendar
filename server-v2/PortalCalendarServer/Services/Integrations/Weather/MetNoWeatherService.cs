@@ -42,9 +42,6 @@ public class MetNoWeatherService : IntegrationServiceBase
         return _latitude != 0 && _longitude != 0;
     }
 
-    // FIXME
-    //protected override int HttpMaxCacheAge => 15 * 60;
-
     private string GetUrl()
     {
         // Truncate coordinates to max 3 decimals (Met.no requirement)

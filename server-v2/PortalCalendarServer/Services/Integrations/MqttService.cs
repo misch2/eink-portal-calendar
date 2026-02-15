@@ -19,7 +19,7 @@ public class MqttService(
     IDatabaseCacheServiceFactory databaseCacheFactory,
     IDisplayService displayService,
     CalendarContext context,
-    Display? display = null) 
+    Display? display = null)
     : IntegrationServiceBase(loggerParam, httpClientFactory, memoryCache, databaseCacheFactory, context, display), IMqttService, IAsyncDisposable
 {
     private new readonly ILogger<MqttService> logger = loggerParam;

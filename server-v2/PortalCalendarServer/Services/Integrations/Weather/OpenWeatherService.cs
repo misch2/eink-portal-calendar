@@ -43,9 +43,6 @@ public class OpenWeatherService : IntegrationServiceBase
         return String.IsNullOrEmpty(_apiKey) == false && _latitude != 0 && _longitude != 0;
     }
 
-    // FIXME
-    //protected override int HttpMaxCacheAge => 30 * 60;
-
     /// <summary>
     /// Fetch current weather from OpenWeather API
     /// </summary>
