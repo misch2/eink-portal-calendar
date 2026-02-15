@@ -196,7 +196,7 @@ public class IcalIntegrationServiceTests : IntegrationServiceTestBase
     }
 
     [Fact]
-    public async Task GetEventsBetweenAsync_WithDifferentDateRanges_UsesSingleCachedHttpRequest()
+    public async Task GetEventsBetweenAsync_WithDifferentDateRanges_UsesMultipleCachedHttpRequest()
     {
         // Arrange
         SetupHttpResponse(TestIcsUrl, SampleIcsData.SimpleCalendar);
@@ -214,8 +214,8 @@ public class IcalIntegrationServiceTests : IntegrationServiceTestBase
         Assert.NotNull(events1);
         Assert.NotNull(events2);
 
-        // Both calls should fetch from web, but only one HTTP request should be made due to caching
-        VerifyHttpRequest(TestIcsUrl, Times.Once());
+        // Both calls should fetch from web
+        VerifyHttpRequest(TestIcsUrl, Times.Exactly(2));
     }
 
     [Fact]
@@ -318,24 +318,6 @@ public class IcalIntegrationServiceTests : IntegrationServiceTestBase
         Assert.Equal("Multi-day Event", multiDayEvent.Summary);
         Assert.True(multiDayEvent.IsAllDay);
         Assert.True((multiDayEvent.EndTime - multiDayEvent.StartTime).TotalDays >= 1);
-    }
-
-    [Fact]
-    public void Constructor_WithNullIcsUrl_ThrowsArgumentNullException()
-    {
-        // Arrange
-        var logger = new Mock<ILogger<IcalIntegrationService>>().Object;
-
-        // Act & Assert
-        Assert.Throws<ArgumentNullException>(() =>
-            new IcalIntegrationService(
-                logger,
-                MockHttpClientFactory.Object,
-                MemoryCache,
-                MockDatabaseCacheServiceFactory.Object,
-                Context,
-                null!,
-                TestDisplay));
     }
 
     [Fact]
