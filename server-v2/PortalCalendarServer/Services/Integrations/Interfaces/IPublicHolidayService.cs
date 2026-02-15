@@ -3,7 +3,7 @@ namespace PortalCalendarServer.Services.Integrations;
 /// <summary>
 /// Interface for public holiday service
 /// </summary>
-public interface IPublicHolidayService
+public interface IPublicHolidayService : IIntegrationService
 {
     PublicHolidayInfo? GetPublicHoliday(DateTime date, string countryCode = "CZ");
     List<PublicHolidayInfo> GetPublicHolidaysForYear(int year, string countryCode = "CZ");

@@ -24,15 +24,13 @@ public class IcalIntegrationService : IntegrationServiceBase
         Display? display = null)
         : base(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(icsUrl);
         _icsUrl = icsUrl;
     }
 
-    // FIXME
-    ///// <summary>
-    ///// Maximum HTTP cache age: 2 hours (matching Perl implementation)
-    ///// </summary>
-    //protected override int HttpMaxCacheAge => 2 * 60 * 60; // 2 hours
+    public override bool IsConfigured()
+    {
+        return String.IsNullOrEmpty(_icsUrl) == false;
+    }
 
     /// <summary>
     /// Fetch raw ICS data from the web
@@ -52,27 +50,12 @@ public class IcalIntegrationService : IntegrationServiceBase
     /// </summary>
     private async Task<string> GetCachedRawDetailsFromWebAsync(CancellationToken cancellationToken = default)
     {
-        var cacheKey = $"ical:raw:{_icsUrl}";
-        var cacheExpiration = TimeSpan.FromHours(2);
+        var dbCacheService = DatabaseCacheFactory.Create(nameof(IcalIntegrationService), TimeSpan.FromHours(2));
 
-        // Try to get from memory cache
-        if (MemoryCache.TryGetValue<string>(cacheKey, out var cachedContent) && cachedContent != null)
-        {
-            Logger.LogDebug("ICS raw data cache HIT for {Url}", _icsUrl);
-            return cachedContent;
-        }
-
-        Logger.LogDebug("ICS raw data cache MISS for {Url}", _icsUrl);
-
-        // Fetch from web
-        var content = await GetRawDetailsFromWebAsync(cancellationToken);
-
-        // Cache the result
-        MemoryCache.Set(cacheKey, content, new MemoryCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = cacheExpiration,
-            Size = content.Length
-        });
+        var content = await dbCacheService.GetOrSetAsync(
+            async () => await GetRawDetailsFromWebAsync(cancellationToken),
+            new { url = _icsUrl },
+            cancellationToken);
 
         return content;
     }

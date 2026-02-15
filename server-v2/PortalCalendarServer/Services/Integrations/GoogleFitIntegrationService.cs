@@ -31,7 +31,7 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
     {
     }
 
-    public bool IsAvailable()
+    public override bool IsConfigured()
     {
         var accessToken = GetConfigValue("_googlefit_access_token");
         var refreshToken = GetConfigValue("_googlefit_refresh_token");
@@ -94,7 +94,7 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
         HttpRequestMessage request,
         CancellationToken cancellationToken = default)
     {
-        if (!IsAvailable())
+        if (!IsConfigured())
         {
             Logger.LogWarning("Google Fit integration not available - missing tokens");
             return null;
@@ -130,7 +130,7 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
     public async Task<GoogleFitAggregateResponse?> FetchFromWebAsync(
         CancellationToken cancellationToken = default)
     {
-        if (!IsAvailable())
+        if (!IsConfigured())
         {
             return null;
         }
@@ -232,7 +232,7 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
     public async Task<List<WeightDataPoint>> GetWeightSeriesAsync(
         CancellationToken cancellationToken = default)
     {
-        if (!IsAvailable())
+        if (!IsConfigured())
         {
             return new List<WeightDataPoint>();
         }

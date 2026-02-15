@@ -14,7 +14,7 @@ public class WeightComponent
     {
         _logger = logger;
         _googleFitService = googleFitService;
-        _isAvailable = googleFitService.IsAvailable();
+        _isAvailable = googleFitService.IsConfigured();
     }
 
     public decimal? GetLastWeight()

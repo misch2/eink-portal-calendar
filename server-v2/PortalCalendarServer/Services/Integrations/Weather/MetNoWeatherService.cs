@@ -37,6 +37,11 @@ public class MetNoWeatherService : IntegrationServiceBase
         _iconMapping = new MetNoIconsMapping();
     }
 
+    public override bool IsConfigured()
+    {
+        return _latitude != 0 && _longitude != 0;
+    }
+
     // FIXME
     //protected override int HttpMaxCacheAge => 15 * 60;
 

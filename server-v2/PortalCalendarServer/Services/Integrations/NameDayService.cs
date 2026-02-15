@@ -408,6 +408,12 @@ public class NameDayService : INameDayService
         _logger = logger;
     }
 
+    public bool IsConfigured()
+    {
+        // Local only, always configured
+        return true;
+    }
+
     /// <summary>
     /// Get name day information for a specific date in Czech calendar.
     /// Returns null if no name day is celebrated on this date.

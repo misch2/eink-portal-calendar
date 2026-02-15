@@ -38,6 +38,11 @@ public class OpenWeatherService : IntegrationServiceBase
         _language = language;
     }
 
+    public override bool IsConfigured()
+    {
+        return String.IsNullOrEmpty(_apiKey) == false && _latitude != 0 && _longitude != 0;
+    }
+
     // FIXME
     //protected override int HttpMaxCacheAge => 30 * 60;
 

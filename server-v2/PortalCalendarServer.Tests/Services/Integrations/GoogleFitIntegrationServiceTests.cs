@@ -102,7 +102,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
     {
         var service = CreateService(display: null);
 
-        var result = service.IsAvailable();
+        var result = service.IsConfigured();
 
         Assert.False(result);
     }
@@ -113,7 +113,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
         var display = CreateTestDisplay();
         var service = CreateService(display);
 
-        var result = service.IsAvailable();
+        var result = service.IsConfigured();
 
         Assert.False(result);
     }
@@ -133,7 +133,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
 
         var service = CreateService(display);
 
-        var result = service.IsAvailable();
+        var result = service.IsConfigured();
 
         Assert.False(result);
     }
@@ -144,7 +144,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
         var display = CreateDisplayWithGoogleFitTokens();
         var service = CreateService(display);
 
-        var result = service.IsAvailable();
+        var result = service.IsConfigured();
 
         Assert.True(result);
     }

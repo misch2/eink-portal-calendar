@@ -24,8 +24,8 @@ public class XkcdComponent(
         memoryCache,
         databaseCacheFactory,
         context,
-        null,  // Display is not needed for XKCD integration
-        0);
+        null  // Display is not needed for XKCD integration
+        );
 
     /// <summary>
     /// Get the XKCD comic information formatted for display

@@ -5,7 +5,7 @@ using PortalCalendarServer.Services.Caches;
 
 namespace PortalCalendarServer.Services.Integrations;
 
-public abstract class IntegrationServiceBase
+public abstract class IntegrationServiceBase : IIntegrationService
 {
     protected readonly ILogger Logger;
     protected readonly IMemoryCache MemoryCache;
@@ -32,4 +32,6 @@ public abstract class IntegrationServiceBase
         Context = context;
         Display = display;
     }
+
+    public abstract bool IsConfigured();
 }

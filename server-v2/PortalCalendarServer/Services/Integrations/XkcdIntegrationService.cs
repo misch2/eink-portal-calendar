@@ -17,9 +17,13 @@ public class XkcdIntegrationService(
     IMemoryCache memoryCache,
     IDatabaseCacheServiceFactory databaseCacheFactory,
     CalendarContext context,
-    Display? display = null,
-    int minimalCacheExpiry = 0) : IntegrationServiceBase(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display)
+    Display? display = null) : IntegrationServiceBase(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display)
 {
+    public override bool IsConfigured()
+    {
+        // No configuration needed for XKCD API
+        return true;
+    }
 
     /// <summary>
     /// Fetch the latest XKCD comic information

@@ -33,6 +33,12 @@ public class PublicHolidayService : IPublicHolidayService
         _logger = logger;
     }
 
+    public bool IsConfigured()
+    {
+        // Local only, always configured
+        return true;
+    }
+
     /// <summary>
     /// Get public holiday information for a specific date
     /// </summary>

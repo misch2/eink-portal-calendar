@@ -1,6 +1,6 @@
 ﻿namespace PortalCalendarServer.Services.Integrations
 {
-    public interface INameDayService
+    public interface INameDayService : IIntegrationService
     {
         NameDayInfo? GetNameDay(DateTime date, string countryCode = "CZ");
         List<NameDayInfo> GetNameDaysForMonth(int year, int month, string countryCode = "CZ");
