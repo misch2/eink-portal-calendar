@@ -382,8 +382,8 @@ public class IcalIntegrationServiceTests : IntegrationServiceTestBase
         // Arrange
         SetupHttpResponse(TestIcsUrl, SampleIcsData.MultipleTimezoneCalendar);
         var service = CreateService();
-        var start = DateTime.Parse("2026-02-01T00:00:00+01:00");
-        var end = DateTime.Parse("2026-02-14T23:59:59+01:00");
+        var start = DateTime.Parse("2026-02-01T00:00:00+01:00").ToUniversalTime();
+        var end = DateTime.Parse("2026-02-14T23:59:59+01:00").ToUniversalTime();
 
         // Act
         var events = await service.GetEventsBetweenAsync(start, end);
@@ -399,8 +399,8 @@ public class IcalIntegrationServiceTests : IntegrationServiceTestBase
         // Arrange
         SetupHttpResponse(TestIcsUrl, SampleIcsData.MultipleTimezoneCalendar);
         var service = CreateService();
-        var start = DateTime.Parse("2026-02-14T00:00:00+01:00");
-        var end = DateTime.Parse("2026-02-14T23:59:59+01:00");
+        var start = DateTime.Parse("2026-02-14T00:00:00+01:00").ToUniversalTime();
+        var end = DateTime.Parse("2026-02-14T23:59:59+01:00").ToUniversalTime();
 
         // Act
         var events = await service.GetEventsBetweenAsync(start, end);

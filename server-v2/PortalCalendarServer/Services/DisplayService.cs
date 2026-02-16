@@ -208,7 +208,7 @@ public class DisplayService(
 
     public DateTime? GetLastVisit(Display display)
     {
-        var lastVisitStr = GetConfig(display, "_last_visit"); // FIXME make this a display property and use UTC always
+        var lastVisitStr = GetConfig(display, "_last_visit");
         if (string.IsNullOrEmpty(lastVisitStr))
         {
             return null;

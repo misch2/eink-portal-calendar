@@ -178,8 +178,7 @@ public class UiController(
                      paramName == "metnoweather" || paramName == "openweather" ||
                      paramName == "telegram" || paramName == "mqtt" || paramName == "ota_mode")
             {
-                // Checkboxes: if not present, explicitly set to empty/false
-                // FIXME is this needed now when we are using hidden inputs for checkboxes to fix this in JS?
+                // Checkboxes "Integration Enabled" for each integration: if not present, explicitly set to empty/false because they are disabled by default in the UI
                 _displayService.SetConfig(display, paramName, "");
             }
         }
