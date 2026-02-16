@@ -7,7 +7,7 @@
 @{
     Layout = null;
 
-    var dateCulture = new CultureInfo(displayService.GetConfig(Model.Display, "date_culture") ?? "en-US");
+    var dateCulture = displayService.GetDateCultureInfo(Model.Display);
     var tz = displayService.GetTimeZoneInfo(Model.Display);
 
     var wakeupInfo = Model.Display.NextWakeupTime();

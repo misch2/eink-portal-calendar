@@ -1,5 +1,6 @@
 using PortalCalendarServer.Models.ColorTypes;
 using PortalCalendarServer.Models.Entities;
+using System.Globalization;
 
 namespace PortalCalendarServer.Services;
 
@@ -27,6 +28,11 @@ public interface IDisplayService
     /// Get the timezone information for a specific display
     /// </summary>
     TimeZoneInfo GetTimeZoneInfo(Display display);
+
+    /// <summary>
+    /// Retrieves the date culture information associated with a specific display
+    /// </summary>
+    CultureInfo GetDateCultureInfo(Display display);
 
     /// <summary>
     /// Get configuration value for a display, with fallback to default display (ID = 0)

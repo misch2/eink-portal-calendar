@@ -6,9 +6,11 @@
 @{
     Layout = null;
 
-    var dateCulture = new CultureInfo(displayService.GetConfig(Model.Display, "date_culture") ?? "en-US");
-
     var now = DateTime.UtcNow;
+
+    var dateCulture = displayService.GetDateCultureInfo(Model.Display);
+    var tz = displayService.GetTimeZoneInfo(Model.Display);
+
     var wakeupInfo = Model.Display.NextWakeupTime();
     var nextWakeup = wakeupInfo.NextWakeup;
     var sleepInSeconds = wakeupInfo.SleepInSeconds;
@@ -100,7 +102,7 @@
                         }
                         else
                         {
-                            @evt.StartTime.ToString("H:mm", dateCulture)
+                            @TimeZoneInfo.ConvertTimeFromUtc(evt.StartTime, tz).ToString("H:mm", dateCulture)
                             @evt.Summary
                             @if (evt.DurationHours.HasValue)
                             {

@@ -7,8 +7,8 @@
 @{
     Layout = null;
 
-    var dateCulture = new CultureInfo(displayService.GetConfig(Model.Display, "date_culture") ?? "en-US");
-    var timezone = TimeZoneInfo.FindSystemTimeZoneById(displayService.GetConfig(Model.Display, "timezone") ?? "UTC");
+    var dateCulture = displayService.GetDateCultureInfo(Model.Display);
+    var timezone = displayService.GetTimeZoneInfo(Model.Display);
 
     var wakeupInfo = Model.Display.NextWakeupTime();
     var nextWakeup = wakeupInfo.NextWakeup;

@@ -252,6 +252,8 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
             }
         }
 
+        logger.LogDebug("...parsed OK");
+
         return result;
     }
 

@@ -6,7 +6,8 @@
 @{
     Layout = null;
 
-    var dateCulture = new CultureInfo(displayService.GetConfig(Model.Display, "date_culture") ?? "en-US");
+    var dateCulture = displayService.GetDateCultureInfo(Model.Display);
+    var tz = displayService.GetTimeZoneInfo(Model.Display);
 
     var wakeupInfo = Model.Display.NextWakeupTime();
     var nextWakeup = wakeupInfo.NextWakeup;
@@ -195,7 +196,7 @@
                         }
                         else
                         {
-                            @evt.StartTime.ToString("t", dateCulture)
+                            @TimeZoneInfo.ConvertTimeFromUtc(evt.StartTime, tz).ToString("t", dateCulture)
                             <text> </text>
                             @evt.Summary
                             @if (evt.DurationHours.HasValue)

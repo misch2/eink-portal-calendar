@@ -74,23 +74,16 @@
     </div>
     <div class="form-group row mt-2">
         <div class="col-md-4">
-            <label for="timezone">Time Zone</label>
+            <label for="timezone">Time Zone (format: "UTC", "Europe/Prague" etc.)</label>
             <input id="timezone" name="timezone" type="text" class="form-control"
                    value="@displayService.GetConfigWithoutDefaults(Model, "timezone")"
                    placeholder="@displayService.GetConfigDefaultsOnly("timezone")">
         </div>
         <div class="col-md-4">
-            <label for="date_culture">Date style</label>
-            <select id="date_culture" name="date_culture" class="form-select">
-                @if (!Model.IsDefault())
-                {
-                    <option value="" disabled selected="@(String.IsNullOrEmpty(displayService.GetConfigWithoutDefaults(Model, "date_culture")))">(@displayService.GetConfigDefaultsOnly("date_culture") - default)</option>
-                }
-                @foreach (var val in new[] { "en-US", "cs-CZ" })
-                {
-                    <option value="@val" selected="@(displayService.GetConfigWithoutDefaults(Model, "date_culture") == val)">@val</option>
-                }
-            </select>
+            <label for="date_culture">Date style (format: "en-US", "cs-CZ" etc.)</label>
+            <input id="date_culture" name="date_culture" type="text" class="form-control"
+                    value="@displayService.GetConfigWithoutDefaults(Model, "date_culture")"
+                    placeholder="@displayService.GetConfigDefaultsOnly("date_culture")">
         </div>
     </div>
 </fieldset>

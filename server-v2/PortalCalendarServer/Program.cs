@@ -81,12 +81,10 @@ builder.Services.AddHostedService<BitmapGenerationService>();
 builder.Services.AddSingleton<ImageRegenerationService>();
 builder.Services.AddHostedService(provider => provider.GetRequiredService<ImageRegenerationService>());
 
-// Configure localization to not disturb number formatting in HTML forms etc.
+// Configure localization to not disturb number formatting in HTML forms, date printing in logs etc.
 var invariant = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentCulture = invariant;
 CultureInfo.DefaultThreadCurrentUICulture = invariant;
-
-var dateCulture = builder.Configuration["Culture:DateCulture"] ?? "en-US";
 
 // Configure OpenAPI with custom settings
 builder.Services.AddOpenApi(options =>

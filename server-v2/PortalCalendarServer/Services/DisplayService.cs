@@ -2,6 +2,7 @@
 using PortalCalendarServer.Models.ColorTypes;
 using PortalCalendarServer.Models.Entities;
 using PortalCalendarServer.Services.BackgroundJobs;
+using System.Globalization;
 
 namespace PortalCalendarServer.Services;
 
@@ -38,6 +39,17 @@ public class DisplayService(
             logger.LogWarning("Timezone not set for display {DisplayId}, defaulting to {tzname}", display.Id, tzname);
         }
         return TimeZoneInfo.FindSystemTimeZoneById(tzname);
+    }
+
+    public CultureInfo GetDateCultureInfo(Display display)
+    {
+        var cultureName = GetConfig(display, "date_culture");
+        if (cultureName is null)
+        {
+            logger.LogWarning("Date culture not set for display {DisplayId}, defaulting to invariant culture", display.Id);
+            return CultureInfo.InvariantCulture;
+        }
+        return new CultureInfo(cultureName);
     }
 
     /// <summary>

@@ -1,4 +1,6 @@
 using Ical.Net;
+using Ical.Net.CalendarComponents;
+using Ical.Net.DataTypes;
 using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.Entities;
@@ -72,21 +74,35 @@ public class IcalIntegrationService : IntegrationServiceBase
         try
         {
             var calendar = Calendar.Load(icsContent);
-
-            // Get all calendar events
-            foreach (var calEvent in calendar!.Events)
+            if (calendar == null)
             {
+                throw new Exception("Failed to parse calendar, no data produced");
+            }
+
+            var calStart = new CalDateTime(start);
+            var calEnd = new CalDateTime(end);
+            var allOccurrences = calendar.GetOccurrences(calStart).TakeWhileBefore(calEnd).ToList();
+
+            var calEvents = calendar.Events;
+
+            logger.LogInformation("Calendar has {Count} total occurrences between {Start} and {End}", allOccurrences.Count, start, end);
+
+            foreach (var occurrence in allOccurrences)
+            {
+                var calEvent = (CalendarEvent)occurrence.Source;
                 try
                 {
+                    //logger.LogDebug("Occurrence: {Summary} at {Start} to {End}", calEvent.Summary, occurrence.Period.StartTime, occurrence.Period.EndTime);
+
                     if (calEvent.Start == null || calEvent.End == null)
                     {
-                        logger.LogWarning("Event {Uid} has invalid start or end time: {Summart}", calEvent.Uid, calEvent.Summary);
+                        logger.LogWarning("Event {Uid} has invalid start or end time: {Summary}", calEvent.Uid, calEvent.Summary);
                         continue;
                     }
 
                     // Check if event falls within date range
-                    var eventStart = calEvent.Start!.AsUtc;
-                    var eventEnd = calEvent.End!.AsUtc;
+                    var eventStart = occurrence.Period.StartTime.AsUtc;
+                    var eventEnd = occurrence.Period.EffectiveEndTime.AsUtc;
 
                     // Skip events outside the range
                     if (eventEnd < start || eventStart > end)
@@ -124,7 +140,7 @@ public class IcalIntegrationService : IntegrationServiceBase
                 }
                 catch (Exception ex)
                 {
-                    logger.LogWarning(ex, "Error processing event {Uid}", calEvent.Uid);
+                    logger.LogWarning(ex, "Error processing event {Uid}: {Summary}", calEvent.Uid, calEvent.Summary);
                 }
             }
 
