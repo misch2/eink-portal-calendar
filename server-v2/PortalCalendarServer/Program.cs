@@ -73,10 +73,10 @@ builder.Services.AddScoped<INameDayService, NameDayService>();
 builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();
 builder.Services.AddScoped<GoogleFitIntegrationService>();
 
-// Register background services
-builder.Services.AddHostedService<CacheCleanupService>();
-builder.Services.AddHostedService<BitmapGenerationService>();
-builder.Services.AddHostedService<MissedConnectionsCheckService>();
+// Register periodic background services
+builder.Services.AddHostedService<PortalCalendarServer.Services.BackgroundJobs.Periodic.CacheCleanupService>();
+builder.Services.AddHostedService<PortalCalendarServer.Services.BackgroundJobs.Periodic.BitmapGenerationService>();
+builder.Services.AddHostedService<PortalCalendarServer.Services.BackgroundJobs.Periodic.MissedConnectionsCheckService>();
 
 // Register Image Regeneration Service (singleton + hosted)
 builder.Services.AddSingleton<ImageRegenerationService>();
@@ -141,10 +141,6 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(ex, "An error occurred during startup initialization");
         throw;
     }
-
-    var displayService = services.GetRequiredService<IDisplayService>();
-    logger.LogInformation("Enqueuing initial image regeneration for all displays on startup");
-    displayService.EnqueueAllImageRegenerationRequest();
 }
 
 // Configure the HTTP request pipeline

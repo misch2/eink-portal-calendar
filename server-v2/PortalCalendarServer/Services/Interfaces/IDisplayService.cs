@@ -107,7 +107,7 @@ public interface IDisplayService
     decimal? GetBatteryPercent(Display display);
 
     /// <summary>
-    /// Calculate the next wakeup time for a display based on its schedule
+    /// Calculate the next wakeup time for a display based on its schedule. Returns data in display time zone.
     /// </summary>
     WakeUpInfo GetNextWakeupTime(Display display, DateTime? optionalNow = null);
 

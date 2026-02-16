@@ -1,4 +1,4 @@
-﻿using PortalCalendarServer.Data;
+using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.ColorTypes;
 using PortalCalendarServer.Models.Entities;
 using PortalCalendarServer.Models.POCOs.Board;

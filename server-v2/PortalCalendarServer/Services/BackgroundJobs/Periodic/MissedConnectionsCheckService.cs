@@ -1,61 +1,44 @@
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Services.Integrations;
 
-namespace PortalCalendarServer.Services.BackgroundJobs;
+namespace PortalCalendarServer.Services.BackgroundJobs.Periodic;
 
 /// <summary>
 /// Background service that periodically checks for displays that have missed their expected connection times.
 /// Runs every 5 minutes to detect frozen or empty battery displays.
 /// Based on check_missed_connects from Perl code.
 /// </summary>
-public class MissedConnectionsCheckService : BackgroundService
+public class MissedConnectionsCheckService : PeriodicBackgroundService
 {
     private readonly ILogger<MissedConnectionsCheckService> _logger;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(5);
+    private readonly TimeSpan _interval;
 
     public MissedConnectionsCheckService(
         ILogger<MissedConnectionsCheckService> logger,
-        IServiceScopeFactory serviceScopeFactory)
+        IServiceScopeFactory serviceScopeFactory,
+        IConfiguration configuration)
+        : base(logger, serviceScopeFactory)
     {
         _logger = logger;
-        _serviceScopeFactory = serviceScopeFactory;
+
+        var intervalMinutes = configuration.GetValue<int>("BackgroundJobs:MissedConnections:IntervalMinutes");
+        _interval = TimeSpan.FromMinutes(intervalMinutes);
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        _logger.LogInformation("Missed Connections Check Service started (checking every {Interval} minutes)", _checkInterval.TotalMinutes);
+    protected override TimeSpan Interval => _interval;
 
-        // Wait a bit before first check to let the app fully start
-        await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+    protected override string ServiceName => "Missed Connections Check Service";
 
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            try
-            {
-                await CheckMissedConnectionsAsync(stoppingToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error checking missed connections");
-            }
-
-            await Task.Delay(_checkInterval, stoppingToken);
-        }
-
-        _logger.LogInformation("Missed Connections Check Service stopped");
-    }
-
-    private async Task CheckMissedConnectionsAsync(CancellationToken cancellationToken)
+    protected override async Task ExecuteWorkAsync(CancellationToken cancellationToken)
     {
         _logger.LogDebug("Checking for missed connections (frozen or empty battery displays)");
 
-        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var scope = ServiceScopeFactory.CreateAsyncScope();
         var displayService = scope.ServiceProvider.GetRequiredService<IDisplayService>();
         var context = scope.ServiceProvider.GetRequiredService<CalendarContext>();
         var mqttService = scope.ServiceProvider.GetRequiredService<IMqttService>();
 
-        var now = DateTime.UtcNow; // Same timezone as _last_visit
+        var now = DateTime.UtcNow;
 
         var displays = displayService.GetAllDisplays().Where(d => !d.IsDefault()).ToList();
 
@@ -70,21 +53,14 @@ public class MissedConnectionsCheckService : BackgroundService
                     continue;
                 }
 
-                // Calculate when the display should have connected based on last visit
-                var timeZone = displayService.GetTimeZoneInfo(display);
-                var lastVisitLocal = TimeZoneInfo.ConvertTimeFromUtc(lastVisit.Value, timeZone); // FIXME is this OK? The date is alread in the TZ or not?
-
-                var wakeupInfo = displayService.GetNextWakeupTime(display, lastVisitLocal);
+                var wakeupInfo = displayService.GetNextWakeupTime(display, lastVisit.Value);
                 var nextExpectedTime = wakeupInfo.NextWakeup;
 
-                // Prevent false failures when the next expected time is very close to now
-                // The clock in displays is not precise and this shouldn't be considered a missed connection
                 var safetyLagMinutes = displayService.GetConfigInt(display, "alive_check_safety_lag_minutes") ?? 0;
                 var nowSafe = now.AddMinutes(-safetyLagMinutes);
 
                 if (nextExpectedTime < nowSafe)
                 {
-                    // Display missed its connection
                     displayService.IncreaseMissedConnectsCount(display, nextExpectedTime);
 
                     var missedConnects = displayService.GetMissedConnects(display);
@@ -92,13 +68,13 @@ public class MissedConnectionsCheckService : BackgroundService
 
                     if (missedConnects == minFailures)
                     {
-                        // Just reached the threshold, send notification
                         displayService.SetConfig(display, "_frozen_notification_sent", "1");
                         await context.SaveChangesAsync(cancellationToken);
 
                         var message = FormatFrozenNotification(
                             display,
-                            lastVisitLocal,
+                            displayService.GetTimeZoneInfo(display),
+                            lastVisit.Value,
                             nextExpectedTime,
                             now,
                             minFailures);
@@ -106,7 +82,6 @@ public class MissedConnectionsCheckService : BackgroundService
                         _logger.LogWarning("Display {DisplayId} ({DisplayName}) is frozen: {Message}",
                             display.Id, display.Name, message);
 
-                        // Send Telegram notification if configured
                         if (displayService.GetConfigBool(display, "telegram"))
                         {
                             var apiKey = displayService.GetConfig(display, "telegram_api_key");
@@ -142,17 +117,21 @@ public class MissedConnectionsCheckService : BackgroundService
     }
 
     private string FormatFrozenNotification(
-        PortalCalendarServer.Models.Entities.Display display,
+        Models.Entities.Display display,
+        TimeZoneInfo timeZone,
         DateTime lastVisit,
         DateTime nextExpectedTime,
         DateTime now,
         int minFailures)
     {
-        var hoursSince = (int)((now - lastVisit.ToUniversalTime()).TotalHours + 0.5);
+        var hoursSince = (int)((now - lastVisit).TotalHours + 0.5);
+
+        var lastVisitLocal = TimeZoneInfo.ConvertTimeFromUtc(lastVisit, timeZone);
+        var nextExpectedLocal = TimeZoneInfo.ConvertTimeFromUtc(nextExpectedTime, timeZone);
 
         return $"Display '{display.Name}' (ID: {display.Id}) appears to be frozen.\n" +
-               $"Last contact: {lastVisit:yyyy-MM-dd HH:mm} ({hoursSince} hours ago)\n" +
-               $"Expected contact: {nextExpectedTime:yyyy-MM-dd HH:mm}\n" +
+               $"Last contact: {lastVisitLocal:yyyy-MM-dd HH:mm} ({hoursSince} hours ago)\n" +
+               $"Expected contact: {nextExpectedLocal:yyyy-MM-dd HH:mm}\n" +
                $"Missed connections threshold: {minFailures}\n" +
                $"This could indicate a frozen display or empty battery.";
     }

@@ -1,8 +1,5 @@
-﻿# TODO
+# TODO
 
-- [ ] FIX: remove default "en-US" locale for dates. If possible use the invariant culture everywhere as default.
-- [ ] Is the wake up (redraw) crontab format for the client being parsed and interpreted correctly?
-- [ ] Check if the "alive check" works
 - [ ] Differentiate between 3color "BWY" and "BWR" ePapers
 - [ ] Add unit tests for the new code
 - [ ] Check all remaining TODOs and FIXMEs in the codebase and either fix them or move them to this list.
@@ -17,8 +14,12 @@
 - [ ] Create semi-automated deployment scripts for the prod server, maybe using Ansible or something similar.
 - [ ] Remove failsafes like null checks and catch the exceptions instead when rendering display page.
 - [ ] On any error return a universal "⚠️ Error occurred, check the logs" page/image to the client.
+- [ ] Add a default DB records for the fresh database
 
 # Done
 
+- [X] FIX: remove default "en-US" locale for dates. If possible use the invariant culture everywhere as default.
+- [X] Check if the "alive check" works
+- [X] Is the wake up (redraw) crontab format for the client being parsed and interpreted correctly?
 - [X] Remove methods which return plain text "UTC" or "en-US" and replace them with methods that return a CultureInfo or TimeZoneInfo object instead.
 - [X] Fix inconsistent timezone handling in templates.
