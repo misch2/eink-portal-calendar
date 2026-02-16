@@ -28,6 +28,12 @@ public class GoogleFitAuthController : Controller
         _displayService = displayService;
     }
 
+    /// <summary>
+    /// Redirects user to a GoogleFit consent screen for a specific display.
+    /// </summary>
+    /// <param name="displayNumber"></param>
+    /// <returns></returns>
+
     // GET /auth/googlefit/{display_number}
     [HttpGet("/auth/googlefit/{displayNumber:int}")]
     public IActionResult GoogleFitRedirect(int displayNumber)
@@ -40,9 +46,11 @@ public class GoogleFitAuthController : Controller
 
         var clientId = _displayService.GetConfig(display, "googlefit_client_id");
         var clientSecret = _displayService.GetConfig(display, "googlefit_client_secret");
-        var redirectUri = _displayService.GetConfig(display, "googlefit_auth_callback");
 
-        if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret) || string.IsNullOrEmpty(redirectUri))
+        // Redirect URI must be generated from the current external host and port, i.e. from Host etc. header
+        var redirectUri = Url.Action(nameof(GoogleFitCallback), "GoogleFitAuth", null, Request.Scheme, Request.Host.Value);
+
+        if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
         {
             return BadRequest(new { error = "Google Fit OAuth configuration incomplete" });
         }
@@ -82,7 +90,6 @@ public class GoogleFitAuthController : Controller
     }
 
     // GET /auth/googlefit/cb
-    // This MUST be first in route matching order (before parameterized routes)
     // Google OAuth restriction: cannot accept additional parameters
     [HttpGet("/auth/googlefit/cb")]
     public async Task<IActionResult> GoogleFitCallback(
@@ -133,9 +140,11 @@ public class GoogleFitAuthController : Controller
             // Get OAuth configuration
             var clientId = _displayService.GetConfig(display, "googlefit_client_id");
             var clientSecret = _displayService.GetConfig(display, "googlefit_client_secret");
-            var redirectUri = _displayService.GetConfig(display, "googlefit_auth_callback");
 
-            if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret) || string.IsNullOrEmpty(redirectUri))
+            // Redirect URI must be generated from the current external host and port, i.e. from Host etc. header
+            var redirectUri = Url.Action(nameof(GoogleFitCallback), "GoogleFitAuth", null, Request.Scheme, Request.Host.Value);
+
+            if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
             {
                 _logger.LogError("Missing Google Fit OAuth configuration for display {DisplayId}", displayId);
                 return View("AuthError", new { Error = "Missing OAuth configuration" });

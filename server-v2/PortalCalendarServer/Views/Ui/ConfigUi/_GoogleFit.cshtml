@@ -29,21 +29,12 @@
                placeholder="@displayService.GetConfigDefaultsOnly("googlefit_client_secret")">
     </div>
     <div class="col-md-12 mt-2">
-        <label for="googlefit_auth_callback">Callback URL</label>
-        <input id="googlefit_auth_callback" name="googlefit_auth_callback" type="text" class="form-control"
-               value="@displayService.GetConfigWithoutDefaults(Model, "googlefit_auth_callback")"
-               placeholder="@displayService.GetConfigDefaultsOnly("googlefit_auth_callback")">
-    </div>
-    <div class="col-md-12 mt-3">
-        <hr>
-    </div>
-    <div class="col-md-12">
-        <label for="_googlefit_refresh_token">Refresh token</label>
+        <label for="_googlefit_refresh_token">Refresh token (generated automatically)</label>
         <input id="_googlefit_refresh_token" name="_googlefit_refresh_token" type="text" class="form-control"
                value="@displayService.GetConfigWithoutDefaults(Model, "_googlefit_refresh_token")" disabled>
     </div>
     <div class="col-md-12 mt-2">
-        <label for="_googlefit_access_token">Auth token</label>
+        <label for="_googlefit_access_token">Auth token (generated automatically)</label>
         <input id="_googlefit_access_token" name="_googlefit_access_token" type="text" class="form-control"
                value="@displayService.GetConfigWithoutDefaults(Model, "_googlefit_access_token")" disabled>
     </div>
