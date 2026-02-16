@@ -9,7 +9,7 @@
     var dateCulture = displayService.GetDateCultureInfo(Model.Display);
     var tz = displayService.GetTimeZoneInfo(Model.Display);
 
-    var wakeupInfo = Model.Display.NextWakeupTime();
+    var wakeupInfo = displayService.GetNextWakeupTime(Model.Display);
     var nextWakeup = wakeupInfo.NextWakeup;
     var sleepInSeconds = wakeupInfo.SleepInSeconds;
     var schedule = wakeupInfo.Schedule;

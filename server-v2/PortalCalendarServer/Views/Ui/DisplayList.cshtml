@@ -48,7 +48,7 @@
                 <td class="text-end">
                     @if (!d.IsDefault())
                     {
-                        var batteryPercent = d.BatteryPercent();
+                        var batteryPercent = displayService.GetBatteryPercent(d);
                         if (batteryPercent.HasValue)
                         {
                             @($"{batteryPercent.Value:F0} %")
@@ -62,7 +62,7 @@
                 <td>
                     @if (!d.IsDefault())
                     {
-                        var nextWakeupInfo = d.NextWakeupTime();
+                        var nextWakeupInfo = displayService.GetNextWakeupTime(d);
                         var minutes = nextWakeupInfo.SleepInSeconds / 60;
                         var seconds = nextWakeupInfo.SleepInSeconds % 60;
                         @($"{nextWakeupInfo.NextWakeup:dd.MM.yyyy HH:mm} (in {minutes} minutes and {seconds} seconds)")
@@ -71,12 +71,12 @@
                 <td>
                     @if (!d.IsDefault())
                     {
-                        var missedConnects = d.MissedConnects();
+                        var missedConnects = displayService.GetMissedConnects(d);
                         if (missedConnects > 0)
                         {
                             var minFailuresStr = displayService.GetConfig(d, "alive_check_minimal_failure_count");
                             var minFailures = int.TryParse(minFailuresStr, out var mf) ? mf : 1;
-                            var lastVisit = d.LastVisit();
+                            var lastVisit = displayService.GetLastVisit(d);
 
                             if (missedConnects >= minFailures)
                             {

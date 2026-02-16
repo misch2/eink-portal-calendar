@@ -8,9 +8,9 @@
     Layout = null;
 
     var dateCulture = displayService.GetDateCultureInfo(Model.Display);
-    var timezone = displayService.GetTimeZoneInfo(Model.Display);
+    var tz = displayService.GetTimeZoneInfo(Model.Display);
 
-    var wakeupInfo = Model.Display.NextWakeupTime();
+    var wakeupInfo = displayService.GetNextWakeupTime(Model.Display);
     var nextWakeup = wakeupInfo.NextWakeup;
     var sleepInSeconds = wakeupInfo.SleepInSeconds;
     var schedule = wakeupInfo.Schedule;
@@ -30,7 +30,7 @@
     // Get weather data
     var weatherInfo = weatherComponent == null ? null : await weatherComponent.GetWeatherAsync(Model.Display, Model.Date);
     var currentWeather = weatherInfo?.CurrentWeather;
-    var forecast = weatherInfo?.Forecast ?? new List<AggregatedWeatherData>();
+    var forecast = weatherInfo?.Forecast;
 
     var precipitationLimit = 0.5; // mm
 }
@@ -61,14 +61,14 @@
                     var wind = (int)(currentWeather.WindSpeedAvg + 0.5);
                     var totalPrecip = currentWeather.PrecipitationSum;
                     var dt = currentWeather.TimeStart.ToUniversalTime();
-                    dt = TimeZoneInfo.ConvertTimeFromUtc(dt, timezone);
+                    dt = TimeZoneInfo.ConvertTimeFromUtc(dt, tz);
 
                     var dayOrNight = currentWeather.TimeIsDay ? "day" : "night";
                     var classRainOrSnow = totalPrecip >= precipitationLimit ? "weather-is-rain-or-snow" : "";
                 }
 
                 <div style="position: absolute; top: 0.25em; left: 0; margin: auto; width: 100%; text-align: center; font-size: 5rem" class="@classRainOrSnow">
-                    @temp °C
+                    @temp Â°C
                 </div>
 
                 <div style="position: absolute; top: 0.5rem; left: 0; text-align: left">
@@ -146,7 +146,7 @@
                 var dayOrNight = item.TimeIsDay ? "day" : "night";
 
                 var dt = item.TimeStart.ToUniversalTime();
-                dt = TimeZoneInfo.ConvertTimeFromUtc(dt, timezone);
+                dt = TimeZoneInfo.ConvertTimeFromUtc(dt, tz);
 
                 string dayDescription;
                 if (dt.Date == Model.Date.Date)
@@ -155,7 +155,7 @@
                 }
                 else if (dt.Date == Model.Date.Date.AddDays(1))
                 {
-                    dayDescription = "zítra";
+                    dayDescription = "zÃ­tra";
                 }
                 else
                 {

@@ -144,7 +144,7 @@ public class UiController(
         ViewData["NavLink"] = "config_ui";
         ViewData["Title"] = $"Configuration - {display.Name}";
         ViewData["Themes"] = await _themeService.GetActiveThemesAsync();
-        ViewData["LastVoltage"] = display.Voltage();
+        ViewData["LastVoltage"] = _displayService.GetVoltage(display);
         ViewData["LastVoltageRaw"] = _displayService.GetConfig(display, "_last_voltage_raw");
         ViewBag.Display = display; // for global layout
 
@@ -178,7 +178,8 @@ public class UiController(
                      paramName == "metnoweather" || paramName == "openweather" ||
                      paramName == "telegram" || paramName == "mqtt" || paramName == "ota_mode")
             {
-                // Checkboxes: if not present, set to empty/false
+                // Checkboxes: if not present, explicitly set to empty/false
+                // FIXME is this needed now when we are using hidden inputs for checkboxes to fix this in JS?
                 _displayService.SetConfig(display, paramName, "");
             }
         }

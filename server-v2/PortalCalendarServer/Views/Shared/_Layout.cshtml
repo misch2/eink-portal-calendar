@@ -40,15 +40,15 @@
         @if (display != null)
         {
             TimeSpan? last_contact_ago = null;
-            if (display.LastVisit() != null)
+            if (displayService.GetLastVisit(display) != null)
             {
-                last_contact_ago = DateTime.UtcNow - display.LastVisit()!.Value;
+                last_contact_ago = DateTime.UtcNow - displayService.GetLastVisit(display)!.Value;
             }
 
             @* FIXME waiting tasks *@
 
-            var last_voltage = display.Voltage();
-            var battery_percent = display.BatteryPercent();
+            var last_voltage = displayService.GetVoltage(display);
+            var battery_percent = displayService.GetBatteryPercent(display);
 
             <h4>Selected display: @display.Name</h4>
 
@@ -73,7 +73,7 @@
 
                     Next wakeup:
                     @{
-                        var nextWakeupInfo = display.NextWakeupTime();
+                        var nextWakeupInfo = displayService.GetNextWakeupTime(display);
                         int nw_minutes = nextWakeupInfo.SleepInSeconds / 60;
                         int nw_seconds = nextWakeupInfo.SleepInSeconds % 60;
                         @($"in {nw_minutes} minutes and {nw_seconds} seconds.")

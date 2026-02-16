@@ -1,5 +1,6 @@
 using PortalCalendarServer.Models.ColorTypes;
 using PortalCalendarServer.Models.Entities;
+using PortalCalendarServer.Models.POCOs.Board;
 using System.Globalization;
 
 namespace PortalCalendarServer.Services;
@@ -84,4 +85,29 @@ public interface IDisplayService
     /// Enqueue a request to regenerate the display image for all displays.
     /// </summary>
     void EnqueueAllImageRegenerationRequest();
+
+    /// <summary>
+    /// Get the number of missed connection attempts for a display
+    /// </summary>
+    int GetMissedConnects(Display display);
+
+    /// <summary>
+    /// Get the last visit timestamp for a display
+    /// </summary>
+    DateTime? GetLastVisit(Display display);
+
+    /// <summary>
+    /// Get the battery voltage for a display
+    /// </summary>
+    decimal? GetVoltage(Display display);
+
+    /// <summary>
+    /// Get the battery percentage for a display
+    /// </summary>
+    decimal? GetBatteryPercent(Display display);
+
+    /// <summary>
+    /// Calculate the next wakeup time for a display based on its schedule
+    /// </summary>
+    WakeUpInfo GetNextWakeupTime(Display display);
 }

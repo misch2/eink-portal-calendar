@@ -172,14 +172,14 @@ public class ApiController : ControllerBase
         await _context.SaveChangesAsync();
 
         // Calculate next wakeup time
-        var wakeupInfo = display.NextWakeupTime();
+        var wakeupInfo = _displayService.GetNextWakeupTime(display);
         _logger.LogInformation(
             "Next wakeup at {NextWakeup} (in {SleepSeconds} seconds) according to crontab schedule '{Schedule}'",
             wakeupInfo.NextWakeup, wakeupInfo.SleepInSeconds, wakeupInfo.Schedule);
 
         // Update MQTT values
-        await _mqttService.PublishSensorAsync(display, "voltage", display.Voltage(), true);
-        await _mqttService.PublishSensorAsync(display, "battery_percent", display.BatteryPercent(), true);
+        await _mqttService.PublishSensorAsync(display, "voltage", _displayService.GetVoltage(display), true);
+        await _mqttService.PublishSensorAsync(display, "battery_percent", _displayService.GetBatteryPercent(display), true);
         await _mqttService.PublishSensorAsync(display, "voltage_raw", _displayService.GetConfig(display, "_last_voltage_raw"), true);
         await _mqttService.PublishSensorAsync(display, "min_voltage", _displayService.GetConfig(display, "_min_voltage"), true);
         await _mqttService.PublishSensorAsync(display, "max_voltage", _displayService.GetConfig(display, "_max_voltage"), true);
@@ -199,7 +199,7 @@ public class ApiController : ControllerBase
         var response = new
         {
             sleep = wakeupInfo.SleepInSeconds,
-            battery_percent = display.BatteryPercent(),
+            battery_percent = _displayService.GetBatteryPercent(display),
             ota_mode = _displayService.GetConfigBool(display, "ota_mode")
         };
 

@@ -1,8 +1,8 @@
 @model PortalCalendarServer.Services.PageViewModel
 @using PortalCalendarServer.Models.Entities
 @using PortalCalendarServer.Services
-@using PortalCalendarServer.Services.PageGeneratorComponents
 @using System.Globalization
+@using PortalCalendarServer.Services.PageGeneratorComponents
 @inject IDisplayService displayService
 @{
     Layout = null;
@@ -10,14 +10,14 @@
     var dateCulture = displayService.GetDateCultureInfo(Model.Display);
     var tz = displayService.GetTimeZoneInfo(Model.Display);
 
-    var wakeupInfo = Model.Display.NextWakeupTime();
+    var wakeupInfo = displayService.GetNextWakeupTime(Model.Display);
     var nextWakeup = wakeupInfo.NextWakeup;
     var sleepInSeconds = wakeupInfo.SleepInSeconds;
     var schedule = wakeupInfo.Schedule;
 
     var calendarComponent = Model.Calendar;
     var calendar = calendarComponent?.GetDetails(Model.Display, Model.Date);
-    var nearestEvents = calendar?.NearestEvents ?? new List<CalendarEvent>();
+    var nearestEvents = calendar?.NearestEvents;
 
     // Helper class for grouping events
     var eventBlocks = new[]

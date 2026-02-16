@@ -1,9 +1,11 @@
 @* Partial view for battery status icon *@
 @using PortalCalendarServer.Models.Entities
+@using PortalCalendarServer.Services
 @model Display
+@inject IDisplayService displayService
 
 @{
-    var pct = Model.BatteryPercent() ?? 0;
+    var pct = displayService.GetBatteryPercent(Model) ?? 0;
     string batteryIcon;
     
     if (pct >= 87)
