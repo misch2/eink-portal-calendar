@@ -189,6 +189,11 @@ public class DisplayService(
     public void EnqueueImageRegenerationRequest(Display display)
     {
         // Enqueue image regeneration in background
+        if (display.IsDefault())
+        {
+            logger.LogWarning("Skipping image regeneration request for default display (ID = 0)");
+            return;
+        }
         imageRegenerationService.EnqueueRequest(display.Id);
     }
 
