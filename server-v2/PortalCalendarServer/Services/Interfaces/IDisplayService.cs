@@ -109,5 +109,15 @@ public interface IDisplayService
     /// <summary>
     /// Calculate the next wakeup time for a display based on its schedule
     /// </summary>
-    WakeUpInfo GetNextWakeupTime(Display display, DateTime? specificDateForNow = null);
+    WakeUpInfo GetNextWakeupTime(Display display, DateTime? optionalNow = null);
+
+    /// <summary>
+    /// Reset the missed connections count for a display to zero
+    /// </summary>
+    void ResetMissedConnectsCount(Display display);
+
+    /// <summary>
+    /// Increase the missed connections count for a display
+    /// </summary>
+    void IncreaseMissedConnectsCount(Display display, DateTime expectedTimeOfConnect);
 }

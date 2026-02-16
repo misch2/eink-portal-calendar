@@ -159,6 +159,58 @@ public class ApiController : ControllerBase
         // Update last visit timestamp
         _displayService.SetConfig(display, "_last_visit", DateTime.UtcNow.ToString("O"));
 
+        // Handle missed connects - reset if there were any
+        var missedConnects = _displayService.GetMissedConnects(display);
+        if (missedConnects > 0)
+        {
+            // Check if we need to send an "unfrozen" notification
+            var frozenNotificationSent = _displayService.GetConfigBool(display, "_frozen_notification_sent");
+            if (frozenNotificationSent)
+            {
+                var lastVisit = _displayService.GetLastVisit(display);
+                if (lastVisit.HasValue)
+                {
+                    var timeZone = _displayService.GetTimeZoneInfo(display);
+                    var lastVisitLocal = TimeZoneInfo.ConvertTimeFromUtc(lastVisit.Value, timeZone);
+                    var nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone);
+
+                    var hoursSince = (int)((DateTime.UtcNow - lastVisit.Value).TotalHours + 0.5);
+                    var message = $"Display '{display.Name}' (ID: {display.Id}) has reconnected!\n" +
+                                  $"Was frozen since: {lastVisitLocal:yyyy-MM-dd HH:mm}\n" +
+                                  $"Reconnected at: {nowLocal:yyyy-MM-dd HH:mm}\n" +
+                                  $"Was offline for approximately {hoursSince} hours";
+
+                    _logger.LogWarning("Display {DisplayId} ({DisplayName}) reconnected after being frozen: {Message}",
+                        display.Id, display.Name, message);
+
+                    // Send unfrozen notification via Telegram if configured
+                    if (_displayService.GetConfigBool(display, "telegram"))
+                    {
+                        var apiKey = _displayService.GetConfig(display, "telegram_api_key");
+                        var chatId = _displayService.GetConfig(display, "telegram_chat_id");
+
+                        if (!string.IsNullOrEmpty(apiKey) && !string.IsNullOrEmpty(chatId))
+                        {
+                            try
+                            {
+                                // TODO: Implement Telegram notification sending
+                                _logger.LogInformation("Would send Telegram unfrozen notification to chat {ChatId} for display {DisplayId}",
+                                    chatId, display.Id);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Failed to send Telegram unfrozen notification for display {DisplayId}", display.Id);
+                            }
+                        }
+                    }
+
+                    _displayService.SetConfig(display, "_frozen_notification_sent", "0");
+                }
+            }
+
+            _displayService.ResetMissedConnectsCount(display);
+        }
+
         // Store voltage and diagnostic data
         _displayService.SetConfig(display, "_last_voltage_raw", adc ?? voltage_raw ?? string.Empty);
         _displayService.SetConfig(display, "_last_voltage", v ?? string.Empty);
@@ -170,6 +222,10 @@ public class ApiController : ControllerBase
         _displayService.SetConfig(display, "_wakeup_reason", wakeup ?? string.Empty);
 
         await _context.SaveChangesAsync();
+
+
+
+
 
         // Calculate next wakeup time
         var wakeupInfo = _displayService.GetNextWakeupTime(display);
@@ -193,8 +249,6 @@ public class ApiController : ControllerBase
         // Final message (workaround for wakeup_reason not being updated)
         await _mqttService.PublishSensorAsync(display, "last_visit", DateTime.UtcNow.ToString("O"));
         await _mqttService.DisconnectAsync();
-
-        // TODO: Handle missed connects and notifications
 
         var response = new
         {

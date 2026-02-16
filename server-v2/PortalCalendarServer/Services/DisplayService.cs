@@ -208,7 +208,7 @@ public class DisplayService(
 
     public DateTime? GetLastVisit(Display display)
     {
-        var lastVisitStr = GetConfig(display, "_last_visit");
+        var lastVisitStr = GetConfig(display, "_last_visit"); // FIXME make this a display property and use UTC always
         if (string.IsNullOrEmpty(lastVisitStr))
         {
             return null;
@@ -291,12 +291,23 @@ public class DisplayService(
         return defaultDate;
     }
 
-    public WakeUpInfo GetNextWakeupTime(Display display, DateTime? specificDateForNow = null)
+    public WakeUpInfo GetNextWakeupTime(Display display, DateTime? optionalNow = null)
     {
-        var now = specificDateForNow ?? DateTime.UtcNow;
+        var now = optionalNow ?? DateTime.UtcNow;
+        var timeZone = GetTimeZoneInfo(display);
+        var schedule = GetConfig(display, "wakeup_schedule") ?? string.Empty;
 
-        var schedule = GetConfig(display, "wakeup_schedule");
-        var nextWakeup = GetNextWakeupTimeForDateTime(schedule, now, GetTimeZoneInfo(display));
+        var nextWakeup = GetNextWakeupTimeForDateTime(schedule, now, timeZone);
+
+        // If nextEvent is too close to now, it should return the next-next event
+        // to avoid displays waking up multiple times due to inaccurate clocks
+        var minSleepMinutes = GetConfigInt(display, "minimal_sleep_time_minutes") ?? 5;
+        var diffSeconds = (nextWakeup - now).TotalSeconds;
+
+        if (diffSeconds <= minSleepMinutes * 60)
+        {
+            nextWakeup = GetNextWakeupTimeForDateTime(schedule, nextWakeup.AddSeconds(1), timeZone);
+        }
 
         var sleepInSeconds = (int)(nextWakeup - now).TotalSeconds;
 
@@ -306,5 +317,37 @@ public class DisplayService(
             SleepInSeconds = sleepInSeconds,
             Schedule = schedule
         };
+    }
+
+    public void ResetMissedConnectsCount(Display display)
+    {
+        SetConfig(display, "_missed_connects", "0");
+        context.SaveChanges();
+    }
+
+    public void IncreaseMissedConnectsCount(Display display, DateTime expectedTimeOfConnect)
+    {
+        var previousExpectedTime = GetConfig(display, "_last_expected_time_of_connect");
+        var expectedTimeStr = expectedTimeOfConnect.ToString("O");
+
+        // Skip if this is the same expected time (avoid duplicate increments)
+        if (previousExpectedTime == expectedTimeStr)
+        {
+            logger.LogDebug(
+                "Skipping increase_missed_connects_count for display {DisplayId} because expected time hasn't changed",
+                display.Id);
+            return;
+        }
+
+        SetConfig(display, "_last_expected_time_of_connect", expectedTimeStr);
+
+        var currentCount = GetMissedConnects(display);
+        SetConfig(display, "_missed_connects", (currentCount + 1).ToString());
+
+        context.SaveChanges();
+
+        logger.LogWarning(
+            "Increased missed connects count for display {DisplayId} to {Count} (expected at {ExpectedTime})",
+            display.Id, currentCount + 1, expectedTimeOfConnect);
     }
 }

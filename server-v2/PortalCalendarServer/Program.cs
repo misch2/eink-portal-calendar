@@ -76,6 +76,7 @@ builder.Services.AddScoped<GoogleFitIntegrationService>();
 // Register background services
 builder.Services.AddHostedService<CacheCleanupService>();
 builder.Services.AddHostedService<BitmapGenerationService>();
+builder.Services.AddHostedService<MissedConnectionsCheckService>();
 
 // Register Image Regeneration Service (singleton + hosted)
 builder.Services.AddSingleton<ImageRegenerationService>();
