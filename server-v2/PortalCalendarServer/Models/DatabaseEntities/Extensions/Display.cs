@@ -1,8 +1,5 @@
 ﻿namespace PortalCalendarServer.Models.Entities
 {
-
-    // FIXME move all of this to DisplayService or something, this is just a data model
-
     public partial class Display
     {
         public bool IsDefault()

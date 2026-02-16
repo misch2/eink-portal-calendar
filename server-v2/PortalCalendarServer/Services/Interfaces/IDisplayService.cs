@@ -109,5 +109,5 @@ public interface IDisplayService
     /// <summary>
     /// Calculate the next wakeup time for a display based on its schedule
     /// </summary>
-    WakeUpInfo GetNextWakeupTime(Display display);
+    WakeUpInfo GetNextWakeupTime(Display display, DateTime? specificDateForNow = null);
 }

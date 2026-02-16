@@ -203,13 +203,12 @@ public class DisplayService(
 
     public int GetMissedConnects(Display display)
     {
-        var missedStr = display.Configs?.FirstOrDefault(c => c.Name == "_missed_connects")?.Value;
-        return int.TryParse(missedStr, out var missed) ? missed : 0;
+        return GetConfigInt(display, "_missed_connects") ?? 0;
     }
 
     public DateTime? GetLastVisit(Display display)
     {
-        var lastVisitStr = display.Configs?.FirstOrDefault(c => c.Name == "_last_visit")?.Value;
+        var lastVisitStr = GetConfig(display, "_last_visit");
         if (string.IsNullOrEmpty(lastVisitStr))
         {
             return null;
@@ -225,58 +224,79 @@ public class DisplayService(
 
     public decimal? GetVoltage(Display display)
     {
-        var voltageStr = display.Configs?.FirstOrDefault(c => c.Name == "_last_voltage")?.Value;
-        if (string.IsNullOrEmpty(voltageStr))
+        var voltage = GetConfigDouble(display, "_last_voltage");
+        if (!voltage.HasValue)
         {
             return null;
         }
 
-        if (decimal.TryParse(voltageStr, NumberStyles.Float, CultureInfo.InvariantCulture, out var voltage))
-        {
-            return Math.Round(voltage, 2);
-        }
-
-        return null;
+        return Math.Round((decimal)voltage.Value, 2);
     }
 
     public decimal? GetBatteryPercent(Display display)
     {
-        var minStr = display.Configs?.FirstOrDefault(c => c.Name == "_min_linear_voltage")?.Value;
-        var maxStr = display.Configs?.FirstOrDefault(c => c.Name == "_max_linear_voltage")?.Value;
+        var min = GetConfigDouble(display, "_min_linear_voltage");
+        var max = GetConfigDouble(display, "_max_linear_voltage");
         var voltage = GetVoltage(display);
-        if (string.IsNullOrEmpty(minStr) || string.IsNullOrEmpty(maxStr) || !voltage.HasValue)
+        if (!min.HasValue || !max.HasValue || !voltage.HasValue)
         {
             return null;
         }
 
-        if (!decimal.TryParse(minStr, NumberStyles.Float, CultureInfo.InvariantCulture, out var min) ||
-            !decimal.TryParse(maxStr, NumberStyles.Float, CultureInfo.InvariantCulture, out var max))
+        var minDecimal = (decimal)min.Value;
+        var maxDecimal = (decimal)max.Value;
+
+        if (minDecimal == 0 || maxDecimal == 0)
         {
             return null;
         }
 
-        var percentage = 100 * (voltage.Value - min) / (max - min);
+        var percentage = 100 * (voltage.Value - minDecimal) / (maxDecimal - minDecimal);
         percentage = Math.Max(0, Math.Min(100, percentage)); // Clip to 0-100
 
         return Math.Round(percentage, 1);
     }
 
-    public WakeUpInfo GetNextWakeupTime(Display display)
+    private DateTime GetNextWakeupTimeForDateTime(string schedule, DateTime dt, TimeZoneInfo timeZone)
     {
-        var now = DateTime.UtcNow;
-        var schedule = display.Configs?.FirstOrDefault(c => c.Name == "wakeup_schedule")?.Value ?? string.Empty;
-        DateTime nextWakeup;
+        // By default wake up tomorrow (truncate to day and add 1 day)
+        var defaultDate = dt.Date.AddDays(1);
+
+        // No schedule, wake up tomorrow (truncate to day and add 1 day)
         if (string.IsNullOrEmpty(schedule))
         {
-            // No schedule, wake up tomorrow
-            nextWakeup = now.Date.AddDays(1);
+            return defaultDate;
         }
-        else
+
+        // Crontab definitions are in the same time zone as the display
+        // Parse cron schedule and find next occurrence
+        try
         {
-            // TODO: Implement crontab schedule parsing
-            // For now, default to next hour
-            nextWakeup = now.AddHours(1).Date.AddHours(now.AddHours(1).Hour);
+            var cronExpression = Cronos.CronExpression.Parse(schedule);
+            var nextOccurrence = cronExpression.GetNextOccurrence(dt, timeZone);
+
+            if (nextOccurrence.HasValue)
+            {
+                return nextOccurrence.Value;
+            }
         }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Invalid crontab schedule '{Schedule}', defaulting to tomorrow", schedule);
+            return defaultDate;
+        }
+
+        // Fallback: wake up tomorrow if no next occurrence found
+        logger.LogWarning("No next occurrence found for cron schedule '{Schedule}', defaulting to tomorrow", schedule);
+        return defaultDate;
+    }
+
+    public WakeUpInfo GetNextWakeupTime(Display display, DateTime? specificDateForNow = null)
+    {
+        var now = specificDateForNow ?? DateTime.UtcNow;
+
+        var schedule = GetConfig(display, "wakeup_schedule");
+        var nextWakeup = GetNextWakeupTimeForDateTime(schedule, now, GetTimeZoneInfo(display));
 
         var sleepInSeconds = (int)(nextWakeup - now).TotalSeconds;
 
