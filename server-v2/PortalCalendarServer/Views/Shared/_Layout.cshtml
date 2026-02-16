@@ -1,6 +1,8 @@
 @using PortalCalendarServer.Models.Entities
 @using PortalCalendarServer.Services
+@using PortalCalendarServer.Services.BackgroundJobs
 @inject IDisplayService displayService
+@inject ImageRegenerationService imageRegenerationService
 
 <!DOCTYPE html>
 <html lang="en">
@@ -33,9 +35,18 @@
         {
             display = d;
         }
+        var activeCount = imageRegenerationService.GetActiveTaskCount();    // Currently processing
     }
     <div class="container">
-        <h1>Portal calendar</h1>
+        <h1>
+            Portal calendar @if (activeCount > 0)
+            {
+                <text>⏳</text>
+            } else
+            {
+                <text></text>
+            }
+        </h1>
 
         @if (display != null)
         {
@@ -44,8 +55,6 @@
             {
                 last_contact_ago = DateTime.UtcNow - displayService.GetLastVisit(display)!.Value;
             }
-
-            @* FIXME waiting tasks *@
 
             var last_voltage = displayService.GetVoltage(display);
             var battery_percent = displayService.GetBatteryPercent(display);

@@ -1,5 +1,4 @@
-using System.Collections.Concurrent;
-using System.Threading.Channels;
+using PortalCalendarServer.Models.POCOs;
 
 namespace PortalCalendarServer.Services.BackgroundJobs;
 
@@ -7,29 +6,23 @@ namespace PortalCalendarServer.Services.BackgroundJobs;
 /// Background service that processes image regeneration requests asynchronously.
 /// Ensures only one active task per display (deduplication).
 /// </summary>
-public class ImageRegenerationService : BackgroundService
+public class ImageRegenerationService : QueuedBackgroundService<ImageRegenerationRequest>
 {
     private readonly ILogger<ImageRegenerationService> _logger;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly Channel<ImageRegenerationRequest> _channel;
-    private readonly ConcurrentDictionary<string, DateTime> _activeRequests;
 
     public ImageRegenerationService(
         ILogger<ImageRegenerationService> logger,
         IServiceScopeFactory serviceScopeFactory)
+        : base(logger, serviceScopeFactory)
     {
         _logger = logger;
-        _serviceScopeFactory = serviceScopeFactory;
-
-        // Unbounded channel for requests
-        _channel = Channel.CreateUnbounded<ImageRegenerationRequest>(new UnboundedChannelOptions
-        {
-            SingleReader = true,
-            SingleWriter = false
-        });
-
-        _activeRequests = new ConcurrentDictionary<string, DateTime>();
     }
+
+    protected override string ServiceName => "Image Regeneration Service";
+
+    protected override string GetRequestKey(ImageRegenerationRequest request) => request.GetKey();
+
+    protected override DateTime GetRequestTimestamp(ImageRegenerationRequest request) => request.RequestedAt;
 
     /// <summary>
     /// Enqueue a request to regenerate an image for a display.
@@ -38,100 +31,24 @@ public class ImageRegenerationService : BackgroundService
     public bool EnqueueRequest(int displayId)
     {
         var request = new ImageRegenerationRequest { DisplayId = displayId };
-        var key = request.GetKey();
-
-        // Check if already processing this display
-        if (_activeRequests.ContainsKey(key))
-        {
-            _logger.LogDebug("Image regeneration for display {DisplayId} is already in progress, skipping", displayId);
-            return false;
-        }
-
-        // Try to write to channel
-        if (_channel.Writer.TryWrite(request))
-        {
-            _logger.LogInformation("Enqueued image regeneration request for display {DisplayId}", displayId);
-            return true;
-        }
-
-        _logger.LogWarning("Failed to enqueue image regeneration request for display {DisplayId}", displayId);
-        return false;
+        return EnqueueRequest(request);
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ProcessRequestAsync(ImageRegenerationRequest request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Image Regeneration Service started");
+        using var scope = ServiceScopeFactory.CreateScope();
+        var pageGeneratorService = scope.ServiceProvider.GetRequiredService<PageGeneratorService>();
+        var displayService = scope.ServiceProvider.GetRequiredService<IDisplayService>();
 
-        await foreach (var request in _channel.Reader.ReadAllAsync(stoppingToken))
+        var display = displayService.GetDisplayById(request.DisplayId);
+        if (display == null)
         {
-            await ProcessRequestAsync(request, stoppingToken);
-        }
-
-        _logger.LogInformation("Image Regeneration Service stopped");
-    }
-
-    private async Task ProcessRequestAsync(ImageRegenerationRequest request, CancellationToken cancellationToken)
-    {
-        var key = request.GetKey();
-
-        // Mark as active (with timestamp for potential cleanup)
-        if (!_activeRequests.TryAdd(key, request.RequestedAt))
-        {
-            _logger.LogDebug("Request {Key} is already being processed", key);
+            _logger.LogWarning("Display {DisplayId} not found, cannot regenerate image", request.DisplayId);
             return;
         }
 
-        try
-        {
-            _logger.LogInformation("Starting image regeneration for display {DisplayId}", request.DisplayId);
-
-            using var scope = _serviceScopeFactory.CreateScope();
-            var pageGeneratorService = scope.ServiceProvider.GetRequiredService<PageGeneratorService>();
-            var displayService = scope.ServiceProvider.GetRequiredService<IDisplayService>();
-
-            var display = displayService.GetDisplayById(request.DisplayId);
-            if (display == null)
-            {
-                _logger.LogWarning("Display {DisplayId} not found, cannot regenerate image", request.DisplayId);
-                return;
-            }
-
-            var realStartTime = DateTime.UtcNow;
-
-            // Generate the image
-            await pageGeneratorService.GenerateImageFromWebAsync(display);
-
-            _logger.LogInformation(
-                "Successfully regenerated image for display {DisplayId} (took {Duration} ms since request, {RealDuration} ms real time)",
-                request.DisplayId,
-                (DateTime.UtcNow - request.RequestedAt).TotalMilliseconds,
-                (DateTime.UtcNow - realStartTime).TotalMilliseconds);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error regenerating image for display {DisplayId}", request.DisplayId);
-        }
-        finally
-        {
-            // Remove from active requests
-            _activeRequests.TryRemove(key, out _);
-        }
+        await pageGeneratorService.GenerateImageFromWebAsync(display);
     }
-
-    public override async Task StopAsync(CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Image Regeneration Service is stopping");
-
-        // Complete the channel to stop accepting new requests
-        _channel.Writer.Complete();
-
-        await base.StopAsync(cancellationToken);
-    }
-
-    /// <summary>
-    /// Gets the number of active regeneration tasks
-    /// </summary>
-    public int GetActiveTaskCount() => _activeRequests.Count;
 
     /// <summary>
     /// Checks if a regeneration is in progress for a specific display
@@ -139,6 +56,6 @@ public class ImageRegenerationService : BackgroundService
     public bool IsRegenerating(int displayId)
     {
         var key = $"regenerate_{displayId}";
-        return _activeRequests.ContainsKey(key);
+        return IsProcessing(key);
     }
 }

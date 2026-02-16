@@ -1,4 +1,4 @@
-namespace PortalCalendarServer.Services.BackgroundJobs;
+namespace PortalCalendarServer.Models.POCOs;
 
 /// <summary>
 /// Represents a request to regenerate an image for a display
