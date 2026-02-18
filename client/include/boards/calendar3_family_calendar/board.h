@@ -8,14 +8,14 @@
 #define USE_WDT
 #define WDT_TIMEOUT 120  // seconds
 
-#define HOSTNAME "esp36-weather" /* a board number, not a chip ID */
+#define HOSTNAME "esp33-calendar" /* a board number, not a chip ID */
 
 #define CALENDAR_URL_HOST "portal-calendar.localnet" /* .NET server on Proxmox LXC */
 #define CALENDAR_URL_PORT 8084                       /* nginx port to log requests, real server runs on 5000 */
 
 #define SYSLOG_SERVER "logserver.localnet" /* rpi1 */
 #define SYSLOG_PORT 514
-#define SYSLOG_MYAPPNAME "weather-display"
+#define SYSLOG_MYAPPNAME "family-calendar"
 
 // Display is 800x480 B/W/R
 // https://www.aliexpress.com/item/1005005121813674.html?spm=a2g0o.order_list.order_list_main.5.335f1802RZxENL
@@ -40,8 +40,8 @@
 #define BUSY_PIN 4
 
 #define VOLTAGE_ADC_PIN 34
-
-#define VOLTAGE_MULTIPLICATION_COEFFICIENT 1.7540
+// #define VOLTAGE_MULTIPLICATION_COEFFICIENT 1.5050
+#define VOLTAGE_MULTIPLICATION_COEFFICIENT 1.7683
 #define VOLTAGE_MIN 3.0
 #define VOLTAGE_MAX 4.2
 #define VOLTAGE_LINEAR_MIN 3.4

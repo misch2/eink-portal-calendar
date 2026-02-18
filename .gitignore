@@ -8,7 +8,7 @@ server/hypnotoad.pid
 server/*.conf
 server/log/*.log
 server/generated_images/*.png
-client/include/boards/*/board.h
+# client/include/boards/*/board.h
 !client/include/boards/example/board.h
 .pio/
 .vstags
