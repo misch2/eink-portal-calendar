@@ -19,3 +19,7 @@ client/include/boards/calendar*.h
 /server-v2/.vs
 /server-v2/PortalCalendarServer/.vs
 /server-v2/generated_images/*.png
+/_example
+/.vs
+/server-v2/PortalCalendarServer/publish.cmd
+/server-v2/PortalCalendarServer/appsettings.Production.json

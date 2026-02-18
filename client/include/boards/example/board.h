@@ -1,7 +1,10 @@
-// #define DEBUG
+#pragma once
+
+#define DEBUG
 // #define USE_GRAYSCALE_BW_DISPLAY
 
-#define MYHOSTNAME "esp32-a"
+#define USE_WIFI_MANAGER
+#define HOSTNAME "esp32-a"
 
 #define CALENDAR_URL_HOST "192.168.0.100"
 #define CALENDAR_URL_PORT 8000
@@ -57,21 +60,28 @@ VCC  - gray   #888 - to +3.3V
 #define DC_PIN 23
 #define RST_PIN 33
 #define BUSY_PIN 27
+
 #define VOLTAGE_ADC_PIN 32
+#define VOLTAGE_MULTIPLICATION_COEFFICIENT 2.371
+#define VOLTAGE_MIN 4.4
+#define VOLTAGE_MAX 6.0
+#define VOLTAGE_LINEAR_MIN VOLTAGE_MIN
+#define VOLTAGE_LINEAR_MAX VOLTAGE_MAX
+
 
 #define DISPLAY_INSTANCE GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN));
 
 // #define USE_WDT
 // #define WDT_TIMEOUT 60  // seconds
 
-void boardSpecificInit() {
+inline void boardSpecificInit() {
   // power on the ePaper and I2C
   //   pinMode(2, OUTPUT);
   //   digitalWrite(2, HIGH);
   //   delay(50);
 }
 
-void boardSpecificDone() {
+inline void boardSpecificDone() {
   // power off the ePaper and I2C
   //   digitalWrite(2, LOW);
 }
