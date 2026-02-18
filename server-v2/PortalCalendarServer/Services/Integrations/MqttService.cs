@@ -18,15 +18,14 @@ public class MqttService(
     IMemoryCache memoryCache,
     IDatabaseCacheServiceFactory databaseCacheFactory,
     IDisplayService displayService,
-    CalendarContext context,
-    Display? display = null)
-    : IntegrationServiceBase(loggerParam, httpClientFactory, memoryCache, databaseCacheFactory, context, display), IMqttService, IAsyncDisposable
+    CalendarContext context)
+    : IntegrationServiceBase(loggerParam, httpClientFactory, memoryCache, databaseCacheFactory, context), IMqttService, IAsyncDisposable
 {
     private new readonly ILogger<MqttService> logger = loggerParam;
     private IMqttClient? _mqttClient;
     private bool _isConnected = false;
 
-    public override bool IsConfigured()
+    public override bool IsConfigured(Display display)
     {
         if (display == null)
         {
@@ -47,7 +46,7 @@ public class MqttService(
             return _mqttClient;
         }
 
-        if (!IsConfigured())
+        if (!IsConfigured(display))
         {
             throw new InvalidOperationException("MQTT integration is not properly configured");
         }

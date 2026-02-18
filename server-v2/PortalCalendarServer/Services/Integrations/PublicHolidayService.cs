@@ -1,3 +1,4 @@
+using PortalCalendarServer.Models.Entities;
 using PublicHoliday;
 
 namespace PortalCalendarServer.Services.Integrations;
@@ -13,19 +14,19 @@ public class PublicHolidayService : IPublicHolidayService
     // Czech holiday names mapping (date format: MM-dd)
     private static readonly Dictionary<string, (string English, string Czech)> CzechHolidayNames = new()
     {
-        { "01-01", ("New Year's Day", "Novı rok") },
-        { "03-29", ("Good Friday", "Velkı pátek") },  // Movable - will be set dynamically
-        { "04-01", ("Easter Monday", "Velikonoèní pondìlí") },  // Movable - will be set dynamically  
-        { "05-01", ("Labour Day", "Svátek práce") },
-        { "05-08", ("Liberation Day", "Den vítìzství") },
-        { "07-05", ("Saints Cyril and Methodius Day", "Den slovanskıch vìrozvìstù Cyrila a Metodìje") },
-        { "07-06", ("Jan Hus Day", "Den upálení mistra Jana Husa") },
-        { "09-28", ("St. Wenceslas Day", "Den èeské státnosti") },
-        { "10-28", ("Independent Czechoslovak State Day", "Den vzniku samostatného èeskoslovenského státu") },
+        { "01-01", ("New Year's Day", "NovÃ½ rok") },
+        { "03-29", ("Good Friday", "VelkÃ½ pÃ¡tek") },  // Movable - will be set dynamically
+        { "04-01", ("Easter Monday", "VelikonoÄnÃ­ pondÄ›lÃ­") },  // Movable - will be set dynamically  
+        { "05-01", ("Labour Day", "SvÃ¡tek prÃ¡ce") },
+        { "05-08", ("Liberation Day", "Den vÃ­tÄ›zstvÃ­") },
+        { "07-05", ("Saints Cyril and Methodius Day", "Den slovanskÃ½ch vÄ›rozvÄ›stÅ¯ Cyrila a MetodÄ›je") },
+        { "07-06", ("Jan Hus Day", "Den upÃ¡lenÃ­ mistra Jana Husa") },
+        { "09-28", ("St. Wenceslas Day", "Den ÄeskÃ© stÃ¡tnosti") },
+        { "10-28", ("Independent Czechoslovak State Day", "Den vzniku samostatnÃ©ho ÄeskoslovenskÃ©ho stÃ¡tu") },
         { "11-17", ("Struggle for Freedom and Democracy Day", "Den boje za svobodu a demokracii") },
-        { "12-24", ("Christmas Eve", "Štìdrı den") },
-        { "12-25", ("Christmas Day", "1. svátek vánoèní") },
-        { "12-26", ("St. Stephen's Day", "2. svátek vánoèní") }
+        { "12-24", ("Christmas Eve", "Å tÄ›drÃ½ den") },
+        { "12-25", ("Christmas Day", "1. svÃ¡tek vÃ¡noÄnÃ­") },
+        { "12-26", ("St. Stephen's Day", "2. svÃ¡tek vÃ¡noÄnÃ­") }
     };
 
     public PublicHolidayService(ILogger<PublicHolidayService> logger)
@@ -33,7 +34,7 @@ public class PublicHolidayService : IPublicHolidayService
         _logger = logger;
     }
 
-    public bool IsConfigured()
+    public bool IsConfigured(Display display)
     {
         // Local only, always configured
         return true;
@@ -75,7 +76,7 @@ public class PublicHolidayService : IPublicHolidayService
         // Get names from our mapping, or use library values as fallback
         var dateKey = date.ToString("MM-dd");
         var (englishName, czechName) = CzechHolidayNames.GetValueOrDefault(dateKey,
-            (holiday.EnglishName ?? "Public Holiday", holiday.Name ?? "Státní svátek"));
+            (holiday.EnglishName ?? "Public Holiday", holiday.Name ?? "StÃ¡tnÃ­ svÃ¡tek"));
 
         _logger.LogDebug("Found public holiday: {EnglishName} ({CzechName}) on {Date}",
             englishName, czechName, date);
@@ -113,7 +114,7 @@ public class PublicHolidayService : IPublicHolidayService
         {
             var dateKey = h.HolidayDate.ToString("MM-dd");
             var (englishName, czechName) = CzechHolidayNames.GetValueOrDefault(dateKey,
-                (h.EnglishName ?? "Public Holiday", h.Name ?? "Státní svátek"));
+                (h.EnglishName ?? "Public Holiday", h.Name ?? "StÃ¡tnÃ­ svÃ¡tek"));
 
             result.Add(new PublicHolidayInfo
             {

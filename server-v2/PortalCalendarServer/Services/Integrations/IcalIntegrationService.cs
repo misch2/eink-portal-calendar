@@ -22,14 +22,13 @@ public class IcalIntegrationService : IntegrationServiceBase
         IMemoryCache memoryCache,
         IDatabaseCacheServiceFactory databaseCacheFactory,
         CalendarContext context,
-        string icsUrl,
-        Display? display = null)
-        : base(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display)
+        string icsUrl)
+        : base(logger, httpClientFactory, memoryCache, databaseCacheFactory, context)
     {
         _icsUrl = icsUrl;
     }
 
-    public override bool IsConfigured()
+    public override bool IsConfigured(Display display)
     {
         return String.IsNullOrEmpty(_icsUrl) == false;
     }

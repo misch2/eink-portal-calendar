@@ -27,14 +27,13 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
         IMemoryCache memoryCache,
         IDatabaseCacheServiceFactory databaseCacheFactory,
         CalendarContext context,
-        IDisplayService displayService,
-        Display? display = null)
-        : base(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display)
+        IDisplayService displayService)
+        : base(logger, httpClientFactory, memoryCache, databaseCacheFactory, context)
     {
         _displayService = displayService;
     }
 
-    public override bool IsConfigured()
+    public override bool IsConfigured(Display display)
     {
         if (display == null)
         {
@@ -46,9 +45,9 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
         return !string.IsNullOrEmpty(accessToken) && !string.IsNullOrEmpty(refreshToken);
     }
 
-    private UserCredential? GetUserCredential()
+    private UserCredential? GetUserCredential(Display display)
     {
-        if (!IsConfigured() || display == null)
+        if (!IsConfigured(display))
         {
             return null;
         }
@@ -83,9 +82,9 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
         return new UserCredential(flow, "user", tokenResponse);
     }
 
-    private async Task<FitnessService?> GetFitnessServiceAsync(CancellationToken cancellationToken = default)
+    private async Task<FitnessService?> GetFitnessServiceAsync(Display display, CancellationToken cancellationToken = default)
     {
-        var credential = GetUserCredential();
+        var credential = GetUserCredential(display);
         if (credential == null || display == null)
         {
             return null;
@@ -114,9 +113,10 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
     }
 
     public async Task<AggregateResponse?> FetchFromWebAsync(
+        Display display,
         CancellationToken cancellationToken = default)
     {
-        if (!IsConfigured())
+        if (!IsConfigured(display))
         {
             return null;
         }
@@ -127,12 +127,13 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
         var globalDtEnd = DateTime.UtcNow;
 
         return await dbCacheService.GetOrSetAsync(
-            async () => await FetchFromWebInternalAsync(globalDtStart, globalDtEnd, cancellationToken),
+            async () => await FetchFromWebInternalAsync(display, globalDtStart, globalDtEnd, cancellationToken),
             new { start = globalDtStart, end = globalDtEnd.Date },
             cancellationToken);
     }
 
     private async Task<AggregateResponse?> FetchFromWebInternalAsync(
+        Display display,
         DateTime globalDtStart,
         DateTime globalDtEnd,
         CancellationToken cancellationToken)
@@ -140,7 +141,7 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
         logger.LogDebug("Requesting Google Fit data from {Start} to {End} for {Days} days",
             globalDtStart, globalDtEnd, FetchDays);
 
-        var service = await GetFitnessServiceAsync(cancellationToken);
+        var service = await GetFitnessServiceAsync(display, cancellationToken);
         if (service == null)
         {
             logger.LogError("Failed to create Google Fit service");
@@ -215,16 +216,17 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
     }
 
     public async Task<List<WeightDataPoint>> GetWeightSeriesAsync(
+        Display display,
         CancellationToken cancellationToken = default)
     {
         var result = new List<WeightDataPoint>();
 
-        if (!IsConfigured())
+        if (!IsConfigured(display))
         {
             return result;
         }
 
-        var data = await FetchFromWebAsync(cancellationToken);
+        var data = await FetchFromWebAsync(display, cancellationToken);
         if (data?.Bucket == null)
         {
             return result;
@@ -258,9 +260,10 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
     }
 
     public async Task<decimal?> GetLastKnownWeightAsync(
+        Display display,
         CancellationToken cancellationToken = default)
     {
-        var series = await GetWeightSeriesAsync(cancellationToken);
+        var series = await GetWeightSeriesAsync(display, cancellationToken);
 
         for (int i = series.Count - 1; i >= 0; i--)
         {

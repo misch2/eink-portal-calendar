@@ -59,8 +59,7 @@ public class WeatherComponent(
                 context,
                 lat.Value,
                 lon.Value,
-                alt.Value,
-                display
+                alt.Value
             );
 
             var detailedForecast = await service.GetForecastAsync();
@@ -129,8 +128,7 @@ public class WeatherComponent(
                 apiKey,
                 lat.Value,
                 lon.Value,
-                lang,
-                display
+                lang
             );
 
             var current = await service.FetchCurrentFromWebAsync();

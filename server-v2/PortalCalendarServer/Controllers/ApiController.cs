@@ -222,12 +222,7 @@ public class ApiController : ControllerBase
         _displayService.SetConfig(display, "_max_linear_voltage", vlmax ?? string.Empty);
         _displayService.SetConfig(display, "_reset_reason", reset ?? string.Empty);
         _displayService.SetConfig(display, "_wakeup_reason", wakeup ?? string.Empty);
-
         await _context.SaveChangesAsync();
-
-
-
-
 
         // Calculate next wakeup time
         var wakeupInfo = _displayService.GetNextWakeupTime(display);

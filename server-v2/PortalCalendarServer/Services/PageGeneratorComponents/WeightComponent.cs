@@ -1,4 +1,5 @@
-﻿using PortalCalendarServer.Models.DTOs;
+using PortalCalendarServer.Models.DTOs;
+using PortalCalendarServer.Models.Entities;
 using PortalCalendarServer.Services.Integrations;
 
 namespace PortalCalendarServer.Services.PageGeneratorComponents;
@@ -8,14 +9,17 @@ public class WeightComponent
     private readonly ILogger<PageGeneratorService> _logger;
     private readonly GoogleFitIntegrationService _googleFitService;
     private readonly bool _isAvailable;
+    private readonly Display _display;
 
     public WeightComponent(
         ILogger<PageGeneratorService> logger,
-        GoogleFitIntegrationService googleFitService)
+        GoogleFitIntegrationService googleFitService,
+        Display display)
     {
         _logger = logger;
         _googleFitService = googleFitService;
-        _isAvailable = googleFitService.IsConfigured();
+        _display = display;
+        _isAvailable = googleFitService.IsConfigured(display);
     }
 
     public decimal? GetLastWeight()
@@ -30,7 +34,7 @@ public class WeightComponent
 
         try
         {
-            var task = _googleFitService.GetLastKnownWeightAsync();
+            var task = _googleFitService.GetLastKnownWeightAsync(_display);
             task.Wait();
             return task.Result;
         }
@@ -53,7 +57,7 @@ public class WeightComponent
 
         try
         {
-            var task = _googleFitService.GetWeightSeriesAsync();
+            var task = _googleFitService.GetWeightSeriesAsync(_display);
             task.Wait();
             return task.Result;
         }

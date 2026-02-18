@@ -23,8 +23,7 @@ public class XkcdComponent(
         httpClientFactory,
         memoryCache,
         databaseCacheFactory,
-        context,
-        null  // Display is not needed for XKCD integration
+        context
         );
 
     /// <summary>

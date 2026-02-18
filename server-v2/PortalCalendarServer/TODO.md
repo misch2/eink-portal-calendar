@@ -1,4 +1,4 @@
-# TODO
+ # TODO
 
 - [ ] Differentiate between 3color "BWY" and "BWR" ePapers
 - [ ] Add unit tests for the new code

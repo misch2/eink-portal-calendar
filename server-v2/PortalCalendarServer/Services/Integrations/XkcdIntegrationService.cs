@@ -16,12 +16,11 @@ public class XkcdIntegrationService(
     IHttpClientFactory httpClientFactory,
     IMemoryCache memoryCache,
     IDatabaseCacheServiceFactory databaseCacheFactory,
-    CalendarContext context,
-    Display? display = null) : IntegrationServiceBase(loggerParam, httpClientFactory, memoryCache, databaseCacheFactory, context, display)
+    CalendarContext context) : IntegrationServiceBase(loggerParam, httpClientFactory, memoryCache, databaseCacheFactory, context)
 {
     private new readonly ILogger<XkcdIntegrationService> logger = loggerParam;
 
-    public override bool IsConfigured()
+    public override bool IsConfigured(Display display)
     {
         // No configuration needed for XKCD API
         return true;

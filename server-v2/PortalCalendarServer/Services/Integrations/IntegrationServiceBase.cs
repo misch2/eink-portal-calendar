@@ -12,7 +12,6 @@ public abstract class IntegrationServiceBase : IIntegrationService
     protected readonly IHttpClientFactory httpClientFactory;
     protected readonly IDatabaseCacheServiceFactory databaseCacheFactory;
     protected readonly CalendarContext context;
-    protected readonly Display? display;
 
     protected HttpClient httpClient => httpClientFactory.CreateClient();
 
@@ -21,8 +20,7 @@ public abstract class IntegrationServiceBase : IIntegrationService
         IHttpClientFactory httpClientFactory,
         IMemoryCache memoryCache,
         IDatabaseCacheServiceFactory databaseCacheFactory,
-        CalendarContext context,
-        Display? display = null
+        CalendarContext context
         )
     {
         this.httpClientFactory = httpClientFactory;
@@ -30,8 +28,7 @@ public abstract class IntegrationServiceBase : IIntegrationService
         this.memoryCache = memoryCache;
         this.databaseCacheFactory = databaseCacheFactory;
         this.context = context;
-        this.display = display;
     }
 
-    public abstract bool IsConfigured();
+    public abstract bool IsConfigured(Display display);
 }

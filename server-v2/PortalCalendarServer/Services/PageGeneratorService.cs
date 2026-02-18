@@ -76,9 +76,8 @@ public class PageGeneratorService
                     _memoryCache,
                     _databaseCacheFactory,
                     _context,
-                    _displayService,
-                    display);
-                return new WeightComponent(_logger, googleFitService);
+                    _displayService);
+                return new WeightComponent(_logger, googleFitService, display);
             },
             xkcdFactory: () => new XkcdComponent(_logger, _httpClientFactory, _memoryCache, _databaseCacheFactory, _context, _loggerFactory),
             publicHolidayFactory: () => new PublicHolidayComponent(_logger, _publicHolidayService),

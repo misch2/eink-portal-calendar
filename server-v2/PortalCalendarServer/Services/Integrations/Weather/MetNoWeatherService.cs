@@ -27,9 +27,8 @@ public class MetNoWeatherService : IntegrationServiceBase
         CalendarContext context,
         double latitude,
         double longitude,
-        double altitude,
-        Display? display = null)
-        : base(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display)
+        double altitude)
+        : base(logger, httpClientFactory, memoryCache, databaseCacheFactory, context)
     {
         _latitude = latitude;
         _longitude = longitude;
@@ -37,7 +36,7 @@ public class MetNoWeatherService : IntegrationServiceBase
         _iconMapping = new MetNoIconsMapping();
     }
 
-    public override bool IsConfigured()
+    public override bool IsConfigured(Display display)
     {
         return _latitude != 0 && _longitude != 0;
     }

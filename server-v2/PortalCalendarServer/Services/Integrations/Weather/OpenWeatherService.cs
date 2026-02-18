@@ -27,9 +27,8 @@ public class OpenWeatherService : IntegrationServiceBase
         string apiKey,
         double latitude,
         double longitude,
-        string language = "en",
-        Display? display = null)
-        : base(logger, httpClientFactory, memoryCache, databaseCacheFactory, context, display)
+        string language = "en")
+        : base(logger, httpClientFactory, memoryCache, databaseCacheFactory, context)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(apiKey);
         _apiKey = apiKey;
@@ -38,7 +37,7 @@ public class OpenWeatherService : IntegrationServiceBase
         _language = language;
     }
 
-    public override bool IsConfigured()
+    public override bool IsConfigured(Display display)
     {
         return String.IsNullOrEmpty(_apiKey) == false && _latitude != 0 && _longitude != 0;
     }

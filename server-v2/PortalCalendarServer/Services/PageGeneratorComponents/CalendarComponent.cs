@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.Entities;
 using PortalCalendarServer.Services.Caches;
@@ -44,8 +44,7 @@ public class CalendarComponent(
                     memoryCache,
                     databaseCacheFactory,
                     context,
-                    url,
-                    display);
+                    url);
 
                 // Get today's events
                 var today = date.Date;
