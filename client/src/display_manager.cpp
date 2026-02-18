@@ -11,24 +11,7 @@
 #include <SPI.h>
 #endif
 
-// FIXME move DISPLAY_INSTANCE here!
-
-#ifdef DISPLAY_TYPE_BW
-#include <GxEPD2_BW.h>
-extern GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display;
-#endif
-
-#ifdef DISPLAY_TYPE_GRAYSCALE
-#ifdef USE_GRAYSCALE_BW_DISPLAY
-#include <GxEPD2_4G_BW.h>
-#else
-#include <GxEPD2_4G_4G.h>
-#endif
-#endif
-
-#ifdef DISPLAY_TYPE_3C
-#include <GxEPD2_3C.h>
-#endif
+extern DISPLAY_CLASS_TYPE display;
 
 DisplayManager::DisplayManager(Logger& logger, WDTManager& wdtManager, OTAManager& otaManager)
     : logger(logger), wdtManager(wdtManager), otaManager(otaManager) {

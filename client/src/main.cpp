@@ -34,25 +34,8 @@
 #include "wdt_manager.h"
 #include "wifi_client.h"
 
-#ifdef DISPLAY_TYPE_BW
-#include <GxEPD2_BW.h>
-const char* defined_color_type = "BW";
-#endif
-#ifdef DISPLAY_TYPE_GRAYSCALE
-const char* defined_color_type = "4G";
-#ifdef USE_GRAYSCALE_BW_DISPLAY
-#include <GxEPD2_4G_BW.h>
-#else
-#include <GxEPD2_4G_4G.h>
-#endif
-#endif
-#ifdef DISPLAY_TYPE_3C
-const char* defined_color_type = "3C";
-#include <GxEPD2_3C.h>
-#endif
-
-// macro to define "display" variable dynamically with the right type
-DISPLAY_INSTANCE
+DISPLAY_CLASS_TYPE display(DISPLAY_CLASS_ARGUMENTS);
+const char* defined_color_type = DISPLAY_COLOR_TYPE_AS_STRING;
 
 /* RTC vars (survives deep sleep) */
 RTC_DATA_ATTR int wakeupCount = 0;
