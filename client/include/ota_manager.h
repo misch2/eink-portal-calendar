@@ -14,6 +14,7 @@ class OTAManager {
   OTAManager(Logger& logger, WDTManager& wdtManager);
   
   void init();
+  void loop();
 };
 
 #endif  // OTA_MANAGER_H

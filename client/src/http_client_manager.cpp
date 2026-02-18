@@ -1,10 +1,13 @@
 #include "http_client_manager.h"
+
 #include <ArduinoJson.h>
-#include <ArduinoOTA.h>
+#include <HTTPClient.h>
 
 #include "board_config.h"
+#include "display_manager.h"
 #include "logger.h"
 #include "main.h"
+#include "ota_manager.h"
 #include "system_info.h"
 #include "version.h"
 #include "voltage.h"
@@ -27,110 +30,108 @@ extern GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display;
 #include <GxEPD2_3C.h>
 #endif
 
-#define SLEEP_TIME_DEFAULT (SECONDS_PER_MINUTE * 5)
-#define SLEEP_TIME_TEMPORARY_ERROR (SECONDS_PER_MINUTE * 5)
-#define SLEEP_TIME_PERMANENT_ERROR (SECONDS_PER_HOUR * 1)
+HTTPClientManager::HTTPClientManager(Logger& logger, WDTManager& wdtManager, OTAManager& otaManager, VoltageReader& voltageReader, SystemInfo& systemInfo,
+                                     DisplayManager& displayManager, int& sleepTime, char* lastChecksum, const char* defined_color_type)
+    : logger(logger),
+      wdtManager(wdtManager),
+      otaManager(otaManager),
+      voltageReader(voltageReader),
+      displayManager(displayManager),
+      systemInfo(systemInfo),
+      sleepTime(sleepTime),
+      lastChecksum(lastChecksum),
+      defined_color_type(defined_color_type) {}
 
-HTTPClientManager::HTTPClientManager(Logger& logger, WDTManager& wdtManager, VoltageReader& voltageReader,
-                                   SystemInfo& systemInfo, HttpClient& httpClient, int& sleepTime,
-                                   char* lastChecksum, const char* defined_color_type)
-    : logger(logger), wdtManager(wdtManager), voltageReader(voltageReader),
-      systemInfo(systemInfo), httpClient(httpClient), sleepTime(sleepTime),
-      lastChecksum(lastChecksum), defined_color_type(defined_color_type) {
-}
-
-String HTTPClientManager::textStatusCode(int statusCode) {
-  if (statusCode == HTTP_ERROR_CONNECTION_FAILED) {
-    return "HTTP_ERROR_CONNECTION_FAILED - Could not connect to the server";
-  } else if (statusCode == HTTP_ERROR_API) {
-    return "HTTP_ERROR_API -  Usually indicates your code is using the class incorrectly";
-  } else if (statusCode == HTTP_ERROR_TIMED_OUT) {
-    return "HTTP_ERROR_TIMED_OUT - Spent too long waiting for a reply";
-  } else if (statusCode == HTTP_ERROR_INVALID_RESPONSE) {
-    return "HTTP_ERROR_INVALID_RESPONSE - The response from the server is invalid, is it definitely an HTTP server?";
-  } else {
-    return "";
+String HTTPClientManager::statusCodeAsString(int statusCode) {
+  switch (statusCode) {
+    case 200: return "OK";
+    case 304: return "Not Modified";
+    case 400: return "Bad Request";
+    case 404: return "Not Found";
+    case 500: return "Internal Server Error";
+    case 502: return "Bad Gateway";
+    case 503: return "Service Unavailable";
+    default: return "Code " + String(statusCode);
   }
 }
 
-void HTTPClientManager::startHttpGetRequest(String path) {
-  int statusCode = 0;
-  bool ok = false;
-  for (int attempt = 1; attempt <= 3; attempt++) {
+int HTTPClientManager::readLineFromStream(WiFiClient* stream, String& result) {
+  result = "";
+  int bytesRead = 0;
+  
+  while (stream->available()) {
+    char c = stream->read();
+    bytesRead++;
+    
+    if (c == '\n') {
+      return bytesRead;
+    }
+    if (c != '\r') {
+      result += c;
+    }
+    
     wdtManager.refresh();
-    if (attempt > 1) {
-      logger.debug("Retrying download, attempt #%d", attempt);
-    }
-
-    logger.debug(">>> GET %s", path.c_str());
-
-    httpClient.beginRequest();
-    httpClient.get(path);
-    httpClient.endRequest();
-
-    statusCode = httpClient.responseStatusCode();
-    logger.debug("<<< HTTP response code: %d (%s)", statusCode, textStatusCode(statusCode).c_str());
-    if (statusCode == 200) {
-      ok = true;
-      break;
-    } else {
-      logger.debug("HTTP response code: %d (%s), attempt #%d", statusCode, textStatusCode(statusCode).c_str(), attempt);
-      httpClient.stop();
-      delay(1000);
-      continue;
-    }
+    otaManager.loop();
   }
-
-  logger.debug("Connection status: connected=%d, available=%ld, headerAvailable=%d", 
-              httpClient.connected(), httpClient.available(), httpClient.headerAvailable());
-  logger.debug("Skipping response headers...");
-  httpClient.skipResponseHeaders();
-  logger.debug("Connection status: connected=%d, available=%ld, headerAvailable=%d", 
-              httpClient.connected(), httpClient.available(), httpClient.headerAvailable());
-
-  if (!ok) {
-    sleepTime = SLEEP_TIME_TEMPORARY_ERROR;
-    extern void error(String message);  // TODO: Should be passed as parameter or callback
-    error(String("Unexpected HTTP response.\nURL: ") +
-          String(CALENDAR_URL_HOST) + ":" + String(CALENDAR_URL_PORT) + path + "\n\nResponse code: " +
-          String(statusCode) + "\n");
-  }
+  
+  return bytesRead;
 }
 
 void HTTPClientManager::loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMode) {
-  String path = "/config?mac=" + WiFi.macAddress()
-                + "&adc=" + String(voltageReader.getAdcRaw())
-                + "&v=" + String(voltageReader.getVoltageReal())
-                + "&vmin=" + String(VOLTAGE_MIN)
-                + "&vmax=" + String(VOLTAGE_MAX)
-                + "&vlmin=" + String(VOLTAGE_LINEAR_MIN)
-                + "&vlmax=" + String(VOLTAGE_LINEAR_MAX)
-                + "&w=" + String(DISPLAY_WIDTH) + "&h=" + String(DISPLAY_HEIGHT)
-                + "&c=" + String(defined_color_type)
-                + "&fw=" + String(FIRMWARE_VERSION)
-                + "&reset=" + systemInfo.resetReasonAsString()
-                + "&wakeup=" + systemInfo.wakeupReasonAsString();
-
+  logger.debug("loadConfigFromWeb()");
   configLoadTime = millis();
-  startHttpGetRequest(path);
-  String jsonText = httpClient.responseBody();
-
+  
+  HTTPClient http;
+  String url = serverUrl + "/config?mac=" + WiFi.macAddress() + 
+               "&adc=" + String(voltageReader.getAdcRaw()) + 
+               "&v=" + String(voltageReader.getVoltageReal()) +
+               "&vmin=" + String(VOLTAGE_MIN) + 
+               "&vmax=" + String(VOLTAGE_MAX) + 
+               "&vlmin=" + String(VOLTAGE_LINEAR_MIN) +
+               "&vlmax=" + String(VOLTAGE_LINEAR_MAX) + 
+               "&w=" + String(DISPLAY_WIDTH) + 
+               "&h=" + String(DISPLAY_HEIGHT) + 
+               "&c=" + String(defined_color_type) +
+               "&fw=" + String(FIRMWARE_VERSION) + 
+               "&reset=" + systemInfo.resetReasonAsString() + 
+               "&wakeup=" + systemInfo.wakeupReasonAsString();
+  
+  logger.trace("URL: %s", url.c_str());
+  http.begin(url);
+  http.setTimeout(10000);
+  
+  int httpCode = http.GET();
+  logger.debug("HTTP response code: %d (%s)", httpCode, statusCodeAsString(httpCode).c_str());
+  
+  if (httpCode != 200) {
+    sleepTime = SLEEP_TIME_TEMPORARY_ERROR;
+    logger.debug("Failed to load config, HTTP code: %d", httpCode);
+    http.end();
+    extern void showErrorOnDisplay(String message);
+    showErrorOnDisplay(String("Failed to load config\nHTTP: ") + statusCodeAsString(httpCode));
+    return;
+  }
+  
+  String jsonText = http.getString();
+  http.end();
+  
   DynamicJsonDocument response(1000);
   DeserializationError errorStr = deserializeJson(response, jsonText);
-
+  
   if (errorStr) {
-    logger.debug("error: %s", errorStr.c_str());
+    logger.debug("JSON parse error: %s", errorStr.c_str());
     sleepTime = SLEEP_TIME_TEMPORARY_ERROR;
-    extern void error(String message);
-    error("Can't parse response");
+    extern void showErrorOnDisplay(String message);
+    showErrorOnDisplay("Can't parse response");
+    return;
   }
-
+  
   int tmpi = response["sleep"];
   logger.trace("sleepTime from JSON: %d", tmpi);
   if (tmpi != 0) {
     sleepTime = tmpi;
   }
-
+  
   bool tmpb = response["ota_mode"];
   logger.trace("otaMode from JSON: %d", tmpb);
   otaMode = tmpb;
@@ -142,33 +143,15 @@ void HTTPClientManager::loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMod
       otaMode = false;
     }
   }
-}
-
-int HTTPClientManager::httpReadStringUntil(char terminator, String &result) {
-  result = "";
-
+  
   wdtManager.refresh();
-  int bytes = 0;
-  while (httpClient.connected() && httpClient.available()) {
-    ArduinoOTA.handle();
-    int c = httpClient.read();
-    if (c < 0) {
-      logger.debug("Premature end of HTTP response");
-      break;
-    }
-    bytes++;
-    if (c == terminator) {
-      break;
-    }
-    result += (char)c;
-  }
-  return bytes;
 }
 
-void HTTPClientManager::showRawBitmapFrom_HTTP(const char *path, int16_t x, int16_t y, int16_t w, int16_t h) {
+void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int16_t y, int16_t w, int16_t h) {
+  logger.debug("showRawBitmapFrom_HTTP(%s)", path);
+  
 #ifdef DISPLAY_TYPE_BW
   static unsigned char input_row_mono_buffer[DISPLAY_BUFFER_SIZE];
-  static unsigned char input_row_color_buffer[DISPLAY_BUFFER_SIZE];
 #endif
 
 #ifdef DISPLAY_TYPE_3C
@@ -177,126 +160,161 @@ void HTTPClientManager::showRawBitmapFrom_HTTP(const char *path, int16_t x, int1
 #endif
 
   uint32_t startTime = millis();
-  if ((x >= display.width()) || (y >= display.height())) {
+  if ((x >= displayManager.displayWidth()) || (y >= displayManager.displayHeight())) {
+    logger.debug("Invalid coordinates: x=%d, y=%d", x, y);
     return;
   }
 
-  String partial_uri = String(path) + "?mac=" + WiFi.macAddress();
-
+  String url = serverUrl + String(path) + "?mac=" + WiFi.macAddress();
+  logger.trace("URL: %s", url.c_str());
+  
   bool ok = false;
   String newChecksum = String(lastChecksum);
+  
   for (int attempt = 1; attempt <= 5; attempt++) {
     if (attempt > 1) {
       logger.debug("Retrying download, attempt #%d", attempt);
+      delay(1000);
     }
-
-    startHttpGetRequest(partial_uri);
-    logger.debug("Expected content length (from headers): %d", httpClient.contentLength());
-
-    uint32_t bytes_read = 0;
-    logger.debug("Reading bitmap header");
+    
+    HTTPClient http;
+    http.begin(url);
+    http.setTimeout(30000); // 30 second timeout for bitmap download
+    
+    int httpCode = http.GET();
+    logger.debug("HTTP response code: %d (%s)", httpCode, statusCodeAsString(httpCode).c_str());
+    
+    if (httpCode != 200) {
+      http.end();
+      if (httpCode == 304) {
+        logger.debug("Image not modified (304), skipping");
+        return;
+      }
+      continue;
+    }
+    
+    WiFiClient* stream = http.getStreamPtr();
+    int contentLength = http.getSize();
+    logger.debug("Content length: %d", contentLength);
+    
+    // Read magic header "MM"
     wdtManager.refresh();
     String line;
-    bytes_read += httpReadStringUntil('\n', line);
-    logger.debug("Read %d bytes, line: %s", bytes_read, line.c_str());
+    int bytesRead = readLineFromStream(stream, line);
+    
+    logger.debug("Magic: %s", line.c_str());
     if (line != "MM") {
       sleepTime = SLEEP_TIME_PERMANENT_ERROR;
-      extern void error(String message);
-      error(String("Invalid bitmap received, doesn't start with a magic sequence:\n") + "Line: " + line + "\n");
-    }
-
-    logger.debug("Reading checksum");
-    wdtManager.refresh();
-    bytes_read += httpReadStringUntil('\n', line);
-
-#ifndef GHOST_HUNTING
-    logger.debug("Last checksum was: %s", lastChecksum);
-    logger.debug("New checksum is: %s", line.c_str());
-    if (line == String(lastChecksum)) {
-      logger.debug("Not refreshing, image is unchanged");
+      extern void showErrorOnDisplay(String message);
+      showErrorOnDisplay(String("Invalid bitmap: ") + line);
+      http.end();
       return;
-    } else {
-      logger.debug("Checksum has changed, reading image and refreshing the display");
     }
-#endif
-
+    
+    // Read checksum
+    wdtManager.refresh();
+    bytesRead += readLineFromStream(stream, line);
     newChecksum = line;
-    logger.debug("Reading image data for %d rows", h);
-
+    
+    logger.debug("Last checksum: %s", lastChecksum);
+    logger.debug("New checksum: %s", newChecksum.c_str());
+    
+    if (newChecksum == String(lastChecksum)) {
+      logger.debug("Checksum unchanged, skipping");
+      http.end();
+      return;
+    }
+    
+    logger.debug("Reading bitmap data for %d rows", h);
+    uint32_t totalBytesRead = bytesRead;
+    bool readError = false;
+    
     for (uint16_t row = 0; row < h; row++) {
       wdtManager.refresh();
-
-      uint32_t local_bytes_read = 0;
+      otaManager.loop();
+      
 #ifdef DISPLAY_TYPE_BW
-      local_bytes_read = httpClient.read(input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
-      if (local_bytes_read != DISPLAY_BUFFER_SIZE) {
-        logger.debug("WARNING(1): bytes read != bytes expected, skipped %d bytes on row %d", 
-                    DISPLAY_BUFFER_SIZE - local_bytes_read, row);
-#ifndef GHOST_HUNTING
-        break;
-#endif
+      size_t bytesAvail = 0;
+      int timeout = 100; // 1 second timeout per row
+      while (stream->available() < DISPLAY_BUFFER_SIZE && timeout > 0) {
+        delay(10);
+        timeout--;
       }
-      bytes_read += local_bytes_read;
+      
+      if (stream->available() >= DISPLAY_BUFFER_SIZE) {
+        size_t read = stream->readBytes(input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
+        if (read == DISPLAY_BUFFER_SIZE) {
+          display.writeImage(input_row_mono_buffer, x, y + row, w, 1);
+          totalBytesRead += read;
+        } else {
+          logger.debug("WARNING: Read %d bytes, expected %d on row %d", read, DISPLAY_BUFFER_SIZE, row);
+          readError = true;
+          break;
+        }
+      } else {
+        logger.debug("WARNING: Timeout waiting for data on row %d", row);
+        readError = true;
+        break;
+      }
 #endif
 
 #ifdef DISPLAY_TYPE_3C
-      local_bytes_read = httpClient.read(input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
-      if (local_bytes_read != DISPLAY_BUFFER_SIZE) {
-        logger.debug("WARNING(2): bytes read != bytes expected, skipped %d bytes on row %d", 
-                    DISPLAY_BUFFER_SIZE - local_bytes_read, row);
-#ifndef GHOST_HUNTING
-        break;
-#endif
+      int timeout = 100;
+      while (stream->available() < DISPLAY_BUFFER_SIZE * 2 && timeout > 0) {
+        delay(10);
+        timeout--;
       }
-      bytes_read += local_bytes_read;
-      local_bytes_read = httpClient.read(input_row_color_buffer, DISPLAY_BUFFER_SIZE);
-      if (local_bytes_read != DISPLAY_BUFFER_SIZE) {
-        logger.debug("WARNING(3): bytes read != bytes expected, skipped %d bytes on row %d", 
-                    DISPLAY_BUFFER_SIZE - local_bytes_read, row);
-#ifndef GHOST_HUNTING
+      
+      if (stream->available() >= DISPLAY_BUFFER_SIZE * 2) {
+        size_t read1 = stream->readBytes(input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
+        size_t read2 = stream->readBytes(input_row_color_buffer, DISPLAY_BUFFER_SIZE);
+        
+        if (read1 == DISPLAY_BUFFER_SIZE && read2 == DISPLAY_BUFFER_SIZE) {
+          display.writeImage(input_row_mono_buffer, input_row_color_buffer, x, y + row, w, 1);
+          totalBytesRead += read1 + read2;
+        } else {
+          logger.debug("WARNING: Read %d+%d bytes, expected %d+%d on row %d", 
+                      read1, read2, DISPLAY_BUFFER_SIZE, DISPLAY_BUFFER_SIZE, row);
+          readError = true;
+          break;
+        }
+      } else {
+        logger.debug("WARNING: Timeout waiting for data on row %d", row);
+        readError = true;
         break;
-#endif
       }
-      bytes_read += local_bytes_read;
-#endif
-
-#ifdef DISPLAY_TYPE_BW
-      display.writeImage(input_row_mono_buffer, x, y + row, w, 1);
-#endif
-#ifdef DISPLAY_TYPE_3C
-      display.writeImage(input_row_mono_buffer, input_row_color_buffer, x, y + row, w, 1);
 #endif
     }
-
-    logger.debug("Total bytes read: %d, total bytes expected: %d, %s", bytes_read, httpClient.contentLength(),
-                bytes_read == httpClient.contentLength() ? "OK" : "ERROR");
-
-#ifdef GHOST_HUNTING
-    ok = 1;
-    break;
-#endif
-    if (bytes_read == httpClient.contentLength()) {
-      ok = 1;
+    
+    http.end();
+    
+    logger.debug("Total bytes read: %d, expected: %d", totalBytesRead, contentLength);
+    
+    if (!readError) {
+      ok = true;
       break;
-    } else {
-      logger.debug("WARNING(4): total bytes read != total bytes expected, skipped %d bytes", 
-                  httpClient.contentLength() - bytes_read);
-      httpClient.stop();
     }
   }
+  
   logger.debug("Download time: %lu ms", millis() - startTime);
-
+  
   if (!ok) {
     sleepTime = SLEEP_TIME_PERMANENT_ERROR;
-    extern void error(String message);
-    error("Failed to download image, there were errors in all attempts.");
+    extern void showErrorOnDisplay(String message);
+    showErrorOnDisplay("Failed to download image after all attempts");
+    return;
   }
-
-  logger.debug("Display refresh starting");
+  
+  // Refresh display
+  logger.debug("Refreshing display");
   wdtManager.refresh();
   startTime = millis();
   display.refresh();
   logger.debug("Display refresh time: %lu ms", millis() - startTime);
-
-  strcpy(lastChecksum, newChecksum.c_str());
+  
+  // Update checksum
+  strncpy(lastChecksum, newChecksum.c_str(), 64);
+  lastChecksum[64] = '\0';
+  
+  wdtManager.refresh();
 }

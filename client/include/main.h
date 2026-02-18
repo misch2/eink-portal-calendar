@@ -5,11 +5,11 @@
 #include "fonts/Open_Sans_Regular_16.h"
 #include "fonts/Open_Sans_Regular_24.h"
 
-void basicInit();
-void wakeupAndConnect();
+void minimalHardwareInit();
+void wakeupDisplayAndConnectWiFi();
 
-void disconnectAndHibernate();
-void error(String message);
+void disconnectWiFiAndHibernateAll();
+void showErrorOnDisplay(String message);
 
 void logRuntimeStats();
 

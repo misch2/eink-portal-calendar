@@ -1,7 +1,6 @@
 // generic libraries
 #include <Adafruit_GFX.h>
 #include <Arduino.h>
-#include <ArduinoHttpClient.h>
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
 #include <WiFi.h>
@@ -23,29 +22,10 @@
 #include <WiFiManager.h>
 #endif
 
-#ifdef DISPLAY_TYPE_BW
-#include <GxEPD2_BW.h>
-const char *defined_color_type = "BW";
-#endif
-
-#ifdef DISPLAY_TYPE_GRAYSCALE
-const char *defined_color_type = "4G";
-#ifdef USE_GRAYSCALE_BW_DISPLAY
-#include <GxEPD2_4G_BW.h>
-#else
-#include <GxEPD2_4G_4G.h>
-#endif
-#endif
-
-#ifdef DISPLAY_TYPE_3C
-const char *defined_color_type = "3C";
-#include <GxEPD2_3C.h>
-#endif
-
-#include "logger.h"
 #include "debug.h"
 #include "display_manager.h"
 #include "http_client_manager.h"
+#include "logger.h"
 #include "main.h"
 #include "ota_manager.h"
 #include "system_info.h"
@@ -53,6 +33,23 @@ const char *defined_color_type = "3C";
 #include "voltage.h"
 #include "wdt_manager.h"
 #include "wifi_client.h"
+
+#ifdef DISPLAY_TYPE_BW
+#include <GxEPD2_BW.h>
+const char* defined_color_type = "BW";
+#endif
+#ifdef DISPLAY_TYPE_GRAYSCALE
+const char* defined_color_type = "4G";
+#ifdef USE_GRAYSCALE_BW_DISPLAY
+#include <GxEPD2_4G_BW.h>
+#else
+#include <GxEPD2_4G_4G.h>
+#endif
+#endif
+#ifdef DISPLAY_TYPE_3C
+const char* defined_color_type = "3C";
+#include <GxEPD2_3C.h>
+#endif
 
 // macro to define "display" variable dynamically with the right type
 DISPLAY_INSTANCE
@@ -64,8 +61,8 @@ RTC_DATA_ATTR char lastChecksum[64 + 1] = "<not_defined_yet>";
 #define SLEEP_TIME_DEFAULT (SECONDS_PER_MINUTE * 5)
 
 // remotely configurable variables (via JSON)
-int sleepTime = SLEEP_TIME_DEFAULT;
-bool otaMode = false;
+int nextSleepTime = SLEEP_TIME_DEFAULT;
+bool otaDebugModeNoSleep = false;
 
 // ordinary vars
 #ifdef USE_WIFI_MANAGER
@@ -73,7 +70,6 @@ WiFiManager wifiManager;
 #endif
 
 WiFiClientWithBlockingReads wifiClient;
-HttpClient httpClient = HttpClient(wifiClient, CALENDAR_URL_HOST, CALENDAR_URL_PORT);
 
 #ifdef SYSLOG_SERVER
 WiFiUDP udpClient;
@@ -84,78 +80,87 @@ Logger logger;
 #endif
 
 WDTManager wdtManager(logger);
-DisplayManager displayManager(logger, wdtManager);
-WiFiConnectionManager wifiConnectionManager(logger, wdtManager);
 OTAManager otaManager(logger, wdtManager);
+DisplayManager displayManager(logger, wdtManager, otaManager);
+WiFiConnectionManager wifiConnectionManager(logger, wdtManager);
 SystemInfo systemInfo(logger, wakeupCount);
 VoltageReader voltageReader(logger);
-HTTPClientManager httpClientManager(logger, wdtManager, voltageReader, systemInfo, httpClient, sleepTime, lastChecksum, defined_color_type);
+HTTPClientManager httpClientManager(logger, wdtManager, otaManager, voltageReader, systemInfo, displayManager, nextSleepTime, lastChecksum, defined_color_type);
 
-uint32_t fullStartTime;
-uint32_t configLoadTime;
+class TimingInfo {
+ public:
+  uint32_t fullStartTime;
+  uint32_t configLoadTime;
 
-void basicInit() {
-  fullStartTime = millis();
+  TimingInfo() : fullStartTime(0), configLoadTime(0) {}
+
+  void logStats() { DEBUG_PRINT("Total execution time: %lu ms", millis() - fullStartTime); }
+};
+TimingInfo timing;
+
+void minimalHardwareInit() {
+  timing.fullStartTime = millis();
   ++wakeupCount;
   Serial.begin(115200);
+  wdtManager.init();
   DEBUG_PRINT("Started");
 }
 
-void wakeupAndConnect() {
+void wakeupDisplayAndConnectWiFi() {
   displayManager.init();
-  if (!wifiConnectionManager.connect()) {
-    sleepTime = SECONDS_PER_HOUR * 1;
-    error("WiFi connect/login unsuccessful.");
+
+  if (!wifiConnectionManager.init()) {
+    nextSleepTime = SECONDS_PER_HOUR * 1;
+    showErrorOnDisplay("WiFi connect/login unsuccessful.");
   }
+
+  otaManager.init();
+  wifiClient.setOTAManager(&otaManager);
   wifiClient.setBlockingReadTimeout(5000);
+
   systemInfo.logResetReason(lastChecksum);
 
 #ifdef USE_WDT
   if (esp_reset_reason() == ESP_RST_TASK_WDT) {
-    sleepTime = SECONDS_PER_HOUR * 1;
-    error("Watchdog issue. Please report this to the developer.");
+    nextSleepTime = SECONDS_PER_HOUR * 1;
+    showErrorOnDisplay("Watchdog issue. Please report this to the developer.");
   }
 #endif
-
-  otaManager.init();
 
   voltageReader.read();
-  ArduinoOTA.handle();
-  httpClientManager.loadConfigFromWeb(configLoadTime, otaMode);
-  ArduinoOTA.handle();
+  otaManager.loop();
+  httpClientManager.loadConfigFromWeb(timing.configLoadTime, otaDebugModeNoSleep);
+  otaManager.loop();
   if (voltageReader.getVoltageReal() > 0 && voltageReader.getVoltageReal() < VOLTAGE_MIN) {
-    sleepTime = SECONDS_PER_HOUR * 1;
-    error(String("Battery voltage too low: ") + String(voltageReader.getVoltageReal()) + " V\n" + "Minimum is: " + String(VOLTAGE_MIN) + " V\n" +
-          "Please charge the battery and try again.");
+    nextSleepTime = SECONDS_PER_HOUR * 1;
+    showErrorOnDisplay(String("Battery voltage too low: ") + String(voltageReader.getVoltageReal()) + " V\n" + "Minimum is: " + String(VOLTAGE_MIN) + " V\n" +
+                       "Please charge the battery and try again.");
   }
 }
 
-void disconnectAndHibernate() {
-  logRuntimeStats();
+void disconnectWiFiAndHibernateAll() {
+  timing.logStats();
   displayManager.stop();
-
-#ifdef GHOST_HUNTING
-  sleepTime = 15;
-#else
-  sleepTime -= (millis() - configLoadTime) / 1000;
-  if (sleepTime < 10) {
-    DEBUG_PRINT("SleepTime is too low (%d seconds), resetting to a sane value", sleepTime);
-    sleepTime = 300;
-  }
-#endif
-  DEBUG_PRINT("Going to hibernate for %d seconds", sleepTime);
   wdtManager.stop();
 
-  wifiConnectionManager.disconnect();
+  nextSleepTime -= (millis() - timing.configLoadTime) / 1000;
+  if (nextSleepTime < 10) {
+    DEBUG_PRINT("SleepTime is too low (%d seconds), resetting to a sane value", nextSleepTime);
+    nextSleepTime = 300;
+  }
+
+  DEBUG_PRINT("Going to hibernate for %d seconds", nextSleepTime);
+
+  wifiConnectionManager.stop();
   boardSpecificDone();
-  espDeepSleep(sleepTime);
+  espDeepSleep(nextSleepTime);
 }
 
-void error(String message) {
+void showErrorOnDisplay(String message) {
   strcpy(lastChecksum, "");
   DEBUG_PRINT("Displaying error: %s", message.c_str());
-  displayManager.displayText(message + "\n\nRetrying after " + String(sleepTime / 60) + " minutes.", &DejaVu_Sans_Mono_16);
-  disconnectAndHibernate();
+  displayManager.displayText(message + "\n\nRetrying after " + String(nextSleepTime / 60) + " minutes.", &DejaVu_Sans_Mono_16);
+  disconnectWiFiAndHibernateAll();
 }
 
 void espDeepSleep(uint64_t seconds) {
@@ -165,34 +170,24 @@ void espDeepSleep(uint64_t seconds) {
   esp_deep_sleep_start();
 }
 
-void logRuntimeStats() {
-  TRACE_PRINT("logRuntimeStats()");
-  DEBUG_PRINT("Total execution time: %lu ms", millis() - fullStartTime);
-}
-
 void setup() {
-  basicInit();
-  wdtManager.init();
+  minimalHardwareInit();
+
   boardSpecificInit();
-  wakeupAndConnect();
+  wakeupDisplayAndConnectWiFi();
 
-#ifdef GHOST_HUNTING
-  DEBUG_PRINT("Ghost hunting mode enabled, not going to sleep");
-#endif
-
-  if (otaMode) {
-    wdtManager.stop();
+  if (otaDebugModeNoSleep) {
     DEBUG_PRINT("Running OTA loop on %s (%s.local)", WiFi.localIP().toString().c_str(), HOSTNAME);
+    wdtManager.stop();
     while (true) {
-      ArduinoOTA.handle();
+      otaManager.loop();
       delay(5);
     }
   };
-
-  httpClientManager.showRawBitmapFrom_HTTP("/calendar/bitmap/epaper", 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-  disconnectAndHibernate();
 }
 
 void loop() {
-  // Shouldn't get here at all due to the deep sleep called in setup
+  httpClientManager.showRawBitmapFrom_HTTP("/calendar/bitmap/epaper", 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+
+  disconnectWiFiAndHibernateAll();
 }

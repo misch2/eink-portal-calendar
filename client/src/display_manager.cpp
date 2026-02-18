@@ -4,11 +4,14 @@
 #include "board_config.h"
 #include "logger.h"
 #include "main.h"
+#include "ota_manager.h"
 #include "wdt_manager.h"
 
 #ifdef SPI_BUS
 #include <SPI.h>
 #endif
+
+// FIXME move DISPLAY_INSTANCE here!
 
 #ifdef DISPLAY_TYPE_BW
 #include <GxEPD2_BW.h>
@@ -27,8 +30,8 @@ extern GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display;
 #include <GxEPD2_3C.h>
 #endif
 
-DisplayManager::DisplayManager(Logger& logger, WDTManager& wdtManager)
-    : logger(logger), wdtManager(wdtManager) {
+DisplayManager::DisplayManager(Logger& logger, WDTManager& wdtManager, OTAManager& otaManager)
+    : logger(logger), wdtManager(wdtManager), otaManager(otaManager) {
 }
 
 void DisplayManager::init() {
@@ -77,7 +80,7 @@ void DisplayManager::displayText(String message, const GFXfont *font) {
   wdtManager.refresh();
   display.firstPage();
   do {
-    ArduinoOTA.handle();
+    otaManager.loop();
     display.fillScreen(GxEPD_WHITE);
     display.setCursor(x, y);
     display.print(message);
@@ -85,4 +88,12 @@ void DisplayManager::displayText(String message, const GFXfont *font) {
   } while (display.nextPage());
   display.refresh();
   wdtManager.refresh();
+}
+
+int DisplayManager::displayWidth() {
+  return display.width();
+}
+
+int DisplayManager::displayHeight() {
+  return display.height();
 }

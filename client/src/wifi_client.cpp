@@ -4,6 +4,7 @@
 
 #include "board_config.h"
 #include "logger.h"
+#include "ota_manager.h"
 #include "version.h"
 #include "wdt_manager.h"
 
@@ -13,12 +14,18 @@ extern WiFiManager wifiManager;
 #endif
 
 // WiFiClientWithBlockingReads implementation
+void WiFiClientWithBlockingReads::setOTAManager(OTAManager* manager) {
+  otaManager = manager;
+}
+
 int WiFiClientWithBlockingReads::blocking_read(uint8_t *buffer, size_t bytes) {
   int remain = bytes;
   uint32_t start = millis();
 
   while ((WiFiClient::connected() || WiFiClient::available()) && (remain > 0)) {
-    ArduinoOTA.handle();
+    if (otaManager) {
+      otaManager->loop();
+    }
     if (WiFiClient::available()) {
       uint8_t data = 0;
       int res = WiFiClient::read(&data, 1);
@@ -67,7 +74,7 @@ WiFiConnectionManager::WiFiConnectionManager(Logger& logger, WDTManager& wdtMana
     : logger(logger), wdtManager(wdtManager) {
 }
 
-bool WiFiConnectionManager::connect() {
+bool WiFiConnectionManager::init() {
   bool res;
 
   logger.debug("Connecting to WiFi");
@@ -83,7 +90,7 @@ bool WiFiConnectionManager::connect() {
   wdtManager.init();
   if (!res) {
     logger.debug("Failed to connect");
-    disconnect();
+    stop();
     return false;
   }
 #else
@@ -109,7 +116,7 @@ bool WiFiConnectionManager::connect() {
   return true;
 }
 
-void WiFiConnectionManager::disconnect() {
+void WiFiConnectionManager::stop() {
   logger.trace("Disconnecting WiFi");
 
   unsigned long start = millis();
