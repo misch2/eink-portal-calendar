@@ -13,26 +13,23 @@ namespace PortalCalendarServer.Tests.Services.Integrations;
 /// </summary>
 public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
 {
-    private GoogleFitIntegrationService CreateService(Display? display = null)
+    private GoogleFitIntegrationService CreateService()
     {
         var logger = new Mock<ILogger<GoogleFitIntegrationService>>().Object;
         var displayService = new Mock<IDisplayService>();
 
         // Setup displayService mocks to return config values
-        if (display != null)
-        {
-            displayService.Setup(ds => ds.GetConfig(display, It.IsAny<string>()))
-                .Returns<Display, string>((d, name) => d.Configs?.FirstOrDefault(c => c.Name == name)?.Value);
-            displayService.Setup(ds => ds.SetConfig(display, It.IsAny<string>(), It.IsAny<string>()))
-                .Callback<Display, string, string>((d, name, value) =>
+        displayService.Setup(ds => ds.GetConfig(It.IsAny<Display>(), It.IsAny<string>()))
+            .Returns<Display, string>((d, name) => d.Configs?.FirstOrDefault(c => c.Name == name)?.Value);
+        displayService.Setup(ds => ds.SetConfig(It.IsAny<Display>(), It.IsAny<string>(), It.IsAny<string>()))
+            .Callback<Display, string, string>((d, name, value) =>
+            {
+                var config = d.Configs?.FirstOrDefault(c => c.Name == name);
+                if (config != null)
                 {
-                    var config = d.Configs?.FirstOrDefault(c => c.Name == name);
-                    if (config != null)
-                    {
-                        config.Value = value;
-                    }
-                });
-        }
+                    config.Value = value;
+                }
+            });
 
         return new GoogleFitIntegrationService(
             logger,
@@ -117,9 +114,9 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
     [Fact]
     public void IsAvailable_WhenNoDisplay_ReturnsFalse()
     {
-        var service = CreateService(display: null);
+        var service = CreateService();
 
-        var result = service.IsConfigured();
+        var result = service.IsConfigured(null!);
 
         Assert.False(result);
     }
@@ -128,9 +125,9 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
     public void IsAvailable_WhenNoTokens_ReturnsFalse()
     {
         var display = CreateTestDisplay();
-        var service = CreateService(display);
+        var service = CreateService();
 
-        var result = service.IsConfigured();
+        var result = service.IsConfigured(display);
 
         Assert.False(result);
     }
@@ -148,9 +145,9 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
         Context.SaveChanges();
         Context.Entry(display).Collection(d => d.Configs).Load();
 
-        var service = CreateService(display);
+        var service = CreateService();
 
-        var result = service.IsConfigured();
+        var result = service.IsConfigured(display);
 
         Assert.False(result);
     }
@@ -159,9 +156,9 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
     public void IsAvailable_WhenBothTokensPresent_ReturnsTrue()
     {
         var display = CreateDisplayWithGoogleFitTokens();
-        var service = CreateService(display);
+        var service = CreateService();
 
-        var result = service.IsConfigured();
+        var result = service.IsConfigured(display);
 
         Assert.True(result);
     }
@@ -170,9 +167,9 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
     public async Task GetWeightSeriesAsync_WhenNotAvailable_ReturnsEmptyList()
     {
         var display = CreateTestDisplay();
-        var service = CreateService(display);
+        var service = CreateService();
 
-        var result = await service.GetWeightSeriesAsync();
+        var result = await service.GetWeightSeriesAsync(display);
 
         Assert.Empty(result);
         VerifyAnyHttpRequest(Times.Never());
@@ -182,7 +179,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
     public async Task GetWeightSeriesAsync_WithSingleDataPoint_ReturnsCorrectWeight()
     {
         var display = CreateDisplayWithGoogleFitTokens();
-        var service = CreateService(display);
+        var service = CreateService();
 
         var testDate = DateTime.UtcNow.Date.AddDays(-5);
         var mockResponse = CreateMockGoogleFitResponse((testDate, 75.5));
@@ -190,7 +187,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
         // Set up response for all the chunked requests (3 requests for 90 days = 3x30-day chunks)
         SetupHttpResponseForAnyUrl(mockResponse, HttpStatusCode.OK);
 
-        var result = await service.GetWeightSeriesAsync();
+        var result = await service.GetWeightSeriesAsync(display);
 
         // The service fetches 90 days in 30-day chunks, so we get 3 responses with the same data
         // We're looking for at least one entry with our expected date
@@ -202,7 +199,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
     public async Task GetWeightSeriesAsync_WithMultipleDataPoints_ReturnsAllWeights()
     {
         var display = CreateDisplayWithGoogleFitTokens();
-        var service = CreateService(display);
+        var service = CreateService();
 
         var testData = new[]
         {
@@ -216,7 +213,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
         var mockResponse = CreateMockGoogleFitResponse(testData);
         SetupHttpResponseForAnyUrl(mockResponse, HttpStatusCode.OK);
 
-        var result = await service.GetWeightSeriesAsync();
+        var result = await service.GetWeightSeriesAsync(display);
 
         // The service fetches in chunks, so we'll have duplicates.
         // Just verify all our test dates are present
@@ -231,7 +228,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
     public async Task GetWeightSeriesAsync_WithMissingWeightData_SkipsEmptyEntries()
     {
         var display = CreateDisplayWithGoogleFitTokens();
-        var service = CreateService(display);
+        var service = CreateService();
 
         var mockResponse = JsonSerializer.Serialize(new
         {
@@ -254,7 +251,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
 
         SetupHttpResponseForAnyUrl(mockResponse, HttpStatusCode.OK);
 
-        var result = await service.GetWeightSeriesAsync();
+        var result = await service.GetWeightSeriesAsync(display);
 
         Assert.Empty(result);
     }
@@ -263,11 +260,11 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
     public async Task GetLastKnownWeightAsync_WhenNoData_ReturnsNull()
     {
         var display = CreateDisplayWithGoogleFitTokens();
-        var service = CreateService(display);
+        var service = CreateService();
 
         SetupHttpResponseForAnyUrl(JsonSerializer.Serialize(new { bucket = Array.Empty<object>() }), HttpStatusCode.OK);
 
-        var result = await service.GetLastKnownWeightAsync();
+        var result = await service.GetLastKnownWeightAsync(display);
 
         Assert.Null(result);
     }
@@ -276,7 +273,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
     public async Task GetLastKnownWeightAsync_WithMultipleEntries_ReturnsLatestWeight()
     {
         var display = CreateDisplayWithGoogleFitTokens();
-        var service = CreateService(display);
+        var service = CreateService();
 
         var testData = new[]
         {
@@ -288,7 +285,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
         var mockResponse = CreateMockGoogleFitResponse(testData);
         SetupHttpResponseForAnyUrl(mockResponse, HttpStatusCode.OK);
 
-        var result = await service.GetLastKnownWeightAsync();
+        var result = await service.GetLastKnownWeightAsync(display);
 
         Assert.Equal(77.2m, result);
     }
@@ -297,7 +294,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
     public async Task GetLastKnownWeightAsync_WithZeroWeight_SkipsAndReturnsNonZero()
     {
         var display = CreateDisplayWithGoogleFitTokens();
-        var service = CreateService(display);
+        var service = CreateService();
 
         var testData = new[]
         {
@@ -309,7 +306,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
         var mockResponse = CreateMockGoogleFitResponse(testData);
         SetupHttpResponseForAnyUrl(mockResponse, HttpStatusCode.OK);
 
-        var result = await service.GetLastKnownWeightAsync();
+        var result = await service.GetLastKnownWeightAsync(display);
 
         Assert.Equal(78.5m, result);
     }
@@ -318,9 +315,9 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
     public async Task FetchFromWebAsync_WhenNotAvailable_ReturnsNull()
     {
         var display = CreateTestDisplay();
-        var service = CreateService(display);
+        var service = CreateService();
 
-        var result = await service.FetchFromWebAsync();
+        var result = await service.FetchFromWebAsync(display);
 
         Assert.Null(result);
         VerifyAnyHttpRequest(Times.Never());
@@ -330,19 +327,19 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
     public async Task FetchFromWebAsync_OnHttpError_ThrowsException()
     {
         var display = CreateDisplayWithGoogleFitTokens();
-        var service = CreateService(display);
+        var service = CreateService();
 
         SetupHttpResponseForAnyUrl("{\"error\": \"unauthorized\"}", HttpStatusCode.Unauthorized);
 
         await Assert.ThrowsAsync<HttpRequestException>(
-            async () => await service.FetchFromWebAsync());
+            async () => await service.FetchFromWebAsync(display));
     }
 
     [Fact(Skip = "Requires mocking Google OAuth which uses internal HttpClient")]
     public async Task FetchFromWebAsync_WithValidResponse_ReturnsParsedData()
     {
         var display = CreateDisplayWithGoogleFitTokens();
-        var service = CreateService(display);
+        var service = CreateService();
 
         var testData = new[]
         {
@@ -353,7 +350,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
         var mockResponse = CreateMockGoogleFitResponse(testData);
         SetupHttpResponseForAnyUrl(mockResponse, HttpStatusCode.OK);
 
-        var result = await service.FetchFromWebAsync();
+        var result = await service.FetchFromWebAsync(display);
 
         Assert.NotNull(result);
         Assert.NotNull(result.Bucket);
@@ -365,17 +362,17 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
     public async Task FetchFromWebAsync_UsesDatabaseCache()
     {
         var display = CreateDisplayWithGoogleFitTokens();
-        var service = CreateService(display);
+        var service = CreateService();
 
         var mockResponse = CreateMockGoogleFitResponse((DateTime.UtcNow.Date, 75.0));
         SetupHttpResponseForAnyUrl(mockResponse, HttpStatusCode.OK);
 
         // First call - should hit API
-        var result1 = await service.FetchFromWebAsync();
+        var result1 = await service.FetchFromWebAsync(display);
         Assert.NotNull(result1);
 
         // Second call - should use cache (no additional HTTP calls)
-        var result2 = await service.FetchFromWebAsync();
+        var result2 = await service.FetchFromWebAsync(display);
         Assert.NotNull(result2);
 
         // Verify HTTP was called for the first request (with chunked requests)
@@ -389,7 +386,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
     public async Task FetchFromWebAsync_HandlesVariousDayRanges(int daysToFetch)
     {
         var display = CreateDisplayWithGoogleFitTokens();
-        var service = CreateService(display);
+        var service = CreateService();
 
         // Generate test data for the specified range
         var testData = Enumerable.Range(0, daysToFetch)
@@ -399,7 +396,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
         var mockResponse = CreateMockGoogleFitResponse(testData);
         SetupHttpResponseForAnyUrl(mockResponse, HttpStatusCode.OK);
 
-        var result = await service.FetchFromWebAsync();
+        var result = await service.FetchFromWebAsync(display);
 
         Assert.NotNull(result);
         Assert.NotNull(result.Bucket);
@@ -411,7 +408,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
     public async Task GetWeightSeriesAsync_ParsesDecimalWeightsCorrectly()
     {
         var display = CreateDisplayWithGoogleFitTokens();
-        var service = CreateService(display);
+        var service = CreateService();
 
         var testData = new[]
         {
@@ -423,7 +420,7 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
         var mockResponse = CreateMockGoogleFitResponse(testData);
         SetupHttpResponseForAnyUrl(mockResponse, HttpStatusCode.OK);
 
-        var result = await service.GetWeightSeriesAsync();
+        var result = await service.GetWeightSeriesAsync(display);
 
         // Service fetches in chunks, so we'll have all our test data present
         Assert.True(result.Count >= 3);
