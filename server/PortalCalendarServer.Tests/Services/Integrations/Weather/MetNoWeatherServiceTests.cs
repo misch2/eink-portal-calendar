@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Moq.Protected;
 using PortalCalendarServer.Services.Integrations.Weather;
 using PortalCalendarServer.Tests.TestBase;
 using System.Net;

@@ -31,7 +31,7 @@ public class UiController(
         "lat", "lon", "max_icons_with_calendar", "max_random_icons", "metnoweather",
         "metnoweather_granularity_hours", "min_random_icons", "mqtt", "mqtt_password", "mqtt_server",
         "mqtt_topic", "mqtt_username", "openweather", "openweather_api_key", "openweather_lang",
-        "ota_mode", "telegram", "telegram_api_key", "telegram_chat_id", "theme_id", "timezone",
+        "ota_mode", "telegram", "telegram_api_key", "telegram_chat_id", "timezone",
         "totally_random_icon", "wakeup_schedule", "web_calendar_ics_url1", "web_calendar_ics_url2",
         "web_calendar_ics_url3", "web_calendar1", "web_calendar2", "web_calendar3"
     ];
@@ -217,6 +217,10 @@ public class UiController(
             if (form.ContainsKey("display_border_left") && int.TryParse(form["display_border_left"], out var borderLeft))
             {
                 display.BorderLeft = borderLeft;
+            }
+            if (form.ContainsKey("theme_id") && int.TryParse(form["theme_id"], out var theme_id))
+            {
+                display.ThemeId = theme_id;
             }
 
             _context.Update(display);

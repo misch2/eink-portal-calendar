@@ -1,0 +1,191 @@
+/* Test Theme - Color Wheel Display */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+    position: relative;
+}
+
+.outline {
+    color: black; /* fill color */
+    -webkit-text-stroke: 1px white; /* outline thickness + color */
+}
+
+/* Angular rainbow gradient background using conic gradient */
+.color-wheel-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Conic (angular) gradient - rainbow based on angle from center */
+    background: conic-gradient(
+        from 0deg at 50% 50%,
+        red 0deg,
+        orange 51deg,
+        yellow 102deg,
+        lime 153deg,
+        cyan 204deg,
+        blue 255deg,
+        magenta 306deg,
+        red 360deg
+    );
+}
+
+/* Alternative: Radial gradient (commented out) */
+/* 
+.color-wheel-background {
+    background: radial-gradient(
+        circle at center,
+        red 0%,
+        orange 7%,
+        yellow 14%,
+        lime 21%,
+        green 28%,
+        cyan 35%,
+        blue 42%,
+        indigo 49%,
+        violet 56%,
+        magenta 63%,
+        red 70%
+    );
+}
+*/
+
+/* Alternative: Linear gradient fallback */
+.rainbow-gradient-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        red 0%,
+        orange 14%,
+        yellow 28%,
+        lime 42%,
+        cyan 56%,
+        blue 70%,
+        magenta 84%,
+        red 100%
+    );
+}
+
+/* Text container */
+.text-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 10;
+}
+
+.test-text {
+    font-size: 120px;
+    color: var(--epd_black);
+    letter-spacing: 0.05em;
+}
+
+.subtitle {
+    font-size: 32px;
+    color: var(--epd_black);
+    /* Larger white outline - 5px thickness */
+    margin-top: 20px;
+    letter-spacing: 0.1em;
+}
+
+/* Color bars for e-paper display testing */
+.color-test-bars {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+}
+
+.color-bar {
+    width: 60px;
+    height: 60px;
+    border: 3px solid var(--epd_black);
+}
+
+.color-bar.black { background-color: var(--epd_black); }
+.color-bar.white { background-color: var(--epd_white); }
+.color-bar.red { background-color: var(--epd_red); }
+.color-bar.yellow { background-color: var(--epd_yellow); }
+
+/* Info text */
+.info-text {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: var(--epd_black);
+    font-size: 18px;
+    /* Larger white outline - 3px thickness */
+    text-align: right;
+    z-index: 10;
+}
+
+.date-time {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: var(--epd_black);
+    font-size: 24px;
+    /* Larger white outline - 4px thickness */
+    z-index: 10;
+}
+
+/* Responsive adjustments for smaller displays */
+@media (max-width: 800px) {
+    .test-text {
+        font-size: 80px;
+        /* Reduce outline size for smaller text */
+    }
+    
+    .subtitle {
+        font-size: 24px;
+    }
+    
+    .color-bar {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .test-text {
+        font-size: 60px;
+    }
+    
+    .subtitle {
+        font-size: 18px;
+    }
+    
+    .info-text,
+    .date-time {
+        font-size: 14px;
+    }
+    
+    .color-bar {
+        width: 30px;
+        height: 30px;
+        border-width: 2px;
+    }
+}

@@ -324,11 +324,21 @@ public class PageGeneratorService
 
                     foreach (var pixel in rowSpan)
                     {
+                        // How the 3C display interprets the data:
+                        //
+                        // mono   color
+                        // buffer buffer
+                        // ----   -----
+                        //   0       1   = black #000
+                        //   1       1   = white #fff
+                        //   0       0   = red/yellow  #f00/#ff0
+                        //   1       0   = red/yellow  #f00/#ff0
+
                         // BW bit: 0 = black, 1 = white
                         var bwBit = (byte)((pixel.R + pixel.G + pixel.B) / 3 > 128 ? 1 : 0);
 
                         // Color bit: 0 = red/yellow (override), 1 = use B&W
-                        var colorBit = (byte)(pixel.R > 128 && pixel.B < 128 ? 0 : 1);
+                        var colorBit = (byte)(pixel.R > 128 && pixel.B < 128 ? 0 : 1);  // FIXME this works for red but not yellow - need a better way to determine if it's a color pixel vs BW
 
                         byteBW = (byte)((byteBW << 1) | bwBit);
                         byteColor = (byte)((byteColor << 1) | colorBit);

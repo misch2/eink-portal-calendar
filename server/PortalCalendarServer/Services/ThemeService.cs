@@ -39,20 +39,4 @@ public class ThemeService
         return await _context.Themes
             .FirstOrDefaultAsync(t => t.Id == themeId && t.IsActive);
     }
-
-    /// <summary>
-    /// Gets the default theme (or first active theme if default not found)
-    /// </summary>
-    public async Task<Theme> GetDefaultThemeAsync()
-    {
-        var defaultTheme = await _context.Themes
-            .FirstOrDefaultAsync(t => t.Id == Models.Constants.Themes.DefaultId && t.IsActive);
-
-        if (defaultTheme != null)
-        {
-            return defaultTheme;
-        }
-
-        throw new InvalidOperationException("No default active theme found in database");
-    }
 }

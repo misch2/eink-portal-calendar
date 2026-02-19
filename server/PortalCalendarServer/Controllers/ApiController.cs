@@ -118,8 +118,6 @@ public class ApiController : ControllerBase
 
         if (display == null)
         {
-            var defaultTheme = await _themeService.GetDefaultThemeAsync();
-
             // Create new display
             display = new Display
             {
@@ -135,7 +133,7 @@ public class ApiController : ControllerBase
                 BorderRight = 0,
                 BorderBottom = 0,
                 BorderLeft = 0,
-                ThemeId = defaultTheme.Id
+                ThemeId = null
             };
 
             _context.Displays.Add(display);

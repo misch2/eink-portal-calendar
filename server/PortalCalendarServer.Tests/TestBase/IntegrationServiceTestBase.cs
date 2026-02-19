@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using Moq.Protected;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Services.Caches;
 using PortalCalendarServer.Tests.TestData;
@@ -160,7 +159,7 @@ public abstract class IntegrationServiceTestBase : IDisposable
             BorderBottom = TestDataHelper.Displays.Common.DefaultBorder,
             BorderLeft = TestDataHelper.Displays.Common.DefaultBorder,
             Firmware = TestDataHelper.Displays.Common.DefaultFirmware,
-            ThemeId = Models.Constants.Themes.DefaultId
+            ThemeId = null
         };
 
         Context.Displays.Add(display);

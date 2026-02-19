@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging;
 using PortalCalendarServer.Services.Integrations;
 using PortalCalendarServer.Tests.TestBase;
-using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using System.Net;
 using System.Text.Json;
@@ -135,7 +134,7 @@ public class XkcdIntegrationServiceTests : IntegrationServiceTestBase
 
         Assert.Equal(result1.Number, result2.Number);
         Assert.Equal(result1.Title, result2.Title);
-        
+
         // Both JSON and image should be fetched only once due to database caching
         // Note: The actual caching happens in DatabaseCacheService, so we just verify
         // that we got consistent results
@@ -249,7 +248,7 @@ public class XkcdIntegrationServiceTests : IntegrationServiceTestBase
 
         // Both calls should return the same image data
         Assert.Equal(result1.ImageData, result2.ImageData);
-        
+
         // Verify the image data was returned
         Assert.NotEmpty(result1.ImageData);
     }
