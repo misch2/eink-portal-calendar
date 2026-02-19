@@ -170,7 +170,7 @@ void setup() {
 }
 
 void loop() {
-  httpClientManager.showRawBitmapFrom_HTTP("/calendar/bitmap/epaper", 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+  httpClientManager.showRawBitmapFrom_HTTP("/api/device/bitmap/epaper", 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 
   disconnectWiFiAndHibernateAll();
 }

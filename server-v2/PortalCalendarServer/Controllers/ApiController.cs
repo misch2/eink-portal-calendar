@@ -58,7 +58,6 @@ public class ApiController : ControllerBase
 
     // GET /api/ping
     [HttpGet("ping")]
-    [HttpGet("~/ping")] // FIXME remove later, keep for backward compatibility
     [Tags("Health Checks")]
     public IActionResult Ping()
     {
@@ -90,8 +89,8 @@ public class ApiController : ControllerBase
     }
 
 
-    // GET /api/config?mac=XX:XX:XX:XX:XX:XX&fw=1.0&w=800&h=480&c=BW&adc=2048&v=4.2&...
-    [HttpGet("config")]
+    // GET /api/device/config?mac=XX:XX:XX:XX:XX:XX&fw=1.0&w=800&h=480&c=BW&adc=2048&v=4.2&...
+    [HttpGet("device/config")]
     [HttpGet("~/config")] // FIXME remove later, keep for backward compatibility
     [Tags("Device API")]
     public async Task<IActionResult> Config(
@@ -257,8 +256,8 @@ public class ApiController : ControllerBase
         return Ok(response);
     }
 
-    // GET /api/calendar/bitmap?mac=XX:XX:XX:XX:XX:XX&rotate=0&flip=&format=png&...
-    [HttpGet("calendar/bitmap")]
+    // GET /api/device/bitmap?mac=XX:XX:XX:XX:XX:XX&rotate=0&flip=&format=png&...
+    [HttpGet("device/bitmap")]
     [HttpGet("~/calendar/bitmap")] // FIXME remove later, keep for backward compatibility
     [Tags("Device API")]
     public async Task<IActionResult> Bitmap(
@@ -306,8 +305,8 @@ public class ApiController : ControllerBase
     }
 
 
-    // GET /api/calendar/bitmap/epaper?mac=XX:XX:XX:XX:XX:XX&web_format=false&preview_colors=false
-    [HttpGet("calendar/bitmap/epaper")]
+    // GET /api/device/bitmap/epaper?mac=XX:XX:XX:XX:XX:XX&web_format=false&preview_colors=false
+    [HttpGet("device/bitmap/epaper")]
     [HttpGet("~/calendar/bitmap/epaper")] // FIXME remove later, keep for backward compatibility
     [Tags("Device API")]
     public async Task<IActionResult> BitmapEpaper(
