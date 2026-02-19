@@ -1,26 +1,15 @@
-server/local/
-server/node_modules/
-server/vendor/
-server/cache/lwp/
-!server/cache/lwp/.gitkeep
-server/.env
-server/hypnotoad.pid
-server/*.conf
-server/log/*.log
-server/generated_images/*.png
 # client/include/boards/*/board.h
 !client/include/boards/example/board.h
 .pio/
 .vstags
 .vscode/
+.vs
+/server/local/
+/server/_data*/
+/server/PortalCalendarServer/.vs
+/server/generated_images/*.png
+/server/PortalCalendarServer/publish.cmd
+/server/PortalCalendarServer/appsettings.Production.json
 # .NET artifacts:
 /server/**/bin/
 /server/**/obj/
-/server/_data*/
-/server/.vs
-/server/PortalCalendarServer/.vs
-/server/generated_images/*.png
-/_example
-/.vs
-/server/PortalCalendarServer/publish.cmd
-/server/PortalCalendarServer/appsettings.Production.json

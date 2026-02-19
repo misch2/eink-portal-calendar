@@ -90,9 +90,16 @@ public class PageGeneratorService
 
     public string DisplayImageName(Display display)
     {
-        var imagePath = Path.Combine(_environment.ContentRootPath, "..");
-        var subPath = $"generated_images/current_calendar_{display.Id}.png";
-        return Path.Combine(imagePath, subPath);
+        var imagePath = _configuration["Paths:GeneratedImages"];
+        if (imagePath == null)
+        {
+            throw new InvalidOperationException("GeneratedImages path is not configured");
+        }
+        imagePath = imagePath.Replace("{ContentRootPath}", _environment.ContentRootPath);
+
+        var ret = Path.Combine(imagePath, $"current_calendar_{display.Id}.png");
+
+        return ret;
     }
 
     public async Task GenerateImageFromWebAsync(Display display)
