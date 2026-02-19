@@ -15,7 +15,10 @@
             <th scope="col">Color type</th>
             <th scope="col">Firmware</th>
             <th scope="col">Battery</th>
-            <th scope="col">Next wakeup</th>
+            <th scope="col">Next wakeup
+                <br />
+                (local time)
+            </th>
             <th scope="col">Status</th>
             <th scope="col">Last image</th>
             <th scope="col">Action</th>
@@ -24,6 +27,9 @@
     <tbody>
         @foreach (var d in Model)
         {
+            var dateCulture = displayService.GetDateCultureInfo(d);
+            var tz = displayService.GetTimeZoneInfo(d);
+
             <tr>
                 <td>@d.Id</td>
                 <td>
@@ -65,7 +71,7 @@
                         var nextWakeupInfo = displayService.GetNextWakeupTime(d);
                         var minutes = nextWakeupInfo.SleepInSeconds / 60;
                         var seconds = nextWakeupInfo.SleepInSeconds % 60;
-                        @($"{nextWakeupInfo.NextWakeup:dd.MM.yyyy HH:mm} (in {minutes} minutes and {seconds} seconds)")
+                        @($"{TimeZoneInfo.ConvertTimeFromUtc(nextWakeupInfo.NextWakeup,tz).ToString("g", dateCulture)} (in {minutes} minutes and {seconds} seconds)")
                     }
                 </td>
                 <td>
