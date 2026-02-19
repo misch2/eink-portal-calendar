@@ -172,7 +172,7 @@ public class DisplayService(
 
     public IColorType? GetColorType(Display display)
     {
-        if (string.IsNullOrEmpty(display.ColorType))
+        if (string.IsNullOrWhiteSpace(display.ColorType))
         {
             return null;
         }
@@ -268,7 +268,7 @@ public class DisplayService(
         var defaultDate = dt.Date.AddDays(1);
 
         // No schedule, wake up tomorrow (truncate to day and add 1 day)
-        if (string.IsNullOrEmpty(schedule))
+        if (string.IsNullOrWhiteSpace(schedule))
         {
             return defaultDate;
         }

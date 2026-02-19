@@ -39,7 +39,7 @@ public class OpenWeatherService : IntegrationServiceBase
 
     public override bool IsConfigured(Display display)
     {
-        return String.IsNullOrEmpty(_apiKey) == false && _latitude != 0 && _longitude != 0;
+        return !string.IsNullOrWhiteSpace(_apiKey) && _latitude != 0 && _longitude != 0;
     }
 
     /// <summary>

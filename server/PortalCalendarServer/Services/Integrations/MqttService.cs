@@ -36,7 +36,7 @@ public class MqttService(
         var username = displayService.GetConfig(display, "mqtt_username");
         var password = displayService.GetConfig(display, "mqtt_password");
 
-        return !string.IsNullOrEmpty(server) && !string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password);
+        return !string.IsNullOrWhiteSpace(server) && !string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password);
     }
 
     private async Task<IMqttClient> GetConnectedClientAsync(Display display)
@@ -68,7 +68,7 @@ public class MqttService(
             .WithProtocolVersion(MqttProtocolVersion.V311)
             .WithCleanSession();
 
-        if (!string.IsNullOrEmpty(username))
+        if (!string.IsNullOrWhiteSpace(username))
         {
             optionsBuilder.WithCredentials(username, password);
         }
@@ -102,7 +102,7 @@ public class MqttService(
             var client = await GetConnectedClientAsync(display);
             var topic = displayService.GetConfig(display, "mqtt_topic");
 
-            if (string.IsNullOrEmpty(topic))
+            if (string.IsNullOrWhiteSpace(topic))
             {
                 logger.LogWarning("MQTT topic not configured for display {DisplayId}", display.Id);
                 return;
@@ -146,7 +146,7 @@ public class MqttService(
             {
                 configPayload["state_class"] = stateClass;
             }
-            if (haDetail.TryGetValue("unit_of_measurement", out var unit) && unit != null && !string.IsNullOrEmpty(unit.ToString()))
+            if (haDetail.TryGetValue("unit_of_measurement", out var unit) && unit != null && !string.IsNullOrWhiteSpace(unit.ToString()))
             {
                 configPayload["unit_of_measurement"] = unit;
             }

@@ -87,7 +87,7 @@ public class MissedConnectionsCheckService : PeriodicBackgroundService
                             var apiKey = displayService.GetConfig(display, "telegram_api_key");
                             var chatId = displayService.GetConfig(display, "telegram_chat_id");
 
-                            if (!string.IsNullOrEmpty(apiKey) && !string.IsNullOrEmpty(chatId))
+                            if (!string.IsNullOrWhiteSpace(apiKey) && !string.IsNullOrWhiteSpace(chatId))
                             {
                                 try
                                 {

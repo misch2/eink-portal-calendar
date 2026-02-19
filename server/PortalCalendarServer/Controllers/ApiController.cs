@@ -148,7 +148,7 @@ public class ApiController : ControllerBase
         else
         {
             // Update existing display
-            if (!string.IsNullOrEmpty(fw))
+            if (!string.IsNullOrWhiteSpace(fw))
             {
                 display.Firmware = fw;
                 _context.Update(display);
@@ -190,7 +190,7 @@ public class ApiController : ControllerBase
                         var apiKey = _displayService.GetConfig(display, "telegram_api_key");
                         var chatId = _displayService.GetConfig(display, "telegram_chat_id");
 
-                        if (!string.IsNullOrEmpty(apiKey) && !string.IsNullOrEmpty(chatId))
+                        if (!string.IsNullOrWhiteSpace(apiKey) && !string.IsNullOrWhiteSpace(chatId))
                         {
                             try
                             {

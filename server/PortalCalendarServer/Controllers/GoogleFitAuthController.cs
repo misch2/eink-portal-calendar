@@ -50,7 +50,7 @@ public class GoogleFitAuthController : Controller
         // Redirect URI must be generated from the current external host and port, i.e. from Host etc. header
         var redirectUri = Url.Action(nameof(GoogleFitCallback), "GoogleFitAuth", null, Request.Scheme, Request.Host.Value);
 
-        if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
+        if (string.IsNullOrWhiteSpace(clientId) || string.IsNullOrWhiteSpace(clientSecret))
         {
             return BadRequest(new { error = "Google Fit OAuth configuration incomplete" });
         }
@@ -144,7 +144,7 @@ public class GoogleFitAuthController : Controller
             // Redirect URI must be generated from the current external host and port, i.e. from Host etc. header
             var redirectUri = Url.Action(nameof(GoogleFitCallback), "GoogleFitAuth", null, Request.Scheme, Request.Host.Value);
 
-            if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
+            if (string.IsNullOrWhiteSpace(clientId) || string.IsNullOrWhiteSpace(clientSecret))
             {
                 _logger.LogError("Missing Google Fit OAuth configuration for display {DisplayId}", displayId);
                 return View("AuthError", new { Error = "Missing OAuth configuration" });
@@ -194,7 +194,7 @@ public class GoogleFitAuthController : Controller
         }
 
         var accessToken = _displayService.GetConfig(display, "_googlefit_access_token");
-        if (string.IsNullOrEmpty(accessToken))
+        if (string.IsNullOrWhiteSpace(accessToken))
         {
             _logger.LogError("No access token found for display {DisplayId}", displayNumber);
             return BadRequest(new { error = "No access token found" });

@@ -30,7 +30,7 @@ public class IcalIntegrationService : IntegrationServiceBase
 
     public override bool IsConfigured(Display display)
     {
-        return String.IsNullOrEmpty(_icsUrl) == false;
+        return !string.IsNullOrWhiteSpace(_icsUrl);
     }
 
     /// <summary>

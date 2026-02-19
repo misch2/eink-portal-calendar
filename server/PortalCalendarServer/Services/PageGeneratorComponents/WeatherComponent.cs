@@ -111,7 +111,7 @@ public class WeatherComponent(
         var lon = displayService.GetConfigDouble(display, "lon");
         var lang = displayService.GetConfig(display, "openweather_lang") ?? "en";
 
-        if (string.IsNullOrEmpty(apiKey) || lat == null || lon == null)
+        if (string.IsNullOrWhiteSpace(apiKey) || lat == null || lon == null)
         {
             logger.LogWarning("OpenWeather enabled but API key or lat/lon not configured");
             return null;

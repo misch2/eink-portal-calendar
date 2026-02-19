@@ -112,6 +112,58 @@ public static class TestDataHelper
     }
 
     /// <summary>
+    /// MQTT integration test data
+    /// </summary>
+    public static class Mqtt
+    {
+        public const string ServerConfigName = "mqtt_server";
+        public const string UsernameConfigName = "mqtt_username";
+        public const string PasswordConfigName = "mqtt_password";
+        public const string TopicConfigName = "mqtt_topic";
+        public const string EnabledConfigName = "mqtt";
+
+        public const string TestServer = "localhost:1883";
+        public const string TestServerWithPort = "mqtt.example.com:8883";
+        public const string TestServerWithoutPort = "mqtt.example.com";
+        public const string TestUsername = "mqtt_test_user";
+        public const string TestPassword = "mqtt_test_password";
+        public const string TestTopic = "test-epaper-display";
+
+        /// <summary>
+        /// Returns standard MQTT configuration as tuples
+        /// </summary>
+        public static (string name, string value)[] StandardConfigs(
+            string? server = null,
+            string? username = null,
+            string? password = null,
+            string? topic = null,
+            bool enabled = true) => new[]
+        {
+            (ServerConfigName, server ?? TestServer),
+            (UsernameConfigName, username ?? TestUsername),
+            (PasswordConfigName, password ?? TestPassword),
+            (TopicConfigName, topic ?? TestTopic),
+            (EnabledConfigName, enabled ? "1" : "0")
+        };
+    }
+
+    /// <summary>
+    /// XKCD integration test data
+    /// </summary>
+    public static class Xkcd
+    {
+        public const string ApiUrl = "https://xkcd.com/info.0.json";
+        public const string TestImageUrl = "https://imgs.xkcd.com/comics/test_comic.png";
+
+        public const int TestComicNumber = 2950;
+        public const string TestComicTitle = "Test Comic";
+        public const string TestComicAlt = "Test alt text for the comic";
+        public const string TestComicYear = "2024";
+        public const string TestComicMonth = "12";
+        public const string TestComicDay = "15";
+    }
+
+    /// <summary>
     /// Common test dates and times
     /// </summary>
     public static class Dates

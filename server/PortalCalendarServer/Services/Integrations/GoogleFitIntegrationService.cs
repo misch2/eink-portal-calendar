@@ -42,7 +42,7 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
 
         var accessToken = _displayService.GetConfig(display, "_googlefit_access_token");
         var refreshToken = _displayService.GetConfig(display, "_googlefit_refresh_token");
-        return !string.IsNullOrEmpty(accessToken) && !string.IsNullOrEmpty(refreshToken);
+        return !string.IsNullOrWhiteSpace(accessToken) && !string.IsNullOrWhiteSpace(refreshToken);
     }
 
     private UserCredential? GetUserCredential(Display display)
@@ -57,7 +57,7 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
         var accessToken = _displayService.GetConfig(display, "_googlefit_access_token");
         var refreshToken = _displayService.GetConfig(display, "_googlefit_refresh_token");
 
-        if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
+        if (string.IsNullOrWhiteSpace(clientId) || string.IsNullOrWhiteSpace(clientSecret))
         {
             logger.LogError("Missing Google Fit OAuth configuration");
             return null;
@@ -97,7 +97,7 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
         if (credential.Token.AccessToken != _displayService.GetConfig(display, "_googlefit_access_token"))
         {
             _displayService.SetConfig(display, "_googlefit_access_token", credential.Token.AccessToken);
-            if (!string.IsNullOrEmpty(credential.Token.RefreshToken))
+            if (!string.IsNullOrWhiteSpace(credential.Token.RefreshToken))
             {
                 _displayService.SetConfig(display, "_googlefit_refresh_token", credential.Token.RefreshToken);
             }

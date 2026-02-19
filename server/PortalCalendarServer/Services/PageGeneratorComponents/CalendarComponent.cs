@@ -32,7 +32,7 @@ public class CalendarComponent(
                 continue;
 
             var url = displayService.GetConfig(display, $"web_calendar_ics_url{calendarNo}");
-            if (string.IsNullOrEmpty(url))
+            if (string.IsNullOrWhiteSpace(url))
                 continue;
 
             try

@@ -247,6 +247,22 @@ public abstract class IntegrationServiceTestBase : IDisposable
     }
 
     /// <summary>
+    /// Create a display configured for MQTT integration.
+    /// </summary>
+    protected Display CreateDisplayWithMqttConfig(
+        string? server = null,
+        string? username = null,
+        string? password = null,
+        string? topic = null,
+        bool enabled = true,
+        string? colorType = null)
+    {
+        var display = CreateTestDisplay(colorType: colorType ?? "BW");
+        AddConfigsToDisplay(display, TestDataHelper.Mqtt.StandardConfigs(server, username, password, topic, enabled));
+        return display;
+    }
+
+    /// <summary>
     /// Get the pre-seeded BW display.
     /// Returns the shared BW display instance or throws if not available.
     /// </summary>
