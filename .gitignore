@@ -4,10 +4,9 @@
 .vstags
 .vscode/
 .vs
-/server/local/
-/server/_data*/
-/server/PortalCalendarServer/.vs
-/server/generated_images/*.png
+/server/_data*
+/server/localdata/database/*
+/server/localdata/generated_images/*.png
 /server/PortalCalendarServer/publish.cmd
 /server/PortalCalendarServer/appsettings.Production.json
 # .NET artifacts:
