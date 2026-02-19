@@ -149,6 +149,7 @@ public class ApiController : ControllerBase
             if (!string.IsNullOrWhiteSpace(fw))
             {
                 display.Firmware = fw;
+                display.ColorType = c ?? display.ColorType;
                 _context.Update(display);
                 await _context.SaveChangesAsync();
             }
