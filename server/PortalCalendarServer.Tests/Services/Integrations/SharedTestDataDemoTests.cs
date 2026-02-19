@@ -1,4 +1,3 @@
-using PortalCalendarServer.Models.Entities;
 using PortalCalendarServer.Tests.TestBase;
 using PortalCalendarServer.Tests.TestData;
 
@@ -79,7 +78,7 @@ public class SharedTestDataDemoTests : IntegrationServiceTestBase
 
         // Verify it has the expected configs
         Assert.NotEmpty(display.Configs);
-        var accessToken = display.Configs.FirstOrDefault(c => 
+        var accessToken = display.Configs.FirstOrDefault(c =>
             c.Name == TestDataHelper.GoogleFit.AccessTokenConfigName);
         Assert.NotNull(accessToken);
         Assert.Equal(TestDataHelper.GoogleFit.TestAccessToken, accessToken.Value);
@@ -110,7 +109,7 @@ public class SharedTestDataDemoTests : IntegrationServiceTestBase
 
         // Verify the display has the expected color type
         Assert.Equal(colorType, display.ColorType);
-        
+
         // This pattern is useful for testing behavior that should work
         // identically for both display types, or for verifying differences
     }
@@ -120,7 +119,7 @@ public class SharedTestDataDemoTests : IntegrationServiceTestBase
     {
         // Create a display with standard Google Fit configuration
         var display = CreateTestDisplay();
-        
+
         // Add configs using TestDataHelper constants for maintainability
         Context.Configs.Add(new Config
         {
@@ -128,7 +127,7 @@ public class SharedTestDataDemoTests : IntegrationServiceTestBase
             Name = TestDataHelper.GoogleFit.AccessTokenConfigName,
             Value = TestDataHelper.GoogleFit.TestAccessToken
         });
-        
+
         Context.SaveChanges();
         Context.Entry(display).Collection(d => d.Configs).Load();
 

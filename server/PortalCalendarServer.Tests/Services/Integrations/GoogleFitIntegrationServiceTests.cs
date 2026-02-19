@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using PortalCalendarServer.Models.Entities;
 using PortalCalendarServer.Services;
 using PortalCalendarServer.Services.Integrations;
 using PortalCalendarServer.Tests.TestBase;

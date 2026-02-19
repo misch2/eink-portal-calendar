@@ -80,9 +80,9 @@ public static class TestDataHelper
     {
         public const string DefaultTestUrl = "https://example.com/calendar.ics";
         public const string AlternativeTestUrl = "https://test.example.com/events.ics";
-        
+
         public const string UrlConfigName = "ical_url";
-        
+
         /// <summary>
         /// Returns standard iCal configuration as tuples
         /// </summary>
@@ -100,7 +100,7 @@ public static class TestDataHelper
         public const string LocationConfigName = "weather_location";
         public const string DefaultLatitude = "50.0755";
         public const string DefaultLongitude = "14.4378"; // Prague coordinates
-        
+
         /// <summary>
         /// Returns standard weather configuration as tuples
         /// </summary>

@@ -3,7 +3,6 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Moq.Protected;
 using PortalCalendarServer.Data;
-using PortalCalendarServer.Models.Entities;
 using PortalCalendarServer.Services.Caches;
 using PortalCalendarServer.Tests.TestData;
 using System.Net;
@@ -22,7 +21,7 @@ public abstract class IntegrationServiceTestBase : IDisposable
     protected Mock<IDatabaseCacheServiceFactory> MockDatabaseCacheServiceFactory { get; }
     protected IMemoryCache MemoryCache { get; }
     protected ILogger Logger { get; }
-    
+
     // Pre-seeded test displays for common scenarios
     protected Display? TestDisplayBW { get; private set; }
     protected Display? TestDisplay3C { get; private set; }
@@ -255,7 +254,7 @@ public abstract class IntegrationServiceTestBase : IDisposable
     {
         if (TestDisplayBW == null)
             throw new InvalidOperationException("BW test display not initialized");
-        
+
         // Reload to ensure configs are loaded
         Context.Entry(TestDisplayBW).Collection(d => d.Configs).Load();
         return TestDisplayBW;
@@ -269,7 +268,7 @@ public abstract class IntegrationServiceTestBase : IDisposable
     {
         if (TestDisplay3C == null)
             throw new InvalidOperationException("3C test display not initialized");
-        
+
         // Reload to ensure configs are loaded
         Context.Entry(TestDisplay3C).Collection(d => d.Configs).Load();
         return TestDisplay3C;
