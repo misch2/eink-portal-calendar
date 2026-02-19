@@ -1,9 +1,0 @@
-#!/bin/bash
-
-HTTP_CACHING_DEPRECATION_WARNING_HIDE=1
-dir=$(dirname $0)
-if [ "$1" == "--without-carton" ]; then
-    cd $dir/.. && morbo -v -l "http://*:8081" -w templates -w lib scripts/portal_calendar
-else
-    cd $dir/.. && carton exec -- hypnotoad "$@" ./scripts/portal_calendar
-fi
