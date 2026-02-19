@@ -14,13 +14,13 @@ server/generated_images/*.png
 .vstags
 .vscode/
 # .NET artifacts:
-/server-v2/**/bin/
-/server-v2/**/obj/
-/server-v2/_data*/
-/server-v2/.vs
-/server-v2/PortalCalendarServer/.vs
-/server-v2/generated_images/*.png
+/server/**/bin/
+/server/**/obj/
+/server/_data*/
+/server/.vs
+/server/PortalCalendarServer/.vs
+/server/generated_images/*.png
 /_example
 /.vs
-/server-v2/PortalCalendarServer/publish.cmd
-/server-v2/PortalCalendarServer/appsettings.Production.json
+/server/PortalCalendarServer/publish.cmd
+/server/PortalCalendarServer/appsettings.Production.json

@@ -1,8 +1,0 @@
-% my $diff_seconds = $now->subtract_datetime_absolute($next)->seconds;
-% my $diff_minutes = int($diff_seconds / 60);
-% my $diff_hours = int($diff_minutes / 60);
-%#
-⚠️ Display #<%= $display->id %> (<%= $display->name %>) seems to be frozen, it missed <%= $missed_connections_limit %> consecutive scheduled connections.
-
-Last contact was at <%= $last_visit->format_cldr('dd.MM.YYYY HH:mm') %>, should have connected at <%= $next->format_cldr('dd.MM.YYYY HH:mm') %>.
-It has been frozen for at least <%= $diff_minutes %> minutes.

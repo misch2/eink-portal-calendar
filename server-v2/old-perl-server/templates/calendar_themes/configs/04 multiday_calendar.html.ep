@@ -1,4 +1,0 @@
-<div class="col-12 mb-3">
-    <label for="display_title">Title</label>
-    <input id="display_title" name="display_title" class="form-control" value="<%= $display->get_config_without_defaults('display_title') %>">
-</div>
