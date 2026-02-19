@@ -5,6 +5,7 @@ using Moq.Protected;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.Entities;
 using PortalCalendarServer.Services.Caches;
+using PortalCalendarServer.Tests.TestData;
 using System.Net;
 
 namespace PortalCalendarServer.Tests.TestBase;
@@ -21,7 +22,10 @@ public abstract class IntegrationServiceTestBase : IDisposable
     protected Mock<IDatabaseCacheServiceFactory> MockDatabaseCacheServiceFactory { get; }
     protected IMemoryCache MemoryCache { get; }
     protected ILogger Logger { get; }
-    protected Display? TestDisplay { get; set; }
+    
+    // Pre-seeded test displays for common scenarios
+    protected Display? TestDisplayBW { get; private set; }
+    protected Display? TestDisplay3C { get; private set; }
 
     protected IntegrationServiceTestBase()
     {
@@ -57,6 +61,30 @@ public abstract class IntegrationServiceTestBase : IDisposable
         MockDatabaseCacheServiceFactory
             .Setup(f => f.Create(It.IsAny<string>(), It.IsAny<TimeSpan>()))
             .Returns(databaseCache);
+
+        // Seed common test displays
+        SeedCommonTestData();
+    }
+
+    /// <summary>
+    /// Seeds common test data that all tests can use.
+    /// Creates two standard displays: one BW and one 3C.
+    /// </summary>
+    protected virtual void SeedCommonTestData()
+    {
+        TestDisplayBW = CreateTestDisplay(
+            TestDataHelper.Displays.BlackAndWhite.Name,
+            TestDataHelper.Displays.BlackAndWhite.Mac,
+            TestDataHelper.Displays.BlackAndWhite.Width,
+            TestDataHelper.Displays.BlackAndWhite.Height,
+            TestDataHelper.Displays.BlackAndWhite.ColorType);
+
+        TestDisplay3C = CreateTestDisplay(
+            TestDataHelper.Displays.ThreeColor.Name,
+            TestDataHelper.Displays.ThreeColor.Mac,
+            TestDataHelper.Displays.ThreeColor.Width,
+            TestDataHelper.Displays.ThreeColor.Height,
+            TestDataHelper.Displays.ThreeColor.ColorType);
     }
 
     /// <summary>
@@ -126,13 +154,13 @@ public abstract class IntegrationServiceTestBase : IDisposable
             Width = width,
             Height = height,
             ColorType = colorType,
-            Rotation = 0,
-            Gamma = 2.2,
-            BorderTop = 0,
-            BorderRight = 0,
-            BorderBottom = 0,
-            BorderLeft = 0,
-            Firmware = "1.0.0",
+            Rotation = TestDataHelper.Displays.Common.DefaultRotation,
+            Gamma = TestDataHelper.Displays.Common.DefaultGamma,
+            BorderTop = TestDataHelper.Displays.Common.DefaultBorder,
+            BorderRight = TestDataHelper.Displays.Common.DefaultBorder,
+            BorderBottom = TestDataHelper.Displays.Common.DefaultBorder,
+            BorderLeft = TestDataHelper.Displays.Common.DefaultBorder,
+            Firmware = TestDataHelper.Displays.Common.DefaultFirmware,
             ThemeId = Models.Constants.Themes.DefaultId
         };
 
@@ -140,6 +168,111 @@ public abstract class IntegrationServiceTestBase : IDisposable
         Context.SaveChanges();
 
         return display;
+    }
+
+    /// <summary>
+    /// Create a display with custom configuration values.
+    /// Example: CreateDisplayWithConfigs(("key1", "value1"), ("key2", "value2"))
+    /// </summary>
+    protected Display CreateDisplayWithConfigs(params (string name, string value)[] configs)
+    {
+        var display = CreateTestDisplay();
+        AddConfigsToDisplay(display, configs);
+        return display;
+    }
+
+    /// <summary>
+    /// Create a display with custom configuration values and specific display properties.
+    /// </summary>
+    protected Display CreateDisplayWithConfigs(
+        string displayName,
+        string mac,
+        string colorType,
+        params (string name, string value)[] configs)
+    {
+        var display = CreateTestDisplay(displayName, mac, colorType: colorType);
+        AddConfigsToDisplay(display, configs);
+        return display;
+    }
+
+    /// <summary>
+    /// Add configuration entries to an existing display.
+    /// </summary>
+    protected void AddConfigsToDisplay(Display display, params (string name, string value)[] configs)
+    {
+        foreach (var (name, value) in configs)
+        {
+            Context.Configs.Add(new Config
+            {
+                DisplayId = display.Id,
+                Name = name,
+                Value = value
+            });
+        }
+
+        Context.SaveChanges();
+        Context.Entry(display).Collection(d => d.Configs).Load();
+    }
+
+    /// <summary>
+    /// Create a display configured for Google Fit integration.
+    /// </summary>
+    protected Display CreateDisplayWithGoogleFitTokens(string? colorType = null)
+    {
+        var display = CreateTestDisplay(colorType: colorType ?? "BW");
+        AddConfigsToDisplay(display, TestDataHelper.GoogleFit.StandardConfigs);
+        return display;
+    }
+
+    /// <summary>
+    /// Create a display configured for iCal integration.
+    /// </summary>
+    protected Display CreateDisplayWithICalConfig(string? url = null, string? colorType = null)
+    {
+        var display = CreateTestDisplay(colorType: colorType ?? "BW");
+        AddConfigsToDisplay(display, TestDataHelper.ICal.StandardConfigs(url));
+        return display;
+    }
+
+    /// <summary>
+    /// Create a display configured for weather service.
+    /// </summary>
+    protected Display CreateDisplayWithWeatherConfig(
+        string? latitude = null,
+        string? longitude = null,
+        string? colorType = null)
+    {
+        var display = CreateTestDisplay(colorType: colorType ?? "BW");
+        AddConfigsToDisplay(display, TestDataHelper.Weather.StandardConfigs(latitude, longitude));
+        return display;
+    }
+
+    /// <summary>
+    /// Get the pre-seeded BW display.
+    /// Returns the shared BW display instance or throws if not available.
+    /// </summary>
+    protected Display GetBWDisplay()
+    {
+        if (TestDisplayBW == null)
+            throw new InvalidOperationException("BW test display not initialized");
+        
+        // Reload to ensure configs are loaded
+        Context.Entry(TestDisplayBW).Collection(d => d.Configs).Load();
+        return TestDisplayBW;
+    }
+
+    /// <summary>
+    /// Get the pre-seeded 3C display.
+    /// Returns the shared 3C display instance or throws if not available.
+    /// </summary>
+    protected Display Get3CDisplay()
+    {
+        if (TestDisplay3C == null)
+            throw new InvalidOperationException("3C test display not initialized");
+        
+        // Reload to ensure configs are loaded
+        Context.Entry(TestDisplay3C).Collection(d => d.Configs).Load();
+        return TestDisplay3C;
     }
 
     /// <summary>

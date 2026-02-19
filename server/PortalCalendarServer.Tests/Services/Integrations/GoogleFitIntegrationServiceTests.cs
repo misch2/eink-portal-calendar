@@ -40,50 +40,6 @@ public class GoogleFitIntegrationServiceTests : IntegrationServiceTestBase
             displayService.Object);
     }
 
-    private Display CreateDisplayWithGoogleFitTokens()
-    {
-        var display = CreateTestDisplay();
-
-        Context.Configs.AddRange(
-            new Config
-            {
-                DisplayId = display.Id,
-                Name = "_googlefit_access_token",
-                Value = "test_access_token_123"
-            },
-            new Config
-            {
-                DisplayId = display.Id,
-                Name = "_googlefit_refresh_token",
-                Value = "test_refresh_token_456"
-            },
-            new Config
-            {
-                DisplayId = display.Id,
-                Name = "googlefit_client_id",
-                Value = "test_client_id"
-            },
-            new Config
-            {
-                DisplayId = display.Id,
-                Name = "googlefit_client_secret",
-                Value = "test_client_secret"
-            },
-            new Config
-            {
-                DisplayId = display.Id,
-                Name = "googlefit_auth_callback",
-                Value = "https://example.com/callback"
-            });
-
-        Context.SaveChanges();
-
-        // Reload the display with configs
-        Context.Entry(display).Collection(d => d.Configs).Load();
-
-        return display;
-    }
-
     private string CreateMockGoogleFitResponse(params (DateTime date, double weight)[] dataPoints)
     {
         var buckets = dataPoints.Select(dp => new
