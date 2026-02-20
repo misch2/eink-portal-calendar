@@ -222,6 +222,18 @@ public class UiController(
             {
                 display.ThemeId = theme_id;
             }
+            if (form.ContainsKey("color_variant"))
+            {
+                var code = form["color_variant"].ToString();
+                if (string.IsNullOrEmpty(code))
+                {
+                    display.ColorVariantCode = null;
+                }
+                else
+                {
+                    display.ColorVariantCode = form["color_variant"].ToString();
+                }
+            }
 
             _context.Update(display);
         }

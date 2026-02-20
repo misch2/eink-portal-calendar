@@ -251,7 +251,7 @@ public class PageGeneratorService
         }
         else if (options.Format == "epaper_native")
         {
-            var bitmap = _convertToEpaperFormat(img, options.DisplayType);
+            var bitmap = _convertToEpaperFormat(img, options.DisplayType.Code);
             var checksum = ComputeSHA1(bitmap);
 
             // Output format: "MM\n" + checksum + "\n" + bitmap data
@@ -441,7 +441,7 @@ public class BitmapOptions
     public string ColormapName { get; set; } = "none";
     public List<string> ColormapColors { get; set; } = new();
     public string Format { get; set; } = "png";
-    public string DisplayType { get; set; } = OldDisplayTypes.BW;
+    public DisplayType DisplayType { get; set; }
 }
 
 public class BitmapResult

@@ -29,6 +29,25 @@
     </fieldset>
 
     <fieldset class="row mb-3">
+        <div class="col-md-12">
+            <label for="color_variant">Color variant</label>
+            <select id="color_variant" name="color_variant" class="form-select">
+                <option value=""></option>
+                @{
+                    var color_variants = Model.DisplayType.ColorVariants;
+                    if (color_variants != null)
+                    {
+                        foreach (var variant in color_variants)
+                        {
+                            <option value="@variant.Code" selected="@(Model.ColorVariantCode == variant.Code)">@variant.Name</option>
+                        }
+                    }
+                }
+            </select>
+        </div>
+    </fieldset>
+
+    <fieldset class="row mb-3">
         <div class="col-md-6">
             <label for="display_rotation">Rotation</label>
             <select id="display_rotation" name="display_rotation" class="form-select">

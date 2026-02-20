@@ -127,6 +127,7 @@ public class ApiController : ControllerBase
                 Width = w ?? 800,
                 Height = h ?? 480,
                 DisplayTypeCode = c ?? OldDisplayTypes.BW,
+                ColorVariantCode = null,
                 Firmware = fw ?? string.Empty,
                 Rotation = 0,
                 Gamma = 2.2,
@@ -298,7 +299,7 @@ public class ApiController : ControllerBase
             ColormapName = colormap_name,
             ColormapColors = color_palette,
             Format = format,
-            DisplayType = display.DisplayTypeCode
+            DisplayType = display.DisplayType
         };
 
         var bitmap = _pageGeneratorService.ConvertStoredBitmap(display, bitmapOptions);
@@ -347,7 +348,7 @@ public class ApiController : ControllerBase
             ColormapName = colormap_name,
             ColormapColors = color_palette,
             Format = format,
-            DisplayType = display.DisplayTypeCode
+            DisplayType = display.DisplayType
         };
 
         var bitmap = _pageGeneratorService.ConvertStoredBitmap(display, bitmapOptions);
