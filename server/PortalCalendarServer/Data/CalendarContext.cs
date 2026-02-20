@@ -132,9 +132,10 @@ public partial class CalendarContext : DbContext
             entity.Property(e => e.HasCustomConfig).HasColumnName("has_custom_config");
             entity.Property(e => e.SortOrder).HasColumnName("sort_order");
             entity.Property(e => e.IsActive).HasColumnName("is_active");
+            entity.Property(e => e.IsDefault).HasColumnName("is_default").HasDefaultValue(false);
 
             entity.HasData(
-                new Theme { Id = 1, FileName = "Default", DisplayName = "Default", HasCustomConfig = false, SortOrder = 0 },
+                new Theme { Id = 1, FileName = "Default", DisplayName = "Default", HasCustomConfig = false, SortOrder = 0, IsDefault = true },
                 new Theme { Id = 2, FileName = "PortalStyleCalendarWithIcons", DisplayName = "Portal Style Calendar with Icons", HasCustomConfig = true, SortOrder = 100 },
                 new Theme { Id = 3, FileName = "GoogleFitWeightWithCalendarAndIcons", DisplayName = "Google Fit Weight with Calendar and Icons", HasCustomConfig = true, SortOrder = 200 },
                 new Theme { Id = 4, FileName = "WeatherForecast", DisplayName = "Weather", HasCustomConfig = false, SortOrder = 300 },

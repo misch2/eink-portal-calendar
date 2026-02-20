@@ -133,8 +133,8 @@ public class ApiController : ControllerBase
                 BorderRight = 0,
                 BorderBottom = 0,
                 BorderLeft = 0,
-                ThemeId = null
-            };
+                ThemeId = (await _themeService.GetDefaultThemeAsync()).Id
+            }; 
 
             _context.Displays.Add(display);
             await _context.SaveChangesAsync();

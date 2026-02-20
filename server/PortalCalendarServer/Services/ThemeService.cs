@@ -39,4 +39,16 @@ public class ThemeService
         return await _context.Themes
             .FirstOrDefaultAsync(t => t.Id == themeId && t.IsActive);
     }
+
+    /// <summary>
+    /// Gets the default theme (the first theme marked as default)
+    /// </summary>
+    public async Task<Theme> GetDefaultThemeAsync()
+    {
+        var defaultTheme = await _context.Themes
+            .Where(t => t.IsDefault)
+            .OrderBy(t => t.SortOrder)
+            .FirstAsync();
+        return defaultTheme;
+    }
 }
