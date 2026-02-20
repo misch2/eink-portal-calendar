@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
-using PortalCalendarServer.Models.Constants;
 using PortalCalendarServer.Models.DatabaseEntities;
 using PortalCalendarServer.Services.Caches;
 using PortalCalendarServer.Services.Integrations;
@@ -220,7 +219,7 @@ public class PageGeneratorService
             if (options.ColormapName == "none")
             {
                 var palette = new List<Color>();
-                palette.AddRange(options.ColormapColors.Select(c => new Color(Rgba32.ParseHex(c))));
+                palette.AddRange(options.ColormapColors);
                 quantizer = new PaletteQuantizer(palette.ToArray(), quantizerOptions);
             }
             else if (options.ColormapName == "webmap")
@@ -251,7 +250,7 @@ public class PageGeneratorService
         }
         else if (options.Format == "epaper_native")
         {
-            var bitmap = _convertToEpaperFormat(img, options.DisplayType.Code);
+            var bitmap = _convertToEpaperFormat(img, display.ColorVariant);
             var checksum = ComputeSHA1(bitmap);
 
             // Output format: "MM\n" + checksum + "\n" + bitmap data
@@ -279,14 +278,16 @@ public class PageGeneratorService
     /// <summary>
     /// Convert image to e-paper native format (BW, 4G, 3C, etc.)
     /// </summary>
-    private byte[] _convertToEpaperFormat(Image<Rgba32> img, string displayType)
+    private byte[] _convertToEpaperFormat(Image<Rgba32> img, ColorVariant colorVariant)
     {
         using var ms = new MemoryStream();
+
+        var displayType = colorVariant.DisplayType;
 
         // Process each row of pixels
         img.ProcessPixelRows(accessor =>
         {
-            if (displayType == OldDisplayTypes.BW) // FIXME constant
+            if (displayType.Code == "BW") // FIXME constant
             {
                 // 1-bit black and white, 8 pixels per byte
                 for (int y = 0; y < accessor.Height; y++)
@@ -311,7 +312,7 @@ public class PageGeneratorService
                     }
                 }
             }
-            else if (displayType == OldDisplayTypes.ThreeColor) // FIXME constant
+            else if (displayType.Code == "3C") // FIXME constant
             {
                 // 3-color (black, white, red/yellow) - dual buffers per row
                 for (int y = 0; y < accessor.Height; y++)
@@ -439,7 +440,7 @@ public class BitmapOptions
     /// Either "none" or "webmap". Originally used for the Perl Imager module.
     /// </summary>
     public string ColormapName { get; set; } = "none";
-    public List<string> ColormapColors { get; set; } = new();
+    public List<Color> ColormapColors { get; set; } = new();
     public string Format { get; set; } = "png";
     public DisplayType DisplayType { get; set; }
 }

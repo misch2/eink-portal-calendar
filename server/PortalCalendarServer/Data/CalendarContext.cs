@@ -197,6 +197,7 @@ public partial class CalendarContext : DbContext
             entity.Property(e => e.Name)
                 .HasColumnType("VARCHAR")
                 .HasColumnName("name");
+            entity.Property(e => e.NumColors).HasColumnName("num_colors");
             entity.HasMany(d => d.ColorVariants).WithOne(p => p.DisplayType)
                 .HasForeignKey(d => d.DisplayTypeCode)
                 .OnDelete(DeleteBehavior.Cascade);
@@ -205,8 +206,8 @@ public partial class CalendarContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasData(
-                new DisplayType { Code = "BW", Name = "Black and White" },
-                new DisplayType { Code = "3C", Name = "3 Color" }
+                new DisplayType { Code = "BW", Name = "Black and White", NumColors = 2 },
+                new DisplayType { Code = "3C", Name = "3 Color", NumColors = 3 }
              );
         });
 
@@ -227,9 +228,18 @@ public partial class CalendarContext : DbContext
             entity.HasOne(d => d.DisplayType).WithMany(p => p.ColorVariants)
                 .HasForeignKey(d => d.DisplayTypeCode)
                 .OnDelete(DeleteBehavior.Cascade);
-            entity.HasMany(d => d.ColorPaletteLinks).WithOne(p => p.ColorVariant)
-                .HasForeignKey(d => d.ColorVariantCode)
-                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(d => d.EpdColors).WithMany(p => p.ColorVariants)
+                .UsingEntity<ColorPaletteLink>(
+                    j => j.HasOne(cl => cl.EpdColor).WithMany().HasForeignKey(cl => cl.EpdColorCode).OnDelete(DeleteBehavior.Cascade),
+                    j => j.HasOne(cl => cl.ColorVariant).WithMany().HasForeignKey(cl => cl.ColorVariantCode).OnDelete(DeleteBehavior.Cascade),
+                    j =>
+                    {
+                        j.HasKey(cl => new { cl.ColorVariantCode, cl.EpdColorCode });
+                        j.ToTable("color_palette_links");
+                    }
+                );
+
+
             entity.HasMany(d => d.Displays).WithOne(p => p.ColorVariant)
                 .HasForeignKey(d => d.ColorVariantCode)
                 .OnDelete(DeleteBehavior.SetNull);
@@ -256,12 +266,6 @@ public partial class CalendarContext : DbContext
             entity.Property(e => e.EpdColorCode)
                 .HasColumnType("VARCHAR")
                 .HasColumnName("epd_color_code");
-            entity.HasOne(d => d.ColorVariant).WithMany(p => p.ColorPaletteLinks)
-                .HasForeignKey(d => d.ColorVariantCode)
-                .OnDelete(DeleteBehavior.Cascade);
-            entity.HasOne(d => d.EpdColor).WithMany(p => p.ColorPaletteLinks)
-                .HasForeignKey(d => d.EpdColorCode)
-                .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasData(
                 new ColorPaletteLink { Id = 1, ColorVariantCode = "BW", EpdColorCode = "black" },

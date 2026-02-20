@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Data;
-using PortalCalendarServer.Models.Constants;
 using PortalCalendarServer.Models.DatabaseEntities;
 using PortalCalendarServer.Services;
 using PortalCalendarServer.Services.Integrations;
@@ -26,7 +25,6 @@ public class ApiController : ControllerBase
         PageGeneratorService pageGeneratorService,
         ThemeService themeService,
         IWeb2PngService web2PngService,
-        OldDisplayTypeRegistry displayTypeRegistry,
         IMqttService mqttService)
     {
         _context = context;
@@ -126,7 +124,7 @@ public class ApiController : ControllerBase
                 Name = $"New display with MAC {mac.ToUpperInvariant()} added on {DateTime.UtcNow}",
                 Width = w ?? 800,
                 Height = h ?? 480,
-                DisplayTypeCode = c ?? OldDisplayTypes.BW,
+                DisplayTypeCode = c,
                 ColorVariantCode = null,
                 Firmware = fw ?? string.Empty,
                 Rotation = 0,
@@ -279,12 +277,10 @@ public class ApiController : ControllerBase
             return NotFound(new { error = "Display not found" });
         }
 
-        var colortype = _displayService.GetColorType(display);
-
         gamma ??= display.Gamma;
-        colors ??= colortype?.NumColors;
+        colors ??= display.DisplayType?.NumColors;
 
-        var color_palette = colortype?.ColorPalette(preview_colors) ?? new List<string>();
+        var color_palette = display.ColorPalette(preview_colors);
         if (color_palette.Count == 0)
         {
             colormap_name = "webmap";
@@ -324,13 +320,14 @@ public class ApiController : ControllerBase
             return NotFound(new { error = "Display not found" });
         }
 
-        var colortype = _displayService.GetColorType(display);
+        var displayType = display.DisplayType;
+        var colorVariant = display.ColorVariant;
 
         var rotate = display.Rotation;
-        var numcolors = colortype!.NumColors;
+        var numcolors = displayType.NumColors;
         var format = "epaper_native";
 
-        var color_palette = colortype?.ColorPalette(preview_colors) ?? new List<string>();
+        var color_palette = display.ColorPalette(preview_colors);
         var colormap_name = color_palette.Count > 0 ? "none" : "webmap";
 
         if (web_format)

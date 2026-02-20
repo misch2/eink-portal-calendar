@@ -1,11 +1,14 @@
 @* Partial view for EPD color CSS variables *@
-@model Dictionary<string, string>
+@model Dictionary<string, string>?
 
 <style type="text/css">
-:root {
-    --epd-black:  @Model["epd_black"];
-    --epd-white:  @Model["epd_white"];
-    --epd-red:    @Model["epd_red"];
-    --epd-yellow: @Model["epd_yellow"];
-}
+    :root {
+        @{
+            foreach (var color_name in Model?.Keys) 
+            {
+                <text>--epd-@color_name : @Model[color_name];
+                </text>
+            }
+        }
+    }
 </style>

@@ -49,7 +49,11 @@
                         @($"{d.VirtualWidth()} × {d.VirtualHeight()}")
                     }
                 </td>
-                <td>@displayService.GetColorType(d)?.PrettyName</td>
+                <td>
+                    @d.DisplayType?.Name
+                    <br />
+                    @d.ColorVariant?.Name
+                </td>
                 <td>@d.Firmware</td>
                 <td class="text-end">
                     @if (!d.IsDefault())

@@ -1,3 +1,5 @@
+using SixLabors.ImageSharp;
+
 namespace PortalCalendarServer.Models.DatabaseEntities
 {
     public partial class Display
@@ -19,21 +21,31 @@ namespace PortalCalendarServer.Models.DatabaseEntities
 
         public Dictionary<string, string> CssColorMap(bool forPreview)
         {
-            var variants = new Dictionary<string, (string preview, string pure)>
-            {
-                ["epd_black"] = ("#111111", "#000000"),
-                ["epd_white"] = ("#dddddd", "#ffffff"),
-                ["epd_red"] = ("#aa0000", "#ff0000"),
-                ["epd_yellow"] = ("#dddd00", "#ffff00")
-            };
+            var map = ColorVariant?.EpdColors.Select(c => (key: c.Code, value: forPreview ? c.EpdPreviewHexValue : c.HexValue))
+                .ToDictionary(x => x.key, x => $"#{x.value}");
 
-            var colors = new Dictionary<string, string>();
-            foreach (var (key, (preview, pure)) in variants)
+            return map;
+        }
+
+        public List<Color> ColorPalette(bool forPreview)
+        {
+            var hexColors = ColorVariant?.EpdColors.Select(c => (forPreview ? c.EpdPreviewHexValue : c.HexValue))
+                .ToList();
+
+            var colors = new List<Color>();
+            if (hexColors != null)
             {
-                colors[key] = forPreview ? preview : pure;
+                foreach (var hex in hexColors)
+                {
+                    if (Color.TryParseHex(hex, out var color))
+                    {
+                        colors.Add(color);
+                    }
+                }
             }
 
             return colors;
         }
+
     }
 }

@@ -1,4 +1,3 @@
-using PortalCalendarServer.Models.Constants;
 using PortalCalendarServer.Tests.TestBase;
 using PortalCalendarServer.Tests.TestData;
 
@@ -38,25 +37,6 @@ public class SharedTestDataDemoTests : IntegrationServiceTestBase
         Assert.Equal(TestDataHelper.Displays.ThreeColor.Height, display.Height);
     }
 
-    [Fact]
-    public void Demo_CompareBothDisplayTypes()
-    {
-        // Get both pre-seeded displays
-        var bwDisplay = GetBWDisplay();
-        var colorDisplay = Get3CDisplay();
-
-        // They have different color types
-        Assert.NotEqual(bwDisplay.DisplayTypeCode, colorDisplay.DisplayTypeCode);
-        Assert.Equal(OldDisplayTypes.BW, bwDisplay.DisplayTypeCode);
-        Assert.Equal(OldDisplayTypes.ThreeColor, colorDisplay.DisplayTypeCode);
-
-        // But same dimensions
-        Assert.Equal(bwDisplay.Width, colorDisplay.Width);
-        Assert.Equal(bwDisplay.Height, colorDisplay.Height);
-
-        // Different MAC addresses
-        Assert.NotEqual(bwDisplay.Mac, colorDisplay.Mac);
-    }
 
     [Fact]
     public void Demo_AddConfigsToPreSeededDisplay()
@@ -98,21 +78,6 @@ public class SharedTestDataDemoTests : IntegrationServiceTestBase
         // Verify configs were added
         Assert.Equal(3, display.Configs.Count);
         Assert.Contains(display.Configs, c => c.Name == "custom_setting_1");
-    }
-
-    [Theory]
-    [InlineData(OldDisplayTypes.BW)]
-    [InlineData(OldDisplayTypes.ThreeColor)]
-    public void Demo_TestBothDisplayTypesInOneTest(string colorType)
-    {
-        // Get the appropriate display based on color type
-        var display = colorType == OldDisplayTypes.BW ? GetBWDisplay() : Get3CDisplay();
-
-        // Verify the display has the expected color type
-        Assert.Equal(colorType, display.DisplayTypeCode);
-
-        // This pattern is useful for testing behavior that should work
-        // identically for both display types, or for verifying differences
     }
 
     [Fact]
