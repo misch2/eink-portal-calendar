@@ -17,8 +17,8 @@ public partial class Display
     public string? DisplayType { get; set; }
     //public virtual DisplayType? DisplayTypeFIXME { get; set; }
 
-    //public string? ColorVariantCode { get; set; }
-    //public virtual ColorVariant? ColorVariant { get; set; }
+    public string? ColorVariantCode { get; set; }
+    public virtual ColorVariant? ColorVariant { get; set; }
 
     public double? Gamma { get; set; }
 
