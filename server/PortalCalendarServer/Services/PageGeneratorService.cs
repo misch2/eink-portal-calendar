@@ -113,7 +113,7 @@ public class PageGeneratorService
         var urlBuilder = new UriBuilder(baseUrl)
         {
             Path = $"calendar/{display.Id}/html",
-            Query = "preview_colors=true"
+            Query = "preview_colors=false"
         };
         var url = urlBuilder.ToString();
 
