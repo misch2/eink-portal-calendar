@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.Constants;
-using PortalCalendarServer.Models.Entities;
+using PortalCalendarServer.Models.DatabaseEntities;
 using PortalCalendarServer.Services;
 using PortalCalendarServer.Services.Integrations;
 
@@ -26,7 +26,7 @@ public class ApiController : ControllerBase
         PageGeneratorService pageGeneratorService,
         ThemeService themeService,
         IWeb2PngService web2PngService,
-        DisplayTypeRegistry displayTypeRegistry,
+        OldDisplayTypeRegistry displayTypeRegistry,
         IMqttService mqttService)
     {
         _context = context;
@@ -126,7 +126,7 @@ public class ApiController : ControllerBase
                 Name = $"New display with MAC {mac.ToUpperInvariant()} added on {DateTime.UtcNow}",
                 Width = w ?? 800,
                 Height = h ?? 480,
-                DisplayType = c ?? DisplayTypes.BW,
+                DisplayType = c ?? OldDisplayTypes.BW,
                 Firmware = fw ?? string.Empty,
                 Rotation = 0,
                 Gamma = 2.2,

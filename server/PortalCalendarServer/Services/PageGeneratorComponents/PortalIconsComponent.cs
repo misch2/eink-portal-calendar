@@ -1,6 +1,6 @@
 namespace PortalCalendarServer.Services.PageGeneratorComponents;
 
-using PortalCalendarServer.Models.Entities;
+using PortalCalendarServer.Models.DatabaseEntities;
 
 public class PortalIconsComponent(
     IDisplayService displayService)

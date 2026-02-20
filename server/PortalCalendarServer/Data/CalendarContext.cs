@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using PortalCalendarServer.Models.Entities;
+using PortalCalendarServer.Models.DatabaseEntities;
 
 namespace PortalCalendarServer.Data;
 
@@ -92,6 +92,9 @@ public partial class CalendarContext : DbContext
             entity.Property(e => e.DisplayType)
                 .HasColumnType("VARCHAR")
                 .HasColumnName("displaytype");
+            //entity.Property(e => e.ColorVariantCode)
+            //    .HasColumnType("VARCHAR")
+            //    .HasColumnName("color_variant");
             entity.Property(e => e.Firmware)
                 .HasColumnType("VARCHAR")
                 .HasColumnName("firmware");
@@ -112,6 +115,12 @@ public partial class CalendarContext : DbContext
             entity.HasOne(d => d.Theme).WithMany(p => p.Displays)
                 .HasForeignKey(d => d.ThemeId)
                 .OnDelete(DeleteBehavior.SetNull);
+            //entity.HasOne(d => d.DisplayType).WithMany(p => p.Displays)
+            //    .HasForeignKey(d => d.DisplayTypeCode)
+            //    .OnDelete(DeleteBehavior.ClientSetNull);
+            //entity.HasOne(d => d.ColorVariant).WithMany(p => p.Displays)
+            //    .HasForeignKey(d => d.ColorVariantCode)
+            //    .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<Theme>(entity =>
@@ -143,6 +152,98 @@ public partial class CalendarContext : DbContext
                 new Theme { Id = 6, FileName = "XKCD", DisplayName = "XKCD", HasCustomConfig = false, SortOrder = 500 },
                 new Theme { Id = 7, FileName = "Test", DisplayName = "Test - Color Wheel", HasCustomConfig = false, SortOrder = 10000 }
              );
+        });
+
+        modelBuilder.Entity<EpdColor>(entity =>
+        {
+            entity.ToTable("epd_colors");
+
+            entity.HasKey(e => e.Code);
+
+            entity.HasIndex(e => e.Name).IsUnique();
+
+            entity.Property(e => e.Code)
+                .HasColumnType("VARCHAR")
+                .HasColumnName("code");
+            entity.Property(e => e.Name)
+                .HasColumnType("VARCHAR")
+                .HasColumnName("name");
+            entity.Property(e => e.HexValue)
+                .HasColumnType("VARCHAR")
+                .HasColumnName("hex_value");
+            entity.Property(e => e.EpdPreviewHexValue)
+                .HasColumnType("VARCHAR")
+                .HasColumnName("epd_preview_hex_value");
+        });
+
+        modelBuilder.Entity<DisplayType>(entity =>
+        {
+            entity.ToTable("display_types");
+
+            entity.HasKey(e => e.Code);
+
+            entity.HasIndex(e => e.Name).IsUnique();
+
+            entity.Property(e => e.Code)
+                .HasColumnType("VARCHAR")
+                .HasColumnName("code");
+            entity.Property(e => e.Name)
+                .HasColumnType("VARCHAR")
+                .HasColumnName("name");
+            //entity.HasMany(d => d.ColorVariants).WithOne(p => p.DisplayType)
+            //    .HasForeignKey(d => d.DisplayTypeCode)
+            //    .OnDelete(DeleteBehavior.Cascade);
+            //entity.HasMany(d => d.Displays).WithOne(p => p.DisplayType)
+            //    .HasForeignKey(d => d.DisplayTypeCode)
+            //    .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ColorVariant>(entity =>
+        {
+            entity.ToTable("color_variants");
+
+            entity.HasKey(e => e.Code);
+
+            entity.HasIndex(e => new { e.DisplayTypeCode, e.Name }).IsUnique();
+
+            entity.Property(e => e.Name)
+                .HasColumnType("VARCHAR")
+                .HasColumnName("name");
+            entity.Property(e => e.DisplayTypeCode)
+                .HasColumnType("VARCHAR")
+                .HasColumnName("display_type_code");
+            //entity.HasOne(d => d.DisplayType).WithMany(p => p.ColorVariants)
+            //    .HasForeignKey(d => d.DisplayTypeCode)
+            //    .OnDelete(DeleteBehavior.Cascade);
+            //entity.HasMany(d => d.ColorPaletteLinks).WithOne(p => p.ColorVariant)
+            //    .HasForeignKey(d => d.ColorVariantCode)
+            //    .OnDelete(DeleteBehavior.Cascade);
+            //entity.HasMany(d => d.Displays).WithOne(p => p.ColorVariant)
+            //    .HasForeignKey(d => d.ColorVariantCode)
+            //    .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<ColorPaletteLink>(entity =>
+        {
+            entity.ToTable("color_palette_links");
+
+            entity.HasKey(e => e.Id);
+
+            entity.HasIndex(e => new { e.ColorVariantCode, e.EpdColorCode }).IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.ColorVariantCode)
+                .HasColumnType("VARCHAR")
+                .HasColumnName("color_variant_code");
+            entity.Property(e => e.EpdColorCode)
+                .HasColumnType("VARCHAR")
+                .HasColumnName("epd_color_code");
+            //entity.HasOne(d => d.ColorVariant).WithMany(p => p.ColorPaletteLinks)
+            //    .HasForeignKey(d => d.ColorVariantCode)
+            //    .OnDelete(DeleteBehavior.Cascade);
+            //entity.HasOne(d => d.EpdColor).WithMany(p => p.ColorPaletteLinks)
+            //    .HasForeignKey(d => d.EpdColorCode)
+            //    .OnDelete(DeleteBehavior.Cascade);
         });
 
         OnModelCreatingPartial(modelBuilder);

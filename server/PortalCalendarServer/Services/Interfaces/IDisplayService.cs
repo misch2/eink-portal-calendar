@@ -1,5 +1,5 @@
 using PortalCalendarServer.Models.ColorTypes;
-using PortalCalendarServer.Models.Entities;
+using PortalCalendarServer.Models.DatabaseEntities;
 using PortalCalendarServer.Models.POCOs.Board;
 using System.Globalization;
 
@@ -73,7 +73,7 @@ public interface IDisplayService
     /// <summary>
     /// Get the color type implementation for a display
     /// </summary>
-    IColorType? GetColorType(Display display);
+    IOldColorType? GetColorType(Display display);
 
     /// <summary>
     /// Enqueue a request to regenerate the display image for a display.

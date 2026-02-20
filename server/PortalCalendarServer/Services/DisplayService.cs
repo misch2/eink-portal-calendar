@@ -1,6 +1,6 @@
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.ColorTypes;
-using PortalCalendarServer.Models.Entities;
+using PortalCalendarServer.Models.DatabaseEntities;
 using PortalCalendarServer.Models.POCOs.Board;
 using PortalCalendarServer.Services.BackgroundJobs;
 using System.Globalization;
@@ -10,7 +10,7 @@ namespace PortalCalendarServer.Services;
 public class DisplayService(
     CalendarContext context,
     ILogger<DisplayService> logger,
-    DisplayTypeRegistry displayTypeRegistry,
+    OldDisplayTypeRegistry displayTypeRegistry,
     ImageRegenerationService imageRegenerationService) : IDisplayService
 {
     public IEnumerable<Display> GetAllDisplays()
@@ -170,14 +170,14 @@ public class DisplayService(
         }
     }
 
-    public IColorType? GetColorType(Display display)
+    public IOldColorType? GetColorType(Display display)
     {
         if (string.IsNullOrWhiteSpace(display.DisplayType))
         {
             return null;
         }
 
-        var ret = displayTypeRegistry.GetColorType(display.DisplayType);
+        var ret = displayTypeRegistry.GetOldColorType(display.DisplayType);
         if (ret == null)
         {
             throw new InvalidOperationException($"Color type '{display.DisplayType}' not found in registry.");

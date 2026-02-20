@@ -1,4 +1,4 @@
-namespace PortalCalendarServer.Models.Entities;
+namespace PortalCalendarServer.Models.DatabaseEntities;
 
 public partial class Display
 {
@@ -15,6 +15,10 @@ public partial class Display
     public int Rotation { get; set; }
 
     public string? DisplayType { get; set; }
+    //public virtual DisplayType? DisplayTypeFIXME { get; set; }
+
+    //public string? ColorVariantCode { get; set; }
+    //public virtual ColorVariant? ColorVariant { get; set; }
 
     public double? Gamma { get; set; }
 
@@ -29,8 +33,7 @@ public partial class Display
     public string? Firmware { get; set; }
 
     public int? ThemeId { get; set; }
+    public virtual Theme? Theme { get; set; }
 
     public virtual ICollection<Config> Configs { get; set; } = new List<Config>();
-
-    public virtual Theme? Theme { get; set; }
 }

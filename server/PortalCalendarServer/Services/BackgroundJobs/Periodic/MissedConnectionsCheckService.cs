@@ -117,7 +117,7 @@ public class MissedConnectionsCheckService : PeriodicBackgroundService
     }
 
     private string FormatFrozenNotification(
-        Models.Entities.Display display,
+        Models.DatabaseEntities.Display display,
         TimeZoneInfo timeZone,
         DateTime lastVisit,
         DateTime nextExpectedTime,

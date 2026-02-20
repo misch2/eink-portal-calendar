@@ -2,7 +2,7 @@ using PortalCalendarServer.Models.Constants;
 
 namespace PortalCalendarServer.Models.ColorTypes
 {
-    public class ThreeColorType : IColorType
+    public class OldThreeColorType : IOldColorType
     {
         public string Code => "3C";
         public string PrettyName => "Black & White & Color (red or yellow)";

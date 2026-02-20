@@ -47,8 +47,8 @@ public class SharedTestDataDemoTests : IntegrationServiceTestBase
 
         // They have different color types
         Assert.NotEqual(bwDisplay.DisplayType, colorDisplay.DisplayType);
-        Assert.Equal(DisplayTypes.BW, bwDisplay.DisplayType);
-        Assert.Equal(DisplayTypes.ThreeColor, colorDisplay.DisplayType);
+        Assert.Equal(OldDisplayTypes.BW, bwDisplay.DisplayType);
+        Assert.Equal(OldDisplayTypes.ThreeColor, colorDisplay.DisplayType);
 
         // But same dimensions
         Assert.Equal(bwDisplay.Width, colorDisplay.Width);
@@ -101,12 +101,12 @@ public class SharedTestDataDemoTests : IntegrationServiceTestBase
     }
 
     [Theory]
-    [InlineData(DisplayTypes.BW)]
-    [InlineData(DisplayTypes.ThreeColor)]
+    [InlineData(OldDisplayTypes.BW)]
+    [InlineData(OldDisplayTypes.ThreeColor)]
     public void Demo_TestBothDisplayTypesInOneTest(string colorType)
     {
         // Get the appropriate display based on color type
-        var display = colorType == DisplayTypes.BW ? GetBWDisplay() : Get3CDisplay();
+        var display = colorType == OldDisplayTypes.BW ? GetBWDisplay() : Get3CDisplay();
 
         // Verify the display has the expected color type
         Assert.Equal(colorType, display.DisplayType);

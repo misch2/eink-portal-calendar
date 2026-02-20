@@ -1,6 +1,6 @@
 global using Moq;
 global using Moq.Protected;
-global using PortalCalendarServer.Models.Entities;
+global using PortalCalendarServer.Models.DatabaseEntities;
 global using System;
 global using System.Collections.Generic;
 global using System.Linq;

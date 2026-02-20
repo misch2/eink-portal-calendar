@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Data;
-using PortalCalendarServer.Models.Entities;
+using PortalCalendarServer.Models.DatabaseEntities;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;

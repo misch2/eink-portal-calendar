@@ -1,6 +1,6 @@
 namespace PortalCalendarServer.Models.ColorTypes
 {
-    public interface IColorType
+    public interface IOldColorType
     {
         string Code { get; }
         string PrettyName { get; }

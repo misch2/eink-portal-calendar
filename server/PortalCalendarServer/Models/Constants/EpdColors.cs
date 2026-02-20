@@ -6,7 +6,7 @@ namespace PortalCalendarServer.Models.Constants
         public required string Original { get; init; }
     }
 
-    public class DisplayTypes
+    public class OldDisplayTypes
     {
         public const string BW = "BW";
         public const string ThreeColor = "3C";

@@ -1,4 +1,4 @@
-namespace PortalCalendarServer.Models.Entities;
+namespace PortalCalendarServer.Models.DatabaseEntities;
 
 public class Theme
 {

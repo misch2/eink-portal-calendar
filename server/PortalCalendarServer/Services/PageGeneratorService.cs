@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.Constants;
-using PortalCalendarServer.Models.Entities;
+using PortalCalendarServer.Models.DatabaseEntities;
 using PortalCalendarServer.Services.Caches;
 using PortalCalendarServer.Services.Integrations;
 using PortalCalendarServer.Services.PageGeneratorComponents;
@@ -286,7 +286,7 @@ public class PageGeneratorService
         // Process each row of pixels
         img.ProcessPixelRows(accessor =>
         {
-            if (displayType == DisplayTypes.BW) // FIXME constant
+            if (displayType == OldDisplayTypes.BW) // FIXME constant
             {
                 // 1-bit black and white, 8 pixels per byte
                 for (int y = 0; y < accessor.Height; y++)
@@ -311,7 +311,7 @@ public class PageGeneratorService
                     }
                 }
             }
-            else if (displayType == DisplayTypes.ThreeColor) // FIXME constant
+            else if (displayType == OldDisplayTypes.ThreeColor) // FIXME constant
             {
                 // 3-color (black, white, red/yellow) - dual buffers per row
                 for (int y = 0; y < accessor.Height; y++)
@@ -441,7 +441,7 @@ public class BitmapOptions
     public string ColormapName { get; set; } = "none";
     public List<string> ColormapColors { get; set; } = new();
     public string Format { get; set; } = "png";
-    public string DisplayType { get; set; } = DisplayTypes.BW;
+    public string DisplayType { get; set; } = OldDisplayTypes.BW;
 }
 
 public class BitmapResult
