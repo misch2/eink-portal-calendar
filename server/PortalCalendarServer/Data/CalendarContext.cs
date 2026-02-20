@@ -91,7 +91,7 @@ public partial class CalendarContext : DbContext
             entity.Property(e => e.BorderTop).HasColumnName("border_top");
             entity.Property(e => e.DisplayTypeCode)
                 .HasColumnType("VARCHAR")
-                .HasColumnName("displaytype");
+                .HasColumnName("display_type");
             entity.Property(e => e.ColorVariantCode)
                 .HasColumnType("VARCHAR")
                 .HasColumnName("color_variant");
