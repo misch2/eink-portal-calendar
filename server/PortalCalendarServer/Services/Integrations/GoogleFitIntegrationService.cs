@@ -6,8 +6,8 @@ using Google.Apis.Fitness.v1.Data;
 using Google.Apis.Services;
 using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
-using PortalCalendarServer.Models.DTOs;
 using PortalCalendarServer.Models.DatabaseEntities;
+using PortalCalendarServer.Models.DTOs;
 using PortalCalendarServer.Services.Caches;
 
 namespace PortalCalendarServer.Services.Integrations;

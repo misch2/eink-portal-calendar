@@ -126,7 +126,7 @@ public class ApiController : ControllerBase
                 Name = $"New display with MAC {mac.ToUpperInvariant()} added on {DateTime.UtcNow}",
                 Width = w ?? 800,
                 Height = h ?? 480,
-                DisplayType = c ?? OldDisplayTypes.BW,
+                DisplayTypeCode = c ?? OldDisplayTypes.BW,
                 Firmware = fw ?? string.Empty,
                 Rotation = 0,
                 Gamma = 2.2,
@@ -153,7 +153,7 @@ public class ApiController : ControllerBase
             }
             if (!string.IsNullOrWhiteSpace(c))
             {
-                display.DisplayType = c;
+                display.DisplayTypeCode = c;
             }
             _context.Update(display);
             await _context.SaveChangesAsync();
@@ -298,7 +298,7 @@ public class ApiController : ControllerBase
             ColormapName = colormap_name,
             ColormapColors = color_palette,
             Format = format,
-            DisplayType = display.DisplayType
+            DisplayType = display.DisplayTypeCode
         };
 
         var bitmap = _pageGeneratorService.ConvertStoredBitmap(display, bitmapOptions);
@@ -347,7 +347,7 @@ public class ApiController : ControllerBase
             ColormapName = colormap_name,
             ColormapColors = color_palette,
             Format = format,
-            DisplayType = display.DisplayType
+            DisplayType = display.DisplayTypeCode
         };
 
         var bitmap = _pageGeneratorService.ConvertStoredBitmap(display, bitmapOptions);

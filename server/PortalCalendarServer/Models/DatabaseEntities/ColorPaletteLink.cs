@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore.Metadata.Conventions;
-
 namespace PortalCalendarServer.Models.DatabaseEntities
 {
     public class ColorPaletteLink

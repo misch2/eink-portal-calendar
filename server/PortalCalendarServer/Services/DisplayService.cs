@@ -172,15 +172,15 @@ public class DisplayService(
 
     public IOldColorType? GetColorType(Display display)
     {
-        if (string.IsNullOrWhiteSpace(display.DisplayType))
+        if (string.IsNullOrWhiteSpace(display.DisplayTypeCode))
         {
             return null;
         }
 
-        var ret = displayTypeRegistry.GetOldColorType(display.DisplayType);
+        var ret = displayTypeRegistry.GetOldColorType(display.DisplayTypeCode);
         if (ret == null)
         {
-            throw new InvalidOperationException($"Color type '{display.DisplayType}' not found in registry.");
+            throw new InvalidOperationException($"Color type '{display.DisplayTypeCode}' not found in registry.");
         }
 
         return ret;

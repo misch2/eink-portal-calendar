@@ -151,7 +151,7 @@ public abstract class IntegrationServiceTestBase : IDisposable
             Mac = mac,
             Width = width,
             Height = height,
-            DisplayType = colorType,
+            DisplayTypeCode = colorType,
             Rotation = TestDataHelper.Displays.Common.DefaultRotation,
             Gamma = TestDataHelper.Displays.Common.DefaultGamma,
             BorderTop = TestDataHelper.Displays.Common.DefaultBorder,

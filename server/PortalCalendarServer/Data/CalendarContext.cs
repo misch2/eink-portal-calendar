@@ -89,7 +89,7 @@ public partial class CalendarContext : DbContext
             entity.Property(e => e.BorderLeft).HasColumnName("border_left");
             entity.Property(e => e.BorderRight).HasColumnName("border_right");
             entity.Property(e => e.BorderTop).HasColumnName("border_top");
-            entity.Property(e => e.DisplayType)
+            entity.Property(e => e.DisplayTypeCode)
                 .HasColumnType("VARCHAR")
                 .HasColumnName("displaytype");
             entity.Property(e => e.ColorVariantCode)
@@ -118,9 +118,9 @@ public partial class CalendarContext : DbContext
             //entity.HasOne(d => d.DisplayType).WithMany(p => p.Displays)
             //    .HasForeignKey(d => d.DisplayTypeCode)
             //    .OnDelete(DeleteBehavior.ClientSetNull);
-            entity.HasOne(d => d.ColorVariant).WithMany(p => p.Displays)
-                .HasForeignKey(d => d.ColorVariantCode)
-                .OnDelete(DeleteBehavior.SetNull);
+            //entity.HasOne(d => d.ColorVariant).WithMany(p => p.Displays)
+            //    .HasForeignKey(d => d.ColorVariantCode)
+            //    .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<Theme>(entity =>
@@ -218,9 +218,9 @@ public partial class CalendarContext : DbContext
             entity.HasMany(d => d.ColorPaletteLinks).WithOne(p => p.ColorVariant)
                 .HasForeignKey(d => d.ColorVariantCode)
                 .OnDelete(DeleteBehavior.Cascade);
-            entity.HasMany(d => d.Displays).WithOne(p => p.ColorVariant)
-                .HasForeignKey(d => d.ColorVariantCode)
-                .OnDelete(DeleteBehavior.SetNull);
+            //entity.HasMany(d => d.Displays).WithOne(p => p.ColorVariant)
+            //    .HasForeignKey(d => d.ColorVariantCode)
+            //    .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<ColorPaletteLink>(entity =>

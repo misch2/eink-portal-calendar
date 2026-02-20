@@ -19,7 +19,7 @@ public class SharedTestDataDemoTests : IntegrationServiceTestBase
         // Verify it has the expected properties
         Assert.Equal(TestDataHelper.Displays.BlackAndWhite.Name, display.Name);
         Assert.Equal(TestDataHelper.Displays.BlackAndWhite.Mac, display.Mac);
-        Assert.Equal(TestDataHelper.Displays.BlackAndWhite.ColorType, display.DisplayType);
+        Assert.Equal(TestDataHelper.Displays.BlackAndWhite.ColorType, display.DisplayTypeCode);
         Assert.Equal(TestDataHelper.Displays.BlackAndWhite.Width, display.Width);
         Assert.Equal(TestDataHelper.Displays.BlackAndWhite.Height, display.Height);
     }
@@ -33,7 +33,7 @@ public class SharedTestDataDemoTests : IntegrationServiceTestBase
         // Verify it has the expected properties
         Assert.Equal(TestDataHelper.Displays.ThreeColor.Name, display.Name);
         Assert.Equal(TestDataHelper.Displays.ThreeColor.Mac, display.Mac);
-        Assert.Equal(TestDataHelper.Displays.ThreeColor.ColorType, display.DisplayType);
+        Assert.Equal(TestDataHelper.Displays.ThreeColor.ColorType, display.DisplayTypeCode);
         Assert.Equal(TestDataHelper.Displays.ThreeColor.Width, display.Width);
         Assert.Equal(TestDataHelper.Displays.ThreeColor.Height, display.Height);
     }
@@ -46,9 +46,9 @@ public class SharedTestDataDemoTests : IntegrationServiceTestBase
         var colorDisplay = Get3CDisplay();
 
         // They have different color types
-        Assert.NotEqual(bwDisplay.DisplayType, colorDisplay.DisplayType);
-        Assert.Equal(OldDisplayTypes.BW, bwDisplay.DisplayType);
-        Assert.Equal(OldDisplayTypes.ThreeColor, colorDisplay.DisplayType);
+        Assert.NotEqual(bwDisplay.DisplayTypeCode, colorDisplay.DisplayTypeCode);
+        Assert.Equal(OldDisplayTypes.BW, bwDisplay.DisplayTypeCode);
+        Assert.Equal(OldDisplayTypes.ThreeColor, colorDisplay.DisplayTypeCode);
 
         // But same dimensions
         Assert.Equal(bwDisplay.Width, colorDisplay.Width);
@@ -109,7 +109,7 @@ public class SharedTestDataDemoTests : IntegrationServiceTestBase
         var display = colorType == OldDisplayTypes.BW ? GetBWDisplay() : Get3CDisplay();
 
         // Verify the display has the expected color type
-        Assert.Equal(colorType, display.DisplayType);
+        Assert.Equal(colorType, display.DisplayTypeCode);
 
         // This pattern is useful for testing behavior that should work
         // identically for both display types, or for verifying differences
