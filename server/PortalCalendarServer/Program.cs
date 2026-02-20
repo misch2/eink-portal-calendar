@@ -65,7 +65,7 @@ builder.Services.AddHttpClient(Options.DefaultName, client =>
 
 // Register services
 builder.Services.AddSingleton<IWeb2PngService, Web2PngService>();
-builder.Services.AddSingleton<ColorTypeRegistry>();
+builder.Services.AddSingleton<DisplayTypeRegistry>();
 builder.Services.AddScoped<IDisplayService, DisplayService>();
 builder.Services.AddScoped<PageGeneratorService>();
 builder.Services.AddScoped<CacheManagementService>();

@@ -1,17 +1,18 @@
 using PortalCalendarServer.Models.ColorTypes;
+using PortalCalendarServer.Models.Constants;
 
 namespace PortalCalendarServer.Services
 {
-    public class ColorTypeRegistry
+    public class DisplayTypeRegistry
     {
         private readonly Dictionary<string, IColorType> _colorTypes;
 
-        public ColorTypeRegistry()
+        public DisplayTypeRegistry()
         {
             _colorTypes = new Dictionary<string, IColorType>
             {
-                ["BW"] = new BlackAndWhiteColorType(),
-                ["3C"] = new ThreeColorColorType(),
+                [DisplayTypes.BW] = new BlackAndWhiteType(),
+                [DisplayTypes.ThreeColor] = new ThreeColorType(),
             };
         }
 

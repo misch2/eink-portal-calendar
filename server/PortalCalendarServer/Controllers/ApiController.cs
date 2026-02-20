@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Data;
+using PortalCalendarServer.Models.Constants;
 using PortalCalendarServer.Models.Entities;
 using PortalCalendarServer.Services;
 using PortalCalendarServer.Services.Integrations;
@@ -25,7 +26,7 @@ public class ApiController : ControllerBase
         PageGeneratorService pageGeneratorService,
         ThemeService themeService,
         IWeb2PngService web2PngService,
-        ColorTypeRegistry colorTypeRegistry,
+        DisplayTypeRegistry displayTypeRegistry,
         IMqttService mqttService)
     {
         _context = context;
@@ -125,7 +126,7 @@ public class ApiController : ControllerBase
                 Name = $"New display with MAC {mac.ToUpperInvariant()} added on {DateTime.UtcNow}",
                 Width = w ?? 800,
                 Height = h ?? 480,
-                ColorType = c ?? "BW",
+                DisplayType = c ?? DisplayTypes.BW,
                 Firmware = fw ?? string.Empty,
                 Rotation = 0,
                 Gamma = 2.2,
@@ -134,7 +135,7 @@ public class ApiController : ControllerBase
                 BorderBottom = 0,
                 BorderLeft = 0,
                 ThemeId = (await _themeService.GetDefaultThemeAsync()).Id
-            }; 
+            };
 
             _context.Displays.Add(display);
             await _context.SaveChangesAsync();
@@ -149,12 +150,14 @@ public class ApiController : ControllerBase
             if (!string.IsNullOrWhiteSpace(fw))
             {
                 display.Firmware = fw;
-                display.ColorType = c ?? display.ColorType;
-                _context.Update(display);
-                await _context.SaveChangesAsync();
             }
+            if (!string.IsNullOrWhiteSpace(c))
+            {
+                display.DisplayType = c;
+            }
+            _context.Update(display);
+            await _context.SaveChangesAsync();
         }
-
 
         // Update last visit timestamp
         _displayService.SetConfig(display, "_last_visit", DateTime.UtcNow.ToString("O"));
@@ -181,7 +184,7 @@ public class ApiController : ControllerBase
                                   $"Was offline for approximately {hoursSince} hours";
 
                     _logger.LogWarning("Display {DisplayId} ({DisplayName}) reconnected after being frozen: {Message}",
-                        display.Id, display.Name, message);
+                                        display.Id, display.Name, message);
 
                     // Send unfrozen notification via Telegram if configured
                     if (_displayService.GetConfigBool(display, "telegram"))
@@ -295,7 +298,7 @@ public class ApiController : ControllerBase
             ColormapName = colormap_name,
             ColormapColors = color_palette,
             Format = format,
-            DisplayType = display.ColorType
+            DisplayType = display.DisplayType
         };
 
         var bitmap = _pageGeneratorService.ConvertStoredBitmap(display, bitmapOptions);
@@ -344,7 +347,7 @@ public class ApiController : ControllerBase
             ColormapName = colormap_name,
             ColormapColors = color_palette,
             Format = format,
-            DisplayType = display.ColorType
+            DisplayType = display.DisplayType
         };
 
         var bitmap = _pageGeneratorService.ConvertStoredBitmap(display, bitmapOptions);

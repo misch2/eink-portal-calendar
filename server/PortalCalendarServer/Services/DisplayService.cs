@@ -10,7 +10,7 @@ namespace PortalCalendarServer.Services;
 public class DisplayService(
     CalendarContext context,
     ILogger<DisplayService> logger,
-    ColorTypeRegistry colorTypeRegistry,
+    DisplayTypeRegistry displayTypeRegistry,
     ImageRegenerationService imageRegenerationService) : IDisplayService
 {
     public IEnumerable<Display> GetAllDisplays()
@@ -172,15 +172,15 @@ public class DisplayService(
 
     public IColorType? GetColorType(Display display)
     {
-        if (string.IsNullOrWhiteSpace(display.ColorType))
+        if (string.IsNullOrWhiteSpace(display.DisplayType))
         {
             return null;
         }
 
-        var ret = colorTypeRegistry.GetColorType(display.ColorType);
+        var ret = displayTypeRegistry.GetColorType(display.DisplayType);
         if (ret == null)
         {
-            throw new InvalidOperationException($"Color type '{display.ColorType}' not found in registry.");
+            throw new InvalidOperationException($"Color type '{display.DisplayType}' not found in registry.");
         }
 
         return ret;

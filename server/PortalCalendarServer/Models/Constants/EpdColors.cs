@@ -6,6 +6,17 @@ namespace PortalCalendarServer.Models.Constants
         public required string Original { get; init; }
     }
 
+    public class DisplayTypes
+    {
+        public const string BW = "BW";
+        public const string ThreeColor = "3C";
+        public static readonly HashSet<string> Definitions = new()
+        {
+            BW,
+            ThreeColor
+        };
+    }
+
     public static class EPDColors
     {
         public static string EPD_Black => "epd_black";

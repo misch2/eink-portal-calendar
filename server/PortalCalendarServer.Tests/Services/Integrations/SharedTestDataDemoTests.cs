@@ -1,3 +1,4 @@
+using PortalCalendarServer.Models.Constants;
 using PortalCalendarServer.Tests.TestBase;
 using PortalCalendarServer.Tests.TestData;
 
@@ -18,7 +19,7 @@ public class SharedTestDataDemoTests : IntegrationServiceTestBase
         // Verify it has the expected properties
         Assert.Equal(TestDataHelper.Displays.BlackAndWhite.Name, display.Name);
         Assert.Equal(TestDataHelper.Displays.BlackAndWhite.Mac, display.Mac);
-        Assert.Equal(TestDataHelper.Displays.BlackAndWhite.ColorType, display.ColorType);
+        Assert.Equal(TestDataHelper.Displays.BlackAndWhite.ColorType, display.DisplayType);
         Assert.Equal(TestDataHelper.Displays.BlackAndWhite.Width, display.Width);
         Assert.Equal(TestDataHelper.Displays.BlackAndWhite.Height, display.Height);
     }
@@ -32,7 +33,7 @@ public class SharedTestDataDemoTests : IntegrationServiceTestBase
         // Verify it has the expected properties
         Assert.Equal(TestDataHelper.Displays.ThreeColor.Name, display.Name);
         Assert.Equal(TestDataHelper.Displays.ThreeColor.Mac, display.Mac);
-        Assert.Equal(TestDataHelper.Displays.ThreeColor.ColorType, display.ColorType);
+        Assert.Equal(TestDataHelper.Displays.ThreeColor.ColorType, display.DisplayType);
         Assert.Equal(TestDataHelper.Displays.ThreeColor.Width, display.Width);
         Assert.Equal(TestDataHelper.Displays.ThreeColor.Height, display.Height);
     }
@@ -45,9 +46,9 @@ public class SharedTestDataDemoTests : IntegrationServiceTestBase
         var colorDisplay = Get3CDisplay();
 
         // They have different color types
-        Assert.NotEqual(bwDisplay.ColorType, colorDisplay.ColorType);
-        Assert.Equal("BW", bwDisplay.ColorType);
-        Assert.Equal("3C", colorDisplay.ColorType);
+        Assert.NotEqual(bwDisplay.DisplayType, colorDisplay.DisplayType);
+        Assert.Equal(DisplayTypes.BW, bwDisplay.DisplayType);
+        Assert.Equal(DisplayTypes.ThreeColor, colorDisplay.DisplayType);
 
         // But same dimensions
         Assert.Equal(bwDisplay.Width, colorDisplay.Width);
@@ -100,15 +101,15 @@ public class SharedTestDataDemoTests : IntegrationServiceTestBase
     }
 
     [Theory]
-    [InlineData("BW")]
-    [InlineData("3C")]
+    [InlineData(DisplayTypes.BW)]
+    [InlineData(DisplayTypes.ThreeColor)]
     public void Demo_TestBothDisplayTypesInOneTest(string colorType)
     {
         // Get the appropriate display based on color type
-        var display = colorType == "BW" ? GetBWDisplay() : Get3CDisplay();
+        var display = colorType == DisplayTypes.BW ? GetBWDisplay() : Get3CDisplay();
 
         // Verify the display has the expected color type
-        Assert.Equal(colorType, display.ColorType);
+        Assert.Equal(colorType, display.DisplayType);
 
         // This pattern is useful for testing behavior that should work
         // identically for both display types, or for verifying differences
