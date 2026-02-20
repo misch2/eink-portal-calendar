@@ -24,7 +24,7 @@
     {
         new {
             Id = "2days",
-            Title = "Dnes a zítra",
+            Title = "Dnes a zÃ­tra",
             Class = "calendar-event-block-today",
             Condition = (Func<CalendarEvent, bool>)(evt => {
                 var deltaDays = (evt.StartTime.Date - Model.Date.Date).Days;
@@ -34,7 +34,7 @@
         },
         new {
             Id = "week",
-            Title = "Nejbližších 7 dní",
+            Title = "NejbliÅ¾Å¡Ã­ch 7 dnÃ­",
             Class = "calendar-event-block-week",
             Condition = (Func<CalendarEvent, bool>)(evt => {
                 var deltaDays = (evt.StartTime.Date - Model.Date.Date).Days;
@@ -43,7 +43,7 @@
         },
         new {
             Id = "rest",
-            Title = "Pozdìjší události",
+            Title = "PozdÄ›jÅ¡Ã­ udÃ¡losti",
             Class = "calendar-event-block-rest",
             Condition = (Func<CalendarEvent, bool>)(evt => {
                 var deltaDays = (evt.StartTime.Date - Model.Date.Date).Days;
@@ -120,7 +120,7 @@
                                     @if (evt.AllDay)
                                     {
                                         @evt.Summary
-                                        <!-- (celý den) -->
+                                        <!-- (celÃ½ den) -->
                                     }
                                     else
                                     {

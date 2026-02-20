@@ -102,17 +102,17 @@ public class AggregatedWeatherData
     public int AggregatedCount { get; set; }
 
     /// <summary>
-    /// Minimum temperature in °C
+    /// Minimum temperature in Â°C
     /// </summary>
     public double TemperatureMin { get; set; }
 
     /// <summary>
-    /// Maximum temperature in °C
+    /// Maximum temperature in Â°C
     /// </summary>
     public double TemperatureMax { get; set; }
 
     /// <summary>
-    /// Average temperature in °C
+    /// Average temperature in Â°C
     /// </summary>
     public double TemperatureAvg { get; set; }
 
