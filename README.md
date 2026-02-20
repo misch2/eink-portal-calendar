@@ -28,7 +28,7 @@ The software is divided into two parts:
     - integration with HomeAssistant (battery & status monitor), 
     - configuration UI
  
-I've chosen this approach because it's easier and more fun for me to implement the server part in my favourite environments (Perl, NodeJS, HTML+CSS) than to try to do this directly on ESP32.
+I've chosen this approach because it's easier and more fun for me to implement the server part in my favourite environments (C#/.NET and HTML+CSS) than to try to do this directly on ESP32.
 
 Everything is designed for a specific e-Paper size of 480x800 pixels, but I'm trying to use relative units in CSS so it should be possible to use different size just by changing the screen and font size.
 
@@ -48,40 +48,6 @@ I also added a voltage monitorig because with ePaper it's not easily detactable 
 * ePaper frame: [3D printed frame by @MultiTricker](https://www.printables.com/model/541552-ramecek-pro-epaper-75-waveshare-i-good-display-v1/related)
 * And optionally: [FFC cable](https://www.laskakit.cz/ffc-fpc-nestineny-flexibilni-kabel-awm-20624-80c-60v-0-5mm-24pin--10cm/) + [FFC FPC connector](https://www.laskakit.cz/laskakit-e-paper-ffc-fpc-24pin-atapter/) for easier connection between the display and the ESP32 board
 
-## Installation 
-
-Edit the `server/portal_calendar.conf` and update settings there. See the `server/examples/portal_calendar.conf` for an example.
-
-Install necessary modules and start the server:
-
-```
-$ sudo apt install perl libimlib2-dev libimlib2
-$ make modules
-$ server/scripts/run_minion &
-$ server/scripts/run_webserver &
-```
-
-Once the server is running you can test it by pointing your browser at it's address (http://...:<PORT>), it should produce HTML page with source calendar on the left side and (empty yet) image on the right side.
-
-Now you can test if the image rendering works:
-
-```
-$ server/scripts/generate_img_from_web
-```
-
-it should respond with something like:
-
-```
-1
-Job enqueued
-```
-
-After a short while there should be a file named `current_calendar.png` in the `server/generated_images/` folder. If there isn't any, check the minion output (either in console, or via http://...:<PORT>/admin URL).
-
-If you refresh the page now, a grayscale PNG version of the calendar screen should be visible on the right side.
-
-Done ✅
-
 ## Sources:
  - The `custom-portal-sign-icons.png` and `custom-portal-sign-full.png` were downloaded from https://decalrobot.com/. 
    - Icons in the `server/public/images/portal_icons` were extracted manually from the image above
@@ -93,11 +59,7 @@ Done ✅
  - Files in `client/wuspy_portal_calendar` are git-cloned from https://github.com/wuspy/portal_calendar.git (see `.gitmodules` file in the root folder)
  - "Broken display" overlay was downloaded from https://www.wallpaperflare.com/technology-cracked-screen-broken-screen-no-people-animal-wildlife-wallpaper-jpnv
  - Multi-display support (and other functionalities too) inspired by https://zivyobraz.eu/
-
- ## Disclaimer
-
-I don't expect anyone to use this project directly, mainly because it's written in Perl. But on the other hand the HTML, CSS or ESP32 code might serve as an inspiration for someone. See the `server/templates/calendar_themes` and `server/public/css/calendar_themes/` folders.
-
+ 
 ## TODO
 
 1. ~~Support for Czech localization and characters~~
