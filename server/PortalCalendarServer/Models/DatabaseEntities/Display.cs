@@ -15,7 +15,7 @@ public partial class Display
     public int Rotation { get; set; }
 
     public string? DisplayTypeCode { get; set; }
-    //public virtual DisplayType? DisplayType { get; set; }
+    public virtual DisplayType? DisplayType { get; set; }
 
     public string? ColorVariantCode { get; set; }
     public virtual ColorVariant? ColorVariant { get; set; }

@@ -115,12 +115,12 @@ public partial class CalendarContext : DbContext
             entity.HasOne(d => d.Theme).WithMany(p => p.Displays)
                 .HasForeignKey(d => d.ThemeId)
                 .OnDelete(DeleteBehavior.SetNull);
-            //entity.HasOne(d => d.DisplayType).WithMany(p => p.Displays)
-            //    .HasForeignKey(d => d.DisplayTypeCode)
-            //    .OnDelete(DeleteBehavior.ClientSetNull);
-            //entity.HasOne(d => d.ColorVariant).WithMany(p => p.Displays)
-            //    .HasForeignKey(d => d.ColorVariantCode)
-            //    .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(d => d.DisplayType).WithMany(p => p.Displays)
+                .HasForeignKey(d => d.DisplayTypeCode)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+            entity.HasOne(d => d.ColorVariant).WithMany(p => p.Displays)
+                .HasForeignKey(d => d.ColorVariantCode)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<Theme>(entity =>
@@ -200,9 +200,9 @@ public partial class CalendarContext : DbContext
             entity.HasMany(d => d.ColorVariants).WithOne(p => p.DisplayType)
                 .HasForeignKey(d => d.DisplayTypeCode)
                 .OnDelete(DeleteBehavior.Cascade);
-            //entity.HasMany(d => d.Displays).WithOne(p => p.DisplayType)
-            //    .HasForeignKey(d => d.DisplayTypeCode)
-            //    .OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(d => d.Displays).WithOne(p => p.DisplayType)
+                .HasForeignKey(d => d.DisplayTypeCode)
+                .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasData(
                 new DisplayType { Code = "BW", Name = "Black and White" },
@@ -230,9 +230,9 @@ public partial class CalendarContext : DbContext
             entity.HasMany(d => d.ColorPaletteLinks).WithOne(p => p.ColorVariant)
                 .HasForeignKey(d => d.ColorVariantCode)
                 .OnDelete(DeleteBehavior.Cascade);
-            //entity.HasMany(d => d.Displays).WithOne(p => p.ColorVariant)
-            //    .HasForeignKey(d => d.ColorVariantCode)
-            //    .OnDelete(DeleteBehavior.SetNull);
+            entity.HasMany(d => d.Displays).WithOne(p => p.ColorVariant)
+                .HasForeignKey(d => d.ColorVariantCode)
+                .OnDelete(DeleteBehavior.SetNull);
 
             entity.HasData(
                 new ColorVariant { Code = "BW", Name = "Black and White", DisplayTypeCode = "BW" },
