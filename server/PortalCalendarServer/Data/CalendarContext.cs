@@ -28,6 +28,8 @@ public partial class CalendarContext : DbContext
         {
             entity.ToTable("cache");
 
+            entity.HasKey(e => e.Id);
+
             entity.HasIndex(e => new { e.Creator, e.Key }, "cache_creator_key").IsUnique();
 
             entity.HasIndex(e => new { e.ExpiresAt, e.Creator }, "cache_expires_at");
@@ -54,6 +56,8 @@ public partial class CalendarContext : DbContext
         {
             entity.ToTable("config");
 
+            entity.HasKey(e => e.Id);
+
             entity.HasIndex(e => new { e.Name, e.DisplayId }, "config_name_display").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("id");
@@ -73,6 +77,8 @@ public partial class CalendarContext : DbContext
         modelBuilder.Entity<Display>(entity =>
         {
             entity.ToTable("displays");
+
+            entity.HasKey(e => e.Id);
 
             entity.HasIndex(e => e.Mac, "IX_displays_mac").IsUnique();
 
@@ -101,10 +107,32 @@ public partial class CalendarContext : DbContext
                 .HasColumnName("name");
             entity.Property(e => e.Rotation).HasColumnName("rotation");
             entity.Property(e => e.Width).HasColumnName("width");
+            entity.Property(e => e.ThemeId).HasColumnName("theme_id");
+
+            entity.HasOne(d => d.Theme).WithMany(p => p.Displays)
+                .HasForeignKey(d => d.ThemeId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<Theme>(entity =>
         {
+            entity.ToTable("themes");
+
+            entity.HasKey(e => e.Id);
+
+            entity.HasIndex(e => e.FileName).IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.FileName)
+                .HasColumnType("VARCHAR")
+                .HasColumnName("file_name");
+            entity.Property(e => e.DisplayName)
+                .HasColumnType("VARCHAR")
+                .HasColumnName("display_name");
+            entity.Property(e => e.HasCustomConfig).HasColumnName("has_custom_config");
+            entity.Property(e => e.SortOrder).HasColumnName("sort_order");
+            entity.Property(e => e.IsActive).HasColumnName("is_active");
+
             entity.HasData(
                 new Theme { Id = 1, FileName = "Default", DisplayName = "Default", HasCustomConfig = false, SortOrder = 0 },
                 new Theme { Id = 2, FileName = "PortalStyleCalendarWithIcons", DisplayName = "Portal Style Calendar with Icons", HasCustomConfig = true, SortOrder = 100 },
@@ -114,7 +142,6 @@ public partial class CalendarContext : DbContext
                 new Theme { Id = 6, FileName = "XKCD", DisplayName = "XKCD", HasCustomConfig = false, SortOrder = 500 },
                 new Theme { Id = 7, FileName = "Test", DisplayName = "Test - Color Wheel", HasCustomConfig = false, SortOrder = 10000 }
              );
-
         });
 
         OnModelCreatingPartial(modelBuilder);
