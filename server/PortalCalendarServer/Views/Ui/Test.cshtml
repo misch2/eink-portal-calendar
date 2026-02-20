@@ -1,21 +1,26 @@
 @model Display
 @using PortalCalendarServer.Models.Entities
+@using PortalCalendarServer.Controllers
 
 <!-- https://css-tricks.com/snippets/css/a-guide-to-flexbox/ -->
 <div style="display: flex; flex-flow: row wrap; justify-content: space-around;">
     <div>
         Calendar page <a href="/calendar/@Model.Id/html?preview_colors=true">as HTML</a>:
         <br>
-        <iframe src="/calendar/@Model.Id/html?preview_colors=true" 
-                width="@Model.VirtualWidth()" 
-                height="@Model.VirtualHeight()" 
+        <iframe src="/calendar/@Model.Id/html?preview_colors=true"
+                width="@Model.VirtualWidth()"
+                height="@Model.VirtualHeight()"
                 style="border: 1px solid black">
         </iframe>
     </div>
     <div>
-        Calendar page <a href="/api/calendar/bitmap?preview_colors=true&format=png&mac=@Model.Mac">as IMG</a> with fixed size:
+        @{
+            var controllerName = nameof(ApiController).Replace("Controller", "");
+            var url = Url.Action(nameof(ApiController.Bitmap), controllerName, new { preview_colors = true, format = "png", mac = Model.Mac });
+        }
+        Calendar page <a href="@url">as IMG</a> with fixed size:
         <br>
-        <img src="/api/device/bitmap?preview_colors=true&format=png&mac=@Model.Mac" 
+        <img src="@url"
              style="border: 1px solid black"
              alt="Calendar as image">
     </div>
