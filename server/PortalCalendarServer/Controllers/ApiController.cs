@@ -228,7 +228,7 @@ public class ApiController : ControllerBase
         var wakeupInfo = _displayService.GetNextWakeupTime(display);
         _logger.LogInformation(
             "Next wakeup at {NextWakeup} (in {SleepSeconds} seconds) according to crontab schedule '{Schedule}'",
-            wakeupInfo.NextWakeup, wakeupInfo.SleepInSeconds, wakeupInfo.Schedule);
+            wakeupInfo.NextWakeup.ToString("O"), wakeupInfo.SleepInSeconds, wakeupInfo.Schedule);
 
         // Update MQTT values
         await _mqttService.PublishSensorAsync(display, "voltage", _displayService.GetVoltage(display), true);
