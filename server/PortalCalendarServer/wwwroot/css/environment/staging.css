@@ -3,15 +3,12 @@
 body::before {
     content: "STAGING";
     position: fixed;
-    /*    top: 50%;
+    top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%) rotate(-35deg);*/
-    top: 90%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) rotate(-35deg);
     font-size: 8rem;
     font-weight: 900;
-    color: rgba(0, 100, 255, 0.08);
+    color: rgba(250, 207, 207, 0.25);
     white-space: nowrap;
     pointer-events: none;
     z-index: 9999;
@@ -19,9 +16,9 @@ body::before {
 }
 
 body {
-/*    background-color: #f0f4ff;*/
+    /*    background-color: #f0f4ff;*/
 }
 
 .navbar.bg-light {
-    background-color: #ccd9ff !important;
+    background-color: rgba(250, 207, 207, 0.5) !important;
 }
