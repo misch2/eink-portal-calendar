@@ -1,0 +1,27 @@
+/* Staging environment indicator */
+
+body::before {
+    content: "STAGING";
+    position: fixed;
+    /*    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-35deg);*/
+    top: 90%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 8rem;
+    font-weight: 900;
+    color: rgba(0, 100, 255, 0.08);
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 9999;
+    user-select: none;
+}
+
+body {
+/*    background-color: #f0f4ff;*/
+}
+
+.navbar.bg-light {
+    background-color: #ccd9ff !important;
+}

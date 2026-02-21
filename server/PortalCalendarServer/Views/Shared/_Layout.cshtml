@@ -1,8 +1,10 @@
 @using PortalCalendarServer.Models.DatabaseEntities
+@using PortalCalendarServer.Models.Options
 @using PortalCalendarServer.Services
 @using PortalCalendarServer.Services.BackgroundJobs
 @inject IDisplayService displayService
 @inject ImageRegenerationService imageRegenerationService
+@inject Microsoft.Extensions.Options.IOptions<UiOptions> uiOptions
 
 <!DOCTYPE html>
 <html lang="en">
@@ -26,6 +28,10 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <link href="/css/global.css" rel="stylesheet" />
+    @if (!string.IsNullOrEmpty(uiOptions.Value.EnvironmentCssFile))
+    {
+        <link href="/@uiOptions.Value.EnvironmentCssFile.TrimStart('/')" rel="stylesheet" />
+    }
     @RenderSection("Styles", required: false)
 </head>
 <body>

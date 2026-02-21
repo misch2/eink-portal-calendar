@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using PortalCalendarServer.Controllers.ModelBinders;
 using PortalCalendarServer.Data;
+using PortalCalendarServer.Models.Options;
 using PortalCalendarServer.Services;
 using PortalCalendarServer.Services.BackgroundJobs;
 using PortalCalendarServer.Services.Caches;
@@ -83,6 +84,8 @@ builder.Services.AddHostedService<PortalCalendarServer.Services.BackgroundJobs.P
 // Register Image Regeneration Service (singleton + hosted)
 builder.Services.AddSingleton<ImageRegenerationService>();
 builder.Services.AddHostedService(provider => provider.GetRequiredService<ImageRegenerationService>());
+
+builder.Services.Configure<UiOptions>(builder.Configuration.GetSection(UiOptions.SectionName));
 
 // Configure localization to not disturb number formatting in HTML forms, date printing in logs etc.
 var invariant = CultureInfo.InvariantCulture;
