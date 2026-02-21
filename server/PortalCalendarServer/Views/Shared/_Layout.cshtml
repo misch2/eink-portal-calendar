@@ -66,7 +66,7 @@
                     @foreach (var disp in allDisplays)
                     {
                         var isSelected = display?.Id == disp.Id;
-                        <a class="nav-link @(isSelected ? "active" : "")"
+                        <a class="nav-link nav-link--sub-item @(isSelected ? "active" : "")"
                            href="@Url.Action(nameof(UiController.Home), "Ui", new { displayNumber = disp.Id })"
                            data-display-id="@disp.Id">
                             @disp.Name
