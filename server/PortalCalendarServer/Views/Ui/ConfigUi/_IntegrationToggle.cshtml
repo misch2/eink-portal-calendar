@@ -10,6 +10,19 @@
     var isDisabled = !Model.IsDefault() && !hasOverride;
 }
 
+@if (!Model.IsDefault())
+{
+    <div class="col-md-12 mt-2">
+        <div class="form-check form-switch">
+            <input class="form-check-input override-toggle" type="checkbox" 
+                   id="_@(integrationName)_override_global" 
+                   data-integration="@integrationName"
+                   @(hasOverride ? "checked" : "")>
+            <label class="form-check-label" for="_@(integrationName)_override_global">Override global settings</label>
+        </div>
+    </div>
+}
+
 <div class="col-md-12">
     <div class="form-check form-switch">
         <input class="form-check-input integration-toggle" type="checkbox" 
@@ -24,15 +37,3 @@
     </div>
 </div>
 
-@if (!Model.IsDefault())
-{
-    <div class="col-md-12 mt-2">
-        <div class="form-check form-switch">
-            <input class="form-check-input override-toggle" type="checkbox" 
-                   id="_@(integrationName)_override_global" 
-                   data-integration="@integrationName"
-                   @(hasOverride ? "checked" : "")>
-            <label class="form-check-label" for="_@(integrationName)_override_global">Override global settings</label>
-        </div>
-    </div>
-}
