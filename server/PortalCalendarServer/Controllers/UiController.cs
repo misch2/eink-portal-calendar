@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
+using PortalCalendarServer.Controllers.Filters;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.DatabaseEntities;
 using PortalCalendarServer.Models.POCOs;
@@ -114,6 +115,7 @@ public class UiController(
 
     // GET /calendar/{display_number}/html
     [HttpGet("/calendar/{displayNumber:int}/html")]
+    [DisplayRenderErrorHandling]
     public IActionResult CalendarHtmlDefaultDate(int displayNumber, [FromQuery] bool preview_colors = false)
     {
         return CalendarHtmlSpecificDate(displayNumber, DateTime.UtcNow, preview_colors);
@@ -121,6 +123,7 @@ public class UiController(
 
     // GET /calendar/{display_number}/html/{date}
     [HttpGet("/calendar/{displayNumber:int}/html/{date}")]
+    [DisplayRenderErrorHandling]
     public IActionResult CalendarHtmlSpecificDate(int displayNumber, DateTime date, [FromQuery] bool preview_colors = false)
     {
         var display = _displayService.GetDisplayById(displayNumber);
@@ -354,7 +357,9 @@ public class UiController(
     /// </summary>
     public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
     {
-        var isCalendarAction = context.ActionDescriptor.DisplayName?.Contains("CalendarHtml") == true;  // FIXME an ugly check
+        var isCalendarAction = context.ActionDescriptor.EndpointMetadata
+            .OfType<DisplayRenderErrorHandlingAttribute>()
+            .Any();
 
         if (!isCalendarAction)
         {
