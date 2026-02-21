@@ -91,8 +91,21 @@ builder.Services.AddAuthentication("Cookies")
         options.LoginPath = "/login";
         options.ExpireTimeSpan = TimeSpan.FromDays(365);
         options.SlidingExpiration = true;
-    });
-builder.Services.AddAuthorization();
+    })
+    .AddScheme<InternalTokenAuthenticationOptions, InternalTokenAuthenticationHandler>(
+        InternalTokenAuthenticationHandler.SchemeName,
+        _ => { });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.DefaultPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .AddAuthenticationSchemes("Cookies", InternalTokenAuthenticationHandler.SchemeName)
+        .RequireAuthenticatedUser()
+        .Build();
+});
+
+// Register the singleton internal token service (must come before services that depend on it)
+builder.Services.AddSingleton<InternalTokenService>();
 
 // Configure localization to not disturb number formatting in HTML forms, date printing in logs etc.
 var invariant = CultureInfo.InvariantCulture;

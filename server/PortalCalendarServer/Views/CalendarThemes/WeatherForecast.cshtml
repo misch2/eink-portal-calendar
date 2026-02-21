@@ -44,8 +44,8 @@
     <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
 
     @* Stylesheets *@
-    <link rel="stylesheet" href="/css/weather-icons.min.css" />
-    <link rel="stylesheet" href="/css/calendar_themes/weather.css" />
+    <link rel="stylesheet" href="/css/weather-icons.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="/css/calendar_themes/weather.css" asp-append-version="true" />
 
     @* EPD Colors *@
     @await Html.PartialAsync("Includes/_EpdColors.cshtml", Model.CssColors)

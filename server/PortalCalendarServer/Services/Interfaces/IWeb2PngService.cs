@@ -13,6 +13,7 @@ public interface IWeb2PngService : IAsyncDisposable
     /// <param name="height">Height of the viewport/screenshot</param>
     /// <param name="destinationPath">Path where the PNG file should be saved</param>
     /// <param name="delayMs">Delay in milliseconds to wait for web fonts and rendering (default: 2000ms)</param>
+    /// <param name="extraHeaders">Optional HTTP headers to send with the page request (e.g. internal auth token)</param>
     /// <param name="cancellationToken">Cancellation token</param>
     Task ConvertUrlAsync(
         string url,
@@ -20,5 +21,6 @@ public interface IWeb2PngService : IAsyncDisposable
         int height,
         string destinationPath,
         int delayMs = 2000,
+        Dictionary<string, string>? extraHeaders = null,
         CancellationToken cancellationToken = default);
 }

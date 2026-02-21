@@ -27,6 +27,7 @@ public class PageGeneratorService
     private readonly ILoggerFactory _loggerFactory;
     private readonly INameDayService _nameDayService;
     private readonly IPublicHolidayService _publicHolidayService;
+    private readonly InternalTokenService _internalTokenService;
 
     public PageGeneratorService(
         ILogger<PageGeneratorService> logger,
@@ -40,7 +41,8 @@ public class PageGeneratorService
         IDatabaseCacheServiceFactory databaseCacheFactory,
         ILoggerFactory loggerFactory,
         INameDayService nameDayService,
-        IPublicHolidayService publicHolidayService)
+        IPublicHolidayService publicHolidayService,
+        InternalTokenService internalTokenService)
     {
         _logger = logger;
         _configuration = configuration;
@@ -54,6 +56,7 @@ public class PageGeneratorService
         _loggerFactory = loggerFactory;
         _nameDayService = nameDayService;
         _publicHolidayService = publicHolidayService;
+        _internalTokenService = internalTokenService;
     }
 
     public PageViewModel PageViewModelForDate(Display display, DateTime date, bool previewColors = false)
@@ -120,11 +123,17 @@ public class PageGeneratorService
         var outputPath = DisplayImageName(display);
         _logger.LogInformation("Generating calendar image from URL {Url} to {OutputPath}", url, outputPath);
 
+        var headers = new Dictionary<string, string>
+        {
+            [InternalTokenAuthenticationHandler.HeaderName] = _internalTokenService.Token
+        };
+
         await _web2PngService.ConvertUrlAsync(
             url,
             display.VirtualWidth(),
             display.VirtualHeight(),
-            outputPath);
+            outputPath,
+            extraHeaders: headers);
 
         _logger.LogInformation("Image generation completed for display {DisplayId}", display.Id);
     }

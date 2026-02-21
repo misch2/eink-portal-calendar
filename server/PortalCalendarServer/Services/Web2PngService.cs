@@ -64,6 +64,7 @@ public class Web2PngService : IWeb2PngService, IAsyncDisposable
         int height,
         string destinationPath,
         int delayMs = 2000,
+        Dictionary<string, string>? extraHeaders = null,
         CancellationToken cancellationToken = default)
     {
         await InitializeAsync();
@@ -85,7 +86,8 @@ public class Web2PngService : IWeb2PngService, IAsyncDisposable
             var context = await _browser.NewContextAsync(new BrowserNewContextOptions
             {
                 ViewportSize = new ViewportSize { Width = width, Height = height },
-                DeviceScaleFactor = 1
+                DeviceScaleFactor = 1,
+                ExtraHTTPHeaders = extraHeaders
             });
 
             try
