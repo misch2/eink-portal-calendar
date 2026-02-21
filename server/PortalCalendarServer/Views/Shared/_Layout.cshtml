@@ -74,6 +74,16 @@
                     }
 
                 </nav>
+
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <div class="mt-auto p-2">
+                        <form method="post" action="/logout">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-outline-secondary btn-sm w-100">Logout</button>
+                        </form>
+                    </div>
+                }
             </div>
         </div>
 

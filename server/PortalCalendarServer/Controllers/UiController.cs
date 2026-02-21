@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ using PortalCalendarServer.Services;
 namespace PortalCalendarServer.Controllers;
 
 [Controller]
+[Authorize]
 public class UiController(
     CalendarContext context,
     ILogger<UiController> logger,

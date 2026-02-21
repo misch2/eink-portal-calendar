@@ -2,6 +2,7 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Auth.OAuth2.Flows;
 using Google.Apis.Auth.OAuth2.Requests;
 using Google.Apis.Fitness.v1;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Data;
@@ -12,6 +13,7 @@ using System.Text.Json;
 namespace PortalCalendarServer.Controllers;
 
 [Controller]
+[Authorize]
 public class GoogleFitAuthController : Controller
 {
     private readonly CalendarContext _context;

@@ -38,6 +38,9 @@ body {
 .sidebar-body {
     padding: 0.5rem 0;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 .nav-section-title {

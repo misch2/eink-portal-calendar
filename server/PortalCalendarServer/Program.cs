@@ -84,6 +84,16 @@ builder.Services.AddHostedService<PortalCalendarServer.Services.BackgroundJobs.P
 builder.Services.AddSingleton<ImageRegenerationService>();
 builder.Services.AddHostedService(provider => provider.GetRequiredService<ImageRegenerationService>());
 
+// Configure cookie authentication for the web UI
+builder.Services.AddAuthentication("Cookies")
+    .AddCookie("Cookies", options =>
+    {
+        options.LoginPath = "/login";
+        options.ExpireTimeSpan = TimeSpan.FromDays(365);
+        options.SlidingExpiration = true;
+    });
+builder.Services.AddAuthorization();
+
 // Configure localization to not disturb number formatting in HTML forms, date printing in logs etc.
 var invariant = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentCulture = invariant;
@@ -169,6 +179,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles(); // For serving static content (CSS, JS, images)
 
 app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Map controllers (both API and MVC)
 app.MapControllers();
