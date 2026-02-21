@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PortalCalendarServer.Data;
 
@@ -10,9 +11,11 @@ using PortalCalendarServer.Data;
 namespace PortalCalendarServer.Migrations
 {
     [DbContext(typeof(CalendarContext))]
-    partial class CalendarContextModelSnapshot : ModelSnapshot
+    [Migration("20260221184605_AddFourColorVariant")]
+    partial class AddFourColorVariant
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -138,30 +141,6 @@ namespace PortalCalendarServer.Migrations
                             Id = 8,
                             ColorVariantCode = "BWR",
                             EpdColorCode = "red"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            ColorVariantCode = "BWRY",
-                            EpdColorCode = "black"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            ColorVariantCode = "BWRY",
-                            EpdColorCode = "white"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            ColorVariantCode = "BWRY",
-                            EpdColorCode = "red"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            ColorVariantCode = "BWRY",
-                            EpdColorCode = "yellow"
                         });
                 });
 

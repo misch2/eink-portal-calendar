@@ -134,7 +134,7 @@ public class PageGeneratorService
     /// </summary>
     public BitmapResult ConvertStoredBitmap(Display display, BitmapOptions options)
     {
-        _logger.LogDebug("Producing bitmap");
+        _logger.LogDebug("Converting pre-generated bitmap");
 
         var imagePath = DisplayImageName(display);
         if (!File.Exists(imagePath))

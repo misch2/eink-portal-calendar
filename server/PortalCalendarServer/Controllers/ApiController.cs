@@ -283,7 +283,8 @@ public class ApiController : ControllerBase
         var color_palette = display.ColorPalette(preview_colors);
         if (color_palette.Count == 0)
         {
-            colormap_name = "webmap";
+            colormap_name = "webmap"; // FIXME is it ideal to use this as a fallback when no colors are defined? maybe we should have a "default" colormap that is just black and white or something? Or throw an error instead?
+            _logger.LogWarning("No colors defined for display {DisplayId}, using fallback colormap {ColormapName}", display.Id, colormap_name);
         }
 
         var bitmapOptions = new BitmapOptions

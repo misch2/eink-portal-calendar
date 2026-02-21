@@ -216,7 +216,8 @@ public partial class CalendarContext : DbContext
 
             entity.HasData(
                 new DisplayType { Code = "BW", Name = "Black and White", NumColors = 2, SortOrder = 100 },
-                new DisplayType { Code = "3C", Name = "3 Color", NumColors = 3, SortOrder = 200 }
+                new DisplayType { Code = "3C", Name = "3 Colors", NumColors = 3, SortOrder = 200 },
+                new DisplayType { Code = "4C", Name = "4 Colors", NumColors = 4, SortOrder = 300 }
              );
         });
 
@@ -257,7 +258,8 @@ public partial class CalendarContext : DbContext
             entity.HasData(
                 new ColorVariant { Code = "BW", Name = "Black and White", DisplayTypeCode = "BW", SortOrder = 1000 },
                 new ColorVariant { Code = "BWY", Name = "Black, White, Yellow", DisplayTypeCode = "3C", SortOrder = 2000 },
-                new ColorVariant { Code = "BWR", Name = "Black, White, Red", DisplayTypeCode = "3C", SortOrder = 2010 }
+                new ColorVariant { Code = "BWR", Name = "Black, White, Red", DisplayTypeCode = "3C", SortOrder = 2010 },
+                new ColorVariant { Code = "BWRY", Name = "Black, White, Red, Yellow", DisplayTypeCode = "4C", SortOrder = 3000 }
              );
         });
 
@@ -287,7 +289,12 @@ public partial class CalendarContext : DbContext
 
                 new ColorPaletteLink { Id = 6, ColorVariantCode = "BWR", EpdColorCode = "black" },
                 new ColorPaletteLink { Id = 7, ColorVariantCode = "BWR", EpdColorCode = "white" },
-                new ColorPaletteLink { Id = 8, ColorVariantCode = "BWR", EpdColorCode = "red" }
+                new ColorPaletteLink { Id = 8, ColorVariantCode = "BWR", EpdColorCode = "red" },
+
+                new ColorPaletteLink { Id = 9, ColorVariantCode = "BWRY", EpdColorCode = "black" },
+                new ColorPaletteLink { Id = 10, ColorVariantCode = "BWRY", EpdColorCode = "white" },
+                new ColorPaletteLink { Id = 11, ColorVariantCode = "BWRY", EpdColorCode = "red" },
+                new ColorPaletteLink { Id = 12, ColorVariantCode = "BWRY", EpdColorCode = "yellow" }
             );
         });
 
