@@ -145,7 +145,7 @@ public class GoogleFitIntegrationService : IntegrationServiceBase
         if (service == null)
         {
             logger.LogError("Failed to create Google Fit service");
-            return null;
+            throw new HttpRequestException("Failed to create Google Fit service");
         }
 
         var globalResponse = new AggregateResponse { Bucket = new List<AggregateBucket>() };

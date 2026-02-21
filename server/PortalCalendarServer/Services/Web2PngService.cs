@@ -142,7 +142,7 @@ public class Web2PngService : IWeb2PngService, IAsyncDisposable
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to convert URL to PNG: {Url}", url);
-            throw;
+            throw new InvalidOperationException($"Failed to convert URL to PNG: {url}", ex);
         }
         finally
         {

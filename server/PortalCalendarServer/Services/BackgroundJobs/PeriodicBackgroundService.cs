@@ -44,6 +44,8 @@ public abstract class PeriodicBackgroundService : BackgroundService
 
         if (StartupDelay > TimeSpan.Zero)
         {
+            _logger.LogInformation("{ServiceName} will start after an initial delay of {StartupDelay} minutes",
+                ServiceName, StartupDelay.TotalMinutes);
             await Task.Delay(StartupDelay, stoppingToken);
         }
 

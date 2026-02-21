@@ -80,7 +80,7 @@ public abstract class QueuedBackgroundService<TRequest> : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("{ServiceName} started", ServiceName);
+        _logger.LogInformation("{ServiceName} started checking queue", ServiceName);
 
         await foreach (var request in _channel.Reader.ReadAllAsync(stoppingToken))
         {

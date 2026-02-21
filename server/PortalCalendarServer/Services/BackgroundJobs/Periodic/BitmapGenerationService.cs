@@ -8,6 +8,7 @@ public class BitmapGenerationService : PeriodicBackgroundService
 {
     private readonly ILogger<BitmapGenerationService> _logger;
     private readonly TimeSpan _interval;
+    private readonly TimeSpan _startupDelay;
 
     public BitmapGenerationService(
         ILogger<BitmapGenerationService> logger,
@@ -19,9 +20,14 @@ public class BitmapGenerationService : PeriodicBackgroundService
 
         var intervalMinutes = configuration.GetValue<int>("BackgroundJobs:BitmapGeneration:IntervalMinutes");
         _interval = TimeSpan.FromMinutes(intervalMinutes);
+
+        intervalMinutes = configuration.GetValue<int>("BackgroundJobs:BitmapGeneration:StartupDelayMinutes");
+        _startupDelay = TimeSpan.FromMinutes(intervalMinutes);
     }
 
     protected override TimeSpan Interval => _interval;
+
+    protected override TimeSpan StartupDelay => _startupDelay;
 
     protected override string ServiceName => "Bitmap Generation Service";
 

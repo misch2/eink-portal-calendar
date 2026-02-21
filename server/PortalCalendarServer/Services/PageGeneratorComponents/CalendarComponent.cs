@@ -63,6 +63,7 @@ public class CalendarComponent(
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error loading calendar {CalendarNo} from {Url}", calendarNo, url);
+                throw;
             }
         }
 

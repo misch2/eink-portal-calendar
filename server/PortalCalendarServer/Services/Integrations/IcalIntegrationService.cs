@@ -148,6 +148,7 @@ public class IcalIntegrationService : IntegrationServiceBase
         catch (Exception ex)
         {
             logger.LogError(ex, "Error parsing calendar data from {Url}", _icsUrl);
+            throw;
         }
 
         return events;

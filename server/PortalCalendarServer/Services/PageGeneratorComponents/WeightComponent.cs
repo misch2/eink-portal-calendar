@@ -41,7 +41,7 @@ public class WeightComponent
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting last weight from Google Fit");
-            return null;
+            throw;
         }
     }
 
@@ -64,7 +64,7 @@ public class WeightComponent
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting weight series from Google Fit");
-            return new List<WeightDataPoint>();
+            throw;
         }
     }
 }

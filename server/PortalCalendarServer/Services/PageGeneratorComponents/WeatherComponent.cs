@@ -94,7 +94,7 @@ public class WeatherComponent(
         catch (Exception ex)
         {
             logger.LogError(ex, "Error fetching Met.no weather data");
-            return null;
+            throw;
         }
     }
 
@@ -143,7 +143,7 @@ public class WeatherComponent(
         catch (Exception ex)
         {
             logger.LogError(ex, "Error fetching OpenWeather data");
-            return null;
+            throw;
         }
     }
 }

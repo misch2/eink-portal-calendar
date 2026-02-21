@@ -3,11 +3,11 @@
 
 <style type="text/css">
     :root {
-        @{
-            foreach (var color_name in Model?.Keys) 
+        @if (Model != null)
+        {
+            foreach (var (colorName, colorValue) in Model)
             {
-                <text>--epd-@color_name : @Model[color_name];
-                </text>
+                @: --epd-@colorName : @colorValue;
             }
         }
     }

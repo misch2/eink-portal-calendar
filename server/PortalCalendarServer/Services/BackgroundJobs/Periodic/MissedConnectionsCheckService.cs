@@ -12,6 +12,7 @@ public class MissedConnectionsCheckService : PeriodicBackgroundService
 {
     private readonly ILogger<MissedConnectionsCheckService> _logger;
     private readonly TimeSpan _interval;
+    private readonly TimeSpan _startupDelay;
 
     public MissedConnectionsCheckService(
         ILogger<MissedConnectionsCheckService> logger,
@@ -23,9 +24,14 @@ public class MissedConnectionsCheckService : PeriodicBackgroundService
 
         var intervalMinutes = configuration.GetValue<int>("BackgroundJobs:MissedConnections:IntervalMinutes");
         _interval = TimeSpan.FromMinutes(intervalMinutes);
+
+        intervalMinutes = configuration.GetValue<int>("BackgroundJobs:MissedConnections:StartupDelayMinutes");
+        _startupDelay = TimeSpan.FromMinutes(intervalMinutes);
     }
 
     protected override TimeSpan Interval => _interval;
+
+    protected override TimeSpan StartupDelay => _startupDelay;
 
     protected override string ServiceName => "Missed Connections Check Service";
 

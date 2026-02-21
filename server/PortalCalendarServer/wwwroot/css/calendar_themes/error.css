@@ -1,0 +1,72 @@
+/* Error Theme - displayed when calendar rendering fails */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    background-color: var(--epd-white, #fff);
+    color: var(--epd-black, #000);
+}
+
+div#visible-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    text-align: center;
+}
+
+.error-icon {
+    font-size: 6rem;
+    margin-bottom: 1rem;
+}
+
+.error-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.error-subtitle {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+
+.error-message {
+    font-size: 0.9rem;
+    max-width: 90%;
+    word-break: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 40%;
+}
+
+.error-message pre {
+    text-align: left;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    border: 1px solid var(--epd-black, #000);
+    background-color: var(--epd-white, #fff);
+}
+
+.error-timestamp {
+    position: absolute;
+    bottom: 1rem;
+    font-size: 0.7rem;
+}

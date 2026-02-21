@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Data;
+using PortalCalendarServer.Models.DatabaseEntities;
+using PortalCalendarServer.Models.POCOs;
 using PortalCalendarServer.Services;
 
 namespace PortalCalendarServer.Controllers;
@@ -13,7 +16,7 @@ public class UiController(
     PageGeneratorService pageGeneratorService,
     IDisplayService displayService,
     ThemeService themeService
-    ) : Controller
+    ) : Controller, IAsyncResultFilter
 {
     private readonly CalendarContext _context = context;
     private readonly ILogger<UiController> _logger = logger;
@@ -126,9 +129,20 @@ public class UiController(
             return NotFound();
         }
 
-        var viewModel = _pageGeneratorService.PageViewModelForDate(display, date, preview_colors);
+        try
+        {
+            var viewModel = _pageGeneratorService.PageViewModelForDate(display, date, preview_colors);
+            return View($"~/Views/CalendarThemes/{display.Theme.FileName}.cshtml", viewModel);
+        }
+        catch (Exception ex)
+        {
+            // Catch errors during view model preparation (before Razor rendering).
+            // Errors during .cshtml rendering are caught by OnResultExecutionAsync.
+            _logger.LogError(ex, "Error preparing calendar view model for display {DisplayId}, theme: {ThemeFileName}",
+                displayNumber, display.Theme.FileName);
 
-        return View($"~/Views/CalendarThemes/{display.Theme.FileName}.cshtml", viewModel);
+            return CalendarErrorView(ex, display);
+        }
     }
 
     // GET /config_ui/{display_number}
@@ -303,5 +317,80 @@ public class UiController(
             _logger.LogError(ex, "Error rendering theme [{ThemeName}]", themeEntity.DisplayName);
             return Content(string.Empty);
         }
+    }
+
+    /// <summary>
+    /// Returns the error theme view for a failed calendar rendering.
+    /// Used both from action methods (for view model preparation errors)
+    /// and from the result filter (for .cshtml rendering errors).
+    /// </summary>
+    private ViewResult CalendarErrorView(Exception ex, Display? display)
+    {
+        Dictionary<string, string>? cssColors = null;
+        try
+        {
+            cssColors = display?.CssColorMap(false);
+        }
+        catch
+        {
+            // Ignore - we're already handling an error
+        }
+
+        var errorModel = new ErrorViewModel
+        {
+            Message = ex.Message,
+            Details = ex.ToString(),
+            ShowDetails = _environment.IsDevelopment(),
+            CssColors = cssColors
+        };
+
+        return View("~/Views/CalendarThemes/_Error.cshtml", errorModel);
+    }
+
+    /// <summary>
+    /// Result filter that catches exceptions thrown during Razor view rendering (.cshtml execution).
+    /// View rendering happens AFTER the action method returns, so try/catch in action methods
+    /// and OnActionExecuted cannot catch .cshtml errors.
+    /// </summary>
+    public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
+    {
+        var isCalendarAction = context.ActionDescriptor.DisplayName?.Contains("CalendarHtml") == true;  // FIXME an ugly check
+
+        if (!isCalendarAction)
+        {
+            await next();
+            return;
+        }
+
+        // Buffer the response so we can replace it entirely on error.
+        // Without this, Razor may have already flushed partial HTML to the client.
+        var originalBody = context.HttpContext.Response.Body;
+        using var bufferedBody = new MemoryStream();
+        context.HttpContext.Response.Body = bufferedBody;
+
+        var resultContext = await next();
+
+        if (resultContext.Exception != null && !resultContext.ExceptionHandled)
+        {
+            _logger.LogError(resultContext.Exception,
+                "Error rendering calendar view for action: {ActionName}",
+                context.ActionDescriptor.DisplayName);
+
+            // Reset the buffered stream and render the error theme instead
+            bufferedBody.SetLength(0);
+            context.HttpContext.Response.StatusCode = 200;
+            context.HttpContext.Response.ContentType = "text/html";
+            context.HttpContext.Response.Headers.ContentLength = null;
+
+            var errorViewResult = CalendarErrorView(resultContext.Exception, null);
+            await errorViewResult.ExecuteResultAsync(context);
+
+            resultContext.ExceptionHandled = true;
+        }
+
+        // Copy the buffered response to the real stream
+        bufferedBody.Position = 0;
+        await bufferedBody.CopyToAsync(originalBody);
+        context.HttpContext.Response.Body = originalBody;
     }
 }
