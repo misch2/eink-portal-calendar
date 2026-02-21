@@ -206,10 +206,26 @@ public class UiController(
             if (form.ContainsKey("display_name"))
             {
                 display.Name = form["display_name"].ToString();
+                var nameClash = await _context.Displays
+                    .AnyAsync(d => d.Id != display.Id && d.Name == display.Name);
+                if (nameClash)
+                {
+                    TempData["Error"] = $"Display name '{display.Name}' is already used by another display.";
+                    return RedirectToAction(nameof(ConfigUiShow), new { displayNumber });
+                }
+
             }
             if (form.ContainsKey("display_mac"))
             {
                 display.Mac = form["display_mac"].ToString().Trim().ToLowerInvariant();
+                var macClash = await _context.Displays
+                    .AnyAsync(d => d.Id != display.Id && d.Mac == display.Mac);
+                if (macClash)
+                {
+                    TempData["Error"] = $"MAC address '{display.Mac}' is already used by another display.";
+                    return RedirectToAction(nameof(ConfigUiShow), new { displayNumber });
+                }
+
             }
             if (form.ContainsKey("display_rotation") && int.TryParse(form["display_rotation"], out var rotation))
             {

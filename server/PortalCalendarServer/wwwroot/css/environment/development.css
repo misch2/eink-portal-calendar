@@ -3,13 +3,10 @@
 body::before {
     content: "DEVELOPMENT";
     position: fixed;
-/*    top: 50%;
-    left: 50%;*/
-    /*    transform: translate(-50%, -50%) rotate(-35deg);*/
-    top: 90%;
+    bottom: 0;
     left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 8rem;
+    transform: translateX(-50%);
+    font-size: 6rem;
     font-weight: 900;
     color: rgba(214, 250, 207, 0.5);
     white-space: nowrap;
@@ -23,5 +20,5 @@ body {
 }
 
 .navbar.bg-light {
-    background-color: rgba(214, 250, 207, 1.00) !important;
+/*    background-color: rgba(214, 250, 207, 1.00) !important;*/
 }
