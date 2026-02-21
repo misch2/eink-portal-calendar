@@ -283,7 +283,7 @@ public class IcalIntegrationServiceTests : IntegrationServiceTestBase
     }
 
     [Fact]
-    public async Task GetEventsBetweenAsync_WithInvalidIcsData_ReturnsEmptyList()
+    public async Task GetEventsBetweenAsync_WithInvalidIcsData_ThrowsException()
     {
         // Arrange
         SetupHttpResponse(TestIcsUrl, "INVALID ICS DATA");
@@ -291,12 +291,9 @@ public class IcalIntegrationServiceTests : IntegrationServiceTestBase
         var start = new DateTime(2024, 1, 15, 0, 0, 0, DateTimeKind.Utc);
         var end = new DateTime(2024, 1, 17, 0, 0, 0, DateTimeKind.Utc);
 
-        // Act
-        var events = await service.GetEventsBetweenAsync(start, end);
-
-        // Assert - Should handle gracefully and return empty list
-        Assert.NotNull(events);
-        Assert.Empty(events);
+        // Act & Assert
+        await Assert.ThrowsAsync<System.Runtime.Serialization.SerializationException>(
+            async () => await service.GetEventsBetweenAsync(start, end));
     }
 
     [Fact]
