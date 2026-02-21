@@ -117,6 +117,7 @@ public class UiController(
 
     // GET /calendar/{display_number}/html
     [HttpGet("/calendar/{displayNumber:int}/html")]
+    [Authorize("CookiesOrInternalToken")]
     [DisplayRenderErrorHandling]
     public IActionResult CalendarHtmlDefaultDate(int displayNumber, [FromQuery] bool preview_colors = false)
     {
@@ -125,6 +126,7 @@ public class UiController(
 
     // GET /calendar/{display_number}/html/{date}
     [HttpGet("/calendar/{displayNumber:int}/html/{date}")]
+    [Authorize("CookiesOrInternalToken")]
     [DisplayRenderErrorHandling]
     public IActionResult CalendarHtmlSpecificDate(int displayNumber, DateTime date, [FromQuery] bool preview_colors = false)
     {

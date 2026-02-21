@@ -98,10 +98,19 @@ builder.Services.AddAuthentication("Cookies")
 
 builder.Services.AddAuthorization(options =>
 {
+    // Default policy: Cookies only, so unauthenticated browser requests get a 302 redirect to /login.
     options.DefaultPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
-        .AddAuthenticationSchemes("Cookies", InternalTokenAuthenticationHandler.SchemeName)
+        .AddAuthenticationSchemes("Cookies")
         .RequireAuthenticatedUser()
         .Build();
+
+    // Used on calendar HTML endpoints so the internal page generator (Playwright) can also authenticate
+    // via the X-Internal-Token header without a user cookie session.
+    options.AddPolicy("CookiesOrInternalToken",
+        new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+            .AddAuthenticationSchemes("Cookies", InternalTokenAuthenticationHandler.SchemeName)
+            .RequireAuthenticatedUser()
+            .Build());
 });
 
 // Register the singleton internal token service (must come before services that depend on it)
