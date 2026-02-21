@@ -1,4 +1,5 @@
 @model PortalCalendarServer.Models.DatabaseEntities.Display
+@using PortalCalendarServer.Controllers
 @using PortalCalendarServer.Services
 
 @{
@@ -10,7 +11,7 @@
     @await Html.PartialAsync("ConfigUi/_IntegrationToggle", Model, ViewData)
 
     <div class="col-md-12 mt-3 mb-3">
-        <a class="btn btn-primary" href="/auth/googlefit/@Model.Id">Authorize calendar to use Google Fit with the values below</a>
+        <a class="btn btn-primary" href="@Url.Action(nameof(GoogleFitAuthController.GoogleFitRedirect), "GoogleFitAuth", new { displayNumber = Model.Id })">Authorize calendar to use Google Fit with the values below</a>
     </div>
 
     <div class="col-md-12">

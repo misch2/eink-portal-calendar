@@ -1,4 +1,5 @@
 @model Display
+@using PortalCalendarServer.Controllers
 @using PortalCalendarServer.Models.DatabaseEntities
 
 @{
@@ -37,11 +38,11 @@
 <p class="row-fluid pb-3">
     Image for the ePaper display
     (if you'd like to see the original image generated from HTML+CSS template then look at the 
-    <a href="/test/@Model.Id">test page</a>).
+    <a href="@Url.Action(nameof(UiController.Test), "Ui", new { displayNumber = Model.Id })">test page</a>).
 </p>
 
 <p class="row-fluid">
     <div class="preview-image">
-        <img src="/api/device/bitmap/epaper?web_format=true&preview_colors=true&mac=@Model.Mac" alt="ePaper preview">
+        <img src="@Url.Action(nameof(ApiController.BitmapEpaper), "Api", new { web_format = true, preview_colors = true, mac = Model.Mac })" alt="ePaper preview">
     </div>
 </p>

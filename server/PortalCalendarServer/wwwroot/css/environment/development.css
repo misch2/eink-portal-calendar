@@ -1,7 +1,7 @@
 /* Development environment indicator */
 
 body::before {
-/*    content: "DEVELOPMENT";*/
+    content: "DEVELOPMENT";
     position: fixed;
 /*    top: 50%;
     left: 50%;*/

@@ -1,4 +1,5 @@
 @model Display
+@using PortalCalendarServer.Controllers
 @using PortalCalendarServer.Models.DatabaseEntities
 
 <h1>Success!</h1>
@@ -16,5 +17,5 @@
 </div>
 
 <p>
-    <a href="/config_ui/@Model.Id" class="btn btn-primary">Return to Configuration</a>
+    <a href="@Url.Action(nameof(UiController.ConfigUiShow), "Ui", new { displayNumber = Model.Id })" class="btn btn-primary">Return to Configuration</a>
 </p>

@@ -1,3 +1,4 @@
+@using PortalCalendarServer.Controllers
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Authentication Error";
@@ -11,5 +12,5 @@
 </div>
 
 <p>
-    <a href="/" class="btn btn-primary">Return to Home</a>
+    <a href="@Url.Action(nameof(UiController.SelectDisplay), "Ui")" class="btn btn-primary">Return to Home</a>
 </p>
