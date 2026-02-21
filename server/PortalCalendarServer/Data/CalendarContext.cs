@@ -16,9 +16,17 @@ public partial class CalendarContext : DbContext
 
     public virtual DbSet<Cache> Caches { get; set; }
 
+    public virtual DbSet<ColorPaletteLink> ColorPaletteLinks { get; set; }
+
+    public virtual DbSet<ColorVariant> ColorVariants { get; set; }
+
     public virtual DbSet<Config> Configs { get; set; }
 
     public virtual DbSet<Display> Displays { get; set; }
+
+    public virtual DbSet<DisplayType> DisplayTypes { get; set; }
+
+    public virtual DbSet<EpdColor> EpdColors { get; set; }
 
     public virtual DbSet<Theme> Themes { get; set; }
 
@@ -198,6 +206,7 @@ public partial class CalendarContext : DbContext
                 .HasColumnType("VARCHAR")
                 .HasColumnName("name");
             entity.Property(e => e.NumColors).HasColumnName("num_colors");
+            entity.Property(e => e.SortOrder).HasColumnName("sort_order");
             entity.HasMany(d => d.ColorVariants).WithOne(p => p.DisplayType)
                 .HasForeignKey(d => d.DisplayTypeCode)
                 .OnDelete(DeleteBehavior.Cascade);
@@ -206,8 +215,8 @@ public partial class CalendarContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasData(
-                new DisplayType { Code = "BW", Name = "Black and White", NumColors = 2 },
-                new DisplayType { Code = "3C", Name = "3 Color", NumColors = 3 }
+                new DisplayType { Code = "BW", Name = "Black and White", NumColors = 2, SortOrder = 100 },
+                new DisplayType { Code = "3C", Name = "3 Color", NumColors = 3, SortOrder = 200 }
              );
         });
 
@@ -228,6 +237,7 @@ public partial class CalendarContext : DbContext
             entity.HasOne(d => d.DisplayType).WithMany(p => p.ColorVariants)
                 .HasForeignKey(d => d.DisplayTypeCode)
                 .OnDelete(DeleteBehavior.Cascade);
+            entity.Property(e => e.SortOrder).HasColumnName("sort_order");
             entity.HasMany(d => d.EpdColors).WithMany(p => p.ColorVariants)
                 .UsingEntity<ColorPaletteLink>(
                     j => j.HasOne(cl => cl.EpdColor).WithMany().HasForeignKey(cl => cl.EpdColorCode).OnDelete(DeleteBehavior.Cascade),
@@ -245,9 +255,9 @@ public partial class CalendarContext : DbContext
                 .OnDelete(DeleteBehavior.SetNull);
 
             entity.HasData(
-                new ColorVariant { Code = "BW", Name = "Black and White", DisplayTypeCode = "BW" },
-                new ColorVariant { Code = "BWY", Name = "Black, White, Yellow", DisplayTypeCode = "3C" },
-                new ColorVariant { Code = "BWR", Name = "Black, White, Red", DisplayTypeCode = "3C" }
+                new ColorVariant { Code = "BW", Name = "Black and White", DisplayTypeCode = "BW", SortOrder = 1000 },
+                new ColorVariant { Code = "BWY", Name = "Black, White, Yellow", DisplayTypeCode = "3C", SortOrder = 2000 },
+                new ColorVariant { Code = "BWR", Name = "Black, White, Red", DisplayTypeCode = "3C", SortOrder = 2010 }
              );
         });
 

@@ -35,6 +35,21 @@ public class DisplayService(
         return context.Displays.Single(d => d.Id == 0);
     }
 
+    public List<DisplayType> GetDisplayTypes()
+    {
+        return context.DisplayTypes
+            .OrderBy(dt => dt.SortOrder)
+            .ToList();
+    }
+
+    public List<ColorVariant> GetColorVariants()
+    {
+        return context.ColorVariants
+            .OrderBy(cv => cv.DisplayTypeCode)
+            .ThenBy(cv => cv.SortOrder)
+            .ToList();
+    }
+
     public TimeZoneInfo GetTimeZoneInfo(Display display)
     {
         var tzname = GetConfig(display, "timezone");

@@ -29,12 +29,28 @@
     </fieldset>
 
     <fieldset class="row mb-3">
-        <div class="col-md-12">
+        <div class="col-md-6">
+            <label for="display_type">Display type</label>
+            <select id="display_type" name="display_type" class="form-select">
+                <option value=""></option>
+                @{
+                    var display_types = displayService.GetDisplayTypes();
+                    if (display_types != null)
+                    {
+                        foreach (var type in display_types)
+                        {
+                            <option value="@type.Code" selected="@(Model.DisplayTypeCode == type.Code)">@type.Name</option>
+                        }
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-6">
             <label for="color_variant">Color variant</label>
             <select id="color_variant" name="color_variant" class="form-select">
                 <option value=""></option>
                 @{
-                    var color_variants = Model.DisplayType.ColorVariants;
+                    var color_variants = displayService.GetColorVariants().Where(cv => cv.DisplayTypeCode == Model.DisplayTypeCode);
                     if (color_variants != null)
                     {
                         foreach (var variant in color_variants)

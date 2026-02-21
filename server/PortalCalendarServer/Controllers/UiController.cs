@@ -251,6 +251,18 @@ public class UiController(
                     display.ColorVariantCode = form["color_variant"].ToString();
                 }
             }
+            if (form.ContainsKey("display_type"))
+            {
+                var code = form["display_type"].ToString();
+                if (string.IsNullOrEmpty(code))
+                {
+                    display.DisplayTypeCode = null;
+                }
+                else
+                {
+                    display.DisplayTypeCode = form["display_type"].ToString();
+                }
+            }
 
             _context.Update(display);
         }
