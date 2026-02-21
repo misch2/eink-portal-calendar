@@ -50,6 +50,13 @@ public class DisplayService(
             .ToList();
     }
 
+    public List<DitheringType> GetDitheringTypes()
+    {
+        return context.DitheringTypes
+            .OrderBy(dt => dt.SortOrder)
+            .ToList();
+    }
+
     public TimeZoneInfo GetTimeZoneInfo(Display display)
     {
         var tzname = GetConfig(display, "timezone");

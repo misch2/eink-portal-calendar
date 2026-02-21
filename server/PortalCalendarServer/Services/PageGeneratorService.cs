@@ -7,6 +7,7 @@ using PortalCalendarServer.Services.PageGeneratorComponents;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Processing.Processors.Dithering;
 using SixLabors.ImageSharp.Processing.Processors.Quantization;
 using System.Security.Cryptography;
 using System.Text;
@@ -209,9 +210,18 @@ public class PageGeneratorService
         if (options.NumColors < 256)
         {
             // Convert to palette-based image with specified number of colors
+            var dithering = options?.DitheringType?.ToLower() switch
+            {
+                "fs" => KnownDitherings.FloydSteinberg,
+                "at" => KnownDitherings.Atkinson,
+                "jjn" => KnownDitherings.JarvisJudiceNinke,
+                "st" => KnownDitherings.Stucki,
+                _ => null
+            };
+
             var quantizerOptions = new QuantizerOptions
             {
-                Dither = null, // use closest color without dithering
+                Dither = dithering,
                 MaxColors = options.NumColors,
             };
             PaletteQuantizer quantizer;
@@ -443,6 +453,7 @@ public class BitmapOptions
     public List<Color> ColormapColors { get; set; } = new();
     public string Format { get; set; } = "png";
     public DisplayType DisplayType { get; set; }
+    public string? DitheringType { get; set; } = null;
 }
 
 public class BitmapResult

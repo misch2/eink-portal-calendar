@@ -29,7 +29,7 @@
     </fieldset>
 
     <fieldset class="row mb-3">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <label for="display_type">Display type</label>
             <select id="display_type" name="display_type" class="form-select">
                 <option value=""></option>
@@ -45,7 +45,7 @@
                 }
             </select>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <label for="color_variant">Color variant</label>
             <select id="color_variant" name="color_variant" class="form-select">
                 <option value=""></option>
@@ -59,6 +59,23 @@
                         }
                     }
                 }
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label for="dithering_type">Dithering</label>
+            <select id="dithering_type" name="dithering_type" class="form-select">
+                <option value=""></option>
+                @{
+                    var dithering_types = displayService.GetDitheringTypes();
+                    if (dithering_types != null)
+                    {
+                        foreach (var type in dithering_types)
+                        {
+                            <option value="@type.Code" selected="@(Model.DitheringTypeCode == type.Code)">@type.Name</option>
+                        }
+                    }
+                }
+    }
             </select>
         </div>
     </fieldset>

@@ -35,5 +35,8 @@ public partial class Display
     public int? ThemeId { get; set; }
     public virtual Theme? Theme { get; set; }
 
+    public string? DitheringTypeCode { get; set; }
+    public virtual DitheringType? DitheringType { get; set; }
+
     public virtual ICollection<Config> Configs { get; set; } = new List<Config>();
 }

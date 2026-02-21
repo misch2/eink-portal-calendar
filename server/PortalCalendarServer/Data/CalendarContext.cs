@@ -26,6 +26,8 @@ public partial class CalendarContext : DbContext
 
     public virtual DbSet<DisplayType> DisplayTypes { get; set; }
 
+    public virtual DbSet<DitheringType> DitheringTypes { get; set; }
+
     public virtual DbSet<EpdColor> EpdColors { get; set; }
 
     public virtual DbSet<Theme> Themes { get; set; }
@@ -119,6 +121,7 @@ public partial class CalendarContext : DbContext
             entity.Property(e => e.Rotation).HasColumnName("rotation");
             entity.Property(e => e.Width).HasColumnName("width");
             entity.Property(e => e.ThemeId).HasColumnName("theme_id");
+            entity.Property(e => e.DitheringTypeCode).HasColumnName("dithering_type_code");
 
             entity.HasOne(d => d.Theme).WithMany(p => p.Displays)
                 .HasForeignKey(d => d.ThemeId)
@@ -129,6 +132,32 @@ public partial class CalendarContext : DbContext
             entity.HasOne(d => d.ColorVariant).WithMany(p => p.Displays)
                 .HasForeignKey(d => d.ColorVariantCode)
                 .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(d => d.DitheringType).WithMany(p => p.Displays)
+                .HasForeignKey(d => d.DitheringTypeCode)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<DitheringType>(entity =>
+        {
+            entity.ToTable("dithering_types");
+
+            entity.HasKey(e => e.Code);
+
+            entity.Property(e => e.Code)
+                .HasColumnType("VARCHAR")
+                .HasColumnName("code");
+            entity.Property(e => e.Name)
+                .HasColumnType("VARCHAR")
+                .HasColumnName("name");
+            entity.Property(e => e.SortOrder).HasColumnName("sort_order");
+
+            entity.HasData(
+                new DitheringType { Code = "", Name = "None", SortOrder = 100 },
+                new DitheringType { Code = "fs", Name = "Floyd-Steinberg", SortOrder = 200 },
+                new DitheringType { Code = "at", Name = "Atkinson", SortOrder = 300 },
+                new DitheringType { Code = "jjn", Name = "Jarvis, Judice, Ninke", SortOrder = 400 },
+                new DitheringType { Code = "st", Name = "Stucki", SortOrder = 500 }
+             );
         });
 
         modelBuilder.Entity<Theme>(entity =>

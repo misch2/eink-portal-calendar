@@ -296,7 +296,8 @@ public class ApiController : ControllerBase
             ColormapName = colormap_name,
             ColormapColors = color_palette,
             Format = format,
-            DisplayType = display.DisplayType
+            DisplayType = display.DisplayType,
+            DitheringType = display.DitheringTypeCode
         };
 
         var bitmap = _pageGeneratorService.ConvertStoredBitmap(display, bitmapOptions);
@@ -346,7 +347,8 @@ public class ApiController : ControllerBase
             ColormapName = colormap_name,
             ColormapColors = color_palette,
             Format = format,
-            DisplayType = display.DisplayType
+            DisplayType = display.DisplayType,
+            DitheringType = display.DitheringTypeCode
         };
 
         var bitmap = _pageGeneratorService.ConvertStoredBitmap(display, bitmapOptions);

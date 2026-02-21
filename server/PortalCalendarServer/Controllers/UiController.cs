@@ -263,6 +263,17 @@ public class UiController(
                     display.DisplayTypeCode = form["display_type"].ToString();
                 }
             }
+            if (form.ContainsKey("dithering_type"))
+            {
+                var code = form["dithering_type"].ToString();
+                if (string.IsNullOrEmpty(code))
+                {
+                    display.DitheringTypeCode = null;
+                } else
+                {
+                    display.DitheringTypeCode = form["dithering_type"].ToString();
+                }
+            }
 
             _context.Update(display);
         }
