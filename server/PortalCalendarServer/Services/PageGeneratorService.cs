@@ -7,7 +7,6 @@ using PortalCalendarServer.Services.PageGeneratorComponents;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Processing.Processors.Dithering;
 using SixLabors.ImageSharp.Processing.Processors.Quantization;
 using System.Security.Cryptography;
 using System.Text;

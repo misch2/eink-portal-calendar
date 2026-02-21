@@ -7,17 +7,11 @@ namespace PortalCalendarServer.Services;
 public class ThemeService
 {
     private readonly CalendarContext _context;
-    private readonly IWebHostEnvironment _environment;
-    private readonly ILogger<ThemeService> _logger;
 
     public ThemeService(
-        CalendarContext context,
-        IWebHostEnvironment environment,
-        ILogger<ThemeService> logger)
+        CalendarContext context)
     {
         _context = context;
-        _environment = environment;
-        _logger = logger;
     }
 
     /// <summary>

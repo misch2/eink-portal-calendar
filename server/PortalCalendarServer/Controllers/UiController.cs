@@ -269,7 +269,8 @@ public class UiController(
                 if (string.IsNullOrEmpty(code))
                 {
                     display.DitheringTypeCode = null;
-                } else
+                }
+                else
                 {
                     display.DitheringTypeCode = form["dithering_type"].ToString();
                 }
