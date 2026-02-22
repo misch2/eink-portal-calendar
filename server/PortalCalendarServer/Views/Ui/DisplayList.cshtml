@@ -20,6 +20,7 @@
                 <br />
                 (local time)
             </th>
+            <th scope="col">Bitmap age</th>
             <th scope="col">Status</th>
             <th scope="col">Last image</th>
             <th scope="col">Action</th>
@@ -77,6 +78,21 @@
                         var minutes = nextWakeupInfo.SleepInSeconds / 60;
                         var seconds = nextWakeupInfo.SleepInSeconds % 60;
                         @($"{TimeZoneInfo.ConvertTimeFromUtc(nextWakeupInfo.NextWakeup,tz).ToString("g", dateCulture)} (in {minutes} minutes and {seconds} seconds)")
+                    }
+                </td>
+                <td>
+                    @if (!d.IsDefault())
+                    {
+                        var bitmapAge = d.RenderedAt.HasValue ? DateTime.UtcNow - d.RenderedAt.Value : (TimeSpan?)null;
+                        if (bitmapAge.HasValue)
+                        {
+                            var minutes = (int)(bitmapAge.Value.TotalMinutes + 0.5);
+                            @($"{minutes} min")
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">N/A</span>
+                        }
                     }
                 </td>
                 <td>
