@@ -8,7 +8,6 @@
 /server/localdata/database/*
 /server/localdata/generated_images/*.png
 /server/PortalCalendarServer/publish.cmd
-/server/PortalCalendarServer/appsettings.Production.json
 # .NET artifacts:
 /server/**/bin/
 /server/**/obj/
