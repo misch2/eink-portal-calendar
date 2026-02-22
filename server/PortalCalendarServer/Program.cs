@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
@@ -85,9 +86,11 @@ builder.Services.AddSingleton<ImageRegenerationService>();
 builder.Services.AddHostedService(provider => provider.GetRequiredService<ImageRegenerationService>());
 
 // Configure cookie authentication for the web UI
-builder.Services.AddAuthentication("Cookies")
-    .AddCookie("Cookies", options =>
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
     {
+        // Use a unique name for each environment
+        options.Cookie.Name = builder.Configuration.GetValue<string>("Auth:CookieName") ?? "PortalCalendarAuth";
         options.LoginPath = "/login";
         options.ExpireTimeSpan = TimeSpan.FromDays(365);
         options.SlidingExpiration = true;
