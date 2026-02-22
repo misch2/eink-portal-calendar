@@ -131,15 +131,20 @@ public class UiController(
     public IActionResult CalendarHtmlSpecificDate(int displayNumber, DateTime date, [FromQuery] bool preview_colors = false, [FromQuery] string? force_error = null)
     {
         var display = _displayService.GetDisplayById(displayNumber);
-        if (display == null || display.Theme == null)
+        if (display == null)
         {
-            return NotFound();
+            return NotFound("Display with this ID not found");
         }
 
         if (!string.IsNullOrEmpty(force_error))
         {
             _logger.LogWarning("Forcing error page for display {DisplayId}: {ErrorMessage}", displayNumber, force_error);
             return CalendarErrorView(new InvalidOperationException(force_error), display);
+        }
+
+        if (display.Theme == null)
+        {
+            return UnprocessableEntity("Display has no theme assigned");
         }
 
         try
