@@ -200,7 +200,7 @@ if (app.Environment.IsDevelopment())
 //// Use request localization
 //app.UseRequestLocalization();
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();    // Not needed since this is typically run behind a reverse proxy that handles TLS termination
 app.UseStaticFiles(); // For serving static content (CSS, JS, images)
 
 app.UseRouting();
