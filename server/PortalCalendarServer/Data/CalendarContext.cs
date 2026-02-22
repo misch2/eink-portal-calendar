@@ -122,6 +122,10 @@ public partial class CalendarContext : DbContext
             entity.Property(e => e.Width).HasColumnName("width");
             entity.Property(e => e.ThemeId).HasColumnName("theme_id");
             entity.Property(e => e.DitheringTypeCode).HasColumnName("dithering_type_code");
+            entity.Property(e => e.RenderedAt)
+                .HasColumnType("DATETIME")
+                .HasColumnName("rendered_at");
+            entity.Property(e => e.RenderErrors).HasColumnName("render_errors");
 
             entity.HasOne(d => d.Theme).WithMany(p => p.Displays)
                 .HasForeignKey(d => d.ThemeId)

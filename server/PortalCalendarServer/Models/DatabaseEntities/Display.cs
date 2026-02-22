@@ -38,5 +38,8 @@ public partial class Display
     public string? DitheringTypeCode { get; set; }
     public virtual DitheringType? DitheringType { get; set; }
 
+    public DateTime? RenderedAt { get; set; }
+    public string? RenderErrors { get; set; }
+
     public virtual ICollection<Config> Configs { get; set; } = new List<Config>();
 }

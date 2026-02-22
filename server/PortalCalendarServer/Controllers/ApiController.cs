@@ -276,6 +276,14 @@ public class ApiController : ControllerBase
         {
             return NotFound(new { error = "Display not found" });
         }
+        if (display.RenderedAt == null)
+        {
+            return NotFound(new { error = "No rendered bitmap available for this display yet" });
+        }
+        if (display.RenderErrors != null)
+        {
+            return StatusCode(500, new { error = "Display has render errors, unable to generate bitmap" });
+        }
 
         gamma ??= display.Gamma;
         colors ??= display.DisplayType?.NumColors;

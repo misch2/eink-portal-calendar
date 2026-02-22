@@ -128,14 +128,30 @@ public class PageGeneratorService
             [InternalTokenAuthenticationHandler.HeaderName] = _internalTokenService.Token
         };
 
-        await _web2PngService.ConvertUrlAsync(
-            url,
-            display.VirtualWidth(),
-            display.VirtualHeight(),
-            outputPath,
-            extraHeaders: headers);
+        try
+        {
+            await _web2PngService.ConvertUrlAsync(
+                url,
+                display.VirtualWidth(),
+                display.VirtualHeight(),
+                outputPath,
+                extraHeaders: headers);
 
-        _logger.LogInformation("Image generation completed for display {DisplayId}", display.Id);
+            _logger.LogInformation("Image generation completed for display {DisplayId}", display.Id);
+            _displayService.UpdateRenderInfo(display, DateTime.UtcNow, null);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating image for display {DisplayId}", display.Id);
+            // Log full exception with possible inner exceptions to the database for troubleshooting
+            var fullException = ex.Message;
+            if (ex.InnerException != null)
+            {
+                fullException += " | Inner Exception: " + ex.InnerException.Message;
+            }
+            _displayService.UpdateRenderInfo(display, DateTime.UtcNow, fullException);
+            throw;
+        }
     }
 
     /// <summary>

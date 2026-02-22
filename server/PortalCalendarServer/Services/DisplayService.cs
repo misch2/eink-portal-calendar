@@ -365,4 +365,12 @@ public class DisplayService(
             "Increased missed connects count for display {DisplayId} to {Count} (expected at {ExpectedTime})",
             display.Id, currentCount + 1, expectedTimeOfConnect);
     }
+
+    public void UpdateRenderInfo(Display display, DateTime renderedAt, string? renderErrors)
+    {
+        display.RenderedAt = renderedAt;
+        display.RenderErrors = renderErrors;
+        context.Update(display);
+        context.SaveChanges();
+    }
 }

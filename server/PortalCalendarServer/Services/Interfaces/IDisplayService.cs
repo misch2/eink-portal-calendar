@@ -114,4 +114,9 @@ public interface IDisplayService
     /// Increase the missed connections count for a display
     /// </summary>
     void IncreaseMissedConnectsCount(Display display, DateTime expectedTimeOfConnect);
+
+    /// <summary>
+    /// Update the render information for a display, including the timestamp of when it was rendered and any errors that occurred during rendering.
+    /// </summary>
+    void UpdateRenderInfo(Display display, DateTime renderedAt, string? renderErrors);
 }
