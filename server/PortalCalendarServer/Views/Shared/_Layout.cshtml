@@ -87,10 +87,13 @@
             </div>
         </div>
 
+        <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
         <!-- ── Main content ──────────────────────────────────────────── -->
         <div class="main-content">
 
             <div class="top-bar">
+                <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
                 <h1 class="mb-0">
                     Portal calendar @if (activeCount > 0)
                     {
@@ -146,12 +149,8 @@
                     </p>
                 }
 
-                <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <nav class="navbar navbar-expand navbar-light bg-light">
                     <div class="container-fluid">
-                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-main">
-                            <span class="navbar-toggler-icon"></span>
-                        </button>
-                        <div class="collapse navbar-collapse" id="navbar-main">
                             <ul class="navbar-nav">
                                 @if (!display.IsDefault())
                                 {
@@ -166,7 +165,6 @@
                                     <a class="nav-link @(navLink == "config_ui" ? "active" : "")" href="@Url.Action(nameof(UiController.ConfigUiShow), "Ui", new { displayNumber = display.Id })">Config</a>
                                 </li>
                             </ul>
-                        </div>
                     </div>
                 </nav>
             }
@@ -196,6 +194,35 @@
 
     <script>
         (function () {
+            // ── Sidebar toggle for mobile ──
+            var sidebar = document.getElementById('sidebar');
+            var backdrop = document.getElementById('sidebar-backdrop');
+            var toggle = document.getElementById('sidebar-toggle');
+
+            function openSidebar() {
+                sidebar.classList.add('open');
+                backdrop.classList.add('open');
+            }
+            function closeSidebar() {
+                sidebar.classList.remove('open');
+                backdrop.classList.remove('open');
+            }
+
+            toggle.addEventListener('click', function () {
+                if (sidebar.classList.contains('open')) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            });
+            backdrop.addEventListener('click', closeSidebar);
+
+            // Close sidebar when a nav link inside it is clicked (mobile UX)
+            sidebar.querySelectorAll('.nav-link').forEach(function (link) {
+                link.addEventListener('click', closeSidebar);
+            });
+
+            // ── Display-switching shortcut ──
             // Patterns where we know how to swap the display number: /home/{n}, /test/{n}, /config_ui/{n}
             var displayUrlPattern = /^(\/(?:home|test|config_ui)\/)(\d+)(\/.*)?$/;
 
