@@ -81,18 +81,94 @@ public class Web2PngService : IWeb2PngService, IAsyncDisposable
         Directory.CreateDirectory(tempDir);
         var tempFile = Path.Combine(tempDir, "screenshot.png");
 
+        // Determine the origin of the target URL so extra headers are only sent to same-origin requests
+        var targetOrigin = new Uri(url).GetLeftPart(UriPartial.Authority);
+
         try
         {
             var context = await _browser.NewContextAsync(new BrowserNewContextOptions
             {
                 ViewportSize = new ViewportSize { Width = width, Height = height },
-                DeviceScaleFactor = 1,
-                ExtraHTTPHeaders = extraHeaders
+                DeviceScaleFactor = 1
+                // Do NOT set ExtraHTTPHeaders here — they would be sent on all
+                // requests including cross-origin ones, breaking CORS for external
+                // resources like Google Fonts.
             });
 
             try
             {
                 var page = await context.NewPageAsync();
+
+                // Intercept requests to add extra headers only to same-origin URLs.
+                // This avoids CORS preflight failures on cross-origin resources
+                // (e.g. fonts.gstatic.com rejecting the X-Internal-Token header).
+                if (extraHeaders is { Count: > 0 })
+                {
+                    await page.RouteAsync("**/*", async route =>
+                    {
+                        var requestUrl = route.Request.Url;
+                        var requestOrigin = new Uri(requestUrl).GetLeftPart(UriPartial.Authority);
+
+                        if (string.Equals(requestOrigin, targetOrigin, StringComparison.OrdinalIgnoreCase))
+                        {
+                            await route.ContinueAsync(new RouteContinueOptions
+                            {
+                                Headers = new Dictionary<string, string>(route.Request.Headers)
+                                    .Concat(extraHeaders)
+                                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
+                            });
+                        }
+                        else
+                        {
+                            await route.ContinueAsync();
+                        }
+                    });
+                }
+
+                // Add console logging to diagnose rendering issues
+                page.Console += (_, msg) =>
+                {
+                    if (msg.Type == "error")
+                    {
+                        _logger.LogError("Web2Png console error: {Text}", msg.Text);
+                    }
+                    else if (msg.Type == "warning")
+                    {
+                        _logger.LogWarning("Web2Png console warning: {Text}", msg.Text);
+                    }
+                    else
+                    {
+                        // log, debug, info, trace, etc.
+                        _logger.LogDebug("Web2Png console [{Type}]: {Text}", msg.Type, msg.Text);
+                    }
+                };
+
+                var networkErrors = new List<string>();
+
+                page.PageError += (_, error) =>
+                {
+                    var msg = $"Page error: {error}";
+                    _logger.LogError("Web2Png page issue {Error}", msg);
+                    networkErrors.Add(msg);
+                };
+
+
+                page.RequestFailed += (_, request) =>
+                {
+                    var msg = $"Request failed: {request.Method} {request.Url} — {request.Failure}";
+                    _logger.LogError("Web2Png request issue: {Message}", msg);
+                    networkErrors.Add(msg);
+                };
+
+                page.Response += (_, response) =>
+                {
+                    if (response.Status >= 400)
+                    {
+                        var msg = $"HTTP {response.Status} {response.StatusText}: {response.Url}";
+                        _logger.LogWarning("Web2Png response issue: {Message}", msg);
+                        networkErrors.Add(msg);
+                    }
+                };
 
                 try
                 {
@@ -130,6 +206,16 @@ public class Web2PngService : IWeb2PngService, IAsyncDisposable
                     File.Copy(tempFile, destinationPath, overwrite: true);
 
                     _logger.LogInformation("PNG file created successfully: {DestinationPath}", destinationPath);
+
+                    if (networkErrors.Count > 0)
+                    {
+                        //_logger.LogWarning(
+                        //    "PNG created but {Count} network issue(s) were encountered during page load for {Url}",
+                        //    networkErrors.Count, url);
+                        throw new AggregateException(
+                            $"PNG created but {networkErrors.Count} network issue(s) occurred while loading {url}",
+                            networkErrors.Select(e => new HttpRequestException(e)));
+                    }
                 }
                 finally
                 {
@@ -141,7 +227,7 @@ public class Web2PngService : IWeb2PngService, IAsyncDisposable
                 await context.CloseAsync();
             }
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not AggregateException)
         {
             _logger.LogError(ex, "Failed to convert URL to PNG: {Url}", url);
             throw new InvalidOperationException($"Failed to convert URL to PNG: {url}", ex);
