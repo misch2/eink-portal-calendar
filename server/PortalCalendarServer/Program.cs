@@ -54,6 +54,11 @@ builder.Services.AddControllersWithViews(options =>
     options.ModelBinderProviders.Insert(0, new FlexibleBoolBinderProvider())
     );
 
+builder.Services.AddAntiforgery(options =>
+{
+    options.Cookie.Name = "PortalCalendarAntiforgery";
+});
+
 // Add memory cache for HTTP response caching
 builder.Services.AddMemoryCache(options =>
 {
@@ -105,11 +110,19 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/login";
         options.ExpireTimeSpan = TimeSpan.FromDays(365);
         options.SlidingExpiration = true;
-        options.SessionStore = new SqliteTicketStore(builder.Services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>());
+        // SessionStore is set via PostConfigure below, after the DI container is fully built
     })
     .AddScheme<InternalTokenAuthenticationOptions, InternalTokenAuthenticationHandler>(
         InternalTokenAuthenticationHandler.SchemeName,
         _ => { });
+
+// Set SessionStore after the DI container is fully built to avoid using
+// a premature BuildServiceProvider() call which would bypass the real container
+builder.Services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
+    .PostConfigure<IServiceScopeFactory>((options, scopeFactory) =>
+    {
+        options.SessionStore = new SqliteTicketStore(scopeFactory);
+    });
 
 builder.Services.AddAuthorization(options =>
 {
