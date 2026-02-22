@@ -73,6 +73,10 @@ public class Web2PngService : IWeb2PngService, IAsyncDisposable
         {
             throw new InvalidOperationException("Browser not initialized");
         }
+        if (string.IsNullOrEmpty(url))
+        {
+            throw new ArgumentException("URL cannot be null or empty", nameof(url));
+        }
 
         _logger.LogInformation("Converting URL to PNG: {Url} ({Width}x{Height})", url, width, height);
 

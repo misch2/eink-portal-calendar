@@ -22,3 +22,7 @@ body {
 .navbar.bg-light {
 /*    background-color: rgba(214, 250, 207, 1.00) !important;*/
 }
+
+.sidebar-body {
+        background-color: rgba(214, 250, 207, 0.25) !important;
+}

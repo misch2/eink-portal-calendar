@@ -15,13 +15,16 @@ public abstract class QueuedBackgroundService<TRequest> : BackgroundService
     protected readonly IServiceScopeFactory ServiceScopeFactory;
     private readonly Channel<TRequest> _channel;
     private readonly ConcurrentDictionary<string, DateTime> _activeRequests;
+    private readonly IHostApplicationLifetime _lifetime;
 
     protected QueuedBackgroundService(
         ILogger logger,
-        IServiceScopeFactory serviceScopeFactory)
+        IServiceScopeFactory serviceScopeFactory,
+        IHostApplicationLifetime lifetime)
     {
         _logger = logger;
         ServiceScopeFactory = serviceScopeFactory;
+        _lifetime = lifetime;
 
         _channel = Channel.CreateUnbounded<TRequest>(new UnboundedChannelOptions
         {
@@ -80,8 +83,13 @@ public abstract class QueuedBackgroundService<TRequest> : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("{ServiceName} started checking queue", ServiceName);
+        _logger.LogInformation("{ServiceName}: Waiting for application to start before processing queue", ServiceName);
 
+        // Wait until the application is fully started and routes are registered
+        // before processing any queued requests (e.g. LinkGenerator requires endpoints to be built)
+        await Task.Run(() => _lifetime.ApplicationStarted.WaitHandle.WaitOne(), stoppingToken);
+
+        _logger.LogInformation("{ServiceName} started checking queue", ServiceName);
         await foreach (var request in _channel.Reader.ReadAllAsync(stoppingToken))
         {
             await ProcessRequestWithTrackingAsync(request, stoppingToken);

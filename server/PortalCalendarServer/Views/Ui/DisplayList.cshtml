@@ -114,7 +114,7 @@
                     @if (!d.IsDefault())
                     {
                         <a href="@Url.Action(nameof(UiController.Home), "Ui", new { displayNumber = d.Id })">
-                            <img src="@Url.Action(nameof(ApiController.Bitmap), "Api", new { preview_colors = true, mac = d.Mac })"
+                            <img src="@Url.Action(nameof(ApiController.Bitmap), "Api", new { mac = d.Mac, preview_colors = true, rotate = 0, flip = ""})"
                                  style="max-height: 6rem; width: auto; border: 1px solid gray"
                                  alt="Display preview" />
                         </a>

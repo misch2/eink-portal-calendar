@@ -28,6 +28,7 @@ public class PageGeneratorService
     private readonly INameDayService _nameDayService;
     private readonly IPublicHolidayService _publicHolidayService;
     private readonly InternalTokenService _internalTokenService;
+    private readonly LinkGenerator _linkGenerator;
 
     public PageGeneratorService(
         ILogger<PageGeneratorService> logger,
@@ -42,7 +43,8 @@ public class PageGeneratorService
         ILoggerFactory loggerFactory,
         INameDayService nameDayService,
         IPublicHolidayService publicHolidayService,
-        InternalTokenService internalTokenService)
+        InternalTokenService internalTokenService,
+        LinkGenerator linkGenerator)
     {
         _logger = logger;
         _configuration = configuration;
@@ -57,6 +59,7 @@ public class PageGeneratorService
         _nameDayService = nameDayService;
         _publicHolidayService = publicHolidayService;
         _internalTokenService = internalTokenService;
+        _linkGenerator = linkGenerator;
     }
 
     public PageViewModel PageViewModelForDate(Display display, DateTime date, bool previewColors = false)
@@ -113,12 +116,12 @@ public class PageGeneratorService
             throw new InvalidOperationException("BaseURL is not configured");
         }
 
-        var urlBuilder = new UriBuilder(baseUrl)
-        {
-            Path = $"calendar/{display.Id}/html",
-            Query = "preview_colors=false"
-        };
-        var url = urlBuilder.ToString();
+        var url = _linkGenerator.GetUriByName(
+                Controllers.Constants.CalendarHtmlDefaultDate,
+                new { displayNumber = display.Id, preview_colors = false },
+                scheme: new Uri(baseUrl).Scheme,
+                host: new HostString(new Uri(baseUrl).Authority))
+            ?? throw new InvalidOperationException("Could not generate URL for CalendarHtmlDefaultDate");
 
         var outputPath = DisplayImageName(display);
         _logger.LogInformation("Generating calendar image from URL {Url} to {OutputPath}", url, outputPath);
@@ -153,12 +156,13 @@ public class PageGeneratorService
             // Try to generate an error page bitmap as fallback
             try
             {
-                var errorUrlBuilder = new UriBuilder(baseUrl)
-                {
-                    Path = $"calendar/{display.Id}/html",
-                    Query = $"preview_colors=false&force_error={Uri.EscapeDataString(fullException)}"
-                };
-                var errorUrl = errorUrlBuilder.ToString();
+                var errorUrl = _linkGenerator.GetUriByName(
+                        Controllers.Constants.CalendarHtmlDefaultDate,
+                        new { displayNumber = display.Id, preview_colors = false, force_error = fullException },
+                        scheme: new Uri(baseUrl).Scheme,
+                        host: new HostString(new Uri(baseUrl).Authority))
+                    ?? throw new InvalidOperationException("Could not generate error URL for CalendarHtmlDefaultDate");
+
                 _logger.LogInformation("Attempting to generate error page bitmap from {ErrorUrl}", errorUrl);
 
                 await _web2PngService.ConvertUrlAsync(
@@ -285,7 +289,7 @@ public class PageGeneratorService
             };
             PaletteQuantizer quantizer;
 
-            if (options.ColormapName == "none")
+            if (string.IsNullOrEmpty(options.ColormapName))
             {
                 var palette = new List<Color>();
                 palette.AddRange(options.ColormapColors);
@@ -508,10 +512,10 @@ public class BitmapOptions
     /// <summary>
     /// Either "none" or "webmap". Originally used for the Perl Imager module.
     /// </summary>
-    public string ColormapName { get; set; } = "none";
+    public string? ColormapName { get; set; }
     public List<Color> ColormapColors { get; set; } = new();
     public string Format { get; set; } = "png";
-    public DisplayType DisplayType { get; set; }
+    public required DisplayType DisplayType { get; set; }
     public string? DitheringType { get; set; } = null;
 }
 

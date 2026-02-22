@@ -12,8 +12,9 @@ public class ImageRegenerationService : QueuedBackgroundService<ImageRegeneratio
 
     public ImageRegenerationService(
         ILogger<ImageRegenerationService> logger,
-        IServiceScopeFactory serviceScopeFactory)
-        : base(logger, serviceScopeFactory)
+        IServiceScopeFactory serviceScopeFactory,
+        IHostApplicationLifetime lifetime)
+        : base(logger, serviceScopeFactory, lifetime)
     {
         _logger = logger;
     }

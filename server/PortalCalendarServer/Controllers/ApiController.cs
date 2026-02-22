@@ -90,7 +90,6 @@ public class ApiController : ControllerBase
 
     // GET /api/device/config?mac=XX:XX:XX:XX:XX:XX&fw=1.0&w=800&h=480&c=BW&adc=2048&v=4.2&...
     [HttpGet("device/config")]
-    [HttpGet("~/config")] // FIXME remove later, keep for backward compatibility
     [Tags("Device API")]
     public async Task<IActionResult> Config(
     [FromQuery] string? mac,
@@ -259,15 +258,13 @@ public class ApiController : ControllerBase
 
     // GET /api/device/bitmap?mac=XX:XX:XX:XX:XX:XX&rotate=0&flip=&format=png&...
     [HttpGet("device/bitmap")]
-    [HttpGet("~/calendar/bitmap")] // FIXME remove later, keep for backward compatibility
-    [Tags("Device API")]
     public async Task<IActionResult> Bitmap(
         [FromQuery] string? mac,
-        [FromQuery] int rotate = 0,
-        [FromQuery] string flip = "",
+        [FromQuery] int? rotate,
+        [FromQuery] string? flip,
         [FromQuery] double? gamma = null,
         [FromQuery] int? colors = null,
-        [FromQuery] string colormap_name = "none",
+        [FromQuery] string? colormap_name = null,
         [FromQuery] string format = "png",
         [FromQuery] bool preview_colors = false)
     {
@@ -280,7 +277,13 @@ public class ApiController : ControllerBase
         {
             return NotFound(new { error = "No rendered bitmap available for this display yet" });
         }
+        if (display.DisplayType == null)
+        {
+            return NotFound(new { error = "Display type information is missing for this display" });
+        }
 
+        rotate ??= display.Rotation;
+        flip ??= "";
         gamma ??= display.Gamma;
         colors ??= display.DisplayType?.NumColors;
 
@@ -293,14 +296,14 @@ public class ApiController : ControllerBase
 
         var bitmapOptions = new BitmapOptions
         {
-            Rotate = rotate,
+            Rotate = rotate!.Value,
             Flip = flip,
             Gamma = gamma!.Value,
             NumColors = colors!.Value,
             ColormapName = colormap_name,
             ColormapColors = color_palette,
             Format = format,
-            DisplayType = display.DisplayType,
+            DisplayType = display.DisplayType!,
             DitheringType = display.DitheringTypeCode
         };
 
@@ -312,52 +315,21 @@ public class ApiController : ControllerBase
 
     // GET /api/device/bitmap/epaper?mac=XX:XX:XX:XX:XX:XX&web_format=false&preview_colors=false
     [HttpGet("device/bitmap/epaper")]
-    [HttpGet("~/calendar/bitmap/epaper")] // FIXME remove later, keep for backward compatibility
     [Tags("Device API")]
     public async Task<IActionResult> BitmapEpaper(
-        [FromQuery] string? mac,
-        [FromQuery] bool web_format = false,
-        [FromQuery] bool preview_colors = false
+        [FromQuery] string? mac
         )
     {
-        var display = await GetDisplayByMacAsync(mac);
-        if (display == null)
-        {
-            return NotFound(new { error = "Display not found" });
-        }
-
-        var displayType = display.DisplayType;
-        var colorVariant = display.ColorVariant;
-
-        var rotate = display.Rotation;
-        var numcolors = displayType.NumColors;
-        var format = "epaper_native";
-
-        var color_palette = display.ColorPalette(preview_colors);
-        var colormap_name = color_palette.Count > 0 ? "none" : "webmap";
-
-        if (web_format)
-        {
-            format = "png";
-            rotate = 0;
-        }
-
-        var bitmapOptions = new BitmapOptions
-        {
-            Rotate = rotate,
-            Flip = "",
-            Gamma = display!.Gamma.Value,
-            NumColors = numcolors,
-            ColormapName = colormap_name,
-            ColormapColors = color_palette,
-            Format = format,
-            DisplayType = display.DisplayType,
-            DitheringType = display.DitheringTypeCode
-        };
-
-        var bitmap = _pageGeneratorService.ConvertStoredBitmap(display, bitmapOptions);
-
-        return ReturnBitmap(bitmap);
+        return await Bitmap(
+            mac: mac,
+            rotate: null,
+            flip: null,
+            gamma: null,
+            colors: null,
+            colormap_name: "none",
+            format: "epaper_native",
+            preview_colors: false
+        );
     }
 
     private IActionResult ReturnBitmap(BitmapResult bitmap)

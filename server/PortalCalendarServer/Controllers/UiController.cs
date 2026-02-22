@@ -116,7 +116,7 @@ public class UiController(
     }
 
     // GET /calendar/{display_number}/html
-    [HttpGet("/calendar/{displayNumber:int}/html")]
+    [HttpGet("/calendar/{displayNumber:int}/html", Name = Constants.CalendarHtmlDefaultDate)]
     [Authorize("CookiesOrInternalToken")]
     [DisplayRenderErrorHandling]
     public IActionResult CalendarHtmlDefaultDate(int displayNumber, [FromQuery] bool preview_colors = false, [FromQuery] string? force_error = null)
