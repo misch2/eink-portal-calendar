@@ -143,14 +143,49 @@ public class PageGeneratorService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error generating image for display {DisplayId}", display.Id);
-            // Log full exception with possible inner exceptions to the database for troubleshooting
             var fullException = ex.Message;
             if (ex.InnerException != null)
             {
                 fullException += " | Inner Exception: " + ex.InnerException.Message;
             }
             _displayService.UpdateRenderInfo(display, DateTime.UtcNow, fullException);
-            throw;
+
+            // Try to generate an error page bitmap as fallback
+            try
+            {
+                var errorUrlBuilder = new UriBuilder(baseUrl)
+                {
+                    Path = $"calendar/{display.Id}/html",
+                    Query = $"preview_colors=false&force_error={Uri.EscapeDataString(fullException)}"
+                };
+                var errorUrl = errorUrlBuilder.ToString();
+                _logger.LogInformation("Attempting to generate error page bitmap from {ErrorUrl}", errorUrl);
+
+                await _web2PngService.ConvertUrlAsync(
+                    errorUrl,
+                    display.VirtualWidth(),
+                    display.VirtualHeight(),
+                    outputPath,
+                    extraHeaders: headers);
+
+                _logger.LogInformation("Error page bitmap generated successfully for display {DisplayId}", display.Id);
+            }
+            catch (Exception fallbackEx)
+            {
+                _logger.LogError(fallbackEx, "Failed to generate error page bitmap for display {DisplayId}, removing stored PNG", display.Id);
+                // Remove the PNG so the API returns 500 instead of serving a stale image
+                try
+                {
+                    if (File.Exists(outputPath))
+                    {
+                        File.Delete(outputPath);
+                    }
+                }
+                catch (Exception deleteEx)
+                {
+                    _logger.LogError(deleteEx, "Failed to delete stale PNG at {OutputPath}", outputPath);
+                }
+            }
         }
     }
 
