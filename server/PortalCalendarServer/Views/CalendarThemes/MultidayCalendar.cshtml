@@ -142,9 +142,7 @@
 
         <div id="bottom-row">
             <div id="bottom-signature">
-                @* Screen displayed at *@
-                <iconify-icon icon="material-symbols:add-to-home-screen-sharp"></iconify-icon>
-                @nextWakeup.ToString("H:mm", dateCulture).
+                @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_WakeupInfo.cshtml", Model.Display)
             </div>
 
             <div id="battery-status">

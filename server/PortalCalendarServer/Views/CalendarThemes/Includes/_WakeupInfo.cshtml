@@ -1,0 +1,24 @@
+@* Partial view for wakeup info *@
+@using PortalCalendarServer.Models.DatabaseEntities
+@using PortalCalendarServer.Services
+@model Display
+@inject IDisplayService displayService
+
+@{
+    var wakeupInfo = displayService.GetNextWakeupTime(Model);
+    var nextWakeup = wakeupInfo.NextWakeup;
+
+    var dateCulture = displayService.GetDateCultureInfo(Model);
+    var tz = displayService.GetTimeZoneInfo(Model);
+
+}
+
+@* Date rendered *@
+<iconify-icon icon="material-symbols:screenshot-monitor-outline-rounded" style="vertical-align: text-bottom"></iconify-icon>
+@DateTime.UtcNow.ToString("t", dateCulture)
+
+<iconify-icon icon="material-symbols:arrow-right-alt" style="vertical-align: text-bottom"></iconify-icon>
+
+@* Next refrest *@
+<iconify-icon icon="material-symbols:refresh" style="vertical-align: text-bottom"></iconify-icon>
+@TimeZoneInfo.ConvertTimeFromUtc(nextWakeup, tz).ToString("t", dateCulture).
