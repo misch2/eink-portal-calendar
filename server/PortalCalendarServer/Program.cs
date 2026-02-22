@@ -29,7 +29,6 @@ builder.Logging.AddSimpleConsole(options =>
 
 // Configure the SQLite connection string to use an absolute path
 var rawConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
 var templatePath = rawConnectionString!.Replace("Data Source=", "");
 var realPath = templatePath;
 realPath = realPath.Replace("{ContentRootPath}", builder.Environment.ContentRootPath);
@@ -39,6 +38,15 @@ var absoluteConnectionString = $"Data Source={absolutePath}";
 builder.Services.AddDbContext<CalendarContext>(options =>
     options.UseLazyLoadingProxies()
     .UseSqlite(absoluteConnectionString));
+
+// Session store database (separate SQLite file)
+var rawSessionConnectionString = builder.Configuration.GetConnectionString("SessionConnection");
+var sessionPath = rawSessionConnectionString!.Replace("Data Source=", "")
+    .Replace("{ContentRootPath}", builder.Environment.ContentRootPath);
+var absoluteSessionPath = Path.GetFullPath(sessionPath);
+var absoluteSessionConnectionString = $"Data Source={absoluteSessionPath}";
+builder.Services.AddDbContext<SessionContext>(options =>
+    options.UseSqlite(absoluteSessionConnectionString));
 
 // Add services to the container
 // Support for both API and MVC controllers
@@ -85,6 +93,9 @@ builder.Services.AddHostedService<PortalCalendarServer.Services.BackgroundJobs.P
 builder.Services.AddSingleton<ImageRegenerationService>();
 builder.Services.AddHostedService(provider => provider.GetRequiredService<ImageRegenerationService>());
 
+// Register SQLite-backed ticket store for cookie authentication
+builder.Services.AddScoped<SqliteTicketStore>();
+
 // Configure cookie authentication for the web UI
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -94,6 +105,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/login";
         options.ExpireTimeSpan = TimeSpan.FromDays(365);
         options.SlidingExpiration = true;
+        options.SessionStore = new SqliteTicketStore(builder.Services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>());
     })
     .AddScheme<InternalTokenAuthenticationOptions, InternalTokenAuthenticationHandler>(
         InternalTokenAuthenticationHandler.SchemeName,
@@ -169,9 +181,14 @@ using (var scope = app.Services.CreateScope())
         var context = services.GetRequiredService<CalendarContext>();
         var connectionString = context.Database.GetConnectionString();
         logger.LogInformation("Starting database migrations on {absoluteConnectionString}", connectionString);
-
         await context.Database.MigrateAsync();
         logger.LogInformation("Database migrations applied successfully");
+
+        var sessionContext = services.GetRequiredService<SessionContext>();
+        var sessionConnectionString = sessionContext.Database.GetConnectionString();
+        logger.LogInformation("Starting session database migrations on {absoluteSessionConnectionString}", sessionConnectionString);
+        await sessionContext.Database.MigrateAsync();
+        logger.LogInformation("Session database migrations applied successfully");
     }
     catch (Exception ex)
     {
