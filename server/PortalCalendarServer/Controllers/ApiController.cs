@@ -326,7 +326,7 @@ public class ApiController : ControllerBase
             flip: null,
             gamma: null,
             colors: null,
-            colormap_name: "none",
+            colormap_name: null,
             format: "epaper_native",
             preview_colors: false
         );
