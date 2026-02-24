@@ -28,7 +28,7 @@ public class CalendarModule : IPortalModule
         "web_calendar1", "web_calendar2", "web_calendar3"
     ];
 
-    public object? CreateComponent(IServiceProvider services, Display display, DateTime date)
+    public object? CreatePageGeneratorComponent(IServiceProvider services, Display display, DateTime date)
     {
         var context = services.GetRequiredService<CalendarContext>();
         var logger = services.GetRequiredService<ILogger<PageGeneratorService>>();

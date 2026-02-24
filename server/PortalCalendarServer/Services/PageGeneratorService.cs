@@ -55,7 +55,7 @@ public class PageGeneratorService
 
         foreach (var module in _moduleRegistry.All)
         {
-            viewModel.RegisterComponent(module.ModuleId, () => module.CreateComponent(_services, display, date));
+            viewModel.RegisterComponent(module.ModuleId, () => module.CreatePageGeneratorComponent(_services, display, date));
         }
 
         return viewModel;

@@ -60,5 +60,5 @@ public interface IPortalModule
     /// The component is wrapped in a <see cref="Lazy{T}"/> so it is only
     /// constructed when the view actually accesses it.
     /// </summary>
-    object? CreateComponent(IServiceProvider services, Display display, DateTime date);
+    object? CreatePageGeneratorComponent(IServiceProvider services, Display display, DateTime date);
 }

@@ -21,5 +21,5 @@ public class MainConfigModule : IPortalModule
 
     public IReadOnlyList<string> CheckboxConfigKeys => [];
 
-    public object? CreateComponent(IServiceProvider services, Display display, DateTime date) => null;
+    public object? CreatePageGeneratorComponent(IServiceProvider services, Display display, DateTime date) => null;
 }

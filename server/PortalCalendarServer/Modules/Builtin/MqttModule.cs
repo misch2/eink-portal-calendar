@@ -19,5 +19,5 @@ public class MqttModule : IPortalModule
 
     public IReadOnlyList<string> CheckboxConfigKeys => ["mqtt"];
 
-    public object? CreateComponent(IServiceProvider services, Display display, DateTime date) => null;
+    public object? CreatePageGeneratorComponent(IServiceProvider services, Display display, DateTime date) => null;
 }

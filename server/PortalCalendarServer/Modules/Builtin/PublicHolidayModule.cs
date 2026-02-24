@@ -18,7 +18,7 @@ public class PublicHolidayModule : IPortalModule
     public IReadOnlyList<string> OwnedConfigKeys => [];
     public IReadOnlyList<string> CheckboxConfigKeys => [];
 
-    public object? CreateComponent(IServiceProvider services, Display display, DateTime date)
+    public object? CreatePageGeneratorComponent(IServiceProvider services, Display display, DateTime date)
     {
         var logger = services.GetRequiredService<ILogger<PageGeneratorService>>();
         var publicHolidayService = services.GetRequiredService<IPublicHolidayService>();

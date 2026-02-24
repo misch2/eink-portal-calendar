@@ -21,5 +21,5 @@ public class OpenWeatherModule : IPortalModule
     public IReadOnlyList<string> CheckboxConfigKeys => ["openweather"];
 
     // Component is provided by MetNoWeatherModule (shared WeatherComponent)
-    public object? CreateComponent(IServiceProvider services, Display display, DateTime date) => null;
+    public object? CreatePageGeneratorComponent(IServiceProvider services, Display display, DateTime date) => null;
 }

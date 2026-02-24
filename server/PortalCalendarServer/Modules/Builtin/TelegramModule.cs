@@ -19,5 +19,5 @@ public class TelegramModule : IPortalModule
 
     public IReadOnlyList<string> CheckboxConfigKeys => ["telegram"];
 
-    public object? CreateComponent(IServiceProvider services, Display display, DateTime date) => null;
+    public object? CreatePageGeneratorComponent(IServiceProvider services, Display display, DateTime date) => null;
 }

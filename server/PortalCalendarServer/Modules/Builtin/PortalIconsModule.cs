@@ -21,7 +21,7 @@ public class PortalIconsModule : IPortalModule
 
     public IReadOnlyList<string> CheckboxConfigKeys => ["totally_random_icon"];
 
-    public object? CreateComponent(IServiceProvider services, Display display, DateTime date)
+    public object? CreatePageGeneratorComponent(IServiceProvider services, Display display, DateTime date)
     {
         var displayService = services.GetRequiredService<IDisplayService>();
         return new PortalIconsComponent(displayService);

@@ -24,7 +24,7 @@ public class MetNoWeatherModule : IPortalModule
 
     public IReadOnlyList<string> CheckboxConfigKeys => ["metnoweather"];
 
-    public object? CreateComponent(IServiceProvider services, Display display, DateTime date)
+    public object? CreatePageGeneratorComponent(IServiceProvider services, Display display, DateTime date)
     {
         var context = services.GetRequiredService<CalendarContext>();
         var logger = services.GetRequiredService<ILogger<PageGeneratorService>>();

@@ -20,5 +20,5 @@ public class ClientConfigModule : IPortalModule
 
     public IReadOnlyList<string> CheckboxConfigKeys => ["ota_mode"];
 
-    public object? CreateComponent(IServiceProvider services, Display display, DateTime date) => null;
+    public object? CreatePageGeneratorComponent(IServiceProvider services, Display display, DateTime date) => null;
 }
