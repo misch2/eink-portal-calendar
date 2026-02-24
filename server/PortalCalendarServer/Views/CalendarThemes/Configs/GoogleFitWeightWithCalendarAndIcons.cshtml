@@ -9,20 +9,29 @@
     ColClass = "col-12", MarginClass = "mb-3"
 })
 
-<div class="row">
+<div class="row mb-3">
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
-    {
+        {
         Display = Model, Key = "min_random_icons", Label = "Min random icons count",
         InputType = "number", ColClass = "col-md-4"
-    })
+        })
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
-    {
+        {
         Display = Model, Key = "max_random_icons", Label = "Max random icons count",
         InputType = "number", ColClass = "col-md-4"
-    })
+        })
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
-    {
+        {
         Display = Model, Key = "max_icons_with_calendar", Label = "Max icons count for calendar event",
         InputType = "number", ColClass = "col-md-4"
-    })
+        })
+</div>
+
+<div class="row">
+    @await Html.PartialAsync("_ConfigCheckbox", new ConfigInputModel
+        {
+        Display = Model, Key = "wakeupinfo_show_times",
+        Label = "Show wakeup times at the bottom",
+        ColClass = "col-12", MarginClass = ""
+        })
 </div>

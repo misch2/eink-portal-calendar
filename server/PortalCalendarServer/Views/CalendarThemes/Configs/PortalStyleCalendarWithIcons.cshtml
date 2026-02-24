@@ -9,7 +9,7 @@
     ColClass = "col-12", MarginClass = "mb-3"
 })
 
-<div class="row">
+<div class="row mb-3">
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
     {
         Display = Model, Key = "min_random_icons", Label = "Min random icons count",
@@ -26,3 +26,10 @@
         InputType = "number", ColClass = "col-md-4"
     })
 </div>
+
+@await Html.PartialAsync("_ConfigCheckbox", new ConfigInputModel
+{
+    Display = Model, Key = "wakeupinfo_show_times",
+    Label = "Show wakeup times at the bottom",
+    ColClass = "col-12", MarginClass = ""
+})

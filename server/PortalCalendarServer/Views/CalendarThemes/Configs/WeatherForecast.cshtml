@@ -2,15 +2,10 @@
 @using PortalCalendarServer.Models.DatabaseEntities
 @using PortalCalendarServer.Models.POCOs
 
-@await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
-{
-    Display = Model, Key = "display_title", Label = "Title",
-    ColClass = "col-12", MarginClass = "mb-3"
-})
-
 @await Html.PartialAsync("_ConfigCheckbox", new ConfigInputModel
 {
     Display = Model, Key = "wakeupinfo_show_times",
     Label = "Show wakeup times at the bottom",
     ColClass = "col-12", MarginClass = ""
 })
+

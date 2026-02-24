@@ -188,7 +188,7 @@ public partial class CalendarContext : DbContext
                 new Theme { Id = 1, FileName = "Default", DisplayName = "Default", HasCustomConfig = false, SortOrder = 0, IsDefault = true },
                 new Theme { Id = 2, FileName = "PortalStyleCalendarWithIcons", DisplayName = "Portal Style Calendar with Icons", HasCustomConfig = true, SortOrder = 100 },
                 new Theme { Id = 3, FileName = "GoogleFitWeightWithCalendarAndIcons", DisplayName = "Google Fit Weight with Calendar and Icons", HasCustomConfig = true, SortOrder = 200 },
-                new Theme { Id = 4, FileName = "WeatherForecast", DisplayName = "Weather", HasCustomConfig = false, SortOrder = 300 },
+                new Theme { Id = 4, FileName = "WeatherForecast", DisplayName = "Weather", HasCustomConfig = true, SortOrder = 300 },
                 new Theme { Id = 5, FileName = "MultidayCalendar", DisplayName = "Multi-day Calendar", HasCustomConfig = true, SortOrder = 400 },
                 new Theme { Id = 6, FileName = "XKCD", DisplayName = "XKCD", HasCustomConfig = false, SortOrder = 500 },
                 new Theme { Id = 7, FileName = "Test", DisplayName = "Test - Color Wheel", HasCustomConfig = false, SortOrder = 10000 }

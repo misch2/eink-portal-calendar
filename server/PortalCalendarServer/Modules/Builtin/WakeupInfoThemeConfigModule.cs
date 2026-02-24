@@ -4,7 +4,7 @@ using PortalCalendarServer.Services.PageGeneratorComponents;
 
 namespace PortalCalendarServer.Modules.Builtin
 {
-    public class WakeupInfoThemePartModule : IPortalModule
+    public class WakeupInfoThemeConfigModule : IPortalModule
     {
         /// <summary>
         /// Configuration items for the wakeup info bar.

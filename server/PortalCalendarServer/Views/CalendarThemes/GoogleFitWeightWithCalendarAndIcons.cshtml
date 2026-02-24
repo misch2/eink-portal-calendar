@@ -210,9 +210,12 @@
 
         <img id="aperture-logo" src="/images/Aperture_Laboratories_Logo.png" alt="Aperture Science" />
 
-        <div id="bottom-signature">
-            @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_WakeupInfo.cshtml", Model.Display)
-        </div>
+        @if (displayService.GetConfigBool(Model.Display, "wakeupinfo_show_times"))
+        {
+            <div id="bottom-signature">
+                @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_WakeupInfo.cshtml", Model.Display)
+            </div>
+        }
 
         <div id="battery-status">
             @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_BatteryStatusIcon.cshtml", Model.Display)
