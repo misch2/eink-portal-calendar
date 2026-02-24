@@ -1,10 +1,12 @@
 @model Display
 @using PortalCalendarServer.Controllers
 @using PortalCalendarServer.Models.DatabaseEntities
+@using PortalCalendarServer.Modules
 @using PortalCalendarServer.Services
 
 @{
     var displayService = (DisplayService)ViewData["DisplayService"]!;
+    var moduleTabs = (IReadOnlyList<IPortalModule>)ViewData["ModuleTabs"]!;
 }
 
 <h3 class="mb-3">Configuration</h3>
@@ -14,49 +16,26 @@
 
     <nav>
         <div class="nav nav-tabs" id="nav-tab" role="tablist">
-            <button class="nav-link active" id="nav-main-tab" data-bs-toggle="tab" data-bs-target="#nav-main" type="button" role="tab" data-tab-hash="nav-main">Main</button>
-            <button class="nav-link" id="nav-client-tab" data-bs-toggle="tab" data-bs-target="#nav-client" type="button" role="tab" data-tab-hash="nav-client">ePaper display (client)</button>
-            <button class="nav-link" id="nav-calendar-tab" data-bs-toggle="tab" data-bs-target="#nav-calendar" type="button" role="tab" data-tab-hash="nav-calendar">Calendar (ICS)</button>
-            <button class="nav-link" id="nav-metnoweather-tab" data-bs-toggle="tab" data-bs-target="#nav-metnoweather" type="button" role="tab" data-tab-hash="nav-metnoweather">Met.no weather</button>
-            <button class="nav-link" id="nav-openweather-tab" data-bs-toggle="tab" data-bs-target="#nav-openweather" type="button" role="tab" data-tab-hash="nav-openweather">OpenWeather</button>
-            <button class="nav-link" id="nav-telegram-tab" data-bs-toggle="tab" data-bs-target="#nav-telegram" type="button" role="tab" data-tab-hash="nav-telegram">Telegram</button>
-            <button class="nav-link" id="nav-mqtt-tab" data-bs-toggle="tab" data-bs-target="#nav-mqtt" type="button" role="tab" data-tab-hash="nav-mqtt">MQTT</button>
-            <button class="nav-link" id="nav-fit-tab" data-bs-toggle="tab" data-bs-target="#nav-fit" type="button" role="tab" data-tab-hash="nav-fit">Google Fit</button>
+            @foreach (var module in moduleTabs)
+            {
+                <button class="nav-link @(module == moduleTabs[0] ? "active" : "")"
+                        id="@(module.ConfigTabId)-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#@module.ConfigTabId"
+                        type="button"
+                        role="tab"
+                        data-tab-hash="@module.ConfigTabId">@module.ConfigTabDisplayName</button>
+            }
         </div>
     </nav>
 
     <div class="tab-content border border-top-0" id="nav-tabContent">
-        <div class="tab-pane show active" id="nav-main" role="tabpanel">
-            @await Html.PartialAsync("ConfigUI/_Main", Model, ViewData)
-        </div>
-
-        <div class="tab-pane" id="nav-client" role="tabpanel">
-            @await Html.PartialAsync("ConfigUI/_Client", Model, ViewData)
-        </div>
-
-        <div class="tab-pane" id="nav-calendar" role="tabpanel">
-            @await Html.PartialAsync("ConfigUI/_Calendar", Model, ViewData)
-        </div>
-
-        <div class="tab-pane" id="nav-metnoweather" role="tabpanel">
-            @await Html.PartialAsync("ConfigUI/_MetNoWeather", Model, ViewData)
-        </div>
-
-        <div class="tab-pane" id="nav-openweather" role="tabpanel">
-            @await Html.PartialAsync("ConfigUI/_OpenWeather", Model, ViewData)
-        </div>
-
-        <div class="tab-pane" id="nav-telegram" role="tabpanel">
-            @await Html.PartialAsync("ConfigUI/_Telegram", Model, ViewData)
-        </div>
-
-        <div class="tab-pane" id="nav-mqtt" role="tabpanel">
-            @await Html.PartialAsync("ConfigUI/_Mqtt", Model, ViewData)
-        </div>
-
-        <div class="tab-pane" id="nav-fit" role="tabpanel">
-            @await Html.PartialAsync("ConfigUI/_GoogleFit", Model, ViewData)
-        </div>
+        @foreach (var module in moduleTabs)
+        {
+            <div class="tab-pane @(module == moduleTabs[0] ? "show active" : "")" id="@module.ConfigTabId" role="tabpanel">
+                @await Html.PartialAsync(module.ConfigPartialView!, Model, ViewData)
+            </div>
+        }
     </div>
 
     <div class="col-12 mt-3">

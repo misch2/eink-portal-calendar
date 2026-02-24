@@ -4,6 +4,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using PortalCalendarServer.Controllers.ModelBinders;
 using PortalCalendarServer.Data;
+using PortalCalendarServer.Modules;
+using PortalCalendarServer.Modules.Builtin;
 using PortalCalendarServer.Services;
 using PortalCalendarServer.Services.BackgroundJobs;
 using PortalCalendarServer.Services.Caches;
@@ -87,7 +89,22 @@ builder.Services.AddScoped<IDatabaseCacheServiceFactory, DatabaseCacheServiceFac
 builder.Services.AddScoped<IMqttService, MqttService>();
 builder.Services.AddScoped<INameDayService, NameDayService>();
 builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();
-builder.Services.AddScoped<GoogleFitIntegrationService>();
+
+// Register module registry with all built-in modules
+var moduleRegistry = new ModuleRegistry();
+moduleRegistry.Register(new MainConfigModule());
+moduleRegistry.Register(new ClientConfigModule());
+moduleRegistry.Register(new CalendarModule());
+moduleRegistry.Register(new MetNoWeatherModule());
+moduleRegistry.Register(new OpenWeatherModule());
+moduleRegistry.Register(new TelegramModule());
+moduleRegistry.Register(new MqttModule());
+moduleRegistry.Register(new GoogleFitModule());
+moduleRegistry.Register(new XkcdModule());
+moduleRegistry.Register(new PublicHolidayModule());
+moduleRegistry.Register(new NameDayModule());
+moduleRegistry.Register(new PortalIconsModule());
+builder.Services.AddSingleton(moduleRegistry);
 
 // Register periodic background services
 builder.Services.AddHostedService<PortalCalendarServer.Services.BackgroundJobs.Periodic.CacheCleanupService>();

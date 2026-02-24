@@ -1,8 +1,5 @@
-using Microsoft.Extensions.Caching.Memory;
-using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.DatabaseEntities;
-using PortalCalendarServer.Services.Caches;
-using PortalCalendarServer.Services.Integrations;
+using PortalCalendarServer.Modules;
 using PortalCalendarServer.Services.PageGeneratorComponents;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -17,49 +14,34 @@ public class PageGeneratorService
 {
     private readonly ILogger<PageGeneratorService> _logger;
     private readonly IConfiguration _configuration;
-    private readonly CalendarContext _context;
     private readonly IWebHostEnvironment _environment;
     private readonly IDisplayService _displayService;
     private readonly IWeb2PngService _web2PngService;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IMemoryCache _memoryCache;
-    private readonly IDatabaseCacheServiceFactory _databaseCacheFactory;
-    private readonly ILoggerFactory _loggerFactory;
-    private readonly INameDayService _nameDayService;
-    private readonly IPublicHolidayService _publicHolidayService;
     private readonly InternalTokenService _internalTokenService;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ModuleRegistry _moduleRegistry;
+    private readonly IServiceProvider _services;
 
     public PageGeneratorService(
         ILogger<PageGeneratorService> logger,
         IConfiguration configuration,
-        CalendarContext context,
         IWebHostEnvironment environment,
         IDisplayService displayService,
         IWeb2PngService web2PngService,
-        IHttpClientFactory httpClientFactory,
-        IMemoryCache memoryCache,
-        IDatabaseCacheServiceFactory databaseCacheFactory,
-        ILoggerFactory loggerFactory,
-        INameDayService nameDayService,
-        IPublicHolidayService publicHolidayService,
         InternalTokenService internalTokenService,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ModuleRegistry moduleRegistry,
+        IServiceProvider services)
     {
         _logger = logger;
         _configuration = configuration;
-        _context = context;
         _environment = environment;
         _displayService = displayService;
         _web2PngService = web2PngService;
-        _httpClientFactory = httpClientFactory;
-        _memoryCache = memoryCache;
-        _databaseCacheFactory = databaseCacheFactory;
-        _loggerFactory = loggerFactory;
-        _nameDayService = nameDayService;
-        _publicHolidayService = publicHolidayService;
         _internalTokenService = internalTokenService;
         _linkGenerator = linkGenerator;
+        _moduleRegistry = moduleRegistry;
+        _services = services;
     }
 
     public PageViewModel PageViewModelForDate(Display display, DateTime date, bool previewColors = false)
@@ -71,25 +53,10 @@ public class PageGeneratorService
             CssColors = display.CssColorMap(previewColors)
         };
 
-        viewModel.InitializeComponents(
-            portalIconsFactory: () => new PortalIconsComponent(_displayService),
-            calendarFactory: () => new CalendarComponent(_logger, _displayService, _httpClientFactory, _memoryCache, _databaseCacheFactory, _context, _loggerFactory),
-            weightFactory: () =>
-            {
-                var googleFitService = new GoogleFitIntegrationService(
-                    _loggerFactory.CreateLogger<GoogleFitIntegrationService>(),
-                    _httpClientFactory,
-                    _memoryCache,
-                    _databaseCacheFactory,
-                    _context,
-                    _displayService);
-                return new WeightComponent(_logger, googleFitService, display);
-            },
-            xkcdFactory: () => new XkcdComponent(_logger, _httpClientFactory, _memoryCache, _databaseCacheFactory, _context, _loggerFactory),
-            publicHolidayFactory: () => new PublicHolidayComponent(_logger, _publicHolidayService),
-            nameDayFactory: () => new NameDayComponent(_logger, _nameDayService),
-            weatherFactory: () => new WeatherComponent(_logger, _displayService, _httpClientFactory, _memoryCache, _databaseCacheFactory, _context, _loggerFactory)
-        );
+        foreach (var module in _moduleRegistry.All)
+        {
+            viewModel.RegisterComponent(module.ModuleId, () => module.CreateComponent(_services, display, date));
+        }
 
         return viewModel;
     }
@@ -465,44 +432,32 @@ public class PageViewModel
     public required DateTime Date { get; set; }
     public required Dictionary<string, string> CssColors { get; set; }
 
-    // All components are lazy
-    private Lazy<PortalIconsComponent>? _portalIconsComponent;
-    private Lazy<CalendarComponent>? _calendarComponent;
-    private Lazy<WeightComponent>? _weightComponent;
-    private Lazy<XkcdComponent>? _xkcdComponent;
-    private Lazy<PublicHolidayComponent>? _publicHolidayComponent;
-    private Lazy<NameDayComponent>? _nameDayComponent;
-    private Lazy<WeatherComponent>? _weatherComponent;
+    private readonly Dictionary<string, object?> _components = new();
 
-    // Component instances
-    public PortalIconsComponent? PortalIcons => _portalIconsComponent?.Value;
-    public CalendarComponent? Calendar => _calendarComponent?.Value;
-    public WeightComponent? Weight => _weightComponent?.Value;
-    public XkcdComponent? Xkcd => _xkcdComponent?.Value;
-    public PublicHolidayComponent? PublicHoliday => _publicHolidayComponent?.Value;
-    public NameDayComponent? NameDay => _nameDayComponent?.Value;
-    public WeatherComponent? Weather => _weatherComponent?.Value;
-
-    internal void InitializeComponents(
-        Func<PortalIconsComponent> portalIconsFactory,
-        Func<CalendarComponent> calendarFactory,
-        Func<WeightComponent> weightFactory,
-        Func<XkcdComponent> xkcdFactory,
-        Func<PublicHolidayComponent> publicHolidayFactory,
-        Func<NameDayComponent> nameDayFactory,
-        Func<WeatherComponent> weatherFactory)
+    internal void RegisterComponent(string moduleId, Func<object?> componentFactory)
     {
-        _portalIconsComponent = new Lazy<PortalIconsComponent>(portalIconsFactory);
-        _calendarComponent = new Lazy<CalendarComponent>(calendarFactory);
-        _weightComponent = new Lazy<WeightComponent>(weightFactory);
-        _xkcdComponent = new Lazy<XkcdComponent>(xkcdFactory);
-        _publicHolidayComponent = new Lazy<PublicHolidayComponent>(publicHolidayFactory);
-        _nameDayComponent = new Lazy<NameDayComponent>(nameDayFactory);
-        _weatherComponent = new Lazy<WeatherComponent>(weatherFactory);
+        _components[moduleId] = componentFactory();
     }
+
+    /// <summary>
+    /// Retrieve a module's page-generator component by module ID.
+    /// Returns <c>null</c> when the module is not registered or provides no component.
+    /// </summary>
+    public T? GetComponent<T>(string moduleId) where T : class
+    {
+        return _components.TryGetValue(moduleId, out var obj) ? obj as T : null;
+    }
+
+    // ── Backward-compatible shim properties for existing Razor views ─────────
+
+    public PortalIconsComponent? PortalIcons => GetComponent<PortalIconsComponent>("portalicons");
+    public CalendarComponent? Calendar => GetComponent<CalendarComponent>("calendar");
+    public WeightComponent? Weight => GetComponent<WeightComponent>("googlefit");
+    public XkcdComponent? Xkcd => GetComponent<XkcdComponent>("xkcd");
+    public PublicHolidayComponent? PublicHoliday => GetComponent<PublicHolidayComponent>("publicholiday");
+    public NameDayComponent? NameDay => GetComponent<NameDayComponent>("nameday");
+    public WeatherComponent? Weather => GetComponent<WeatherComponent>("metnoweather");
 }
-
-
 public class BitmapOptions
 {
     public int Rotate { get; set; }

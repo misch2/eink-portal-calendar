@@ -6,6 +6,7 @@ using PortalCalendarServer.Controllers.Filters;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.DatabaseEntities;
 using PortalCalendarServer.Models.POCOs;
+using PortalCalendarServer.Modules;
 using PortalCalendarServer.Services;
 
 namespace PortalCalendarServer.Controllers;
@@ -18,7 +19,8 @@ public class UiController(
     IWebHostEnvironment environment,
     PageGeneratorService pageGeneratorService,
     IDisplayService displayService,
-    ThemeService themeService
+    ThemeService themeService,
+    ModuleRegistry moduleRegistry
     ) : Controller, IAsyncResultFilter
 {
     private readonly CalendarContext _context = context;
@@ -27,20 +29,7 @@ public class UiController(
     private readonly PageGeneratorService _pageGeneratorService = pageGeneratorService;
     private readonly IDisplayService _displayService = displayService;
     private readonly ThemeService _themeService = themeService;
-
-    // Config parameter names that can be saved from the UI
-    private static readonly string[] ConfigUiParameters =
-    [
-        // FIXME this is not ideal, every config class should have a list of its own parameters, and we should only save those instead of this big hardcoded list
-        "alive_check_safety_lag_minutes", "alive_check_minimal_failure_count", "alt", "date_culture", "display_title",
-        "googlefit", "googlefit_client_id", "googlefit_client_secret",
-        "lat", "lon", "max_icons_with_calendar", "max_random_icons", "metnoweather",
-        "metnoweather_granularity_hours", "min_random_icons", "mqtt", "mqtt_password", "mqtt_server",
-        "mqtt_topic", "mqtt_username", "openweather", "openweather_api_key", "openweather_lang",
-        "ota_mode", "telegram", "telegram_api_key", "telegram_chat_id", "timezone",
-        "totally_random_icon", "wakeup_schedule", "web_calendar_ics_url1", "web_calendar_ics_url2",
-        "web_calendar_ics_url3", "web_calendar1", "web_calendar2", "web_calendar3"
-    ];
+    private readonly ModuleRegistry _moduleRegistry = moduleRegistry;
 
     // GET /
     [HttpGet("/")]
@@ -178,6 +167,7 @@ public class UiController(
         ViewData["Themes"] = await _themeService.GetActiveThemesAsync();
         ViewData["LastVoltage"] = _displayService.GetVoltage(display);
         ViewData["LastVoltageRaw"] = _displayService.GetConfig(display, "_last_voltage_raw");
+        ViewData["ModuleTabs"] = _moduleRegistry.WithConfigTab;
         ViewBag.Display = display; // for global layout
 
         // Pass DisplayService and Display to the view through ViewData
@@ -198,19 +188,18 @@ public class UiController(
             return NotFound();
         }
 
-        // Save generic config parameters
-        foreach (var paramName in ConfigUiParameters)
+        var checkboxKeys = _moduleRegistry.AllCheckboxConfigKeys;
+
+        // Save generic config parameters owned by modules
+        foreach (var paramName in _moduleRegistry.AllOwnedConfigKeys)
         {
             if (form.ContainsKey(paramName))
             {
-                var value = form[paramName].ToString();
-                _displayService.SetConfig(display, paramName, value);
+                _displayService.SetConfig(display, paramName, form[paramName].ToString());
             }
-            else if (paramName.StartsWith("web_calendar") || paramName == "googlefit" ||
-                     paramName == "metnoweather" || paramName == "openweather" ||
-                     paramName == "telegram" || paramName == "mqtt" || paramName == "ota_mode")
+            else if (checkboxKeys.Contains(paramName))
             {
-                // Checkboxes "Integration Enabled" for each integration: if not present, explicitly set to empty/false because they are disabled by default in the UI
+                // Unchecked checkboxes are absent from the form — explicitly clear them
                 _displayService.SetConfig(display, paramName, "");
             }
         }
