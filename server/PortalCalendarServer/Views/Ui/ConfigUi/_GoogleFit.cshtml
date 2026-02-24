@@ -1,9 +1,8 @@
 @model PortalCalendarServer.Models.DatabaseEntities.Display
 @using PortalCalendarServer.Controllers
-@using PortalCalendarServer.Services
+@using PortalCalendarServer.Models.POCOs
 
 @{
-    var displayService = (DisplayService)ViewData["DisplayService"]!;
     ViewData["IntegrationName"] = "googlefit";
 }
 
@@ -17,26 +16,24 @@
     <div class="col-md-12">
         See <a href="https://console.cloud.google.com/apis/">https://console.cloud.google.com/apis/</a> to get client ID and secret values:
     </div>
-    <div class="col-md-12 mt-2">
-        <label for="googlefit_client_id">Client ID</label>
-        <input id="googlefit_client_id" name="googlefit_client_id" type="text" class="form-control"
-               value="@displayService.GetConfigWithoutDefaults(Model, "googlefit_client_id")"
-               placeholder="@displayService.GetConfigDefaultsOnly("googlefit_client_id")">
-    </div>
-    <div class="col-md-12 mt-2">
-        <label for="googlefit_client_secret">Client secret</label>
-        <input id="googlefit_client_secret" name="googlefit_client_secret" type="text" class="form-control"
-               value="@displayService.GetConfigWithoutDefaults(Model, "googlefit_client_secret")"
-               placeholder="@displayService.GetConfigDefaultsOnly("googlefit_client_secret")">
-    </div>
-    <div class="col-md-12 mt-2">
-        <label for="_googlefit_refresh_token">Refresh token (generated automatically)</label>
-        <input id="_googlefit_refresh_token" name="_googlefit_refresh_token" type="text" class="form-control"
-               value="@displayService.GetConfigWithoutDefaults(Model, "_googlefit_refresh_token")" disabled>
-    </div>
-    <div class="col-md-12 mt-2">
-        <label for="_googlefit_access_token">Auth token (generated automatically)</label>
-        <input id="_googlefit_access_token" name="_googlefit_access_token" type="text" class="form-control"
-               value="@displayService.GetConfigWithoutDefaults(Model, "_googlefit_access_token")" disabled>
-    </div>
+    @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+    {
+        Display = Model, Key = "googlefit_client_id", Label = "Client ID",
+        ColClass = "col-md-12", MarginClass = "mt-2"
+    })
+    @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+    {
+        Display = Model, Key = "googlefit_client_secret", Label = "Client secret",
+        ColClass = "col-md-12", MarginClass = "mt-2"
+    })
+    @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+    {
+        Display = Model, Key = "_googlefit_refresh_token", Label = "Refresh token (generated automatically)",
+        ColClass = "col-md-12", MarginClass = "mt-2", Disabled = true
+    })
+    @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+    {
+        Display = Model, Key = "_googlefit_access_token", Label = "Auth token (generated automatically)",
+        ColClass = "col-md-12", MarginClass = "mt-2", Disabled = true
+    })
 </fieldset>

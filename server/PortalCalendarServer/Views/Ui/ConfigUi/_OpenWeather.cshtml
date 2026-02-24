@@ -1,25 +1,22 @@
 @model PortalCalendarServer.Models.DatabaseEntities.Display
-@using PortalCalendarServer.Services
+@using PortalCalendarServer.Models.POCOs
 
 @{
-    var displayService = (DisplayService)ViewData["DisplayService"]!;
     ViewData["IntegrationName"] = "openweather";
 }
 
 <fieldset class="row mb-3" id="@(ViewData["IntegrationName"])_fieldset">
     @await Html.PartialAsync("ConfigUi/_IntegrationToggle", Model, ViewData)
-    
-    <div class="col-md-12 mt-3">
-        <label for="openweather_api_key">API key</label>
-        <input id="openweather_api_key" name="openweather_api_key" type="text" class="form-control"
-               value="@displayService.GetConfigWithoutDefaults(Model, "openweather_api_key")"
-               placeholder="@displayService.GetConfigDefaultsOnly("openweather_api_key")">
-    </div>
-    <div class="col-md-4 mt-3">
-        <label for="openweather_lang">Language</label>
-        <input id="openweather_lang" name="openweather_lang" type="text" class="form-control"
-               value="@displayService.GetConfigWithoutDefaults(Model, "openweather_lang")"
-               placeholder="@displayService.GetConfigDefaultsOnly("openweather_lang")">
-        <div class="form-text">Language code, for example "en", "cs", etc.</div>
-    </div>
+
+    @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+    {
+        Display = Model, Key = "openweather_api_key", Label = "API key",
+        ColClass = "col-md-12", MarginClass = "mt-3"
+    })
+    @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+    {
+        Display = Model, Key = "openweather_lang", Label = "Language",
+        ColClass = "col-md-4", MarginClass = "mt-3",
+        HelpText = "Language code, for example \"en\", \"cs\", etc."
+    })
 </fieldset>

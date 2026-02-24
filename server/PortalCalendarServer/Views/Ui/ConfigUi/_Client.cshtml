@@ -1,21 +1,17 @@
 @model PortalCalendarServer.Models.DatabaseEntities.Display
+@using PortalCalendarServer.Models.DatabaseEntities
+@using PortalCalendarServer.Models.POCOs
 @using PortalCalendarServer.Services
-
-@{
-    var displayService = (DisplayService)ViewData["DisplayService"]!;
-}
+@inject IDisplayService DisplayService
 
 <fieldset class="row mb-3">
-    <div class="col-md-12">
-        <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="ota_mode" name="ota_mode" value="1"
-                   checked="@(displayService.GetConfig(Model, "ota_mode") == "1")">
-            <label class="form-check-label" for="ota_mode">OTA mode on</label>
-        </div>
-        <div class="form-text">
-            (Required for firmware update. ⚠️ It disables standard functionality and waits for OTA update indefinitely until a manual reset or a successful firmware download!)
-        </div>
-    </div>
+    @await Html.PartialAsync("_ConfigCheckbox", new ConfigInputModel
+    {
+        Display = Model, Key = "ota_mode",
+        Label = "OTA mode on",
+        HelpText = "(Required for firmware update. ⚠️ It disables standard functionality and waits for OTA update indefinitely until a manual reset or a successful firmware download!)",
+        ColClass = "col-md-12"
+    })
 </fieldset>
 
 @if (!Model.IsDefault())
@@ -33,15 +29,9 @@
             <label for="display_type">Display type</label>
             <select id="display_type" name="display_type" class="form-select">
                 <option value=""></option>
-                @{
-                    var display_types = displayService.GetDisplayTypes();
-                    if (display_types != null)
-                    {
-                        foreach (var type in display_types)
-                        {
-                            <option value="@type.Code" selected="@(Model.DisplayTypeCode == type.Code)">@type.Name</option>
-                        }
-                    }
+                @foreach (var type in DisplayService.GetDisplayTypes())
+                {
+                    <option value="@type.Code" selected="@(Model.DisplayTypeCode == type.Code)">@type.Name</option>
                 }
             </select>
         </div>
@@ -49,15 +39,9 @@
             <label for="color_variant">Color variant</label>
             <select id="color_variant" name="color_variant" class="form-select">
                 <option value=""></option>
-                @{
-                    var color_variants = displayService.GetColorVariants().Where(cv => cv.DisplayTypeCode == Model.DisplayTypeCode);
-                    if (color_variants != null)
-                    {
-                        foreach (var variant in color_variants)
-                        {
-                            <option value="@variant.Code" selected="@(Model.ColorVariantCode == variant.Code)">@variant.Name</option>
-                        }
-                    }
+                @foreach (var variant in DisplayService.GetColorVariants().Where(cv => cv.DisplayTypeCode == Model.DisplayTypeCode))
+                {
+                    <option value="@variant.Code" selected="@(Model.ColorVariantCode == variant.Code)">@variant.Name</option>
                 }
             </select>
         </div>
@@ -65,17 +49,10 @@
             <label for="dithering_type">Dithering</label>
             <select id="dithering_type" name="dithering_type" class="form-select">
                 <option value=""></option>
-                @{
-                    var dithering_types = displayService.GetDitheringTypes();
-                    if (dithering_types != null)
-                    {
-                        foreach (var type in dithering_types)
-                        {
-                            <option value="@type.Code" selected="@(Model.DitheringTypeCode == type.Code)">@type.Name</option>
-                        }
-                    }
+                @foreach (var type in DisplayService.GetDitheringTypes())
+                {
+                    <option value="@type.Code" selected="@(Model.DitheringTypeCode == type.Code)">@type.Name</option>
                 }
-    }
             </select>
         </div>
     </fieldset>
@@ -121,25 +98,24 @@
 }
 
 <fieldset class="row mb-3">
-    <div class="col-md-4">
-        <label for="wakeup_schedule">Wake up (redraw) schedule</label>
-        <input id="wakeup_schedule" name="wakeup_schedule" type="text" class="form-control"
-               value="@displayService.GetConfigWithoutDefaults(Model, "wakeup_schedule")"
-               placeholder="@displayService.GetConfigDefaultsOnly("wakeup_schedule")">
-        <div class="form-text">Schedule is in the <a href="https://crontab.guru/">crontab format</a>, for example "0 * * * *"</div>
-    </div>
-    <div class="col-md-4">
-        <label for="alive_check_safety_lag_minutes">Enforced lag when checking if display is alive (minutes)</label>
-        <input id="alive_check_safety_lag_minutes" name="alive_check_safety_lag_minutes" type="number" class="form-control"
-               value="@displayService.GetConfigWithoutDefaults(Model, "alive_check_safety_lag_minutes")"
-               placeholder="@displayService.GetConfigDefaultsOnly("alive_check_safety_lag_minutes")">
-        <div class="form-text">How many minutes to delay the check after the expected contact time</div>
-    </div>
-    <div class="col-md-4">
-        <label for="alive_check_minimal_failure_count">Min. number of alive check failures</label>
-        <input id="alive_check_minimal_failure_count" name="alive_check_minimal_failure_count" type="number" class="form-control"
-               value="@displayService.GetConfigWithoutDefaults(Model, "alive_check_minimal_failure_count")"
-               placeholder="@displayService.GetConfigDefaultsOnly("alive_check_minimal_failure_count")">
-        <div class="form-text">Minimal number of failures the display is considered to be frozen and before a notification is sent.</div>
-    </div>
+    @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+    {
+        Display = Model, Key = "wakeup_schedule", Label = "Wake up (redraw) schedule",
+        ColClass = "col-md-4",
+        HelpText = "Schedule is in the crontab format, for example \"0 * * * *\""
+    })
+    @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+    {
+        Display = Model, Key = "alive_check_safety_lag_minutes",
+        Label = "Enforced lag when checking if display is alive (minutes)",
+        InputType = "number", ColClass = "col-md-4",
+        HelpText = "How many minutes to delay the check after the expected contact time"
+    })
+    @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+    {
+        Display = Model, Key = "alive_check_minimal_failure_count",
+        Label = "Min. number of alive check failures",
+        InputType = "number", ColClass = "col-md-4",
+        HelpText = "Minimal number of failures the display is considered to be frozen and before a notification is sent."
+    })
 </fieldset>

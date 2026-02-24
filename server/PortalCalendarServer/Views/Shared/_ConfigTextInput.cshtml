@@ -1,0 +1,25 @@
+@model PortalCalendarServer.Models.POCOs.ConfigInputModel
+@using PortalCalendarServer.Services
+@inject IDisplayService DisplayService
+
+@{
+    var currentValue = DisplayService.GetConfigWithoutDefaults(Model.Display, Model.Key);
+    var placeholder = DisplayService.GetConfigDefaultsOnly(Model.Key);
+    var wrapClass = string.Join(" ", new[] { Model.ColClass, Model.MarginClass }.Where(s => !string.IsNullOrEmpty(s)));
+    var stepAttr = Model.InputType == "number" && Model.Step != null ? $"step=\"{Model.Step}\"" : null;
+}
+
+<div class="@wrapClass">
+    <label for="@Model.Key">@Model.Label</label>
+    <input id="@Model.Key" name="@Model.Key"
+           type="@Model.InputType"
+           class="form-control"
+           value="@currentValue"
+           placeholder="@placeholder"
+           @(stepAttr != null ? Html.Raw(stepAttr) : Html.Raw(""))
+           @(Model.Disabled ? Html.Raw("disabled") : Html.Raw(""))>
+    @if (!string.IsNullOrEmpty(Model.HelpText))
+    {
+        <div class="form-text">@Model.HelpText</div>
+    }
+</div>

@@ -1,0 +1,21 @@
+@model PortalCalendarServer.Models.POCOs.ConfigInputModel
+@using PortalCalendarServer.Services
+@inject IDisplayService DisplayService
+
+@{
+    var currentValue = DisplayService.GetConfigWithoutDefaults(Model.Display, Model.Key) == "1";
+    var wrapClass = string.Join(" ", new[] { Model.ColClass, Model.MarginClass }.Where(s => !string.IsNullOrEmpty(s)));
+}
+
+<div class="@wrapClass">
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox"
+               id="@Model.Key" name="@Model.Key" value="1"
+               @(currentValue ? "checked" : "")>
+        <label class="form-check-label" for="@Model.Key">@Model.Label</label>
+    </div>
+    @if (!string.IsNullOrEmpty(Model.HelpText))
+    {
+        <div class="form-text">@Model.HelpText</div>
+    }
+</div>

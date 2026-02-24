@@ -1,51 +1,19 @@
 @model PortalCalendarServer.Models.DatabaseEntities.Display
-@using PortalCalendarServer.Services
+@using PortalCalendarServer.Models.POCOs
 
-@{
-    var displayService = (DisplayService)ViewData["DisplayService"]!;
+@for (int i = 1; i <= 3; i++)
+{
+    <fieldset class="row mb-3">
+        @await Html.PartialAsync("_ConfigCheckbox", new ConfigInputModel
+        {
+            Display = Model, Key = $"web_calendar{i}",
+            Label = $"ICS calendar #{i} enabled",
+            ColClass = "col-md-12"
+        })
+        @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+        {
+            Display = Model, Key = $"web_calendar_ics_url{i}", Label = "URL",
+            ColClass = "col-md-12", MarginClass = "mt-2"
+        })
+    </fieldset>
 }
-
-<fieldset class="row mb-3">
-    <div class="col-md-12">
-        <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="web_calendar1" name="web_calendar1" value="1"
-                   checked="@(displayService.GetConfig(Model, "web_calendar1") == "1")">
-            <label class="form-check-label" for="web_calendar1">ICS calendar #1 enabled</label>
-        </div>
-    </div>
-    <div class="col-md-12 mt-2">
-        <label for="web_calendar_ics_url1">URL</label>
-        <input id="web_calendar_ics_url1" name="web_calendar_ics_url1" type="text" class="form-control"
-               value="@displayService.GetConfigWithoutDefaults(Model, "web_calendar_ics_url1")">
-    </div>
-</fieldset>
-
-<fieldset class="row mb-3">
-    <div class="col-md-12">
-        <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="web_calendar2" name="web_calendar2" value="1"
-                   checked="@(displayService.GetConfig(Model, "web_calendar2") == "1")">
-            <label class="form-check-label" for="web_calendar2">ICS calendar #2 enabled</label>
-        </div>
-    </div>
-    <div class="col-md-12 mt-2">
-        <label for="web_calendar_ics_url2">URL</label>
-        <input id="web_calendar_ics_url2" name="web_calendar_ics_url2" type="text" class="form-control"
-               value="@displayService.GetConfigWithoutDefaults(Model, "web_calendar_ics_url2")">
-    </div>
-</fieldset>
-
-<fieldset class="row mb-3">
-    <div class="col-md-12">
-        <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="web_calendar3" name="web_calendar3" value="1"
-                   checked="@(displayService.GetConfig(Model, "web_calendar3") == "1")">
-            <label class="form-check-label" for="web_calendar3">ICS calendar #3 enabled</label>
-        </div>
-    </div>
-    <div class="col-md-12 mt-2">
-        <label for="web_calendar_ics_url3">URL</label>
-        <input id="web_calendar_ics_url3" name="web_calendar_ics_url3" type="text" class="form-control"
-               value="@displayService.GetConfigWithoutDefaults(Model, "web_calendar_ics_url3")">
-    </div>
-</fieldset>

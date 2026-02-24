@@ -1,11 +1,8 @@
 @model Display
 @using PortalCalendarServer.Models.DatabaseEntities
+@using PortalCalendarServer.Models.POCOs
 @using PortalCalendarServer.Services
-
-@{
-    var themes = (List<Theme>)ViewData["Themes"]!;
-    var displayService = (DisplayService)ViewData["DisplayService"]!;
-}
+@inject IDisplayService DisplayService
 
 @if (!Model.IsDefault())
 {
@@ -18,6 +15,9 @@
 
     <fieldset class="row mb-4">
         <legend class="w-auto">Theme</legend>
+        @{
+            var themes = (List<Theme>)ViewData["Themes"]!;
+        }
         <div class="col-md-12">
             <select id="theme_id" name="theme_id" class="form-select">
                 <option value=""></option>
@@ -32,7 +32,6 @@
             </select>
         </div>
 
-        <!-- Theme customization section - indented and styled to show it belongs to Theme -->
         <div class="col-md-12 mt-3">
             <div class="card border-start border-primary border-3 bg-light">
                 <div class="card-body">
@@ -53,37 +52,29 @@
 <fieldset class="row mb-3">
     <legend class="w-auto">Location and locale</legend>
     <div class="form-group row">
-        <div class="col-md-4">
-            <label for="lat">Latitude (+N/-S)</label>
-            <input id="lat" name="lat" type="text" class="form-control"
-                   value="@displayService.GetConfigWithoutDefaults(Model, "lat")"
-                   placeholder="@displayService.GetConfigDefaultsOnly("lat")">
-        </div>
-        <div class="col-md-4">
-            <label for="lon">Longitude (+E/-W)</label>
-            <input id="lon" name="lon" type="text" class="form-control"
-                   value="@displayService.GetConfigWithoutDefaults(Model, "lon")"
-                   placeholder="@displayService.GetConfigDefaultsOnly("lon")">
-        </div>
-        <div class="col-md-4">
-            <label for="alt">Altitude (m)</label>
-            <input id="alt" name="alt" type="text" class="form-control"
-                   value="@displayService.GetConfigWithoutDefaults(Model, "alt")"
-                   placeholder="@displayService.GetConfigDefaultsOnly("alt")">
-        </div>
+        @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+        {
+            Display = Model, Key = "lat", Label = "Latitude (+N/-S)", ColClass = "col-md-4"
+        })
+        @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+        {
+            Display = Model, Key = "lon", Label = "Longitude (+E/-W)", ColClass = "col-md-4"
+        })
+        @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+        {
+            Display = Model, Key = "alt", Label = "Altitude (m)", ColClass = "col-md-4"
+        })
     </div>
     <div class="form-group row mt-2">
-        <div class="col-md-4">
-            <label for="timezone">Time Zone (format: "UTC", "Europe/Prague" etc.)</label>
-            <input id="timezone" name="timezone" type="text" class="form-control"
-                   value="@displayService.GetConfigWithoutDefaults(Model, "timezone")"
-                   placeholder="@displayService.GetConfigDefaultsOnly("timezone")">
-        </div>
-        <div class="col-md-4">
-            <label for="date_culture">Date style (format: "en-US", "cs-CZ" etc.)</label>
-            <input id="date_culture" name="date_culture" type="text" class="form-control"
-                    value="@displayService.GetConfigWithoutDefaults(Model, "date_culture")"
-                    placeholder="@displayService.GetConfigDefaultsOnly("date_culture")">
-        </div>
+        @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+        {
+            Display = Model, Key = "timezone", Label = "Time Zone (format: \"UTC\", \"Europe/Prague\" etc.)",
+            ColClass = "col-md-4"
+        })
+        @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+        {
+            Display = Model, Key = "date_culture", Label = "Date style (format: \"en-US\", \"cs-CZ\" etc.)",
+            ColClass = "col-md-4"
+        })
     </div>
 </fieldset>

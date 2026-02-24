@@ -1,18 +1,17 @@
 @model PortalCalendarServer.Models.DatabaseEntities.Display
-@using PortalCalendarServer.Services
+@using PortalCalendarServer.Models.POCOs
 
 @{
-    var displayService = (DisplayService)ViewData["DisplayService"]!;
     ViewData["IntegrationName"] = "metnoweather";
 }
 
 <fieldset class="row mb-3" id="@(ViewData["IntegrationName"])_fieldset">
     @await Html.PartialAsync("ConfigUi/_IntegrationToggle", Model, ViewData)
-    
-    <div class="col-md-4 mt-3">
-        <label for="metnoweather_granularity_hours">Aggregate forecast by how many hours</label>
-        <input id="metnoweather_granularity_hours" name="metnoweather_granularity_hours" type="text" class="form-control"
-               value="@displayService.GetConfigWithoutDefaults(Model, "metnoweather_granularity_hours")"
-               placeholder="@displayService.GetConfigDefaultsOnly("metnoweather_granularity_hours")">
-    </div>
+
+    @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+    {
+        Display = Model, Key = "metnoweather_granularity_hours",
+        Label = "Aggregate forecast by how many hours",
+        ColClass = "col-md-4", MarginClass = "mt-3"
+    })
 </fieldset>

@@ -119,4 +119,19 @@ public interface IDisplayService
     /// Update the render information for a display, including the timestamp of when it was rendered and any errors that occurred during rendering.
     /// </summary>
     void UpdateRenderInfo(Display display, DateTime renderedAt, string? renderErrors);
+
+    /// <summary>
+    /// Get all available display types
+    /// </summary>
+    List<DisplayType> GetDisplayTypes();
+
+    /// <summary>
+    /// Get all available color variants
+    /// </summary>
+    List<ColorVariant> GetColorVariants();
+
+    /// <summary>
+    /// Get all available dithering types
+    /// </summary>
+    List<DitheringType> GetDitheringTypes();
 }

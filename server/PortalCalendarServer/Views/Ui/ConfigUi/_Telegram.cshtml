@@ -1,25 +1,22 @@
 @model PortalCalendarServer.Models.DatabaseEntities.Display
-@using PortalCalendarServer.Services
+@using PortalCalendarServer.Models.POCOs
 
 @{
-    var displayService = (DisplayService)ViewData["DisplayService"]!;
     ViewData["IntegrationName"] = "telegram";
 }
 
 <fieldset class="row mb-3" id="@(ViewData["IntegrationName"])_fieldset">
     @await Html.PartialAsync("ConfigUi/_IntegrationToggle", Model, ViewData)
-    
-    <div class="col-md-12 mt-3">
-        <label for="telegram_api_key">API key</label>
-        <input id="telegram_api_key" name="telegram_api_key" type="text" class="form-control"
-               value="@displayService.GetConfigWithoutDefaults(Model, "telegram_api_key")"
-               placeholder="@displayService.GetConfigDefaultsOnly("telegram_api_key")">
-    </div>
-    <div class="col-md-12 mt-3">
-        <label for="telegram_chat_id">Chat ID</label>
-        <input id="telegram_chat_id" name="telegram_chat_id" type="text" class="form-control"
-               value="@displayService.GetConfigWithoutDefaults(Model, "telegram_chat_id")"
-               placeholder="@displayService.GetConfigDefaultsOnly("telegram_chat_id")">
-        <div class="form-text">See <a href="https://stackoverflow.com/questions/32423837/telegram-bot-how-to-get-a-group-chat-id">https://stackoverflow.com/questions/32423837/telegram-bot-how-to-get-a-group-chat-id</a> to get the id.</div>
-    </div>
+
+    @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+    {
+        Display = Model, Key = "telegram_api_key", Label = "API key",
+        ColClass = "col-md-12", MarginClass = "mt-3"
+    })
+    @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+    {
+        Display = Model, Key = "telegram_chat_id", Label = "Chat ID",
+        ColClass = "col-md-12", MarginClass = "mt-3",
+        HelpText = "See https://stackoverflow.com/questions/32423837/telegram-bot-how-to-get-a-group-chat-id to get the id."
+    })
 </fieldset>

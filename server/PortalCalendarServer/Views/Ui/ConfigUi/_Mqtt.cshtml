@@ -1,38 +1,29 @@
 @model PortalCalendarServer.Models.DatabaseEntities.Display
-@using PortalCalendarServer.Services
+@using PortalCalendarServer.Models.POCOs
 
 @{
-    var displayService = (DisplayService)ViewData["DisplayService"]!;
     ViewData["IntegrationName"] = "mqtt";
 }
 
 <fieldset class="row mb-3" id="@(ViewData["IntegrationName"])_fieldset">
     @await Html.PartialAsync("ConfigUi/_IntegrationToggle", Model, ViewData)
-    
+
     <div class="form-group row mt-3">
-        <div class="col-md-3">
-            <label for="mqtt_server">Server</label>
-            <input id="mqtt_server" name="mqtt_server" type="text" class="form-control"
-                   value="@displayService.GetConfigWithoutDefaults(Model, "mqtt_server")"
-                   placeholder="@displayService.GetConfigDefaultsOnly("mqtt_server")">
-        </div>
-        <div class="col-md-3">
-            <label for="mqtt_username">Username</label>
-            <input id="mqtt_username" name="mqtt_username" type="text" class="form-control"
-                   value="@displayService.GetConfigWithoutDefaults(Model, "mqtt_username")"
-                   placeholder="@displayService.GetConfigDefaultsOnly("mqtt_username")">
-        </div>
-        <div class="col-md-3">
-            <label for="mqtt_password">Password</label>
-            <input id="mqtt_password" name="mqtt_password" type="text" class="form-control"
-                   value="@displayService.GetConfigWithoutDefaults(Model, "mqtt_password")"
-                   placeholder="@displayService.GetConfigDefaultsOnly("mqtt_password")">
-        </div>
-        <div class="col-md-3">
-            <label for="mqtt_topic">Device topic</label>
-            <input id="mqtt_topic" name="mqtt_topic" type="text" class="form-control"
-                   value="@displayService.GetConfigWithoutDefaults(Model, "mqtt_topic")"
-                   placeholder="@displayService.GetConfigDefaultsOnly("mqtt_topic")">
-        </div>
+        @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+        {
+            Display = Model, Key = "mqtt_server", Label = "Server", ColClass = "col-md-3"
+        })
+        @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+        {
+            Display = Model, Key = "mqtt_username", Label = "Username", ColClass = "col-md-3"
+        })
+        @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+        {
+            Display = Model, Key = "mqtt_password", Label = "Password", ColClass = "col-md-3"
+        })
+        @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+        {
+            Display = Model, Key = "mqtt_topic", Label = "Device topic", ColClass = "col-md-3"
+        })
     </div>
 </fieldset>
