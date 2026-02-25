@@ -73,7 +73,8 @@ div#visible-area {
     height: 780px;
     width: 460px;
     overflow: hidden;
-    /* background-color: gainsboro; */
+    display: flex;
+    flex-direction: column;
 }
 
 div.top-date-row {
@@ -94,7 +95,10 @@ h3#calendar-title {
 }
 
 div.calendar-container {
+    flex: 1 1 auto;
     overflow: hidden;
+    /* Snap to whole line heights so no event row is cut in half */
+    line-height: 1.24em;
 }
 
 div.calendar-event-block {
@@ -140,25 +144,20 @@ div.calendar-event-block-title+div.calendar-event-block-content>div.calendar-day
 }
 
 div#bottom-row {
-    position: absolute;
+    display: flex;
+    flex: 0 0 auto;         /* do not grow or shrink — take only what it needs */
     width: 100%;
-    bottom: 0;
-    left: 0;
-    height: 1.5rem;
+    justify-content: space-between;
+    align-items: flex-end;
     background-color: var(--epd-white);
 }
 
 div#bottom-signature {
-    position: absolute;
-    bottom: 0rem;
-    left: 0;
     font-size: 0.7rem;
 }
 
 div#battery-status {
-    position: absolute;
-    bottom: -0.2rem;
-    right: 0;
     text-align: right;
     font-size: 1.3rem;
+    margin-bottom: -0.25rem;
 }

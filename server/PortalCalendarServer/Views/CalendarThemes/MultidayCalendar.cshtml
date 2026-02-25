@@ -149,5 +149,24 @@
             </div>
         </div>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const container = document.querySelector(".calendar-container");
+            const containerBottom = container.getBoundingClientRect().bottom;
+
+            // Walk all direct and nested children, hide anything that overflows
+            const allElements = container.querySelectorAll(
+                // ".calendar-event-block, .calendar-day-title, .calendar-event"
+                ".calendar-day-title, .calendar-event"
+            );
+
+            for (const el of allElements) {
+                const elBottom = el.getBoundingClientRect().bottom;
+                if (elBottom > containerBottom) {
+                    el.style.visibility = "hidden";
+                }
+            }
+        });
+    </script>
 </body>
 </html>
