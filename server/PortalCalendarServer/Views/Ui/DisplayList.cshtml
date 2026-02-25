@@ -52,9 +52,14 @@
                     }
                 </td>
                 <td>
-                    @d.DisplayType?.Name
-                    <br />
-                    @d.ColorVariant?.Name
+                    @{
+                        var colorCode = d.DisplayType?.Code;
+                        if (d.ColorVariant?.Code != d.DisplayType?.Code)
+                        {
+                            colorCode += "/" + @d.ColorVariant?.Code;
+                        }
+                    }
+                    @colorCode
                 </td>
                 <td>@d.Firmware</td>
                 <td class="text-end">
