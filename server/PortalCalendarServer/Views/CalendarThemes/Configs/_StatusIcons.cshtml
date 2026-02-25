@@ -1,0 +1,18 @@
+@model Display
+@using PortalCalendarServer.Models.DatabaseEntities
+@using PortalCalendarServer.Models.POCOs
+
+<div class="row mb-3">
+    @await Html.PartialAsync("_ConfigCheckbox", new ConfigInputModel
+        {
+        Display = Model, Key = "theme_config_status_wakeupinfo",
+        Label = "Show wakeup times at the bottom",
+        ColClass = "col-3", MarginClass = ""
+        })
+    @await Html.PartialAsync("_ConfigCheckbox", new ConfigInputModel
+        {
+        Display = Model, Key = "theme_config_status_battery",
+        Label = "Show battery status at the bottom",
+        ColClass = "col-3", MarginClass = ""
+        })
+</div>

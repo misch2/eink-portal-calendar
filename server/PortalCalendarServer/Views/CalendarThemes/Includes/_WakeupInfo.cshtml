@@ -13,12 +13,17 @@
 
 }
 
-@* Date rendered *@
-<iconify-icon icon="material-symbols:screenshot-monitor-outline-rounded" style="vertical-align: text-bottom"></iconify-icon>
-@DateTime.UtcNow.ToString("t", dateCulture)
+@if (displayService.GetConfigBool(Model, "theme_config_status_wakeupinfo"))
+{
+    @* Date rendered *@
+    <iconify-icon icon="material-symbols:screenshot-monitor-outline-rounded" style="vertical-align: text-bottom"></iconify-icon>
 
-<iconify-icon icon="material-symbols:arrow-right-alt" style="vertical-align: text-bottom"></iconify-icon>
+    @DateTime.UtcNow.ToString("t", dateCulture)
 
-@* Next refresh *@
-<iconify-icon icon="material-symbols:refresh" style="vertical-align: text-bottom"></iconify-icon>
-@TimeZoneInfo.ConvertTimeFromUtc(nextWakeup, tz).ToString("t", dateCulture).
+    <iconify-icon icon="material-symbols:arrow-right-alt" style="vertical-align: text-bottom"></iconify-icon>
+
+    @* Next refresh *@
+    <iconify-icon icon="material-symbols:refresh" style="vertical-align: text-bottom"></iconify-icon>
+
+    @TimeZoneInfo.ConvertTimeFromUtc(nextWakeup, tz).ToString("t", dateCulture)<text>.</text>
+}

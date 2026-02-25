@@ -24,7 +24,7 @@
 
     var calendar = calendarComponent!.GetDetails(Model.Display, Model.Date);
     var icons = iconsComponent!.GenerateIcons(Model.Display, Model.Date, calendar.HasEntries);
-    
+
     // Generate weight data with consistent randomization based on date
     var weightSeries = Model.Weight?.GetWeightSeries(Model.Date);
     var lastWeight = Model.Weight?.GetLastWeight();
@@ -34,17 +34,17 @@
 <head>
     <meta charset="utf-8" />
     <title>Calendar - Google Fit Weight</title>
-    
+
     @* Icon library *@
     <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
-    
+
     @* Stylesheets *@
     <link rel="stylesheet" href="/css/calendar.css" asp-append-version="true" />
     <link rel="stylesheet" href="/css/calendar_themes/googlefit.css" asp-append-version="true" />
-    
+
     @* EPD Colors *@
     @await Html.PartialAsync("Includes/_EpdColors.cshtml", Model.CssColors)
-    
+
     @* Google Charts Library *@
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
@@ -59,15 +59,15 @@
             data.addRows([
                 @if (weightSeries != null)
                 {
-                    @foreach (var point in weightSeries)
-                    {
-                        <text>
-                        [
-                            new Date(@point.Date.Year, @(point.Date.Month - 1), @point.Date.Day, @point.Date.Hour, @point.Date.Minute, @point.Date.Second, 0),
-                            @point.Weight.ToString("F1", CultureInfo.InvariantCulture)
-                        ],
-                        </text>
-                    }
+                            @foreach (var point in weightSeries)
+                            {
+                                        <text>
+                                        [
+                                            new Date(@point.Date.Year, @(point.Date.Month - 1), @point.Date.Day, @point.Date.Hour, @point.Date.Minute, @point.Date.Second, 0),
+                                            @point.Weight.ToString("F1", CultureInfo.InvariantCulture)
+                                        ],
+                                        </text>
+                            }
                 }
             ]);
 
@@ -79,7 +79,7 @@
 
                 // Remove legend
                 legend: { position: 'none' },
-                
+
                 // X-axis labels and gridlines
                 hAxis: {
                     XtextPosition: 'none',
@@ -90,22 +90,22 @@
                     ticks: [
                         @if (weightSeries != null)
                         {
-                            @foreach (var point in weightSeries.Where(p => p.Date.Day == 1))
-                            {
-                                <text>
-                                {
-                                    "v": new Date(@point.Date.Year, @(point.Date.Month - 1), @point.Date.Day),
-                                    "f": @Json.Serialize(@point.Date.ToString("MMMM", dateCulture))
-                                },
-                                </text>
-                            }
+                                    @foreach (var point in weightSeries.Where(p => p.Date.Day == 1))
+                                    {
+                                                <text>
+                                                {
+                                                    "v": new Date(@point.Date.Year, @(point.Date.Month - 1), @point.Date.Day),
+                                                    "f": @Json.Serialize(@point.Date.ToString("MMMM", dateCulture))
+                                                },
+                                                </text>
+                                    }
                         }
                     ],
                 },
-                
+
                 // Y-axis
                 vAxis: {
-                    XXXtitle: 'Váha', 
+                    XXXtitle: 'Váha',
                     XXXtextPosition: 'none',
                     gridlines: { color: '#000', count: 3 },
                     minorGridlines: { color: 'transparent' },
@@ -210,13 +210,9 @@
 
         <img id="aperture-logo" src="/images/Aperture_Laboratories_Logo.png" alt="Aperture Science" />
 
-        @if (displayService.GetConfigBool(Model.Display, "wakeupinfo_show_times"))
-        {
-            <div id="bottom-signature">
-                @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_WakeupInfo.cshtml", Model.Display)
-            </div>
-        }
-
+        <div id="bottom-signature">
+            @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_WakeupInfo.cshtml", Model.Display)
+        </div>
         <div id="battery-status">
             @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_BatteryStatusIcon.cshtml", Model.Display)
         </div>

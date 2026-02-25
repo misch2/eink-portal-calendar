@@ -1,25 +1,23 @@
 using PortalCalendarServer.Models.DatabaseEntities;
-using PortalCalendarServer.Services;
-using PortalCalendarServer.Services.PageGeneratorComponents;
 
 namespace PortalCalendarServer.Modules.Builtin
 {
-    public class WakeupInfoThemeConfigModule : IPortalModule
+    public class ThemeConfigStatusIndicatorsModule : IPortalModule
     {
         /// <summary>
-        /// Configuration items for the wakeup info bar.
+        /// Configuration items for the status indicators.
         /// No config tab — icon settings are part of the Main config or individual theme config tab.
         /// </summary>
-        public string ModuleId => "wakeupinfo_theme_part";
+        public string ModuleId => "theme_config_status_indicators";
         public string? ConfigTabDisplayName => null;
         public string? ConfigPartialView => null;
 
         public IReadOnlyList<string> OwnedConfigKeys =>
         [
-            "wakeupinfo_show_times"
+            "theme_config_status_wakeupinfo", "theme_config_status_battery"
         ];
 
-        public IReadOnlyList<string> CheckboxConfigKeys => ["wakeupinfo_show_times"];
+        public IReadOnlyList<string> CheckboxConfigKeys => ["theme_config_status_wakeupinfo", "theme_config_status_battery"];
 
         public object? CreatePageGeneratorComponent(IServiceProvider services, Display display, DateTime date) => null;
     }

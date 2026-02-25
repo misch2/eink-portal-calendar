@@ -13,7 +13,7 @@
     var nextWakeup = wakeupInfo.NextWakeup;
     var sleepInSeconds = wakeupInfo.SleepInSeconds;
     var schedule = wakeupInfo.Schedule;
-    
+
     var now = DateTime.UtcNow;
 
     // Text decorator function (can be: lowercase, UPPERCASE, Capitalized)
@@ -32,13 +32,13 @@
 <head>
     <meta charset="utf-8" />
     <title>Calendar - Portal Style with Icons</title>
-    
+
     @* Icon library *@
     <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
-    
+
     @* Stylesheets *@
     <link rel="stylesheet" href="/css/calendar.css" asp-append-version="true" />
-    
+
     @* EPD Colors *@
     @await Html.PartialAsync("Includes/_EpdColors.cshtml", Model.CssColors)
 </head>
@@ -49,7 +49,7 @@
     {
         <div id="overlay-image"></div>
     }
-    
+
     <div id="spacer">
         <div class="top-month-header">
             <div>
@@ -117,12 +117,9 @@
 
         <img id="aperture-logo" src="/images/Aperture_Laboratories_Logo.png" alt="Aperture Science" />
 
-        @if (displayService.GetConfigBool(Model.Display, "wakeupinfo_show_times"))
-        {
-            <div id="bottom-signature">
-                @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_WakeupInfo.cshtml", Model.Display)
-            </div>
-        }
+        <div id="bottom-signature">
+            @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_WakeupInfo.cshtml", Model.Display)
+        </div>
         <div id="battery-status">
             @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_BatteryStatusIcon.cshtml", Model.Display)
         </div>

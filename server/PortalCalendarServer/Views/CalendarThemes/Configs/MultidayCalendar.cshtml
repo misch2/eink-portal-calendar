@@ -8,9 +8,4 @@
     ColClass = "col-12", MarginClass = "mb-3"
 })
 
-@await Html.PartialAsync("_ConfigCheckbox", new ConfigInputModel
-{
-    Display = Model, Key = "wakeupinfo_show_times",
-    Label = "Show wakeup times at the bottom",
-    ColClass = "col-12", MarginClass = ""
-})
+@await Html.PartialAsync("~/Views/CalendarThemes/Configs/_StatusIcons.cshtml")

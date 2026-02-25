@@ -42,4 +42,7 @@
     }
 }
 
-<iconify-icon icon="@batteryIcon" rotate="90deg" class="battery-icon"></iconify-icon>
+@if (displayService.GetConfigBool(Model, "theme_config_status_battery"))
+{
+    <iconify-icon icon="@batteryIcon" rotate="90deg" class="battery-icon"></iconify-icon>
+}

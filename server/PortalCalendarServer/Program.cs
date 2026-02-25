@@ -105,7 +105,7 @@ moduleRegistry.Register(new XkcdModule());
 moduleRegistry.Register(new PublicHolidayModule());
 moduleRegistry.Register(new NameDayModule());
 moduleRegistry.Register(new PortalIconsModule());
-moduleRegistry.Register(new WakeupInfoThemeConfigModule());
+moduleRegistry.Register(new ThemeConfigStatusIndicatorsModule());
 builder.Services.AddSingleton(moduleRegistry);
 
 // Register periodic background services

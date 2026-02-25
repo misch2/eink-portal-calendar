@@ -94,7 +94,7 @@
                     <i class="wi wi-cloud" style="font-size: 1rem; margin-top: 0.15rem"></i> @(5 * (int)(currentWeather.CloudPercentAvg / 5 + 0.5)) <text>%</text>
                     @if (currentWeather.FogPercentAvg > 0)
                     {
-                        <i class="wi wi-fog" style="font-size: 1rem; margin-top: 0.15rem"></i> 
+                        <i class="wi wi-fog" style="font-size: 1rem; margin-top: 0.15rem"></i>
                         @(5 * (int)(currentWeather.FogPercentAvg / 5 + 0.5)) <text>%</text>
                     }
                 </div>
@@ -214,12 +214,9 @@
             }
         </div>
 
-        @if (displayService.GetConfigBool(Model.Display, "wakeupinfo_show_times"))
-        {
-            <div id="bottom-signature">
-                @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_WakeupInfo.cshtml", Model.Display)
-            </div>
-        }
+        <div id="bottom-signature">
+            @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_WakeupInfo.cshtml", Model.Display)
+        </div>
         <div id="battery-status">
             @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_BatteryStatusIcon.cshtml", Model.Display)
         </div>
