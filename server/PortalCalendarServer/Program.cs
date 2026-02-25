@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
@@ -118,6 +119,14 @@ builder.Services.AddHostedService(provider => provider.GetRequiredService<ImageR
 
 // Register SQLite-backed ticket store for cookie authentication
 builder.Services.AddScoped<SqliteTicketStore>();
+
+// Persist data protection keys to disk so auth cookies survive app restarts
+var rawKeysPath = builder.Configuration.GetValue<string>("Paths:DataProtectionKeys");
+var keysDirectory = Path.GetFullPath(
+    rawKeysPath!.Replace("{ContentRootPath}", builder.Environment.ContentRootPath));
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(keysDirectory))
+    .SetApplicationName("PortalCalendarServer");
 
 // Configure cookie authentication for the web UI
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
