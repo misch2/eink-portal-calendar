@@ -90,6 +90,7 @@ builder.Services.AddScoped<IDatabaseCacheServiceFactory, DatabaseCacheServiceFac
 builder.Services.AddScoped<IMqttService, MqttService>();
 builder.Services.AddScoped<INameDayService, NameDayService>();
 builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();
+builder.Services.AddScoped<BitmapService>();
 
 // Register module registry with all built-in modules
 var moduleRegistry = new ModuleRegistry();

@@ -7,6 +7,9 @@ using PortalCalendarServer.Services.Integrations;
 
 namespace PortalCalendarServer.Controllers;
 
+// FIXME: Add authentication and authorization for these endpoints, especially the device config and bitmap endpoints.
+// They currently rely on the obscurity/randomness of the MAC address, but it would be more secure to require an API key or so.
+
 [ApiController]
 [Route("api")]
 public class ApiController : ControllerBase
@@ -17,6 +20,7 @@ public class ApiController : ControllerBase
     private readonly PageGeneratorService _pageGeneratorService;
     private readonly ThemeService _themeService;
     private readonly IMqttService _mqttService;
+    private readonly BitmapService _bitmapService;
 
     public ApiController(
         CalendarContext context,
@@ -25,7 +29,8 @@ public class ApiController : ControllerBase
         PageGeneratorService pageGeneratorService,
         ThemeService themeService,
         IWeb2PngService web2PngService,
-        IMqttService mqttService)
+        IMqttService mqttService,
+        BitmapService bitmapService)
     {
         _context = context;
         _logger = logger;
@@ -33,6 +38,7 @@ public class ApiController : ControllerBase
         _pageGeneratorService = pageGeneratorService;
         _themeService = themeService;
         _mqttService = mqttService;
+        _bitmapService = bitmapService;
     }
 
     // Helper to get display by MAC address
@@ -256,63 +262,6 @@ public class ApiController : ControllerBase
         return Ok(response);
     }
 
-    // GET /api/device/bitmap?mac=XX:XX:XX:XX:XX:XX&rotate=0&flip=&format=png&...
-    [HttpGet("device/bitmap")]
-    public async Task<IActionResult> Bitmap(
-        [FromQuery] string? mac,
-        [FromQuery] int? rotate,
-        [FromQuery] string? flip,
-        [FromQuery] double? gamma = null,
-        [FromQuery] int? colors = null,
-        [FromQuery] string? colormap_name = null,
-        [FromQuery] string format = "png",
-        [FromQuery] bool preview_colors = false)
-    {
-        var display = await GetDisplayByMacAsync(mac);
-        if (display == null)
-        {
-            return NotFound(new { error = "Display not found" });
-        }
-        if (display.RenderedAt == null)
-        {
-            return NotFound(new { error = "No rendered bitmap available for this display yet" });
-        }
-        if (display.DisplayType == null)
-        {
-            return NotFound(new { error = "Display type information is missing for this display" });
-        }
-
-        rotate ??= display.Rotation;
-        flip ??= "";
-        gamma ??= display.Gamma;
-        colors ??= display.DisplayType?.NumColors;
-
-        var color_palette = display.ColorPalette(preview_colors);
-        if (color_palette.Count == 0)
-        {
-            colormap_name = "webmap"; // FIXME is it ideal to use this as a fallback when no colors are defined? maybe we should have a "default" colormap that is just black and white or something? Or throw an error instead?
-            _logger.LogWarning("No colors defined for display {DisplayId}, using fallback colormap {ColormapName}", display.Id, colormap_name);
-        }
-
-        var bitmapOptions = new BitmapOptions
-        {
-            Rotate = rotate!.Value,
-            Flip = flip,
-            Gamma = gamma!.Value,
-            NumColors = colors!.Value,
-            ColormapName = colormap_name,
-            ColormapColors = color_palette,
-            Format = format,
-            DisplayType = display.DisplayType!,
-            DitheringType = display.DitheringTypeCode
-        };
-
-        var bitmap = _pageGeneratorService.ConvertStoredBitmap(display, bitmapOptions);
-
-        return ReturnBitmap(bitmap);
-    }
-
-
     // GET /api/device/bitmap/epaper?mac=XX:XX:XX:XX:XX:XX&web_format=false&preview_colors=false
     [HttpGet("device/bitmap/epaper")]
     [Tags("Device API")]
@@ -320,37 +269,22 @@ public class ApiController : ControllerBase
         [FromQuery] string? mac
         )
     {
-        return await Bitmap(
-            mac: mac,
-            rotate: null,
-            flip: null,
-            gamma: null,
-            colors: null,
-            colormap_name: null,
-            format: "epaper_native",
-            preview_colors: false
-        );
-    }
+        var display = await GetDisplayByMacAsync(mac);
+        if (display == null)
+        {
+            return NotFound(new { error = "Display not found" });
+        }
 
-    private IActionResult ReturnBitmap(BitmapResult bitmap)
-    {
+        var bitmap = _bitmapService.GetBitmap(
+            display.Id, out var errorMessage,
+            null, null, null, null, null, "epaper_native", false);
+
         if (bitmap == null)
         {
-            return StatusCode(500, new { error = "Failed to convert bitmap" });
+            return NotFound(new { error = errorMessage });
         }
 
-        // Return the bitmap data with proper headers
-        if (bitmap.Headers != null)
-        {
-            foreach (var header in bitmap.Headers)
-            {
-                Response.Headers.Append(header.Key, header.Value);
-            }
-        }
-
-        return File(bitmap.Data, bitmap.ContentType);
+        return this.ReturnBitmap(bitmap);
     }
-
-
 }
 

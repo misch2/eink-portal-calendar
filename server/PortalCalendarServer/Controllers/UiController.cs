@@ -20,7 +20,8 @@ public class UiController(
     PageGeneratorService pageGeneratorService,
     IDisplayService displayService,
     ThemeService themeService,
-    ModuleRegistry moduleRegistry
+    ModuleRegistry moduleRegistry,
+    BitmapService bitmapService
     ) : Controller, IAsyncResultFilter
 {
     private readonly CalendarContext _context = context;
@@ -30,6 +31,7 @@ public class UiController(
     private readonly IDisplayService _displayService = displayService;
     private readonly ThemeService _themeService = themeService;
     private readonly ModuleRegistry _moduleRegistry = moduleRegistry;
+    private readonly BitmapService _bitmapService = bitmapService;
 
     // GET /
     [HttpGet("/")]
@@ -217,7 +219,10 @@ public class UiController(
                     TempData["Error"] = $"Display name '{display.Name}' is already used by another display.";
                     return RedirectToAction(nameof(ConfigUiShow), new { displayNumber });
                 }
-
+            }
+            else
+            {
+                display.Name = null;
             }
             if (form.ContainsKey("display_mac"))
             {
@@ -229,7 +234,10 @@ public class UiController(
                     TempData["Error"] = $"MAC address '{display.Mac}' is already used by another display.";
                     return RedirectToAction(nameof(ConfigUiShow), new { displayNumber });
                 }
-
+            }
+            else
+            {
+                display.Mac = null;
             }
             if (form.ContainsKey("display_rotation") && int.TryParse(form["display_rotation"], out var rotation))
             {
@@ -392,6 +400,37 @@ public class UiController(
         };
 
         return View("~/Views/CalendarThemes/_Error.cshtml", errorModel);
+    }
+
+    // GET /calendar/{displayNumber}/bitmap?rotate=0&flip=&format=png&...
+    [HttpGet("/calendar/{displayNumber:int}/bitmap")]
+    public async Task<IActionResult> Bitmap(
+        int displayNumber,
+        [FromQuery] string? mac,
+        [FromQuery] int? rotate,
+        [FromQuery] string? flip,
+        [FromQuery] double? gamma = null,
+        [FromQuery] int? colors = null,
+        [FromQuery] string? colormap_name = null,
+        [FromQuery] string format = "png",
+        [FromQuery] bool preview_colors = false)
+    {
+        var display = _displayService.GetDisplayById(displayNumber);
+        if (display == null)
+        {
+            return NotFound();
+        }
+
+        var bitmap = _bitmapService.GetBitmap(
+            display.Id, out var errorMessage,
+            rotate, flip, gamma, colors, colormap_name, format, preview_colors);
+
+        if (bitmap == null)
+        {
+            return NotFound(errorMessage);
+        }
+
+        return await Task.FromResult(this.ReturnBitmap(bitmap));
     }
 
     /// <summary>
