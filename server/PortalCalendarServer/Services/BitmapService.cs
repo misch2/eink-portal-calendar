@@ -14,7 +14,7 @@ public class BitmapService(
     /// Returns <c>null</c> when the display, its rendered bitmap, or its display-type information cannot be found;
     /// the <paramref name="errorMessage"/> out-parameter will contain a human-readable reason in that case.
     /// </summary>
-    public BitmapResult? GetBitmap(
+    public virtual BitmapResult? GetBitmap(
         int displayId,
         out string? errorMessage,
         int? rotate = null,
