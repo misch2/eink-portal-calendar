@@ -5,6 +5,7 @@
 .vscode/
 .vs
 /server/_data*
+/server/localdata/data-protection-keys/
 /server/localdata/database/*
 /server/localdata/generated_images/*.png
 /server/PortalCalendarServer/publish.cmd
