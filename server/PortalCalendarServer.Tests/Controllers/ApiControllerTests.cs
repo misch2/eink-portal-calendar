@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PortalCalendarServer.Controllers;
 using PortalCalendarServer.Data;
-using PortalCalendarServer.Models.DatabaseEntities;
 using PortalCalendarServer.Models.POCOs.Board;
 using PortalCalendarServer.Services;
 using PortalCalendarServer.Services.Integrations;

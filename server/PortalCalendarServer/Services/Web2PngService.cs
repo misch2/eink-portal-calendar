@@ -38,7 +38,15 @@ public class Web2PngService : IWeb2PngService, IAsyncDisposable
             _browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
             {
                 Headless = true,
-                Args = new[] { "--disable-dev-shm-usage", "--no-sandbox" }
+                Args = new[]
+                {
+                    "--disable-dev-shm-usage",
+                    "--no-sandbox",
+                    "--font-render-hinting=none",           // disable OS-specific hinting
+                    "--disable-font-subpixel-positioning",  // no subpixel glyph placement
+                    "--force-color-profile=srgb",           // consistent color profile
+                    "--disable-lcd-text",                   // force grayscale AA, no ClearType (matches Linux headless)
+                }
             });
             _initialized = true;
             _logger.LogInformation("Playwright browser initialized successfully");
