@@ -160,11 +160,20 @@
                 ".calendar-day-title, .calendar-event"
             );
 
+            let firstHidden = null;
             for (const el of allElements) {
                 const elBottom = el.getBoundingClientRect().bottom;
                 if (elBottom > containerBottom) {
                     el.style.visibility = "hidden";
+                    if (!firstHidden) firstHidden = el;
                 }
+            }
+
+            if (firstHidden) {
+                const indicator = document.createElement("div");
+                indicator.id = "overflow-indicator";
+                indicator.textContent = "…";
+                firstHidden.parentNode.insertBefore(indicator, firstHidden);
             }
         });
     </script>

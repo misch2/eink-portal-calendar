@@ -139,6 +139,12 @@ div.calendar-event {
     padding-top: 0.25rem;
 }
 
+div#overflow-indicator {
+    margin-top: 0.25rem;
+/*    font-size: 0.85em;*/
+/*    opacity: 0.6;*/
+}
+
 div.calendar-event-block-title+div.calendar-event-block-content>div.calendar-day-title {
     padding-top: 0.25rem;
 }
