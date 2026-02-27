@@ -80,6 +80,7 @@ div#visible-area {
     flex-direction: column;
 }
 
+/* "My calendar" */
 h3#calendar-title {
     text-align: center;
     font-size: 1.2rem;
@@ -100,6 +101,7 @@ div.calendar-event-block-today {
     color: var(--epd-red);
 }
 
+/* "Today and tomorrow" */
 div.calendar-event-block-title {
     font-weight: bold;
     margin-top: 0.5rem;
@@ -122,20 +124,22 @@ div.calendar-container > div.calendar-event-block:first-child > div.calendar-eve
 div.calendar-event-block-content {
 }
 
+/* "Saturday 28th (+2)" */
 div.calendar-day-title {
     font-weight: bold;
-    margin-top: 0.5rem;
+    margin-top: 0.4rem;
+    padding-left: 0.1rem;
 }
 
+/* "11:00 Event name" */
 div.calendar-event {
     padding-top: 0.25rem;
+    padding-left: 0.1rem;
 }
 
 div#overflow-indicator {
     text-align: center;
     margin-top: 0.25rem;
-    /*    font-size: 0.85em;*/
-    /*    opacity: 0.6;*/
 }
 
 div.calendar-event-block-title + div.calendar-event-block-content > div.calendar-day-title {
