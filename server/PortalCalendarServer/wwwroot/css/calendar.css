@@ -41,14 +41,14 @@ div div div div {
 
 @font-face {
     font-family: 'DIN';
-    /* src: url('/fonts/D-DIN.otf') format('opentype'); */
-    /* test cestiny: */
-    src: url('/fonts/651-font.otf') format('opentype');
+    src: local('XXXXXXXXXXX'),  /* intentionally invalid — prevents system font matching */
+         url('/fonts/651-font.otf') format('opentype');
 }
 
 @font-face {
     font-family: 'DINCondensed';
-    src: url('/fonts/D-DINCondensed.otf') format('opentype');
+    src: local('XXXXXXXXXXX'),  /* intentionally invalid — prevents system font matching */
+         url('/fonts/D-DINCondensed.otf') format('opentype');
 }
 
 body {

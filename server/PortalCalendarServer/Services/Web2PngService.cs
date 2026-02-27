@@ -45,7 +45,8 @@ public class Web2PngService : IWeb2PngService, IAsyncDisposable
                     "--font-render-hinting=none",           // disable OS-specific hinting
                     "--disable-font-subpixel-positioning",  // no subpixel glyph placement
                     "--force-color-profile=srgb",           // consistent color profile
-                    "--disable-lcd-text",                   // force grayscale AA, no ClearType (matches Linux headless)
+                    "--disable-lcd-text",                   // force grayscale AA, no ClearType
+                    //"--disable-skia-runtime-opts",          // disable platform-specific Skia optimizations
                 }
             });
             _initialized = true;
