@@ -90,7 +90,7 @@ div.top-date-row {
 h3#calendar-title {
     text-align: center;
     font-size: 1.2rem;
-    margin-top: 1rem;
+    margin-top: 0.8rem;
     margin-bottom: 1rem;
 }
 
@@ -140,6 +140,7 @@ div.calendar-event {
 }
 
 div#overflow-indicator {
+    text-align: center;
     margin-top: 0.25rem;
 /*    font-size: 0.85em;*/
 /*    opacity: 0.6;*/
