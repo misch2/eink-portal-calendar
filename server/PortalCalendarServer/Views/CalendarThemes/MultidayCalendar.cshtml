@@ -52,7 +52,7 @@
         }
     };
 }
-@* <!DOCTYPE html> *@
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -68,8 +68,13 @@
     @await Html.PartialAsync("Includes/_EpdColors.cshtml", Model.CssColors)
 </head>
 
-<body>
+@{
+            int width = Model.Display.VirtualWidth();
+            int height = Model.Display.VirtualHeight();
+}
+<body style="width: @(width)px; height: @(height)px;">
     <div id="visible-area">
+
         <h3 id="calendar-title">
             @displayService.GetConfig(Model.Display, "display_title")
         </h3>
@@ -150,30 +155,45 @@
         </div>
     </div>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+            document.addEventListener("DOMContentLoaded", function () {
             const container = document.querySelector(".calendar-container");
-            const containerBottom = container.getBoundingClientRect().bottom;
 
-            // Walk all direct and nested children, hide anything that overflows
-            const allElements = container.querySelectorAll(
-                // ".calendar-event-block, .calendar-day-title, .calendar-event"
-                ".calendar-day-title, .calendar-event"
-            );
+            const getContainerBottom = () => container.getBoundingClientRect().bottom;
 
+            const allElements = Array.from(container.querySelectorAll(
+                ".calendar-event-block-title, .calendar-day-title, .calendar-event"
+            ));
+
+            // Phase 1: hide all elements that overflow
             let firstHidden = null;
             for (const el of allElements) {
                 const elBottom = el.getBoundingClientRect().bottom;
-                if (elBottom > containerBottom) {
-                    el.style.visibility = "hidden";
+                if (elBottom > getContainerBottom()) {
+                    el.style.display = "none";
                     if (!firstHidden) firstHidden = el;
                 }
             }
 
-            if (firstHidden) {
-                const indicator = document.createElement("div");
-                indicator.id = "overflow-indicator";
-                indicator.textContent = "…";
-                firstHidden.parentNode.insertBefore(indicator, firstHidden);
+            if (!firstHidden) return;
+
+            // Phase 2: insert indicator before the first hidden element
+            const indicator = document.createElement("div");
+            indicator.id = "overflow-indicator";
+            indicator.textContent = "…";
+            firstHidden.parentNode.insertBefore(indicator, firstHidden);
+
+            // Phase 3: if the indicator itself overflows, keep hiding preceding
+            // visible elements until the indicator fits (or nothing remains)
+            const visibleElements = allElements.filter(el => el.style.display !== "none");
+            let i = visibleElements.length - 1;
+            while (indicator.getBoundingClientRect().bottom > getContainerBottom() && i >= 0) {
+                visibleElements[i].style.display = "none";
+                i--;
+            }
+
+            // Phase 4: if indicator still doesn't fit, remove it entirely
+            if (indicator.getBoundingClientRect().bottom > getContainerBottom()) {
+                indicator.remove();
             }
         });
     </script>

@@ -2,7 +2,7 @@
 
 html,
 body {
-    /* background-color: aqua; */
+    /*     background-color: aqua; */
     font-size: 18pt;
     font-family: 'DIN';
 }
@@ -18,38 +18,39 @@ p {
 
 /* debug */
 
-div,
+/*div,
 p {
-    /* border: 3px dotted gray; */
+     border: 3px dotted gray; 
 }
 
 div {
-    /* background-color: cadetblue; */
+     background-color: cadetblue; 
 }
 
 div div {
-    /* background-color: coral; */
+     background-color: coral; 
 }
 
 div div div {
-    /* background-color: bisque; */
+     background-color: bisque; 
 }
 
 div div div div {
-    /* background-color: darkolivegreen; */
-    /* background-color: #eee; */
+     background-color: darkolivegreen; 
+     background-color: #eee; 
 }
+*/
 
 @font-face {
     font-family: 'DIN';
-    /* src: url('/fonts/D-DIN.otf') format('opentype'); */
-    /* test cestiny: */
-    src: url('/fonts/651-font.otf') format('opentype');
+    src: local('XXXXXXXXXXX'), /* intentionally invalid — prevents system font matching */
+    url('/fonts/651-font.otf') format('opentype');
 }
 
 @font-face {
     font-family: 'DINCondensed';
-    src: url('/fonts/D-DINCondensed.otf') format('opentype');
+    src: local('XXXXXXXXXXX'), /* intentionally invalid — prevents system font matching */
+    url('/fonts/D-DINCondensed.otf') format('opentype');
 }
 
 :root {
@@ -64,27 +65,19 @@ body {
     /* background-color: burlywood; */
     background-color: var(--epd-white);
     color: var(--epd-black);
+    padding: 10px; /* creates the 10px inset */
+    box-sizing: border-box; /* ensures padding is included in the 480x800 size */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
+/* content inside just flows normally */
 div#visible-area {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    height: 780px;
-    width: 460px;
+    flex: 1 1 auto;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-}
-
-div.top-date-row {
-    display: flex;
-    flex-wrap: wrap;
-    /* for the case when the date or name is too long */
-    justify-content: space-between;
-
-    padding-bottom: 0.2em;
-    border-bottom: 2px solid var(--epd-black);
 }
 
 h3#calendar-title {
@@ -97,8 +90,6 @@ h3#calendar-title {
 div.calendar-container {
     flex: 1 1 auto;
     overflow: hidden;
-    /* Snap to whole line heights so no event row is cut in half */
-    line-height: 1.24em;
 }
 
 div.calendar-event-block {
@@ -118,17 +109,18 @@ div.calendar-event-block-title {
     color: var(--epd-white);
 }
 
-div.calendar-container>div.calendar-event-block:first-child,
-div.calendar-container>div.calendar-event-block:first-child>div.calendar-event-block-title:first-child {
-    margin-top: 0;
-}
-
 div.calendar-event-block-today div.calendar-event-block-title {
     background-color: var(--epd-red);
     color: var(--epd-white);
 }
 
-div.calendar-event-block-content {}
+div.calendar-container > div.calendar-event-block:first-child,
+div.calendar-container > div.calendar-event-block:first-child > div.calendar-event-block-title:first-child {
+    margin-top: 0;
+}
+
+div.calendar-event-block-content {
+}
 
 div.calendar-day-title {
     font-weight: bold;
@@ -142,17 +134,17 @@ div.calendar-event {
 div#overflow-indicator {
     text-align: center;
     margin-top: 0.25rem;
-/*    font-size: 0.85em;*/
-/*    opacity: 0.6;*/
+    /*    font-size: 0.85em;*/
+    /*    opacity: 0.6;*/
 }
 
-div.calendar-event-block-title+div.calendar-event-block-content>div.calendar-day-title {
+div.calendar-event-block-title + div.calendar-event-block-content > div.calendar-day-title {
     padding-top: 0.25rem;
 }
 
 div#bottom-row {
     display: flex;
-    flex: 0 0 auto;         /* do not grow or shrink — take only what it needs */
+    flex: 0 0 auto; /* do not grow or shrink — take only what it needs */
     width: 100%;
     justify-content: space-between;
     align-items: flex-end;

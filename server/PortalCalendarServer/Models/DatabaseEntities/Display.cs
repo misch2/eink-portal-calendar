@@ -4,13 +4,13 @@ public partial class Display
 {
     public int Id { get; set; }
 
-    public string Mac { get; set; } = null!;
+    public string? Mac { get; set; } = null;
 
-    public string Name { get; set; } = null!;
+    public string? Name { get; set; } = null;
 
-    public int Width { get; set; }
+    public int Width { get; set; } = 0;
 
-    public int Height { get; set; }
+    public int Height { get; set; } = 0;
 
     public int Rotation { get; set; }
 
