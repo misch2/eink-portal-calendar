@@ -34,14 +34,14 @@ jobs:
       # run: dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true -p:PublishTrimmed=true -o publish
 
       - name: Create ZIP
-        run: Compress-Archive -Path publish\* -DestinationPath portal-calendar-server-win-x64.zip
+        run: Compress-Archive -Path publish\* -DestinationPath portal-calendar-server-windows-x64-${{ github.event.release.tag_name }}.zip
 
       - name: Move ZIP to repo root
-        run: move portal-calendar-server-win-x64.zip ../..
+        run: move portal-calendar-server-windows-x64-${{ github.event.release.tag_name }}.zip ../..
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v2
         with:
-          files: portal-calendar-server-win-x64.zip
+          files: portal-calendar-server-windows-x64-${{ github.event.release.tag_name }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
