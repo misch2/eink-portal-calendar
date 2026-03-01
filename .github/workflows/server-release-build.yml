@@ -1,0 +1,42 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: Build .NET Server Windows Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+
+    # runs-on: ubuntu-latest
+    runs-on: self-hosted
+
+    defaults:
+      run:
+        working-directory: ./server/PortalCalendarServer
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Publish (Windows x64)
+      run: dotnet publish -c Release -r win-x64 --self-contained false -o publish
+
+    # Optional: single-file EXE
+    # run: dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true -p:PublishTrimmed=true -o publish
+
+    - name: Create ZIP
+      run: Compress-Archive -Path publish\* -DestinationPath portal-calendar-server-win-x64.zip
+
+    - name: Upload to Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: portal-calendar-server-win-x64.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
