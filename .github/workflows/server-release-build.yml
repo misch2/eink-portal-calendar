@@ -31,13 +31,13 @@ jobs:
         run: dotnet publish -c Release -r win-x64 --self-contained false -o publish
 
       # Optional: single-file EXE
-      # run: dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true -p:PublishTrimmed=true -o publish
+      # run: dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true -p:PublishTrimmed=true -o publish/
 
       - name: Create ZIP
-        run: Compress-Archive -Path publish\* -DestinationPath portal-calendar-server-windows-x64-${{ github.event.release.tag_name }}.zip
+        run: zip -r portal-calendar-server-windows-x64-${{ github.event.release.tag_name }}.zip publish/
 
       - name: Move ZIP to repo root
-        run: move portal-calendar-server-windows-x64-${{ github.event.release.tag_name }}.zip ../..
+        run: mv portal-calendar-server-windows-x64-${{ github.event.release.tag_name }}.zip ../..
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v2
