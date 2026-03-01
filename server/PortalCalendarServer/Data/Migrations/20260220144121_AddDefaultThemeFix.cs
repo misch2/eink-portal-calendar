@@ -10,15 +10,12 @@ namespace PortalCalendarServer.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // do this only if the default theme doesn't exist, otherwise it will cause a duplicate key error
-            if (!migrationBuilder.Sql("SELECT COUNT(*) FROM themes WHERE id = 1").Equals(0))
-            {
-
-                migrationBuilder.InsertData(
-                table: "themes",
-                columns: new[] { "id", "display_name", "file_name", "has_custom_config", "is_active", "is_default", "sort_order" },
-                values: new object[] { 1, "Default", "Default", false, true, true, 0 });
-            }
+            // INSERT OR IGNORE lets SQLite skip the insert if id=1 already exists
+            // (the broken C# if-guard previously used migrationBuilder.Sql() as a bool,
+            // which never worked and always caused a duplicate key on fresh databases)
+            migrationBuilder.Sql(
+                "INSERT OR IGNORE INTO \"themes\" (\"id\", \"display_name\", \"file_name\", \"has_custom_config\", \"is_active\", \"is_default\", \"sort_order\") " +
+                "VALUES (1, 'Default', 'Default', 0, 1, 1, 0);");
         }
 
         /// <inheritdoc />
