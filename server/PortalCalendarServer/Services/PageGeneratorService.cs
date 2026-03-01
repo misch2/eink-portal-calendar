@@ -63,12 +63,8 @@ public class PageGeneratorService
 
     public string DisplayImageName(Display display)
     {
-        var imagePath = _configuration["Paths:GeneratedImages"];
-        if (imagePath == null)
-        {
-            throw new InvalidOperationException("GeneratedImages path is not configured");
-        }
-        imagePath = imagePath.Replace("{ContentRootPath}", _environment.ContentRootPath);
+        var imagePath = _configuration["Paths:GeneratedImages"]
+            ?? throw new InvalidOperationException("GeneratedImages path is not configured");
 
         var ret = Path.Combine(imagePath, $"current_calendar_{display.Id}.png");
 

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using PortalCalendarServer.Controllers.ModelBinders;
 using PortalCalendarServer.Data;
+using PortalCalendarServer.Infrastructure;
 using PortalCalendarServer.Modules;
 using PortalCalendarServer.Modules.Builtin;
 using PortalCalendarServer.Services;
@@ -30,26 +31,28 @@ builder.Logging.AddSimpleConsole(options =>
     options.IncludeScopes = false;
 });
 
-// Configure the SQLite connection string to use an absolute path
-var rawConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-var templatePath = rawConnectionString!.Replace("Data Source=", "");
-var realPath = templatePath;
-realPath = realPath.Replace("{ContentRootPath}", builder.Environment.ContentRootPath);
-var absolutePath = Path.GetFullPath(realPath); // Ensure it's an absolute path
+// Compute well-known path roots for placeholder substitution
+var genericAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+var portalCalendarDataPath = Path.Combine(genericAppDataPath, "PortalCalendarServer");
+Directory.CreateDirectory(portalCalendarDataPath);
 
-var absoluteConnectionString = $"Data Source={absolutePath}";
+// Replace all placeholder tokens in configuration values loaded from appsettings*.json
+builder.Configuration.AddPlaceholderReplacements(new Dictionary<string, string>
+{
+    ["{DataPath}"] = portalCalendarDataPath,
+    ["{ContentRootPath}"] = builder.Environment.ContentRootPath,
+});
+
+// Configure the SQLite connection string to use an absolute path
+var defaultConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
 builder.Services.AddDbContext<CalendarContext>(options =>
     options.UseLazyLoadingProxies()
-    .UseSqlite(absoluteConnectionString));
+    .UseSqlite(defaultConnectionString));
 
 // Session store database (separate SQLite file)
-var rawSessionConnectionString = builder.Configuration.GetConnectionString("SessionConnection");
-var sessionPath = rawSessionConnectionString!.Replace("Data Source=", "")
-    .Replace("{ContentRootPath}", builder.Environment.ContentRootPath);
-var absoluteSessionPath = Path.GetFullPath(sessionPath);
-var absoluteSessionConnectionString = $"Data Source={absoluteSessionPath}";
+var sessionConnectionString = builder.Configuration.GetConnectionString("SessionConnection")!;
 builder.Services.AddDbContext<SessionContext>(options =>
-    options.UseSqlite(absoluteSessionConnectionString));
+    options.UseSqlite(sessionConnectionString));
 
 // Add services to the container
 // Support for both API and MVC controllers
@@ -122,9 +125,7 @@ builder.Services.AddHostedService(provider => provider.GetRequiredService<ImageR
 builder.Services.AddScoped<SqliteTicketStore>();
 
 // Persist data protection keys to disk so auth cookies survive app restarts
-var rawKeysPath = builder.Configuration.GetValue<string>("Paths:DataProtectionKeys");
-var keysDirectory = Path.GetFullPath(
-    rawKeysPath!.Replace("{ContentRootPath}", builder.Environment.ContentRootPath));
+var keysDirectory = builder.Configuration.GetValue<string>("Paths:DataProtectionKeys")!;
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(keysDirectory))
     .SetApplicationName("PortalCalendarServer");
@@ -219,15 +220,15 @@ using (var scope = app.Services.CreateScope())
 
     try
     {
-        var context = services.GetRequiredService<CalendarContext>();
-        var connectionString = context.Database.GetConnectionString();
-        logger.LogInformation("Starting database migrations on {absoluteConnectionString}", connectionString);
-        await context.Database.MigrateAsync();
+        var defaultContext = services.GetRequiredService<CalendarContext>();
+        var migrationDefaultConnectionString = defaultContext.Database.GetConnectionString();
+        logger.LogInformation("Starting database migrations on {absoluteConnectionString}", migrationDefaultConnectionString);
+        await defaultContext.Database.MigrateAsync();
         logger.LogInformation("Database migrations applied successfully");
 
         var sessionContext = services.GetRequiredService<SessionContext>();
-        var sessionConnectionString = sessionContext.Database.GetConnectionString();
-        logger.LogInformation("Starting session database migrations on {absoluteSessionConnectionString}", sessionConnectionString);
+        var migrationSessionConnectionString = sessionContext.Database.GetConnectionString();
+        logger.LogInformation("Starting session database migrations on {absoluteSessionConnectionString}", migrationSessionConnectionString);
         await sessionContext.Database.MigrateAsync();
         logger.LogInformation("Session database migrations applied successfully");
     }
