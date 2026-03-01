@@ -17,6 +17,9 @@ jobs:
       run:
         working-directory: ./server/PortalCalendarServer
 
+    permissions:
+      contents: write
+
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
