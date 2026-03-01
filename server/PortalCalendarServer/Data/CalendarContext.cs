@@ -94,7 +94,8 @@ public partial class CalendarContext : DbContext
 
             entity.HasIndex(e => e.Name, "IX_displays_name").IsUnique();
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Id)
+                .HasColumnName("id");
             entity.Property(e => e.BorderBottom).HasColumnName("border_bottom");
             entity.Property(e => e.BorderLeft).HasColumnName("border_left");
             entity.Property(e => e.BorderRight).HasColumnName("border_right");

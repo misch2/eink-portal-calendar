@@ -35,6 +35,12 @@ builder.Logging.AddSimpleConsole(options =>
 var genericAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 var portalCalendarDataPath = Path.Combine(genericAppDataPath, "PortalCalendarServer");
 Directory.CreateDirectory(portalCalendarDataPath);
+var subFolders = new[] { "database", "generated_images", "data-protection-keys" };
+foreach (var subFolder in subFolders)
+{
+    var fullPath = Path.Combine(portalCalendarDataPath, subFolder);
+    Directory.CreateDirectory(fullPath);
+}
 
 // Replace all placeholder tokens in configuration values loaded from appsettings*.json
 builder.Configuration.AddPlaceholderReplacements(new Dictionary<string, string>
