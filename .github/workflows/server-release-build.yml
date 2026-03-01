@@ -37,7 +37,7 @@ jobs:
         run: Compress-Archive -Path publish\* -DestinationPath portal-calendar-server-win-x64.zip
 
       - name: Move ZIP to repo root
-        run: move portal-calendar-server-win-x64.zip ../../..
+        run: move portal-calendar-server-win-x64.zip ../..
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v2
