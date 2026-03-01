@@ -7,9 +7,11 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: write
+
 jobs:
   build:
-
     # runs-on: ubuntu-latest
     runs-on: self-hosted
 
@@ -17,32 +19,29 @@ jobs:
       run:
         working-directory: ./server/PortalCalendarServer
 
-    permissions:
-      contents: write
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 9.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Publish (Windows x64)
-      run: dotnet publish -c Release -r win-x64 --self-contained false -o publish
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Publish (Windows x64)
+        run: dotnet publish -c Release -r win-x64 --self-contained false -o publish
 
-    # Optional: single-file EXE
-    # run: dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true -p:PublishTrimmed=true -o publish
+      # Optional: single-file EXE
+      # run: dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true -p:PublishTrimmed=true -o publish
 
-    - name: Create ZIP
-      run: Compress-Archive -Path publish\* -DestinationPath portal-calendar-server-win-x64.zip
+      - name: Create ZIP
+        run: Compress-Archive -Path publish\* -DestinationPath portal-calendar-server-win-x64.zip
 
-    - name: Move ZIP to repo root
-      run: move portal-calendar-server-win-x64.zip ../../..
+      - name: Move ZIP to repo root
+        run: move portal-calendar-server-win-x64.zip ../../..
 
-    - name: Upload to Release
-      uses: softprops/action-gh-release@v2
-      with:
-        files: portal-calendar-server-win-x64.zip
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: portal-calendar-server-win-x64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
