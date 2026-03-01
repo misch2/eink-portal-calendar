@@ -34,7 +34,7 @@ jobs:
       # run: dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true -p:PublishTrimmed=true -o publish/
 
       - name: Create ZIP
-        run: zip -r portal-calendar-server-windows-x64-${{ github.event.release.tag_name }}.zip publish/
+        run: cd publish && zip -r ../portal-calendar-server-windows-x64-${{ github.event.release.tag_name }}.zip .
 
       - name: Move ZIP to repo root
         run: mv portal-calendar-server-windows-x64-${{ github.event.release.tag_name }}.zip ../..
