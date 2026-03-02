@@ -32,6 +32,8 @@ public partial class CalendarContext : DbContext
 
     public virtual DbSet<Theme> Themes { get; set; }
 
+    public virtual DbSet<AppUser> Users { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Cache>(entity =>
@@ -50,7 +52,7 @@ public partial class CalendarContext : DbContext
                 .HasColumnType("DATETIME")
                 .HasColumnName("created_at");
             entity.Property(e => e.Creator)
-                .HasColumnType("VARCHAR(255)")
+                .HasColumnType("VARCHAR")
                 .HasColumnName("creator");
             entity.Property(e => e.Data).HasColumnName("data");
             entity.Property(e => e.ExpiresAt)
@@ -58,7 +60,7 @@ public partial class CalendarContext : DbContext
                 .HasColumnType("DATETIME")
                 .HasColumnName("expires_at");
             entity.Property(e => e.Key)
-                .HasColumnType("VARCHAR(255)")
+                .HasColumnType("VARCHAR")
                 .HasColumnName("key");
         });
 
@@ -330,6 +332,25 @@ public partial class CalendarContext : DbContext
                 new ColorPaletteLink { Id = 11, ColorVariantCode = "BWRY", EpdColorCode = "red" },
                 new ColorPaletteLink { Id = 12, ColorVariantCode = "BWRY", EpdColorCode = "yellow" }
             );
+        });
+
+        modelBuilder.Entity<AppUser>(entity =>
+        {
+            entity.ToTable("users");
+
+            entity.HasKey(e => e.Id);
+
+            entity.HasIndex(e => e.Username).IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Username)
+                .IsRequired()
+                .HasColumnType("VARCHAR")
+                .HasColumnName("username");
+            entity.Property(e => e.PasswordHash)
+                .IsRequired()
+                .HasColumnType("VARCHAR")
+                .HasColumnName("password_hash");
         });
 
         OnModelCreatingPartial(modelBuilder);

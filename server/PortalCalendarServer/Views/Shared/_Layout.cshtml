@@ -75,6 +75,16 @@
                         </a>
                     }
 
+                    <span class="nav-section-title mt-3">Administration</span>
+                    <a class="nav-link @(navLink == "users" ? "active" : "")"
+                       href="/users">
+                        Users
+                    </a>
+                    <a class="nav-link @(navLink == "change-password" ? "active" : "")"
+                       href="/change-password">
+                        Change password
+                    </a>
+
                 </nav>
 
                 @if (User.Identity?.IsAuthenticated == true)
@@ -173,8 +183,6 @@
                     </div>
                 </nav>
             }
-
-            <hr />
 
             @if (TempData["Message"] != null)
             {

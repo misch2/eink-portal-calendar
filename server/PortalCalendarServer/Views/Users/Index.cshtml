@@ -1,0 +1,93 @@
+@model List<PortalCalendarServer.Models.DatabaseEntities.AppUser>
+@using PortalCalendarServer.Controllers
+@using System.Security.Claims
+
+<h3>Users</h3>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Username</th>
+            <th scope="col">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            var isCurrentUser = User.FindFirstValue(ClaimTypes.NameIdentifier) == user.Id.ToString();
+            <tr>
+                <td>@user.Id</td>
+                <td>
+                    @user.Username
+                    @if (isCurrentUser)
+                    {
+                        <span class="badge bg-info">you</span>
+                    }
+                </td>
+                <td>
+                    @if (!isCurrentUser)
+                    {
+                        <button type="button" class="btn btn-danger btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#delete_user_modal"
+                                data-user-id="@user.Id"
+                                data-user-name="@user.Username">
+                            Delete
+                        </button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h4>Add New User</h4>
+<form method="post" action="/users/add" class="row g-3 mb-4" style="max-width: 500px;">
+    @Html.AntiForgeryToken()
+    <div class="col-12">
+        <label class="form-label">Username</label>
+        <input type="text" name="username" class="form-control" required />
+    </div>
+    <div class="col-12">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" required />
+    </div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Add User</button>
+    </div>
+</form>
+
+<!-- Delete User Modal -->
+<div class="modal fade" id="delete_user_modal" tabindex="-1">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete user</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Do you really want to delete user <b>"<span class="delete_modal_user_name"></span>"</b>?
+            </div>
+            <div class="modal-footer">
+                <form id="delete_user_form" method="post" action="">
+                    @Html.AntiForgeryToken()
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $('#delete_user_modal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var modal = $(this);
+            var userId = button.data('user-id');
+            modal.find('.delete_modal_user_name').text(button.data('user-name'));
+            modal.find('#delete_user_form').attr('action', '/users/delete/' + userId);
+        });
+    </script>
+}
