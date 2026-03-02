@@ -7,11 +7,17 @@ using System.Text.Json;
 
 namespace PortalCalendarServer.Services.Caches;
 
+public interface IDatabaseCacheService
+{
+    Task<T> GetOrSetAsync<T>(Func<Task<T>> callback, object cacheKeyParameters, CancellationToken cancellationToken = default);
+    Task ClearAsync(CancellationToken cancellationToken = default);
+}
+
 /// <summary>
 /// Database-backed cache service for long-term caching of integration data.
 /// Equivalent to PortalCalendar::DatabaseCache in Perl.
 /// </summary>
-public class DatabaseCacheService
+public class DatabaseCacheService : IDatabaseCacheService
 {
     private readonly CalendarContext _context;
     private readonly ILogger<DatabaseCacheService> _logger;

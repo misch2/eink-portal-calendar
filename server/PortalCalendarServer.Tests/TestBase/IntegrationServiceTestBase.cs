@@ -9,6 +9,19 @@ using System.Net;
 namespace PortalCalendarServer.Tests.TestBase;
 
 /// <summary>
+/// IDatabaseCacheService implementation that bypasses all caching and always invokes the callback.
+/// Used in tests so that no DB access or log noise is produced by the cache layer.
+/// </summary>
+internal sealed class PassThroughDatabaseCacheService : IDatabaseCacheService
+{
+    public Task<T> GetOrSetAsync<T>(Func<Task<T>> callback, object cacheKeyParameters, CancellationToken cancellationToken = default)
+        => callback();
+
+    public Task ClearAsync(CancellationToken cancellationToken = default)
+        => Task.CompletedTask;
+}
+
+/// <summary>
 /// Base class for integration service tests.
 /// Provides common setup for mocking dependencies like HttpClient, DbContext, and IMemoryCache.
 /// </summary>
@@ -53,12 +66,12 @@ public abstract class IntegrationServiceTestBase : IDisposable
         var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
         Logger = loggerFactory.CreateLogger(GetType());
 
-        // Setup mock database cache service factory
+        // Setup mock database cache service factory - returns a pass-through that never
+        // hits the database or produces log output, keeping other tests clean.
         MockDatabaseCacheServiceFactory = new Mock<IDatabaseCacheServiceFactory>();
-        var databaseCache = new DatabaseCacheService(Context, loggerFactory.CreateLogger<DatabaseCacheService>(), "", TimeSpan.Zero);
         MockDatabaseCacheServiceFactory
             .Setup(f => f.Create(It.IsAny<string>(), It.IsAny<TimeSpan>()))
-            .Returns(databaseCache);
+            .Returns(new PassThroughDatabaseCacheService());
 
         // Seed common test displays
         SeedCommonTestData();
