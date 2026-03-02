@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using PortalCalendarServer.Models.POCOs;
+using PortalCalendarServer.Services;
 using System.Security.Claims;
 
 namespace PortalCalendarServer.Controllers;
 
 [Controller]
-public class LoginController(IConfiguration configuration) : Controller
+public class LoginController(UserService userService) : Controller
 {
     [HttpGet("/login")]
     public IActionResult Login([FromQuery] string? returnUrl = null)
@@ -27,14 +27,14 @@ public class LoginController(IConfiguration configuration) : Controller
         [FromForm] string password,
         [FromQuery] string? returnUrl = null)
     {
-        var users = configuration.GetSection("Auth:Users").Get<List<AuthUser>>() ?? [];
-        var match = users.FirstOrDefault(u => u.Username == username && u.Password == password);
+        var user = await userService.AuthenticateAsync(username, password);
 
-        if (match != null)
+        if (user != null)
         {
             var claims = new List<Claim>
             {
-                new(ClaimTypes.Name, match.Username)
+                new(ClaimTypes.Name, user.Username),
+                new(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
             var identity = new ClaimsIdentity(claims, "Cookies");
             var principal = new ClaimsPrincipal(identity);
