@@ -27,7 +27,7 @@ jobs:
         env:
           DOTNET_CLI_DO_NOT_PROMPT_FOR_WORKLOAD_UPDATE: true          
       - name: Restore dependencies
-        run: dotnet restore --no-interactive
+        run: dotnet restore
       - name: Build
         run: dotnet build --no-restore
       - name: Test
