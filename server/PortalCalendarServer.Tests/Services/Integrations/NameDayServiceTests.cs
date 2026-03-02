@@ -11,24 +11,24 @@ public class NameDayServiceTests
     private readonly INameDayService _service = new NameDayService(new Mock<ILogger<NameDayService>>().Object);
 
     [Theory]
-    [InlineData(1, 1, "Novı rok")]
+    [InlineData(1, 1, "NovÃ½ rok")]
     [InlineData(1, 15, "Alice")]
-    [InlineData(2, 14, "Valentın")]
-    [InlineData(2, 29, "Horymír")] // Leap year
+    [InlineData(2, 14, "ValentÃ½n")]
+    [InlineData(2, 29, "HorymÃ­r")] // Leap year
     [InlineData(3, 8, "Gabriela")]
     [InlineData(3, 19, "Josef")]
     [InlineData(4, 27, "Jaroslav")]
-    [InlineData(5, 1, "Svátek práce")]
+    [InlineData(5, 1, "SvÃ¡tek prÃ¡ce")]
     [InlineData(6, 24, "Jan")]
-    [InlineData(7, 5, "Den slovanskıch vìrozvìstù Cyrila a Metodìje")]
+    [InlineData(7, 5, "Den slovanskÃ½ch vÄ›rozvÄ›stÅ¯ Cyrila a MetodÄ›je")]
     [InlineData(8, 15, "Hana")]
-    [InlineData(9, 28, "Václav")]
+    [InlineData(9, 28, "VÃ¡clav")]
     [InlineData(9, 29, "Michal")]
-    [InlineData(10, 28, "Alfréd")]
+    [InlineData(10, 28, "AlfrÃ©d")]
     [InlineData(11, 17, "Mahulena+Gertruda")]
-    [InlineData(12, 6, "Mikuláš")]
-    [InlineData(12, 24, "Adam a Eva, Štìdrı den")]
-    [InlineData(12, 25, "Boí hod vánoèní, 1.svátek vánoèní")]
+    [InlineData(12, 6, "MikulÃ¡Å¡")]
+    [InlineData(12, 24, "Adam a Eva, Å tÄ›drÃ½ den")]
+    [InlineData(12, 25, "BoÅ¾Ã­ hod vÃ¡noÄnÃ­, 1.svÃ¡tek vÃ¡noÄnÃ­")]
     [InlineData(12, 31, "Silvestr")]
     public void GetNameDay_ForVariousDates_ReturnsCorrectNames(int month, int day, string expectedName)
     {
@@ -42,10 +42,10 @@ public class NameDayServiceTests
     }
 
     [Theory]
-    [InlineData(2024, 1, 31, "Novı rok", "Marika")]
-    [InlineData(2024, 2, 29, null, "Horymír")]      // Leap year
-    [InlineData(2023, 2, 28, null, "Lumír")]        // Non-leap year
-    [InlineData(2024, 12, 31, "Mikuláš", "Silvestr")]
+    [InlineData(2024, 1, 31, "NovÃ½ rok", "Marika")]
+    [InlineData(2024, 2, 29, null, "HorymÃ­r")]      // Leap year
+    [InlineData(2023, 2, 28, null, "LumÃ­r")]        // Non-leap year
+    [InlineData(2024, 12, 31, "MikulÃ¡Å¡", "Silvestr")]
     public void GetNameDaysForMonth_ForVariousMonths_ReturnsCorrectEntries(
         int year, int month, int expectedCount, string? containsFirst, string? containsLast)
     {

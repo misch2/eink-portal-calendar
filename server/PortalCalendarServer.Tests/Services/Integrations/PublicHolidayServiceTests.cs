@@ -29,7 +29,7 @@ public class PublicHolidayServiceTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal("New Year's Day", result.Name);
-        Assert.Equal("Novı rok", result.LocalName);
+        Assert.Equal("NovÃ½ rok", result.LocalName);
         Assert.Equal(date.Date, result.Date.Date);
         Assert.Equal("CZ", result.CountryCode);
     }
@@ -46,7 +46,7 @@ public class PublicHolidayServiceTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal("Labour Day", result.Name);
-        Assert.Equal("Svátek práce", result.LocalName);
+        Assert.Equal("SvÃ¡tek prÃ¡ce", result.LocalName);
         Assert.Equal(date.Date, result.Date.Date);
     }
 
@@ -110,17 +110,17 @@ public class PublicHolidayServiceTests
     }
 
     [Theory]
-    [InlineData(1, 1, "New Year's Day", "Novı rok")]
-    [InlineData(5, 1, "Labour Day", "Svátek práce")]
-    [InlineData(5, 8, "Liberation Day", "Den vítìzství")]
-    [InlineData(7, 5, "Saints Cyril and Methodius Day", "Den slovanskıch vìrozvìstù Cyrila a Metodìje")]
-    [InlineData(7, 6, "Jan Hus Day", "Den upálení mistra Jana Husa")]
-    [InlineData(9, 28, "St. Wenceslas Day", "Den èeské státnosti")]
-    [InlineData(10, 28, "Independent Czechoslovak State Day", "Den vzniku samostatného èeskoslovenského státu")]
+    [InlineData(1, 1, "New Year's Day", "NovÃ½ rok")]
+    [InlineData(5, 1, "Labour Day", "SvÃ¡tek prÃ¡ce")]
+    [InlineData(5, 8, "Liberation Day", "Den vÃ­tÄ›zstvÃ­")]
+    [InlineData(7, 5, "Saints Cyril and Methodius Day", "Den slovanskÃ½ch vÄ›rozvÄ›stÅ¯ Cyrila a MetodÄ›je")]
+    [InlineData(7, 6, "Jan Hus Day", "Den upÃ¡lenÃ­ mistra Jana Husa")]
+    [InlineData(9, 28, "St. Wenceslas Day", "Den ÄeskÃ© stÃ¡tnosti")]
+    [InlineData(10, 28, "Independent Czechoslovak State Day", "Den vzniku samostatnÃ©ho ÄeskoslovenskÃ©ho stÃ¡tu")]
     [InlineData(11, 17, "Struggle for Freedom and Democracy Day", "Den boje za svobodu a demokracii")]
-    [InlineData(12, 24, "Christmas Eve", "Štìdrı den")]
-    [InlineData(12, 25, "Christmas Day", "1. svátek vánoèní")]
-    [InlineData(12, 26, "St. Stephen's Day", "2. svátek vánoèní")]
+    [InlineData(12, 24, "Christmas Eve", "Å tÄ›drÃ½ den")]
+    [InlineData(12, 25, "Christmas Day", "1. svÃ¡tek vÃ¡noÄnÃ­")]
+    [InlineData(12, 26, "St. Stephen's Day", "2. svÃ¡tek vÃ¡noÄnÃ­")]
     public void GetPublicHoliday_ForVariousHolidays_ReturnsCorrectInfo(
         int month, int day, string expectedName, string expectedLocalName)
     {
@@ -378,10 +378,10 @@ public class PublicHolidayServiceTests
         // Arrange - Test various holidays with Czech-specific characters
         var testCases = new[]
         {
-            (Month: 1, Day: 1, ExpectedChar: 'ı'),  // Novı rok
-            (Month: 5, Day: 1, ExpectedChar: 'á'),  // Svátek práce
-            (Month: 9, Day: 28, ExpectedChar: 'è'), // èeské
-            (Month: 12, Day: 24, ExpectedChar: 'ì')  // Štìdrı
+            (Month: 1, Day: 1, ExpectedChar: 'Ã½'),  // NovÃ½ rok
+            (Month: 5, Day: 1, ExpectedChar: 'Ã¡'),  // SvÃ¡tek prÃ¡ce
+            (Month: 9, Day: 28, ExpectedChar: 'Ä'), // ÄeskÃ©
+            (Month: 12, Day: 24, ExpectedChar: 'Ä›')  // Å tÄ›drÃ½
         };
 
         foreach (var (month, day, expectedChar) in testCases)
