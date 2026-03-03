@@ -110,9 +110,19 @@
             <div class="top-bar">
                 <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
                 <h1 class="mb-0">
-                    Portal calendar @if (activeCount > 0)
+                    @if (activeCount > 0)
                     {
                         <text>⏳</text>
+                    }
+                    @if (display != null)
+                    {
+                        <text>
+                            Selected display: @display.Name
+                        </text>
+                    }
+                    else if (!string.IsNullOrEmpty(ViewData["Title"]?.ToString()))
+                    {
+                        <text>@ViewData["Title"]</text>
                     }
                 </h1>
             </div>
@@ -128,7 +138,6 @@
                 var last_voltage = displayService.GetVoltage(display);
                 var battery_percent = displayService.GetBatteryPercent(display);
 
-                <h4>Selected display: @display.Name</h4>
 
                 if (!display.IsDefault())
                 {
@@ -166,20 +175,20 @@
 
                 <nav class="navbar navbar-expand navbar-light bg-light">
                     <div class="container-fluid">
-                            <ul class="navbar-nav">
-                                @if (!display.IsDefault())
-                                {
-                                    <li class="nav-item">
-                                        <a class="nav-link @(navLink == "home" ? "active" : "")" href="@Url.Action(nameof(UiController.Home), "Ui", new { displayNumber = display.Id })">Home</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link @(navLink == "compare" ? "active" : "")" href="@Url.Action(nameof(UiController.Test), "Ui", new { displayNumber = display.Id })">Test page</a>
-                                    </li>
-                                }
+                        <ul class="navbar-nav">
+                            @if (!display.IsDefault())
+                            {
                                 <li class="nav-item">
-                                    <a class="nav-link @(navLink == "config_ui" ? "active" : "")" href="@Url.Action(nameof(UiController.ConfigUiShow), "Ui", new { displayNumber = display.Id })">Config</a>
+                                    <a class="nav-link @(navLink == "home" ? "active" : "")" href="@Url.Action(nameof(UiController.Home), "Ui", new { displayNumber = display.Id })">Home</a>
                                 </li>
-                            </ul>
+                                <li class="nav-item">
+                                    <a class="nav-link @(navLink == "compare" ? "active" : "")" href="@Url.Action(nameof(UiController.Test), "Ui", new { displayNumber = display.Id })">Test page</a>
+                                </li>
+                            }
+                            <li class="nav-item">
+                                <a class="nav-link @(navLink == "config_ui" ? "active" : "")" href="@Url.Action(nameof(UiController.ConfigUiShow), "Ui", new { displayNumber = display.Id })">Config</a>
+                            </li>
+                        </ul>
                     </div>
                 </nav>
             }
