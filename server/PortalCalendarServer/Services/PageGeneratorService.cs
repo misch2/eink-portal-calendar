@@ -236,7 +236,7 @@ public class PageGeneratorService
         if (options.NumColors < 256)
         {
             // Convert to palette-based image with specified number of colors
-            var dithering = options?.DitheringType?.ToLower() switch
+            var dithering = options.DitheringType?.ToLower() switch
             {
                 "fs" => KnownDitherings.FloydSteinberg,
                 "at" => KnownDitherings.Atkinson,
@@ -286,7 +286,9 @@ public class PageGeneratorService
         }
         else if (options.Format == "epaper_native")
         {
-            var bitmap = _convertToEpaperFormat(img, display.ColorVariant);
+            var colorVariant = display.ColorVariant
+                ?? throw new InvalidOperationException("Display has no ColorVariant assigned");
+            var bitmap = _convertToEpaperFormat(img, colorVariant);
             var checksum = ComputeSHA1(bitmap);
 
             // Output format: "MM\n" + checksum + "\n" + bitmap data
@@ -318,7 +320,8 @@ public class PageGeneratorService
     {
         using var ms = new MemoryStream();
 
-        var displayType = colorVariant.DisplayType;
+        var displayType = colorVariant.DisplayType
+            ?? throw new InvalidOperationException("ColorVariant has no associated DisplayType");
 
         // Process each row of pixels
         img.ProcessPixelRows(accessor =>

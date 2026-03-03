@@ -45,7 +45,10 @@
 
 <body>
     @* Overlay image (disabled by default) *@
-    @if (false)
+    @{
+        var showOverlay = false;
+    }
+    @if (showOverlay)
     {
         <div id="overlay-image"></div>
     }

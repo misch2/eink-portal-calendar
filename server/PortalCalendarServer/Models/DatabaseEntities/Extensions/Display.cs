@@ -24,7 +24,7 @@ namespace PortalCalendarServer.Models.DatabaseEntities
             var map = ColorVariant?.EpdColors.Select(c => (key: c.Code, value: forPreview ? c.EpdPreviewHexValue : c.HexValue))
                 .ToDictionary(x => x.key, x => $"#{x.value}");
 
-            return map;
+            return map ?? new();
         }
 
         public List<Color> ColorPalette(bool forPreview)

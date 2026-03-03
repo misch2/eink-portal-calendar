@@ -17,7 +17,7 @@
 
     var calendarComponent = Model.Calendar;
     var calendar = calendarComponent?.GetDetails(Model.Display, Model.Date);
-    var nearestEvents = calendar?.NearestEvents;
+    var nearestEvents = calendar?.NearestEvents ?? [];
 
     // Helper class for grouping events
     var eventBlocks = new[]

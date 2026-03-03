@@ -84,11 +84,14 @@ public class IcalIntegrationService : IntegrationServiceBase
 
             var calEvents = calendar.Events;
 
-            logger.LogInformation("Calendar has {Count} total occurrences between {Start} and {End}", allOccurrences.Count, start, end);
+            logger.LogDebug("Calendar has {Count} total occurrences between {Start} and {End}", allOccurrences.Count, start, end);
 
             foreach (var occurrence in allOccurrences)
             {
-                var calEvent = (CalendarEvent)occurrence.Source;
+                if (occurrence.Source is not CalendarEvent calEvent)
+                {
+                    continue;
+                }
                 try
                 {
                     //logger.LogDebug("Occurrence: {Summary} at {Start} to {End}", calEvent.Summary, occurrence.Period.StartTime, occurrence.Period.EndTime);
@@ -99,9 +102,23 @@ public class IcalIntegrationService : IntegrationServiceBase
                         continue;
                     }
 
+                    var period = occurrence.Period;
+                    if (period == null)
+                    {
+                        logger.LogWarning("Occurrence has no period for event {Uid}: {Summary}", calEvent.Uid, calEvent.Summary);
+                        continue;
+                    }
+
                     // Check if event falls within date range
-                    var eventStart = occurrence.Period.StartTime.AsUtc;
-                    var eventEnd = occurrence.Period.EffectiveEndTime.AsUtc;
+                    var effectiveEndTime = period.EffectiveEndTime;
+                    if (effectiveEndTime == null)
+                    {
+                        logger.LogWarning("Occurrence has no effective end time for event {Uid}: {Summary}", calEvent.Uid, calEvent.Summary);
+                        continue;
+                    }
+
+                    var eventStart = period.StartTime.AsUtc;
+                    var eventEnd = effectiveEndTime.AsUtc;
 
                     // Skip events outside the range
                     if (eventEnd < start || eventStart > end)
@@ -120,7 +137,7 @@ public class IcalIntegrationService : IntegrationServiceBase
                     }
 
                     // Check if it's a recurring event
-                    var isRecurrent = calEvent.RecurrenceRules != null && calEvent.RecurrenceRules.Count > 0;
+                    var isRecurrent = calEvent.RecurrenceRules?.Count > 0;
 
                     var eventData = new CalendarEventData
                     {

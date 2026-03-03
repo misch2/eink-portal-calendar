@@ -30,7 +30,7 @@
     // Get weather data
     var weatherInfo = weatherComponent == null ? null : await weatherComponent.GetWeatherAsync(Model.Display, Model.Date);
     var currentWeather = weatherInfo?.CurrentWeather;
-    var forecast = weatherInfo?.Forecast;
+    var forecast = weatherInfo?.Forecast ?? [];
 
     var precipitationLimit = 0.5; // mm
 }
