@@ -1,0 +1,42 @@
+name: Build and test client (PlatformIO)
+
+on:
+  push:
+    # ignore pushes that belong to a PR as they are handled by the pull_request event
+    branches-ignore:
+      - '**'
+  pull_request:
+    branches: ["*"]
+
+jobs:
+  build:
+    runs-on: [self-hosted, linux, x64]
+
+    env:
+      PIP_ROOT_USER_ACTION: ignore
+      VENV_PATH: /runner/data/venv/platformio
+      PLATFORMIO_CORE_DIR: /runner/data/platformio
+
+#    defaults:
+#      run:
+#        working-directory: ./client
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Python virtual environment
+        run: |
+          python3 -m venv $VENV_PATH
+          echo "$VENV_PATH/bin" >> $GITHUB_PATH
+
+      - name: Install PlatformIO
+        run: pip install platformio
+
+      - name: Build
+        run: pio run -e example

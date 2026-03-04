@@ -5,14 +5,15 @@ name: Build and test .NET server
 
 on:
   push:
-    branches: ["master"]
+    # ignore pushes that belong to a PR as they are handled by the pull_request event
+    branches-ignore:
+      - '**'
   pull_request:
-    branches: ["master"]
+    branches: ["*"]
 
 jobs:
   build:
-    # runs-on: ubuntu-latest
-    runs-on: self-hosted
+    runs-on: [self-hosted, linux, x64]
 
     defaults:
       run:
