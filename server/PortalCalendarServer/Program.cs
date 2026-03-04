@@ -88,11 +88,21 @@ builder.Services.AddTransient<CachingHttpMessageHandler>();
 
 builder.Services.AddHttpClient(Options.DefaultName, client =>
 {
-    client.Timeout = TimeSpan.FromSeconds(10);
+    client.Timeout = TimeSpan.FromSeconds(10);  // FIXME make configurable via appsettings
     client.DefaultRequestHeaders.Add("User-Agent",
         "PortalCalendar/2.0 (github.com/misch2/eink-portal-calendar)");
 })
-.AddHttpMessageHandler<CachingHttpMessageHandler>();
+.AddHttpMessageHandler<CachingHttpMessageHandler>()
+.AddStandardResilienceHandler(options =>
+{
+    options.Retry.MaxRetryAttempts = 3;
+    options.Retry.BackoffType = Polly.DelayBackoffType.Linear;
+    options.Retry.UseJitter = true;
+
+    options.CircuitBreaker.FailureRatio = 0.5; // Open circuit if 50% of requests fail
+    options.CircuitBreaker.MinimumThroughput = 10; // Only consider breaking if at least 10 requests have been made
+})
+;
 
 // Register services
 builder.Services.AddSingleton<IWeb2PngService, Web2PngService>();
