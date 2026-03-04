@@ -190,6 +190,7 @@ public class Web2PngService : IWeb2PngService, IAsyncDisposable
                     {
                         WaitUntil = WaitUntilState.NetworkIdle,
                         Timeout = 30000 // 30 seconds timeout
+                        // FIXME make configurable via appconfig
                     });
 
                     // Wait for fonts and dynamic content to load
