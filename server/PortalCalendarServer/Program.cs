@@ -83,7 +83,6 @@ builder.Services.AddMemoryCache(options =>
 });
 
 // Configure HttpClient with caching
-builder.Services.AddHttpClient();
 builder.Services.AddTransient<CachingHttpMessageHandler>();
 
 builder.Services.AddHttpClient(Options.DefaultName, client =>
