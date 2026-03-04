@@ -5,14 +5,13 @@ name: Build and test .NET server
 
 on:
   push:
-    branches: ["master"]
+    branches: ["*"]
   pull_request:
-    branches: ["master"]
+    branches: ["*"]
 
 jobs:
   build:
-    # runs-on: ubuntu-latest
-    runs-on: self-hosted
+    runs-on: [self-hosted, linux, x64]
 
     defaults:
       run:
