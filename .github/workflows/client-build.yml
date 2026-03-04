@@ -1,4 +1,4 @@
-name: PlatformIO Build
+name: Build and test client (PlatformIO)
 
 on:
   push:
