@@ -2,7 +2,9 @@ name: Build and test client (PlatformIO)
 
 on:
   push:
-    branches: ["*"]
+    # ignore pushes that belong to a PR as they are handled by the pull_request event
+    branches-ignore:
+      - '**'
   pull_request:
     branches: ["*"]
 
