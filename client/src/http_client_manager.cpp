@@ -75,10 +75,11 @@ void HTTPClientManager::loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMod
   configLoadTime = millis();
 
   HTTPClient http;
-  String url = serverUrl + "/api/device/config?mac=" + WiFi.macAddress() + "&adc=" + String(voltageReader.getAdcRaw()) + "&v=" + String(voltageReader.getVoltageReal()) +
-               "&vmin=" + String(VOLTAGE_MIN) + "&vmax=" + String(VOLTAGE_MAX) + "&vlmin=" + String(VOLTAGE_LINEAR_MIN) +
-               "&vlmax=" + String(VOLTAGE_LINEAR_MAX) + "&w=" + String(DISPLAY_WIDTH) + "&h=" + String(DISPLAY_HEIGHT) + "&c=" + String(defined_color_type) +
-               "&fw=" + String(FIRMWARE_VERSION) + "&reset=" + systemInfo.resetReasonAsString() + "&wakeup=" + systemInfo.wakeupReasonAsString();
+  String url = serverUrl + "/api/device/config?mac=" + WiFi.macAddress() + "&adc=" + String(voltageReader.getAdcRaw()) +
+               "&v=" + String(voltageReader.getVoltageReal()) + "&vmin=" + String(VOLTAGE_MIN) + "&vmax=" + String(VOLTAGE_MAX) +
+               "&vlmin=" + String(VOLTAGE_LINEAR_MIN) + "&vlmax=" + String(VOLTAGE_LINEAR_MAX) + "&w=" + String(DISPLAY_WIDTH) +
+               "&h=" + String(DISPLAY_HEIGHT) + "&c=" + String(defined_color_type) + "&fw=" + String(FIRMWARE_VERSION) +
+               "&reset=" + systemInfo.resetReasonAsString() + "&wakeup=" + systemInfo.wakeupReasonAsString();
 
   logger.trace("URL: %s", url.c_str());
   http.begin(url);
@@ -134,11 +135,23 @@ void HTTPClientManager::loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMod
 void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int16_t y, int16_t w, int16_t h) {
   logger.debug("showRawBitmapFrom_HTTP(%s)", path);
 
+  // FIXME this definitely should go to the DisplayManager!
+
 #ifdef DISPLAY_TYPE_BW
+#define DISPLAY_SINGLE_BUFFER
+#endif
+#ifdef DISPLAY_TYPE_3C
+#define DISPLAY_DUAL_BUFFER
+#endif
+#ifdef DISPLAY_TYPE_4C
+#define DISPLAY_DUAL_BUFFER
+#endif
+
+#ifdef DISPLAY_SINGLE_BUFFER
   static unsigned char input_row_mono_buffer[DISPLAY_BUFFER_SIZE];
 #endif
 
-#ifdef DISPLAY_TYPE_3C
+#ifdef DISPLAY_DUAL_BUFFER
   static unsigned char input_row_mono_buffer[DISPLAY_BUFFER_SIZE];
   static unsigned char input_row_color_buffer[DISPLAY_BUFFER_SIZE];
 #endif
@@ -217,7 +230,7 @@ void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
       wdtManager.refresh();
       otaManager.loop();
 
-#ifdef DISPLAY_TYPE_BW
+#ifdef DISPLAY_SINGLE_BUFFER
       size_t bytesAvail = 0;
       int timeout = 100;  // 1 second timeout per row
       while (stream->available() < DISPLAY_BUFFER_SIZE && timeout > 0) {
@@ -242,7 +255,7 @@ void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
       }
 #endif
 
-#ifdef DISPLAY_TYPE_3C
+#ifdef DISPLAY_DUAL_BUFFER
       int timeout = 100;
       while (stream->available() < DISPLAY_BUFFER_SIZE * 2 && timeout > 0) {
         delay(10);

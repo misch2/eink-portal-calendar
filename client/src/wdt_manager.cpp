@@ -21,7 +21,7 @@ void WDTManager::init() {
 void WDTManager::refresh() {
 #ifdef USE_WDT
   if (enabled) {
-    logger.trace("(WDT ping)");
+    // logger.trace("(WDT ping)");
     esp_task_wdt_reset();
   }
 #endif
