@@ -194,6 +194,7 @@ public partial class CalendarContext : DbContext
                 new Theme { Id = 4, FileName = "WeatherForecast", DisplayName = "Weather", HasCustomConfig = true, SortOrder = 300 },
                 new Theme { Id = 5, FileName = "MultidayCalendar", DisplayName = "Multi-day Calendar", HasCustomConfig = true, SortOrder = 400 },
                 new Theme { Id = 6, FileName = "XKCD", DisplayName = "XKCD", HasCustomConfig = false, SortOrder = 500 },
+                new Theme { Id = 8, FileName = "WebImage", DisplayName = "Image from web", HasCustomConfig = true, SortOrder = 600 }, 
                 new Theme { Id = 7, FileName = "Test", DisplayName = "Test - Color Wheel", HasCustomConfig = false, SortOrder = 10000 }
              );
         });

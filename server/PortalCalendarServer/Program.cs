@@ -130,6 +130,7 @@ moduleRegistry.Register(new PublicHolidayModule());
 moduleRegistry.Register(new NameDayModule());
 moduleRegistry.Register(new PortalIconsModule());
 moduleRegistry.Register(new ThemeConfigStatusIndicatorsModule());
+moduleRegistry.Register(new WebImageModule());
 builder.Services.AddSingleton(moduleRegistry);
 
 // Register periodic background services
