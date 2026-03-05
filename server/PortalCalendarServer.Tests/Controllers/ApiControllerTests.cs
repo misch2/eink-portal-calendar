@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using PortalCalendarServer.Controllers;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.POCOs.Board;
+using PortalCalendarServer.Models.POCOs.Bitmap;
 using PortalCalendarServer.Services;
 using PortalCalendarServer.Services.Integrations;
 using PortalCalendarServer.Tests.TestBase;
@@ -15,27 +16,11 @@ public class ApiControllerTests : IntegrationServiceTestBase
 {
     private readonly Mock<IDisplayService> _mockDisplayService;
     private readonly Mock<IMqttService> _mockMqttService;
-    // BitmapService is a concrete class — use a spy via explicit ctor args
-    private readonly Mock<BitmapService> _mockBitmapService;
 
     public ApiControllerTests()
     {
         _mockDisplayService = new Mock<IDisplayService>();
         _mockMqttService = new Mock<IMqttService>();
-
-        _mockBitmapService = new Mock<BitmapService>(
-            _mockDisplayService.Object,
-            new Mock<PageGeneratorService>(
-                Mock.Of<ILogger<PageGeneratorService>>(),
-                Mock.Of<Microsoft.Extensions.Configuration.IConfiguration>(),
-                Mock.Of<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>(),
-                _mockDisplayService.Object,
-                Mock.Of<IWeb2PngService>(),
-                new InternalTokenService(),
-                Mock.Of<Microsoft.AspNetCore.Routing.LinkGenerator>(),
-                new Modules.ModuleRegistry(),
-                Mock.Of<IServiceProvider>()).Object,
-            Mock.Of<ILogger<BitmapService>>());
 
         // Default MQTT setup — most tests don't care about MQTT internals
         _mockMqttService
@@ -70,8 +55,7 @@ public class ApiControllerTests : IntegrationServiceTestBase
             pageGenService,
             themeService,
             Mock.Of<IWeb2PngService>(),
-            _mockMqttService.Object,
-            _mockBitmapService.Object);
+            _mockMqttService.Object);
 
         controller.ControllerContext = new ControllerContext
         {
@@ -143,8 +127,7 @@ public class ApiControllerTests : IntegrationServiceTestBase
             stubPageGenService,
             new ThemeService(emptyContext),
             Mock.Of<IWeb2PngService>(),
-            _mockMqttService.Object,
-            _mockBitmapService.Object);
+            _mockMqttService.Object);
 
         var result = controller.Health();
 
@@ -373,18 +356,18 @@ public class ApiControllerTests : IntegrationServiceTestBase
     }
 
     [Fact]
-    public async Task BitmapEpaper_WhenBitmapServiceReturnsNull_ReturnsNotFound()
+    public async Task BitmapEpaper_WhenBitmapServiceReturnsError_ReturnsNotFound()
     {
         var display = CreateTestDisplay(mac: "12:34:56:78:9a:bc");
         string? errMsg = "No rendered bitmap available for this display yet";
 
-        _mockBitmapService
-            .Setup(b => b.GetBitmap(
+        _mockDisplayService
+            .Setup(b => b.ConvertExistingRawBitmap(
                 display.Id,
-                out errMsg,
-                It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<double?>(),
-                It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<string>(), It.IsAny<bool>()))
-            .Returns((BitmapResult?)null);
+                It.IsAny<OutputFormat>(),
+                It.IsAny<int?>(), It.IsAny<string?>()
+                ))
+            .Returns(new BitmapResult { ErrorMessage = errMsg });
 
         var controller = CreateController();
         var result = await controller.BitmapEpaper(mac: display.Mac);

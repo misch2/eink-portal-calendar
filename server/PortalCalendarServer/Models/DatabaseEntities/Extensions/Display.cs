@@ -37,6 +37,7 @@ namespace PortalCalendarServer.Models.DatabaseEntities
             {
                 foreach (var hex in hexColors)
                 {
+                    // FIXME use .EpdPreviewColor here?
                     if (Color.TryParseHex(hex, out var color))
                     {
                         colors.Add(color);

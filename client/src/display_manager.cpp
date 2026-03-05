@@ -46,7 +46,7 @@ void DisplayManager::stop() {
 }
 
 void DisplayManager::displayText(String message, const GFXfont *font) {
-  display.setRotation(3);
+  display.setRotation(DISPLAY_ROTATION);
 
   if (font == nullptr) {
     font = &Open_Sans_Regular_24;

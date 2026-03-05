@@ -18,7 +18,7 @@
     </div>
     <div>
         @{
-            var bitmapUrl = Url.Action(nameof(UiController.Bitmap), "Ui", new { displayNumber = Model.Id, format = "png", rotate = 0, flip = "", preview_colors = true });
+            var bitmapUrl = Url.Action(nameof(UiController.Bitmap), "Ui", new { displayNumber = Model.Id });
             var rendered_ago = Model.RenderedAt.HasValue ? $"rendered {(DateTime.UtcNow - Model.RenderedAt.Value).TotalMinutes:F0} minutes ago" : "never rendered";
         }
         Calendar page <a href="@bitmapUrl">as IMG</a> with fixed size (@rendered_ago):

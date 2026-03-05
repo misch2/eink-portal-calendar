@@ -43,6 +43,6 @@
 
 <p class="row-fluid">
     <div class="preview-image">
-        <img src="@Url.Action(nameof(UiController.Bitmap), "Ui", new { displayNumber = Model.Id, format = "png", rotate = 0, flip = "", preview_colors = true })" alt="ePaper preview">
+        <img src="@Url.Action(nameof(UiController.Bitmap), "Ui", new { displayNumber = Model.Id })" alt="ePaper preview">
     </div>
 </p>

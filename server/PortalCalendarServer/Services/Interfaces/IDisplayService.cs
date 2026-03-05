@@ -1,5 +1,6 @@
 using PortalCalendarServer.Models.DatabaseEntities;
 using PortalCalendarServer.Models.POCOs.Board;
+using PortalCalendarServer.Models.POCOs.Bitmap;
 using System.Globalization;
 
 namespace PortalCalendarServer.Services;
@@ -134,4 +135,24 @@ public interface IDisplayService
     /// Get all available dithering types
     /// </summary>
     List<DitheringType> GetDitheringTypes();
+
+    /// <summary>
+    /// Generate bitmap image from a full color PNG snapshot
+    /// </summary>
+    BitmapResult ConvertExistingWebSnapshot(Display display, BitmapOptions options);
+
+    string RawWebSnapshotFileName(Display display);
+
+    /// <summary>
+    /// Builds a <see cref="BitmapResult"/> for the given display using the supplied rendering options.
+    /// Returns <c>null</c> when the display, its rendered bitmap, or its display-type information cannot be found;
+    /// the <paramref name="errorMessage"/> out-parameter will contain a human-readable reason in that case.
+    /// </summary>
+    BitmapResult ConvertExistingRawBitmap(
+        int displayId,
+        OutputFormat format,
+        int? rotate = null,
+        string? flip = null);
 }
+
+// FIXME ConvertExistingRawBitmap vs  ConvertExistingWebSnapshot ???
