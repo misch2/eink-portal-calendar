@@ -71,6 +71,16 @@ public class PageGeneratorService
         return ret;
     }
 
+    private string DisplayIntermediateImageName(Display display)
+    {
+        var imagePath = _configuration["Paths:GeneratedImages"]
+            ?? throw new InvalidOperationException("GeneratedImages path is not configured");
+
+        var ret = Path.Combine(imagePath, $"current_calendar_{display.Id}-intermediate.png");
+
+        return ret;
+    }
+
     public async Task GenerateImageFromWebAsync(Display display)
     {
         var baseUrl = _configuration["URLs:BaseURL"];
@@ -270,6 +280,10 @@ public class PageGeneratorService
             img.Mutate(x => x.Quantize(quantizer));
         }
 
+        // Save intermediate bitmap for debugging purposes
+        var intermediatePath = DisplayIntermediateImageName(display);
+        img.SaveAsPng(intermediatePath);
+
         // Generate output based on format
         if (options.Format == "png")
         {
@@ -286,6 +300,7 @@ public class PageGeneratorService
         }
         else if (options.Format == "epaper_native")
         {
+            // FIXME use a reasonable default! Or, ideally, in the setup and have this as non-nullable and required in BitmapOptions
             var colorVariant = display.ColorVariant
                 ?? throw new InvalidOperationException("Display has no ColorVariant assigned");
             var bitmap = _convertToEpaperFormat(img, colorVariant);
@@ -351,9 +366,10 @@ public class PageGeneratorService
                     }
                 }
             }
-            else if (displayType.Code == "3C") // FIXME constant
+            else if (displayType.Code == "3C" || displayType.Code == "4C") // FIXME constant
             {
                 // 3-color (black, white, red/yellow) - dual buffers per row
+                // 4-color (black, white, red, yellow) - dtto but with a different color bit interpretation
                 for (int y = 0; y < accessor.Height; y++)
                 {
                     var rowSpan = accessor.GetRowSpan(y);
@@ -365,21 +381,27 @@ public class PageGeneratorService
 
                     foreach (var pixel in rowSpan)
                     {
-                        // How the 3C display interprets the data:
-                        //
-                        // mono   color
-                        // buffer buffer
-                        // ----   -----
-                        //   0       1   = black #000
-                        //   1       1   = white #fff
-                        //   0       0   = red/yellow  #f00/#ff0
-                        //   1       0   = red/yellow  #f00/#ff0
+                        // The image is already quantized to the exact palette, so classify
+                        // each pixel by its RGB values into one of the known e-paper colors.
+                        var detectedColor = ClassifyPixelColor(pixel);
 
-                        // BW bit: 0 = black, 1 = white
-                        var bwBit = (byte)((pixel.R + pixel.G + pixel.B) / 3 > 128 ? 1 : 0);
-
-                        // Color bit: 0 = red/yellow (override), 1 = use B&W
-                        var colorBit = (byte)(pixel.R > 128 && pixel.B < 128 ? 0 : 1);  // FIXME this works for red but not yellow - need a better way to determine if it's a color pixel vs BW
+                        // Dual-buffer encoding:
+                        //   mono buffer | color buffer | result
+                        //   -----------   ------------   ----
+                        //       0              1         black
+                        //       1              1         white
+                        //       0              0         red   (or the single accent color for 3C)
+                        //       1              0         yellow (same as red/accent for 3C)
+                        var (bwBit, colorBit) = detectedColor switch
+                        {
+                            DetectedEpdColor.Black => ((byte)0, (byte)1),
+                            DetectedEpdColor.White => ((byte)1, (byte)1),
+                            DetectedEpdColor.Yellow => ((byte)0, (byte)0),
+                            DetectedEpdColor.Red => ((byte)1, (byte)0),
+                            _ => throw new InvalidOperationException(
+                                $"Unexpected pixel color ({pixel.R}, {pixel.G}, {pixel.B}) " +
+                                $"could not be classified for display type {displayType.Code}")
+                        };
 
                         byteBW = (byte)((byteBW << 1) | bwBit);
                         byteColor = (byte)((byteColor << 1) | colorBit);
@@ -414,6 +436,36 @@ public class PageGeneratorService
         });
 
         return ms.ToArray();
+    }
+
+    /// <summary>
+    /// Possible e-paper colors detected from a quantized pixel.
+    /// </summary>
+    private enum DetectedEpdColor { Black, White, Red, Yellow }
+
+    /// <summary>
+    /// Classify a quantized pixel into the closest e-paper color.
+    /// The image is expected to already be quantized to the exact palette
+    /// (black=#000, white=#FFF, red=#F00, yellow=#FF0), so simple
+    /// channel thresholds are sufficient to handle minor rounding.
+    /// </summary>
+    private static DetectedEpdColor ClassifyPixelColor(Rgba32 pixel)
+    {
+        bool rHigh = pixel.R > 128;
+        bool gHigh = pixel.G > 128;
+        bool bHigh = pixel.B > 128;
+
+        return (rHigh, gHigh, bHigh) switch
+        {
+            (false, false, false) => DetectedEpdColor.Black,   // #000000
+            (true, true, true) => DetectedEpdColor.White,   // #FFFFFF
+            (true, false, false) => DetectedEpdColor.Red,     // #FF0000
+            (true, true, false) => DetectedEpdColor.Yellow,  // #FFFF00
+            // Fallback: classify by luminance as black or white
+            _ => (pixel.R + pixel.G + pixel.B) / 3 > 128
+                ? DetectedEpdColor.White
+                : DetectedEpdColor.Black,
+        };
     }
 
     private static string ComputeSHA1(byte[] data)
