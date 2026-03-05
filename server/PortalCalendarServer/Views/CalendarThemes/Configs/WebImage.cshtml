@@ -1,0 +1,15 @@
+@model Display
+@using PortalCalendarServer.Models.DatabaseEntities
+@using PortalCalendarServer.Models.POCOs
+
+@await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+{
+    Display = Model, Key = "webimage_url", Label = "Image URL",
+        ColClass = "col-md-12", MarginClass = "mt-2"
+})
+
+@await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+{
+    Display = Model, Key = "webimage_cache_hours", Label = "Cache for N hours",
+        ColClass = "col-md-3"
+})

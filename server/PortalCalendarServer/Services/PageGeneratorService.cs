@@ -175,4 +175,5 @@ public class PageViewModel
     public PublicHolidayComponent? PublicHoliday => GetComponent<PublicHolidayComponent>("publicholiday");
     public NameDayComponent? NameDay => GetComponent<NameDayComponent>("nameday");
     public WeatherComponent? Weather => GetComponent<WeatherComponent>("metnoweather");
+    public WebImageComponent? WebImage => GetComponent<WebImageComponent>("webimage");
 }

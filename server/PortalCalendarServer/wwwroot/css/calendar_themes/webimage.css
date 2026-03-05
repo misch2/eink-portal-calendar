@@ -1,0 +1,35 @@
+/* resets */
+
+html,
+body,
+div,
+p {
+    padding: 0;
+    margin: 0;
+}
+
+:root {
+    /* only for VSCode editor, real colors are overriden in the template based on the purpose (preview or real EPD) */
+    --epd-black: #000;
+    --epd-white: #fff;
+    --epd-red: #f00;
+    --epd-yellow: #ff0;
+}
+
+body {
+    /* background-color: burlywood; */
+    background-color: var(--epd-white);
+    color: var(--epd-black);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* content inside just flows normally */
+div#visible-area {
+    flex: 1 1 auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
