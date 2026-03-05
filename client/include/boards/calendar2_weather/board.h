@@ -25,6 +25,7 @@
 #define DISPLAY_WIDTH 800
 #define DISPLAY_HEIGHT 480
 #define DISPLAY_TYPE_3C  // 3 colors - black, white and red/yellow
+#define DISPLAY_ROTATION 3  // vertical with connector on the right side
 #define BITMAP_BPP 1     // 1 bit per pixel (and two buffers, but that's up to the code)
 
 // #define REMAP_SPI

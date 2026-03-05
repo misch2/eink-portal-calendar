@@ -1,7 +1,5 @@
 #pragma once
 
-#include <Arduino.h>
-
 #define DEBUG
 
 #define USE_WIFI_MANAGER
@@ -29,6 +27,7 @@
 #define DISPLAY_WIDTH 800
 #define DISPLAY_HEIGHT 480
 #define DISPLAY_TYPE_BW  // black and white
+#define DISPLAY_ROTATION 3  // vertical with connector on the right side
 #define BITMAP_BPP 1
 
 // EzSBC ESP32 breakout board

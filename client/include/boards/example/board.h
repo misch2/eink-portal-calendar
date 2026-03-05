@@ -25,6 +25,8 @@
 #define DISPLAY_TYPE_BW  // black and white
 // #define DISPLAY_TYPE_3C // 3 colors - black, white and red/yellow
 
+#define DISPLAY_ROTATION 3  // vertical with connector on the right side
+
 // #define REMAP_SPI
 // #define SPI_BUS HSPI
 // #define PIN_SPI_CLK 18   // CLK
