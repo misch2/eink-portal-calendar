@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Playwright;
+using PortalCalendarServer.Models.POCOs.Bitmap;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.DatabaseEntities;
 using PortalCalendarServer.Services;
@@ -20,7 +23,6 @@ public class ApiController : ControllerBase
     private readonly PageGeneratorService _pageGeneratorService;
     private readonly ThemeService _themeService;
     private readonly IMqttService _mqttService;
-    private readonly BitmapService _bitmapService;
 
     public ApiController(
         CalendarContext context,
@@ -29,8 +31,7 @@ public class ApiController : ControllerBase
         PageGeneratorService pageGeneratorService,
         ThemeService themeService,
         IWeb2PngService web2PngService,
-        IMqttService mqttService,
-        BitmapService bitmapService)
+        IMqttService mqttService)
     {
         _context = context;
         _logger = logger;
@@ -38,7 +39,6 @@ public class ApiController : ControllerBase
         _pageGeneratorService = pageGeneratorService;
         _themeService = themeService;
         _mqttService = mqttService;
-        _bitmapService = bitmapService;
     }
 
     // Helper to get display by MAC address
@@ -262,7 +262,7 @@ public class ApiController : ControllerBase
         return Ok(response);
     }
 
-    // GET /api/device/bitmap/epaper?mac=XX:XX:XX:XX:XX:XX&web_format=false&preview_colors=false
+    // GET /api/device/bitmap/epaper?mac=XX:XX:XX:XX:XX:XX
     [HttpGet("device/bitmap/epaper")]
     [Tags("Device API")]
     public async Task<IActionResult> BitmapEpaper(
@@ -275,13 +275,28 @@ public class ApiController : ControllerBase
             return NotFound(new { error = "Display not found" });
         }
 
-        var bitmap = _bitmapService.GetBitmap(
-            display.Id, out var errorMessage,
-            null, null, null, null, null, "epaper_native", false);
+        // UI:
+        // FIXME 
+        //var bitmap = _bitmapService.GetStoredBitmap(
+        //    display.Id, out var errorMessage,
+        //    rotate, flip, gamma, colors, colormap_name, format);
 
-        if (bitmap == null)
+        //if (bitmap == null)
+        //{
+        //    return NotFound(errorMessage);
+        //}
+
+        // API:
+        var bitmap = _displayService.ConvertExistingRawBitmap(
+            displayId: display.Id,
+            format: OutputFormat.EpaperSpecific,
+            rotate: null,
+            flip: null
+            );
+
+        if (bitmap.ErrorMessage != null)
         {
-            return NotFound(new { error = errorMessage });
+            return NotFound(new { error = bitmap.ErrorMessage });
         }
 
         return this.ReturnBitmap(bitmap);

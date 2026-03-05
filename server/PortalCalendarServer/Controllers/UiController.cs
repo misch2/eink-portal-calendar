@@ -6,6 +6,7 @@ using PortalCalendarServer.Controllers.Filters;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.DatabaseEntities;
 using PortalCalendarServer.Models.POCOs;
+using PortalCalendarServer.Models.POCOs.Bitmap;
 using PortalCalendarServer.Modules;
 using PortalCalendarServer.Services;
 
@@ -20,8 +21,7 @@ public class UiController(
     PageGeneratorService pageGeneratorService,
     IDisplayService displayService,
     ThemeService themeService,
-    ModuleRegistry moduleRegistry,
-    BitmapService bitmapService
+    ModuleRegistry moduleRegistry
     ) : Controller, IAsyncResultFilter
 {
     private readonly CalendarContext _context = context;
@@ -31,7 +31,6 @@ public class UiController(
     private readonly IDisplayService _displayService = displayService;
     private readonly ThemeService _themeService = themeService;
     private readonly ModuleRegistry _moduleRegistry = moduleRegistry;
-    private readonly BitmapService _bitmapService = bitmapService;
 
     // GET /
     [HttpGet("/")]
@@ -115,7 +114,7 @@ public class UiController(
         return CalendarHtmlSpecificDate(displayNumber, DateTime.UtcNow, preview_colors, force_error);
     }
 
-    // GET /calendar/{display_number}/html/{date}
+    // GET /calendar/{displayNumber:int}/html/{date}
     [HttpGet("/calendar/{displayNumber:int}/html/{date}")]
     [Authorize("CookiesOrInternalToken")]
     [DisplayRenderErrorHandling]
@@ -405,15 +404,7 @@ public class UiController(
     // GET /calendar/{displayNumber}/bitmap?rotate=0&flip=&format=png&...
     [HttpGet("/calendar/{displayNumber:int}/bitmap")]
     public async Task<IActionResult> Bitmap(
-        int displayNumber,
-        [FromQuery] string? mac,
-        [FromQuery] int? rotate,
-        [FromQuery] string? flip,
-        [FromQuery] double? gamma = null,
-        [FromQuery] int? colors = null,
-        [FromQuery] string? colormap_name = null,
-        [FromQuery] string format = "png",
-        [FromQuery] bool preview_colors = false)
+        int displayNumber)
     {
         var display = _displayService.GetDisplayById(displayNumber);
         if (display == null)
@@ -421,13 +412,15 @@ public class UiController(
             return NotFound();
         }
 
-        var bitmap = _bitmapService.GetBitmap(
-            display.Id, out var errorMessage,
-            rotate, flip, gamma, colors, colormap_name, format, preview_colors);
-
-        if (bitmap == null)
+        var bitmap = _displayService.ConvertExistingRawBitmap(
+            displayId: display.Id,
+            format: OutputFormat.Png,
+            rotate: 0,
+            flip: ""
+        );
+        if (bitmap.ErrorMessage != null)
         {
-            return NotFound(errorMessage);
+            return NotFound(bitmap.ErrorMessage);
         }
 
         return await Task.FromResult(this.ReturnBitmap(bitmap));
