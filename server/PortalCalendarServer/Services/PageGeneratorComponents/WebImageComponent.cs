@@ -10,7 +10,6 @@ namespace PortalCalendarServer.Services.PageGeneratorComponents;
 /// 
 /// </summary>
 public class WebImageComponent(
-    ILogger<PageGeneratorService> logger,
     IDisplayService displayService,
     IHttpClientFactory httpClientFactory,
     IMemoryCache memoryCache,
@@ -22,8 +21,11 @@ public class WebImageComponent(
 
     public WebImageInfo GetDetails(Display display)
     {
-        var imageUrl = displayService.GetConfig(display, "webimage_url");
-        var cacheHours = int.Parse(displayService.GetConfig(display, "webimage_cache_hours"));
+        var imageUrl = displayService.GetConfig(display, "webimage_url")
+            ?? throw new InvalidOperationException("webimage_url configuration is not set for this display");
+        var cacheHoursStr = displayService.GetConfig(display, "webimage_cache_hours")
+            ?? throw new InvalidOperationException("webimage_cache_hours configuration is not set for this display");
+        var cacheHours = int.Parse(cacheHoursStr);
 
         var integrationService = new WebImageIntegrationService(
            loggerFactory.CreateLogger<WebImageIntegrationService>(),
