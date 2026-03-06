@@ -42,11 +42,65 @@ I also added a voltage monitorig because with ePaper it's not easily detactable 
 
 * Display:
   * [Waveshare 7.5" 800x480 ePaper B/W display](https://www.laskakit.cz/waveshare-7-5--640x384-epaper-raw-displej-bw/)
-  * or [WFT0583CZ61 7.5" 800x480 ePaper B/W/R display](https://www.aliexpress.com/item/1005005121813674.html?spm=a2g0o.order_list.order_list_main.5.1a521802F7URVo)
+  * or [WFT0583CZ61 7.5" 800x480 ePaper B/W/R display](https://www.aliexpress.com/item/1005005121813674.html)
+  * or [GDEM075F52 7.5" 4C 800x480 ePaper B/W/R/Y display](https://www.aliexpress.com/item/1005010179550278.html)
 * ESP32 board: [LaskaKit low power ePaper ESP32 board with USB-C and LiPol charging circuit](https://www.laskakit.cz/laskakit-espink-esp32-e-paper-pcb-antenna/)
 * Power source: [LiPol battery](https://www.laskakit.cz/geb-lipol-baterie-805060-3000mah-3-7v-jst-ph-2-0/)
 * ePaper frame: [3D printed frame by @MultiTricker](https://www.printables.com/model/541552-ramecek-pro-epaper-75-waveshare-i-good-display-v1/related)
 * And optionally: [FFC cable](https://www.laskakit.cz/ffc-fpc-nestineny-flexibilni-kabel-awm-20624-80c-60v-0-5mm-24pin--10cm/) + [FFC FPC connector](https://www.laskakit.cz/laskakit-e-paper-ffc-fpc-24pin-atapter/) for easier connection between the display and the ESP32 board
+
+## Installation
+
+### 1. Server (.NET)
+
+**Prerequisites:** [.NET 9 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
+
+Run the server:
+```
+dotnet PortalCalendarServer.dll
+```
+or run `PortalCalendarServer.exe` directly on Windows.
+
+By default the server listens on port **5000**. On first start it will create the SQLite database and run any pending migrations automatically.
+
+> **Note:** If you are upgrading from an older database (< 2.0 version) you may encounter a migration error. See `server/PortalCalendarServer/INSTALL.md` for the fix.
+
+Once running, open `http://<server-ip>:5000` in a browser to access the configuration UI where you can add displays, configure calendars, weather, and other integrations. Login to application is `admin` with password `changeme`.
+
+### 2. Client (ESP32)
+
+**Prerequisites:** [PlatformIO](https://platformio.org/) (VS Code extension or CLI)
+
+**Step 1 — Choose a board config.**  
+Copy the example that best matches your hardware from `client/include/boards/` (see the table of verified displays above). The available environments defined in `platformio.ini` are:
+
+| Environment | Board config folder |
+|---|---|
+| `example` | `client/include/boards/example/` |
+| `example2` | `client/include/boards/example_4color_GDEM075F52_and_laskakit_ESPink_v2.5/` |
+
+**Step 2 — Edit `board.h`.**  
+At minimum, set your server's IP address and port:
+```cpp
+#define CALENDAR_URL_HOST "192.168.x.x"   // IP of your server
+#define CALENDAR_URL_PORT 5000
+```
+Adjust the display type, pin assignments, and voltage settings as needed.
+
+**Step 3 — Flash the firmware.**
+```
+pio run -e example -t upload --upload-port COM3
+```
+Replace `example` with your chosen environment and `COM3` with the correct serial port (or `<hostname>.local` for OTA updates).
+
+**Step 4 — Configure WiFi.**  
+On first boot the ESP32 starts a WiFi access point `ESP-xxyyzz` (where xxyyzz is a part of the MAC address). Connect to it with your phone, enter your WiFi credentials in the captive portal, and save. The device will reboot and connect to your network.
+
+**Step 5 — Wait for the first image.**  
+After connecting to WiFi the ESP32 will contact the server and display the first generated image. This may take up to a minute as the server renders the bitmap on demand.
+
+**Troubleshooting:** Connect to the serial port at 115200 baud to see detailed log output from the ESP32.
+
 
 ## Sources:
  - The portal sign icons were downloaded from https://decalrobot.com/. 
@@ -81,17 +135,17 @@ Third-party assets bundled in this repository have their own licenses:
 
 All configurations use 7.5" 800x480 ePaper displays. Board configuration files are in `client/include/boards/`.
 
-| ePaper panel | Colors | GxEPD2 driver class | Controller | Example board config |
-|---|---|---|---|---|
-| GoodDisplay GDEW075T7 | B/W (2 colors) | `GxEPD2_750_T7` | GD7965 (EK79655) | `example/` |
-| GoodDisplay GDEW075Z08 (WFT0583CZ61 compatible) | B/W/R (3 colors) | `GxEPD2_750c_Z08` | GD7965 | `calendar2_weather/` |
-| GoodDisplay GDEM075F52 | B/W/R/Y (4 colors) | `GxEPD2_750c_GDEM075F52` | — | `example_4color_GDEM075F52_and_laskakit_ESPink_v2.5/` |
+| ePaper panel | Colors | GxEPD2 driver class | Example board config |
+|---|---|---|---|
+| GDEW075T7 | B/W (2 colors) | `GxEPD2_750_T7` | `example/` |
+| GDEW075Z08 (WFT0583CZ61 compatible) | B/W/R (3 colors) | `GxEPD2_750c_Z08` | `calendar2_weather/` |
+| GDEM075F52 | B/W/R/Y (4 colors) | `GxEPD2_750c_GDEM075F52` | `example_4color_GDEM075F52_and_laskakit_ESPink_v2.5/` |
 
 Verified ESP32 controller boards:
 
 | Board | Notes | Example board config |
 |---|---|---|
 | EzSBC ESP32 breakout board | Generic ESP32, custom SPI pin mapping | `calendar1_portal/` |
-| LaskaKit ESPink v2.5 | Low power ePaper ESP32 board with USB-C, LiPol charging, ePaper power control via GPIO 2 | `example_4color_GDEM075F52_and_laskakit_ESPink_v2.5/` |
+| [LaskaKit ESPink v2.5](https://github.com/LaskaKit/ESPink/blob/main/HW/old/ESPink_v2_5.pdf) ([version 3.5](https://www.laskakit.cz/laskakit-espink-esp32-e-paper-pcb-antenna/?variantId=12419) should work perfectly well too) | Low power ePaper ESP32 board with USB-C, LiPol charging, ePaper power control via GPIO 2 | `example_4color_GDEM075F52_and_laskakit_ESPink_v2.5/` |
 
 Color type support in the firmware: B/W (`DISPLAY_TYPE_BW`), 3-color (`DISPLAY_TYPE_3C`), and 4-color (`DISPLAY_TYPE_4C`).
