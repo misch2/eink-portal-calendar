@@ -567,11 +567,10 @@ public class DisplayService(
                     }
                 }
             }
-            else if (displayType.Code == "3C" || displayType.Code == "4C") // FIXME constant
+            else if (displayType.Code == "3C") // FIXME constant
             {
                 var epdColors = colorVariant.EpdColors.ToArray();
                 // 3-color (black, white, red/yellow) - dual buffers per row
-                // 4-color (black, white, red, yellow) - dtto but with a different color bit interpretation
                 for (int y = 0; y < accessor.Height; y++)
                 {
                     var rowSpan = accessor.GetRowSpan(y);
@@ -593,7 +592,7 @@ public class DisplayService(
                         //       0              1         black
                         //       1              1         white
                         //       0              0         red   (or the single accent color for 3C)
-                        //       1              0         yellow (same as red/accent for 3C)
+                        //       1              0         red   (or the single accent color for 3C)
                         byte bwBit = 0;
                         byte colorBit = 0;
                         if (detectedColor.IsWhite)
@@ -604,13 +603,9 @@ public class DisplayService(
                         {
                             bwBit = 0; colorBit = 1;
                         }
-                        else if (detectedColor.IsRed)
+                        else if (detectedColor.IsRed || detectedColor.IsYellow)
                         {
                             bwBit = 1; colorBit = 0;
-                        }
-                        else if (detectedColor.IsYellow)
-                        {
-                            bwBit = 0; colorBit = 0;
                         }
 
                         byteBW = (byte)((byteBW << 1) | bwBit);
@@ -639,6 +634,67 @@ public class DisplayService(
                     }
                 }
             }
+            else if (displayType.Code == "4C") // FIXME constant
+            {
+                var epdColors = colorVariant.EpdColors.ToArray();
+                // 4-color (black, white, red, yellow) - single buffer with 2 bits per pixel
+                for (int y = 0; y < accessor.Height; y++)
+                {
+                    var rowSpan = accessor.GetRowSpan(y);
+                    var bufferNative = new List<byte>();
+                    byte byteNative = 0;
+                    int bitCount = 0;
+
+                    foreach (var pixel in rowSpan)
+                    {
+                        // The image is already quantized to the exact palette, so classify
+                        // each pixel by its RGB values into one of the known e-paper colors.
+                        var detectedColor = ClassifyPixelColor(pixel, epdColors);
+
+                        // Dual-buffer encoding:
+                        //   mono buffer | color buffer | result
+                        //   -----------   ------------   ----
+                        //       0              1         black
+                        //       1              1         white
+                        //       0              0         red
+                        //       1              0         yellow
+                        byte bufferPixel = 0;
+                        if (detectedColor.IsWhite)
+                        {
+                            bufferPixel = 0b11;
+                        }
+                        else if (detectedColor.IsBlack)
+                        {
+                            bufferPixel = 0b01;
+                        }
+                        else if (detectedColor.IsRed)
+                        {
+                            bufferPixel = 0b00;
+                        }
+                        else if (detectedColor.IsYellow)
+                        {
+                            bufferPixel = 0b10;
+                        }
+
+                        byteNative = (byte)((byteNative << 2) | bufferPixel);
+                        bitCount += 2;
+
+                        if (bitCount == 8)
+                        {
+                            bufferNative.Add(byteNative);
+                            byteNative = 0;
+                            bitCount = 0;
+                        }
+                    }
+
+                    // Write native buffer for this row
+                    foreach (var b in bufferNative)
+                    {
+                        ms.WriteByte(b);
+                    }
+                }
+            }
+
             else
             {
                 throw new ArgumentException($"Unknown display type: {displayType}");
