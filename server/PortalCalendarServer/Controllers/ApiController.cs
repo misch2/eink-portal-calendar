@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Playwright;
-using PortalCalendarServer.Models.POCOs.Bitmap;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.DatabaseEntities;
+using PortalCalendarServer.Models.POCOs.Bitmap;
 using PortalCalendarServer.Services;
 using PortalCalendarServer.Services.Integrations;
 

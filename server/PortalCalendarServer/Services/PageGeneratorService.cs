@@ -1,7 +1,6 @@
 using PortalCalendarServer.Models.DatabaseEntities;
 using PortalCalendarServer.Modules;
 using PortalCalendarServer.Services.PageGeneratorComponents;
-using SixLabors.ImageSharp;
 
 namespace PortalCalendarServer.Services;
 

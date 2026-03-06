@@ -1,9 +1,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.DatabaseEntities;
-using PortalCalendarServer.Models.DTOs;
 using PortalCalendarServer.Services.Caches;
-using System.Text.Json;
 
 namespace PortalCalendarServer.Services.Integrations;
 

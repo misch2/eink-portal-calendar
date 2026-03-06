@@ -19,9 +19,9 @@
 
 #define DISPLAY_WIDTH 800
 #define DISPLAY_HEIGHT 480
-#define DISPLAY_TYPE_4C  // 4 colors - black, white, red, and yellow
+#define DISPLAY_TYPE_4C     // 4 colors - black, white, red, and yellow
+#define BITMAP_BPP 2        // 2 bit per pixel for DISPLAY_TYPE_4C
 #define DISPLAY_ROTATION 1  // vertical with connector on the left side
-#define BITMAP_BPP 1     // 1 bit per pixel (and two buffers, but that's up to the code)
 
 #define CS_PIN 5    // SS
 #define DC_PIN 17   // D/C
