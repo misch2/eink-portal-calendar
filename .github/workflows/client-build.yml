@@ -2,11 +2,12 @@ name: Build and test client (PlatformIO)
 
 on:
   push:
-    # ignore pushes that belong to a PR as they are handled by the pull_request event
-    branches-ignore:
-      - '**'
+    branches:
+      - main
+      - develop
   pull_request:
-    branches: ["*"]
+    branches:
+      - "*"
 
 jobs:
   build:
@@ -17,9 +18,9 @@ jobs:
       VENV_PATH: /runner/data/venv/platformio
       PLATFORMIO_CORE_DIR: /runner/data/platformio
 
-#    defaults:
-#      run:
-#        working-directory: ./client
+    #    defaults:
+    #      run:
+    #        working-directory: ./client
 
     steps:
       - uses: actions/checkout@v4

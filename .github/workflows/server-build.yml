@@ -5,11 +5,12 @@ name: Build and test .NET server
 
 on:
   push:
-    # ignore pushes that belong to a PR as they are handled by the pull_request event
-    branches-ignore:
-      - '**'
+    branches:
+      - main
+      - develop
   pull_request:
-    branches: ["*"]
+    branches:
+      - "*"
 
 jobs:
   build:
