@@ -1,15 +1,14 @@
 #pragma once
 
-#define DEBUG
+#include <Arduino.h>
 
-// #define USE_WDT
-// #define WDT_TIMEOUT 60  // seconds
+// #define DEBUG
 
 #define USE_WIFI_MANAGER
-#define HOSTNAME "esp32-a"
+#define HOSTNAME "epaper" /* host name for mDNS (in the .local domain) */
 
 #define CALENDAR_URL_HOST "192.168.0.100"
-#define CALENDAR_URL_PORT 8000
+#define CALENDAR_URL_PORT 5000
 
 // #define SYSLOG_SERVER "192.168.0.101"
 // #define SYSLOG_PORT 514
@@ -19,13 +18,16 @@
 // GDEW075T7 800x480, EK79655 (GD7965)
 #define DISPLAY_WIDTH 800
 #define DISPLAY_HEIGHT 480
-#define BITMAP_BPP 1
 
-// Uncomment correct color capability of your ePaper display
 #define DISPLAY_TYPE_BW  // black and white
-// #define DISPLAY_TYPE_3C // 3 colors - black, white and red/yellow
+#define BITMAP_BPP 1     // 1 bit per pixel for DISPLAY_TYPE_BW
 
 #define DISPLAY_ROTATION 3  // vertical with connector on the right side
+
+#define DISPLAY_CLASS_TYPE GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2>
+#define DISPLAY_CLASS_ARGUMENTS (GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN))
+
+// ePaper display driver
 
 // #define REMAP_SPI
 // #define SPI_BUS HSPI
@@ -34,7 +36,6 @@
 // #define PIN_SPI_MOSI 23  // DIN
 // #define PIN_SPI_SS -1    // unused (FIXME or the same as CS_PIN)
 
-// ePaper display driver pins
 #define CS_PIN 15
 #define DC_PIN 23
 #define RST_PIN 33
@@ -47,9 +48,6 @@
 #define VOLTAGE_MAX 6.0
 #define VOLTAGE_LINEAR_MIN VOLTAGE_MIN
 #define VOLTAGE_LINEAR_MAX VOLTAGE_MAX
-
-#define DISPLAY_CLASS_TYPE GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2>
-#define DISPLAY_CLASS_ARGUMENTS (GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN))
 
 inline void boardSpecificInit() {
   // power on the ePaper and I2C
