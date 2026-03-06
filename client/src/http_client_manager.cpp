@@ -138,22 +138,16 @@ void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
   // FIXME this definitely should go to the DisplayManager!
 
 #ifdef DISPLAY_TYPE_BW
-#define DISPLAY_SINGLE_BUFFER
-#endif
-#ifdef DISPLAY_TYPE_3C
-#define DISPLAY_DUAL_BUFFER
-#endif
-#ifdef DISPLAY_TYPE_4C
-#define DISPLAY_DUAL_BUFFER
-#endif
-
-#ifdef DISPLAY_SINGLE_BUFFER
   static unsigned char input_row_mono_buffer[DISPLAY_BUFFER_SIZE];
 #endif
 
-#ifdef DISPLAY_DUAL_BUFFER
+#ifdef DISPLAY_TYPE_3C
   static unsigned char input_row_mono_buffer[DISPLAY_BUFFER_SIZE];
   static unsigned char input_row_color_buffer[DISPLAY_BUFFER_SIZE];
+#endif
+
+#ifdef DISPLAY_TYPE_4C
+  static unsigned char input_row_native_buffer[DISPLAY_BUFFER_SIZE];
 #endif
 
   uint32_t startTime = millis();
@@ -230,7 +224,7 @@ void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
       wdtManager.refresh();
       otaManager.loop();
 
-#ifdef DISPLAY_SINGLE_BUFFER
+#ifdef DISPLAY_TYPE_BW
       size_t bytesAvail = 0;
       int timeout = 100;  // 1 second timeout per row
       while (stream->available() < DISPLAY_BUFFER_SIZE && timeout > 0) {
@@ -255,7 +249,7 @@ void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
       }
 #endif
 
-#ifdef DISPLAY_DUAL_BUFFER
+#ifdef DISPLAY_TYPE_3C
       int timeout = 100;
       while (stream->available() < DISPLAY_BUFFER_SIZE * 2 && timeout > 0) {
         delay(10);
@@ -280,6 +274,32 @@ void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
         break;
       }
 #endif
+
+#ifdef DISPLAY_TYPE_4C
+      int timeout = 100;
+      while (stream->available() < DISPLAY_BUFFER_SIZE && timeout > 0) {
+        delay(10);
+        timeout--;
+      }
+
+      if (stream->available() >= DISPLAY_BUFFER_SIZE) {
+        size_t read = stream->readBytes(input_row_native_buffer, DISPLAY_BUFFER_SIZE);
+
+        if (read == DISPLAY_BUFFER_SIZE) {
+          display.writeNative(input_row_native_buffer, nullptr, x, y + row, w, 1, false, false, false);
+          totalBytesRead += read;
+        } else {
+          logger.debug("WARNING: Read %d bytes, expected %d on row %d", read, DISPLAY_BUFFER_SIZE, row);
+          readError = true;
+          break;
+        }
+      } else {
+        logger.debug("WARNING: Timeout waiting for data on row %d", row);
+        readError = true;
+        break;
+      }
+#endif
+
     }
 
     http.end();
