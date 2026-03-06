@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   append-notice:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64]
     steps:
       - name: Append GPLv3 notice to release body
         uses: actions/github-script@v7
@@ -25,9 +25,7 @@ jobs:
               '',
               '---',
               '',
-              '> **License notice:** The compiled firmware binary incorporates',
-              '> [GxEPD2](https://github.com/ZinggJM/GxEPD2) (GPLv3) and is therefore',
-              '> distributed under the [GNU General Public License v3](https://www.gnu.org/licenses/gpl-3.0.html).',
+              '> **License notice:** The compiled firmware binary incorporates [GxEPD2](https://github.com/ZinggJM/GxEPD2) (GPLv3) and is therefore distributed under the [GNU General Public License v3](https://www.gnu.org/licenses/gpl-3.0.html).',
               '> Source code is available in this repository.',
             ].join('\n');
 
