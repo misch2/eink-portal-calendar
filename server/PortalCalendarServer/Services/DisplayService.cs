@@ -542,6 +542,9 @@ public class DisplayService(
         // Process each row of pixels
         img.ProcessPixelRows(accessor =>
         {
+            // The image is already quantized to the exact palette, so classify
+            // each pixel by its RGB values into one of the known e-paper colors.
+
             if (displayType.Code == "BW") // FIXME constant
             {
                 // 1-bit black and white, 8 pixels per byte
@@ -569,8 +572,8 @@ public class DisplayService(
             }
             else if (displayType.Code == "3C") // FIXME constant
             {
-                var epdColors = colorVariant.EpdColors.ToArray();
                 // 3-color (black, white, red/yellow) - dual buffers per row
+                var epdColors = colorVariant.EpdColors.ToArray();
                 for (int y = 0; y < accessor.Height; y++)
                 {
                     var rowSpan = accessor.GetRowSpan(y);
@@ -582,8 +585,6 @@ public class DisplayService(
 
                     foreach (var pixel in rowSpan)
                     {
-                        // The image is already quantized to the exact palette, so classify
-                        // each pixel by its RGB values into one of the known e-paper colors.
                         var detectedColor = ClassifyPixelColor(pixel, epdColors);
 
                         // Dual-buffer encoding:
@@ -636,8 +637,8 @@ public class DisplayService(
             }
             else if (displayType.Code == "4C") // FIXME constant
             {
-                var epdColors = colorVariant.EpdColors.ToArray();
                 // 4-color (black, white, red, yellow) - single buffer with 2 bits per pixel
+                var epdColors = colorVariant.EpdColors.ToArray();
                 for (int y = 0; y < accessor.Height; y++)
                 {
                     var rowSpan = accessor.GetRowSpan(y);
@@ -647,33 +648,26 @@ public class DisplayService(
 
                     foreach (var pixel in rowSpan)
                     {
-                        // The image is already quantized to the exact palette, so classify
-                        // each pixel by its RGB values into one of the known e-paper colors.
                         var detectedColor = ClassifyPixelColor(pixel, epdColors);
-
-                        // Dual-buffer encoding:
-                        //   mono buffer | color buffer | result
-                        //   -----------   ------------   ----
-                        //       0              1         black
-                        //       1              1         white
-                        //       0              0         red
-                        //       1              0         yellow
                         byte bufferPixel = 0;
+            //if (!(color_data & 0x80)) out_data |= black_data & 0x80 ? 0x03 : 0x02; // red or yellow
+            //else out_data |= black_data & 0x80 ? 0x01 : 0x00; // white or black
+
                         if (detectedColor.IsWhite)
-                        {
-                            bufferPixel = 0b11;
-                        }
-                        else if (detectedColor.IsBlack)
                         {
                             bufferPixel = 0b01;
                         }
-                        else if (detectedColor.IsRed)
+                        else if (detectedColor.IsBlack)
                         {
                             bufferPixel = 0b00;
                         }
-                        else if (detectedColor.IsYellow)
+                        else if (detectedColor.IsRed)
                         {
                             bufferPixel = 0b10;
+                        }
+                        else if (detectedColor.IsYellow)
+                        {
+                            bufferPixel = 0b11;
                         }
 
                         byteNative = (byte)((byteNative << 2) | bufferPixel);
