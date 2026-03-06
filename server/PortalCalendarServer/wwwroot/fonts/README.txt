@@ -1,14 +1,10 @@
 
-See the @font-face declaration in server/public/css/calendar.css for list of fonts that need to be available in this folder.
+See the @font-face declaration CSS files for list of fonts that need to be available in this folder.
 
-So far it's DIN Regular and DIN Condensed only. And as the Condensed variant is used only for the large digits, it doesn't need to contain any other glyphs than numerals.
+The fonts have open licenses and have been downloaded from these sources:
 
+* d-din/ - https://www.fontsquirrel.com/fonts/d-din (SIL Open Font License 1.1)
 
-The fonts here were downloaded from these sources:
+gidole/ - https://github.com/larsenwork/Gidole (OFL + MIT License)
 
- - D-DIN-BOLD.otf, D-DIN.otf, D-DINCondensed.otf
-   https://www.fontsquirrel.com/fonts/d-din (ASCII and basic accents only)
-
- - 651-font.otf
-   https://cs.fontsisland.com/font/din-pro (full Czech set of characters)
-
+clear-sans/ - https://www.fontsquirrel.com/fonts/clear-sans (Apache License 2.0)

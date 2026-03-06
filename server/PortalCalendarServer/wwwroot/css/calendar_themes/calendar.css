@@ -27,33 +27,22 @@ div {
     /* background-color: cadetblue; */
 }
 
-div div {
-    /* background-color: coral; */
-}
+    div div {
+        /* background-color: coral; */
+    }
 
-div div div {
-    /* background-color: bisque; */
-}
+        div div div {
+            /* background-color: bisque; */
+        }
 
-div div div div {
-    /* background-color: darkolivegreen; */
-}
-
-@font-face {
-    font-family: 'DIN';
-    src: local('XXXXXXXXXXX'),  /* intentionally invalid — prevents system font matching */
-         url('/fonts/651-font.otf') format('opentype');
-}
-
-@font-face {
-    font-family: 'DINCondensed';
-    src: local('XXXXXXXXXXX'),  /* intentionally invalid — prevents system font matching */
-         url('/fonts/D-DINCondensed.otf') format('opentype');
-}
+            div div div div {
+                /* background-color: darkolivegreen; */
+            }
 
 body {
     /* background-color: burlywood; */
-    font-family: 'DIN';
+    font-family: 'Gidole';
+    letter-spacing: 0.02em;
     background-color: var(--epd-white);
     color: var(--epd-black);
 }
@@ -89,7 +78,8 @@ div#overlay-image {
 div.top-month-header {
     padding-bottom: 0.2em;
     margin-bottom: 0.2em;
-    font-family: 'DIN';
+    font-family: 'Gidole';
+    letter-spacing: 0.02em;
     font-size: 1rem;
     padding-bottom: 0.1rem;
     border-bottom: 2px solid var(--epd-black);
@@ -105,15 +95,16 @@ div.day-number-big {
 }
 
 div.day-of-week-block {
-    font-family: 'DIN';
+    font-family: 'Gidole';
+    letter-spacing: 0.02em;
     font-size: 1rem;
 }
 
-div.day-of-week-block div.separator {
-    margin-top: 0.3rem;
-    border-bottom: 2px solid var(--epd-black);
-    margin-bottom: 0.3rem;
-}
+    div.day-of-week-block div.separator {
+        margin-top: 0.3rem;
+        border-bottom: 2px solid var(--epd-black);
+        margin-bottom: 0.3rem;
+    }
 
 div.dow-number-and-name {
     display: flex;
@@ -126,11 +117,11 @@ div.bunch-of-bars {
     gap: 6px;
 }
 
-div.bunch-of-bars div.bar {
-    width: 6px;
-    height: 35px;
-    background-color: var(--epd-black);
-}
+    div.bunch-of-bars div.bar {
+        width: 6px;
+        height: 35px;
+        background-color: var(--epd-black);
+    }
 
 div.icons-container {
     display: flex;
@@ -165,11 +156,11 @@ div.calendar-container {
     margin-top: 0.8rem;
 }
 
-div.calendar-container div {
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-}
+    div.calendar-container div {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
 
 img#aperture-logo {
     position: absolute;
