@@ -650,8 +650,8 @@ public class DisplayService(
                     {
                         var detectedColor = ClassifyPixelColor(pixel, epdColors);
                         byte bufferPixel = 0;
-            //if (!(color_data & 0x80)) out_data |= black_data & 0x80 ? 0x03 : 0x02; // red or yellow
-            //else out_data |= black_data & 0x80 ? 0x01 : 0x00; // white or black
+                        //if (!(color_data & 0x80)) out_data |= black_data & 0x80 ? 0x03 : 0x02; // red or yellow
+                        //else out_data |= black_data & 0x80 ? 0x01 : 0x00; // white or black
 
                         if (detectedColor.IsWhite)
                         {
@@ -663,11 +663,11 @@ public class DisplayService(
                         }
                         else if (detectedColor.IsRed)
                         {
-                            bufferPixel = 0b10;
+                            bufferPixel = 0b11;
                         }
                         else if (detectedColor.IsYellow)
                         {
-                            bufferPixel = 0b11;
+                            bufferPixel = 0b10;
                         }
 
                         byteNative = (byte)((byteNative << 2) | bufferPixel);
