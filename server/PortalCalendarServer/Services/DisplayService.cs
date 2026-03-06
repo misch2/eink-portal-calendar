@@ -8,9 +8,9 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Processors.Quantization;
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
-using System.Globalization;
 
 namespace PortalCalendarServer.Services;
 
