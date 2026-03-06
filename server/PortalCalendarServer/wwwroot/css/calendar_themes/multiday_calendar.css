@@ -4,7 +4,8 @@ html,
 body {
     /*     background-color: aqua; */
     font-size: 18pt;
-    font-family: 'DIN';
+    font-family: 'Gidole';
+    letter-spacing: 0.02em;
 }
 
 html,
@@ -40,18 +41,6 @@ div div div div {
      background-color: #eee; 
 }
 */
-
-@font-face {
-    font-family: 'DIN';
-    src: local('XXXXXXXXXXX'), /* intentionally invalid — prevents system font matching */
-    url('/fonts/651-font.otf') format('opentype');
-}
-
-@font-face {
-    font-family: 'DINCondensed';
-    src: local('XXXXXXXXXXX'), /* intentionally invalid — prevents system font matching */
-    url('/fonts/D-DINCondensed.otf') format('opentype');
-}
 
 :root {
     /* only for VSCode editor, real colors are overriden in the template based on the purpose (preview or real EPD) */

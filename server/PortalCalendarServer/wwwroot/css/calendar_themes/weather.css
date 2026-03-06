@@ -39,18 +39,6 @@ div div div div {
     /* background-color: #eee; */
 }
 
-@font-face {
-    font-family: 'DIN';
-    src: local('XXXXXXXXXXX'),
-         url('/fonts/651-font.otf') format('opentype');
-}
-
-@font-face {
-    font-family: 'DINCondensed';
-    src: local('XXXXXXXXXXX'),
-         url('/fonts/D-DINCondensed.otf') format('opentype');
-}
-
 :root {
     /* only for VSCode editor, real colors are overriden in the template based on the purpose (preview or real EPD) */
     --epd-black: #000;
@@ -61,7 +49,8 @@ div div div div {
 
 body {
     /* background-color: burlywood; */
-    font-family: 'DIN';
+    font-family: 'Gidole';
+    letter-spacing: 0.02em;
     background-color: var(--epd-white);
     color: var(--epd-black);
 }

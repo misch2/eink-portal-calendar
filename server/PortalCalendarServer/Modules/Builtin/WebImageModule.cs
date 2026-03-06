@@ -25,13 +25,12 @@ public class WebImageModule : IPortalModule
     public object? CreatePageGeneratorComponent(IServiceProvider services, Display display, DateTime date)
     {
         var context = services.GetRequiredService<CalendarContext>();
-        var logger = services.GetRequiredService<ILogger<PageGeneratorService>>();
         var displayService = services.GetRequiredService<IDisplayService>();
         var httpClientFactory = services.GetRequiredService<IHttpClientFactory>();
         var memoryCache = services.GetRequiredService<IMemoryCache>();
         var databaseCacheFactory = services.GetRequiredService<IDatabaseCacheServiceFactory>();
         var loggerFactory = services.GetRequiredService<ILoggerFactory>();
 
-        return new WebImageComponent(logger, displayService, httpClientFactory, memoryCache, databaseCacheFactory, context, loggerFactory);
+        return new WebImageComponent(displayService, httpClientFactory, memoryCache, databaseCacheFactory, context, loggerFactory);
     }
 }

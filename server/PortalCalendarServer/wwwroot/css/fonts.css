@@ -1,0 +1,44 @@
+@font-face {
+    font-family: 'DIN';
+    src: local('XXXXXXXXXXX'), /* intentionally invalid — prevents system font matching */
+    url('/fonts/gidole/Gidole-Regular.ttf') format('opentype');
+    /*    url('/fonts/clear-sans/ClearSans-Light.ttf') format('opentype');*/
+    /* Vertical metric overrides — adjust these percentages to tweak line height at the font level */
+    /* ascent-override: 105%; */ /* increase to add space above the baseline */
+    /* descent-override: 25%; */ /* increase to add space below the baseline */
+    /* line-gap-override: 10%; */ /* adds extra gap between lines */
+}
+
+@font-face {
+    font-family: 'Gidole';
+    src: local('XXXXXXXXXXX'), /* intentionally invalid — prevents system font matching */
+    url('/fonts/gidole/Gidole-Regular.ttf') format('opentype');
+    /*    url('/fonts/clear-sans/ClearSans-Light.ttf') format('opentype');*/
+    /* Vertical metric overrides — adjust these percentages to tweak line height at the font level */
+    /* ascent-override: 105%; */ /* increase to add space above the baseline */
+    /* descent-override: 25%; */ /* increase to add space below the baseline */
+    /* line-gap-override: 10%; */ /* adds extra gap between lines */
+    line-gap-override: 10%;
+}
+
+@font-face {
+    font-family: 'DINCondensed';
+    src: local('XXXXXXXXXXX'), /* intentionally invalid — prevents system font matching */
+    /* basic ASCII characters only */
+    url('/fonts/d-din/D-DINCondensed.otf') format('opentype');
+    /* Vertical metric overrides — adjust these percentages to tweak line height at the font level */
+    /* ascent-override: 105%; */
+    /* descent-override: 25%; */
+    /* line-gap-override: 10%; */
+}
+
+/*
+    Note: letter-spacing and line-height cannot be set in @font-face.
+    Apply them on the elements that use the font, e.g.:
+
+    body {
+        font-family: 'DIN';
+        letter-spacing: 0.05em;
+        line-height: 1.4;
+    }
+*/

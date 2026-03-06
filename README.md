@@ -52,13 +52,30 @@ I also added a voltage monitorig because with ePaper it's not easily detactable 
  - The portal sign icons were downloaded from https://decalrobot.com/. 
    - Icons in `server/PortalCalendarServer/wwwroot/images/portal_icons` were extracted manually from the source image
  - Fonts in `server/PortalCalendarServer/wwwroot/fonts` were downloaded from:
-   - D-DIN-BOLD.otf, D-DIN.otf, D-DINCondensed.otf
-     https://www.fontsquirrel.com/fonts/d-din (ASCII and basic accents only)
-   - 651-font.otf
-     https://cs.fontsisland.com/font/din-pro (full Czech set of characters)
+   - `d-din/` — https://www.fontsquirrel.com/fonts/d-din (SIL Open Font License 1.1)
+   - `gidole/` — https://github.com/larsenwork/Gidole (OFL + MIT)
+   - `clear-sans/` — https://www.fontsquirrel.com/fonts/clear-sans (Apache License 2.0)
+ - Weather Icons font — https://github.com/erikflowers/weather-icons (font: SIL OFL 1.1, CSS: MIT)
  - Files in `client/wuspy_portal_calendar` are git-cloned from https://github.com/wuspy/portal_calendar.git (see `.gitmodules` file in the root folder)
- - "Broken display" overlay was downloaded from https://www.wallpaperflare.com/technology-cracked-screen-broken-screen-no-people-animal-wildlife-wallpaper-jpnv
  - Multi-display support (and other functionalities too) inspired by https://zivyobraz.eu/
+
+## License
+
+The source code of this project is licensed under the **[MIT License](LICENSE)**.
+
+The compiled firmware binary incorporates [GxEPD2](https://github.com/ZinggJM/GxEPD2) (GPLv3) and is therefore distributed as a combined work under the **[GNU General Public License v3](https://www.gnu.org/licenses/gpl-3.0.html)**.
+
+Third-party assets bundled in this repository have their own licenses:
+
+| Asset | License |
+|---|---|
+| D-DIN fonts (`server/.../fonts/d-din/`) | SIL Open Font License 1.1 |
+| Gidole font (`server/.../fonts/gidole/`) | OFL + MIT |
+| Clear Sans font (`server/.../fonts/clear-sans/`) | Apache 2.0 |
+| Weather Icons (`server/.../wwwroot/font/`) | Font: SIL OFL 1.1, CSS: MIT |
+| Open Sans, DejaVu Sans Mono (client header fonts) | Apache 2.0 / Bitstream Vera |
+| Portal sign icons (`server/.../images/portal_icons/`) | © Valve Corporation (fan use) |
+| GxEPD2 library | GNU General Public License v3 |
  
 ## Verified ePaper displays and controllers
 

@@ -35,4 +35,8 @@
       <None Remove="PortalCalendarServer.Tests\**" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="wwwroot\fonts\d-din\" />
+    </ItemGroup>
+
 </Project>
