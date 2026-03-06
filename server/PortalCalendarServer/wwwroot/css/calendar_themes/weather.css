@@ -59,8 +59,8 @@ div#visible-area {
     position: absolute;
     top: 10px;
     left: 10px;
-/*    height: 780px;
-    width: 460px;*/
+    height: 780px;
+    width: 460px;
     overflow: hidden;
     /* background-color: gainsboro; */
 }
