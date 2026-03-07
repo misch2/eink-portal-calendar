@@ -40,4 +40,4 @@ jobs:
         run: pip install platformio
 
       - name: Build
-        run: pio run -e example -e example2
+        run: pio run -e test1 -e test2 -e test3 -e test4

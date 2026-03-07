@@ -1,5 +1,5 @@
 #include "wdt_manager.h"
-#include "board_config.h"
+#include "hw_config.h"
 #include "logger.h"
 
 #ifdef USE_WDT

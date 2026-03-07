@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include <ArduinoOTA.h>
 
-#include "board_config.h"
+#include "hw_config.h"
 #include "logger.h"
 #include "ota_manager.h"
 #include "version.h"

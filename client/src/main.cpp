@@ -11,7 +11,7 @@
 #endif
 
 // dynamically include board-specific config
-#include "board_config.h"
+#include "hw_config.h"
 
 // conditionally included libraries
 #ifdef SPI_BUS

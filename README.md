@@ -110,7 +110,6 @@ After connecting to WiFi the ESP32 will contact the server and display the first
    - `gidole/` — https://github.com/larsenwork/Gidole (OFL + MIT)
    - `clear-sans/` — https://www.fontsquirrel.com/fonts/clear-sans (Apache License 2.0)
  - Weather Icons font — https://github.com/erikflowers/weather-icons (font: SIL OFL 1.1, CSS: MIT)
- - Files in `client/wuspy_portal_calendar` are git-cloned from https://github.com/wuspy/portal_calendar.git (see `.gitmodules` file in the root folder)
  - Multi-display support (and other functionalities too) inspired by https://zivyobraz.eu/
 
 ## License

@@ -1,7 +1,7 @@
 #include "display_manager.h"
 #include <ArduinoOTA.h>
 
-#include "board_config.h"
+#include "hw_config.h"
 #include "logger.h"
 #include "main.h"
 #include "ota_manager.h"
@@ -26,10 +26,10 @@ void DisplayManager::init() {
 #ifdef SPI_BUS
   SPIClass *spi = new SPIClass(SPI_BUS);
 #ifdef REMAP_SPI
-  Serial.println("remapping SPI");
+  logger.debug("remapping SPI");
   spi->begin(PIN_SPI_CLK, PIN_SPI_MISO, PIN_SPI_MOSI, PIN_SPI_SS);
 #endif
-  Serial.println("remapped");
+  logger.debug("remapped, now initialising SPI");
   display.init(115200, false, 2, false, *spi, SPISettings(7000000, MSBFIRST, SPI_MODE0));
 #else
   display.init(115200, false, 2, false);

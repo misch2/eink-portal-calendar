@@ -1,6 +1,6 @@
 #pragma once
 
-#include "board_config.h"
+#include "hw_config.h"
 
 #ifdef VOLTAGE_ADC_PIN
 #include <ESP32AnalogRead.h>

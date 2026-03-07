@@ -3,7 +3,7 @@
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 
-#include "board_config.h"
+#include "hw_config.h"
 #include "display_manager.h"
 #include "logger.h"
 #include "main.h"
