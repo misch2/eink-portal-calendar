@@ -99,7 +99,7 @@ pio run -e example -t upload --upload-port COM3
 Replace `example` with your chosen environment and `COM3` with the correct serial port (or `<hostname>.local` for OTA updates).
 
 **Step 4 — Configure WiFi.**  
-On first boot the ESP32 starts a WiFi access point `ESP-xxyyzz` (where xxyyzz is a part of the MAC address). Connect to it with your phone, enter your WiFi credentials in the captive portal, and save. The device will reboot and connect to your network.
+On first boot the ESP32 starts a WiFi access point `ESP32-xxyyzz` (where xxyyzz is a part of the MAC address). Connect to it with your phone, enter your WiFi credentials in the captive portal, and save. The device will reboot and connect to your network.
 
 **Step 5 — Wait for the first image.**  
 After connecting to WiFi the ESP32 will contact the server and display the first generated image. This may take up to a minute as the server renders the bitmap on demand.
