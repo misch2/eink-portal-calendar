@@ -74,19 +74,18 @@ bool HTTPClientManager::loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMod
 
   HTTPClient http;
   String url = serverUrl + "/api/device/config?mac=" + WiFi.macAddress() +  //
-               "&fmt=1" +  // new in 2.1.1, not used for anything yet. Will become a format version to allow for non-breaking changes in the future.
-               "&adc=" + String(voltageReader.getAdcRaw()) +     //
-               "&v=" + String(voltageReader.getVoltageReal()) +  //
-               "&vmin=" + String(VOLTAGE_MIN) +                  //
-               "&vmax=" + String(VOLTAGE_MAX) +                  //
-               "&vlmin=" + String(VOLTAGE_LINEAR_MIN) +          //
-               "&vlmax=" + String(VOLTAGE_LINEAR_MAX) +          //
-               "&w=" + String(DISPLAY_WIDTH) +                   //
-               "&h=" + String(DISPLAY_HEIGHT) +                  //
-               "&c=" + String(defined_color_type) +              //
-               "&fw=" + String(FIRMWARE_VERSION) +               //
-               "&rot=" + String(DISPLAY_ROTATION) +              // new in 2.1.1, not used for anything yet
-               "&reset=" + systemInfo.resetReasonAsString() +    //
+               "&adc=" + String(voltageReader.getAdcRaw()) +                //
+               "&v=" + String(voltageReader.getVoltageReal()) +             //
+               "&vmin=" + String(VOLTAGE_MIN) +                             //
+               "&vmax=" + String(VOLTAGE_MAX) +                             //
+               "&vlmin=" + String(VOLTAGE_LINEAR_MIN) +                     //
+               "&vlmax=" + String(VOLTAGE_LINEAR_MAX) +                     //
+               "&w=" + String(DISPLAY_WIDTH) +                              //
+               "&h=" + String(DISPLAY_HEIGHT) +                             //
+               "&c=" + String(defined_color_type) +                         //
+               "&fw=" + String(FIRMWARE_VERSION) +                          //
+               "&rot=" + String(DISPLAY_ROTATION) +                         // new in 2.1.1, not used for anything yet
+               "&reset=" + systemInfo.resetReasonAsString() +               //
                "&wakeup=" + systemInfo.wakeupReasonAsString();
 
   logger.trace("URL: %s", url.c_str());
@@ -139,21 +138,19 @@ bool HTTPClientManager::loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMod
   return true;
 }
 
-bool HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int16_t y, int16_t w, int16_t h) {
-  logger.debug("showRawBitmapFrom_HTTP(%s)", path);
+bool HTTPClientManager::showRawBitmapFromWeb() {
+  String path = "/api/device/bitmap/epaper";
 
   int rowBytes = displayManager.bytesPerRow();
   static unsigned char row_buffer[DISPLAY_BUFFER_SIZE * 2];  // max needed (3C uses 2x)
 
   uint32_t startTime = millis();
-  if ((x >= displayManager.displayWidth()) || (y >= displayManager.displayHeight())) {
-    logger.debug("Invalid coordinates: x=%d, y=%d", x, y);
-    lastErrorMessage = "Invalid coordinates requested";
-    return false;
-  }
 
-  String url = serverUrl + String(path) + "?mac=" + WiFi.macAddress();
-  logger.trace("URL: %s", url.c_str());
+  String url = serverUrl + path + "?" +      //
+               "mac=" + WiFi.macAddress() +  //
+               "&fmt=1"                      // format 1 = raw bitmap with header (see below), format 2 = TODO
+      ;
+  logger.debug("Loading bitmap from: %s", url.c_str());
 
   bool ok = false;
   String newChecksum = String(lastChecksum);
@@ -175,11 +172,7 @@ bool HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
 
     if (httpCode != 200) {
       http.end();
-      if (httpCode == 304) {
-        logger.debug("Image not modified (304), skipping");
-        return true;
-      }
-      continue;
+      continue;  // next attempt
     }
 
     WiFiClient* stream = http.getStreamPtr();
@@ -213,11 +206,11 @@ bool HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
       return true;
     }
 
-    logger.debug("Reading bitmap data for %d rows", h);
+    logger.debug("Reading bitmap data");
     uint32_t totalBytesRead = bytesRead;
     bool readError = false;
 
-    for (uint16_t row = 0; row < h; row++) {
+    for (uint16_t row = 0; row < displayManager.displayHeight(); row++) {
       wdtManager.ping();
       otaManager.loop();
 
@@ -230,7 +223,7 @@ bool HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
       if (stream->available() >= rowBytes) {
         size_t read = stream->readBytes(row_buffer, rowBytes);
         if (read == (size_t)rowBytes) {
-          displayManager.drawBitmapRow(row_buffer, x, y + row, w);
+          displayManager.drawBitmapRow(row_buffer, row);
           totalBytesRead += read;
         } else {
           logger.debug("WARNING: Read %d bytes, expected %d on row %d", read, rowBytes, row);

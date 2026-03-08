@@ -26,6 +26,6 @@ class DisplayManager {
   // Bitmap drawing methods
   int bytesPerRow();
   void beginBitmapDraw();
-  void drawBitmapRow(unsigned char* data, int16_t x, int16_t y, int16_t w);
+  void drawBitmapRow(unsigned char* data, int16_t y);
   void endBitmapDraw();
 };

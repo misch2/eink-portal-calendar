@@ -89,7 +89,9 @@ void DisplayManager::beginBitmapDraw() {
 #endif
 }
 
-void DisplayManager::drawBitmapRow(unsigned char* data, int16_t x, int16_t y, int16_t w) {
+void DisplayManager::drawBitmapRow(unsigned char* data, int16_t y) {
+  int16_t x = 0;
+  int16_t w = displayWidth();
 #ifdef DISPLAY_TYPE_BW
   display.writeImage(data, x, y, w, 1);
 #endif

@@ -173,7 +173,7 @@ void setup() {
 }
 
 void loop() {
-  if (!httpClientManager.showRawBitmapFrom_HTTP("/api/device/bitmap/epaper", 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT)) {
+  if (!httpClientManager.showRawBitmapFromWeb()) {
     showErrorOnDisplay(httpClientManager.lastErrorMessage);
   }
 
