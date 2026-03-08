@@ -8,4 +8,4 @@
 #define DISPLAY_WIDTH 800
 #define DISPLAY_HEIGHT 480
 #define DISPLAY_TYPE_3C              // 3 colors - black, white, red
-#define DISPLAY_REQUIRES_PIXEL_DRAW  // not sure why, no time to investigate, but using the internal GxEPD2_3C full-page buffer seems to help
+#define DISPLAY_USE_PIXEL_DRAW  // not sure why, no time to investigate, but using the internal GxEPD2_3C full-page buffer seems to help

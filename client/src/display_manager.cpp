@@ -74,3 +74,71 @@ void DisplayManager::displayText(String message, const GFXfont* font) {
 int DisplayManager::displayWidth() { return display.width(); }
 
 int DisplayManager::displayHeight() { return display.height(); }
+
+int DisplayManager::bytesPerRow() {
+#ifdef DISPLAY_TYPE_3C
+  return DISPLAY_BUFFER_SIZE * 2;
+#else
+  return DISPLAY_BUFFER_SIZE;
+#endif
+}
+
+void DisplayManager::beginBitmapDraw() {
+#ifdef DISPLAY_USE_PIXEL_DRAW
+  display.fillScreen(GxEPD_WHITE);
+#endif
+}
+
+void DisplayManager::drawBitmapRow(unsigned char* data, int16_t y) {
+  int16_t x = 0;
+  int16_t w = displayWidth();
+#ifdef DISPLAY_TYPE_BW
+  display.writeImage(data, x, y, w, 1);
+#endif
+
+#ifdef DISPLAY_TYPE_3C
+  unsigned char* monoData = data;
+  unsigned char* colorData = data + DISPLAY_BUFFER_SIZE;
+#ifdef DISPLAY_USE_PIXEL_DRAW
+  for (int i = 0; i < DISPLAY_BUFFER_SIZE; i++) {
+    uint8_t monoByte = monoData[i];
+    uint8_t colorByte = colorData[i];
+
+    for (int bit = 7; bit >= 0; bit--) {
+      uint16_t color;
+      bool isBlack = (monoByte & (1 << bit)) == 0;
+      bool isColor = (colorByte & (1 << bit)) == 0;
+
+      if (isBlack) {
+        color = GxEPD_BLACK;
+      } else if (isColor) {
+        color = GxEPD_RED;
+      } else {
+        color = GxEPD_WHITE;
+      }
+
+      int pixelX = x + (i * 8 + (7 - bit));
+      display.drawPixel(pixelX, y, color);
+    }
+  }
+#else
+  display.writeImage(monoData, colorData, x, y, w, 1);
+#endif
+#endif
+
+#ifdef DISPLAY_TYPE_4C
+  display.writeNative(data, nullptr, x, y, w, 1, false, false, false);
+#endif
+}
+
+void DisplayManager::endBitmapDraw() {
+  logger.debug("Refreshing display");
+  wdt.ping();
+  uint32_t startTime = millis();
+#ifdef DISPLAY_USE_PIXEL_DRAW
+  display.display();
+#else
+  display.refresh();
+#endif
+  logger.debug("Display refresh time: %lu ms", millis() - startTime);
+}

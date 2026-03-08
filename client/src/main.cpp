@@ -112,7 +112,10 @@ void wakeupDisplayAndConnectWiFi() {
 
   voltageReader.read();
   otaManager.loop();
-  httpClientManager.loadConfigFromWeb(timing.configLoadTime, otaDebugModeNoSleep);
+  if (!httpClientManager.loadConfigFromWeb(timing.configLoadTime, otaDebugModeNoSleep)) {
+    showErrorOnDisplay(httpClientManager.lastErrorMessage);
+  }
+
   otaManager.loop();
   if (voltageReader.getVoltageReal() > 0 && voltageReader.getVoltageReal() < VOLTAGE_MIN) {
     nextSleepTime = SECONDS_PER_HOUR * 1;
@@ -170,7 +173,9 @@ void setup() {
 }
 
 void loop() {
-  httpClientManager.showRawBitmapFrom_HTTP("/api/device/bitmap/epaper", 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+  if (!httpClientManager.showRawBitmapFromWeb()) {
+    showErrorOnDisplay(httpClientManager.lastErrorMessage);
+  }
 
   disconnectWiFiAndHibernateAll();
 }
