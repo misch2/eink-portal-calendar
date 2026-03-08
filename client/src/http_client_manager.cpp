@@ -3,8 +3,8 @@
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 
-#include "board_config.h"
 #include "display_manager.h"
+#include "hw_config.h"
 #include "logger.h"
 #include "main.h"
 #include "ota_manager.h"
@@ -63,7 +63,7 @@ int HTTPClientManager::readLineFromStream(WiFiClient* stream, String& result) {
       result += c;
     }
 
-    wdtManager.refresh();
+    wdtManager.ping();
     otaManager.loop();
   }
 
@@ -129,7 +129,7 @@ void HTTPClientManager::loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMod
     }
   }
 
-  wdtManager.refresh();
+  wdtManager.ping();
 }
 
 void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int16_t y, int16_t w, int16_t h) {
@@ -162,6 +162,10 @@ void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
   bool ok = false;
   String newChecksum = String(lastChecksum);
 
+#ifdef DISPLAY_REQUIRES_PIXEL_DRAW
+  display.fillScreen(GxEPD_WHITE);  // make sure we start with a blank screen
+#endif
+
   for (int attempt = 1; attempt <= 5; attempt++) {
     if (attempt > 1) {
       logger.debug("Retrying download, attempt #%d", attempt);
@@ -189,7 +193,7 @@ void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
     logger.debug("Content length: %d", contentLength);
 
     // Read magic header "MM"
-    wdtManager.refresh();
+    wdtManager.ping();
     String line;
     int bytesRead = readLineFromStream(stream, line);
 
@@ -203,7 +207,7 @@ void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
     }
 
     // Read checksum
-    wdtManager.refresh();
+    wdtManager.ping();
     bytesRead += readLineFromStream(stream, line);
     newChecksum = line;
 
@@ -221,7 +225,7 @@ void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
     bool readError = false;
 
     for (uint16_t row = 0; row < h; row++) {
-      wdtManager.refresh();
+      wdtManager.ping();
       otaManager.loop();
 
 #ifdef DISPLAY_TYPE_BW
@@ -261,7 +265,33 @@ void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
         size_t read2 = stream->readBytes(input_row_color_buffer, DISPLAY_BUFFER_SIZE);
 
         if (read1 == DISPLAY_BUFFER_SIZE && read2 == DISPLAY_BUFFER_SIZE) {
+#ifdef DISPLAY_REQUIRES_PIXEL_DRAW
+          // Ugly hack to convert 1bpp mono + 1bpp color buffers into actual pixel colors
+          for (int i = 0; i < DISPLAY_BUFFER_SIZE; i++) {
+            uint8_t monoByte = input_row_mono_buffer[i];
+            uint8_t colorByte = input_row_color_buffer[i];
+
+            for (int bit = 7; bit >= 0; bit--) {
+              uint16_t color;
+              bool isBlack = (monoByte & (1 << bit)) == 0;
+              bool isColor = (colorByte & (1 << bit)) == 0;
+
+              if (isBlack) {
+                color = GxEPD_BLACK;
+              } else if (isColor) {
+                color = GxEPD_RED;  // or GxEPD_YELLOW depending on your display
+              } else {
+                color = GxEPD_WHITE;
+              }
+
+              int pixelX = x + (i * 8 + (7 - bit));
+              int pixelY = y + row;
+              display.drawPixel(pixelX, pixelY, color);
+            }
+          }
+#else
           display.writeImage(input_row_mono_buffer, input_row_color_buffer, x, y + row, w, 1);
+#endif
           totalBytesRead += read1 + read2;
         } else {
           logger.debug("WARNING: Read %d+%d bytes, expected %d+%d on row %d", read1, read2, DISPLAY_BUFFER_SIZE, DISPLAY_BUFFER_SIZE, row);
@@ -299,7 +329,6 @@ void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
         break;
       }
 #endif
-
     }
 
     http.end();
@@ -323,14 +352,18 @@ void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
 
   // Refresh display
   logger.debug("Refreshing display");
-  wdtManager.refresh();
+  wdtManager.ping();
   startTime = millis();
-  display.refresh();
+#ifdef DISPLAY_REQUIRES_PIXEL_DRAW
+  display.display();  // for pixel-drawn displays, we need to call display() to actually update the screen
+#else
+  display.refresh();  // not .display() because we have been writing directly to the display, not to an internal full-page buffer.
+#endif
   logger.debug("Display refresh time: %lu ms", millis() - startTime);
 
   // Update checksum
   strncpy(lastChecksum, newChecksum.c_str(), 64);
   lastChecksum[64] = '\0';
 
-  wdtManager.refresh();
+  wdtManager.ping();
 }

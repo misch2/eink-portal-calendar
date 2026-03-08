@@ -11,9 +11,9 @@ class WDTManager {
 
  public:
   WDTManager(Logger& logger);
-  
+
   void init();
-  void refresh();
+  void ping();
   void stop();
 };
 

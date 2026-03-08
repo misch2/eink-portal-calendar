@@ -5,7 +5,7 @@
 #include <HTTPClient.h>
 #include <WiFi.h>
 
-#include "board_config.h"
+#include "hw_config.h"
 
 #define SLEEP_TIME_DEFAULT (SECONDS_PER_MINUTE * 5)
 #define SLEEP_TIME_TEMPORARY_ERROR (SECONDS_PER_MINUTE * 5)

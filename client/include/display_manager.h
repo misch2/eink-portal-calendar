@@ -11,8 +11,8 @@ class OTAManager;
 class DisplayManager {
  private:
   Logger& logger;
-  WDTManager& wdtManager;
-  OTAManager& otaManager;
+  WDTManager& wdt;
+  OTAManager& ota;
 
  public:
   DisplayManager(Logger& logger, WDTManager& wdtManager, OTAManager& otaManager);

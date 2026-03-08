@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "board_config.h"
+#include "hw_config.h"
 #include "logger.h"
 
 #ifdef SYSLOG_SERVER
