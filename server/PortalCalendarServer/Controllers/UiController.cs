@@ -92,10 +92,6 @@ public class UiController(
         }
 
         _context.Configs.RemoveRange(_context.Configs.Where(c => c.DisplayId == display.Id));
-        if (display.Theme != null)
-        {
-            _context.Themes.Remove(display.Theme);
-        }
         _context.Displays.Remove(display);
         await _context.SaveChangesAsync();
 
