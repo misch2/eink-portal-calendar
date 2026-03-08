@@ -11,7 +11,7 @@ namespace PortalCalendarServer.Models.POCOs.Bitmap
 
     public class BitmapOptions
     {
-        public int Rotate { get; set; }
+        public DisplayRotation Rotate { get; set; }
         public string Flip { get; set; } = string.Empty;
         public double Gamma { get; set; } = 1.0;
         public int NumColors { get; set; } = 256;

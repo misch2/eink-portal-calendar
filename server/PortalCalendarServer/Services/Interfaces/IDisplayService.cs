@@ -1,4 +1,5 @@
 using PortalCalendarServer.Models.DatabaseEntities;
+using PortalCalendarServer.Models.POCOs;
 using PortalCalendarServer.Models.POCOs.Bitmap;
 using PortalCalendarServer.Models.POCOs.Board;
 using System.Globalization;
@@ -151,7 +152,7 @@ public interface IDisplayService
     BitmapResult ConvertExistingRawBitmap(
         int displayId,
         OutputFormat format,
-        int? rotate = null,
+        DisplayRotation? rotate = null,
         string? flip = null);
 }
 

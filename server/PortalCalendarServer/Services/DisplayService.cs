@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.DatabaseEntities;
+using PortalCalendarServer.Models.POCOs;
 using PortalCalendarServer.Models.POCOs.Bitmap;
 using PortalCalendarServer.Models.POCOs.Board;
 using PortalCalendarServer.Services.BackgroundJobs;
@@ -403,13 +404,13 @@ public class DisplayService(
         }
 
         // Rotate
-        if (options.Rotate != 0)
+        if (options.Rotate != DisplayRotation.None)
         {
             var angle = options.Rotate switch
             {
-                1 => RotateMode.Rotate90,
-                2 => RotateMode.Rotate180,
-                3 => RotateMode.Rotate270,
+                DisplayRotation.Rotate90 => RotateMode.Rotate90,
+                DisplayRotation.Rotate180 => RotateMode.Rotate180,
+                DisplayRotation.Rotate270 => RotateMode.Rotate270,
                 _ => throw new ArgumentException($"Unknown 'rotate' value: {options.Rotate}")
             };
             img.Mutate(x => x.Rotate(angle));
@@ -745,7 +746,7 @@ public class DisplayService(
     public BitmapResult ConvertExistingRawBitmap( // FIXME name and purpose, this is for controllers
             int displayId,
             OutputFormat format,
-            int? rotate = null,
+            DisplayRotation? rotate = null,
             string? flip = null)
     {
         var ret = new BitmapResult();
