@@ -1,4 +1,5 @@
 #include "wifi_client.h"
+
 #include <Arduino.h>
 #include <ArduinoOTA.h>
 
@@ -14,11 +15,9 @@ extern WiFiManager wifiManager;
 #endif
 
 // WiFiClientWithBlockingReads implementation
-void WiFiClientWithBlockingReads::setOTAManager(OTAManager* manager) {
-  otaManager = manager;
-}
+void WiFiClientWithBlockingReads::setOTAManager(OTAManager* manager) { otaManager = manager; }
 
-int WiFiClientWithBlockingReads::blocking_read(uint8_t *buffer, size_t bytes) {
+int WiFiClientWithBlockingReads::blocking_read(uint8_t* buffer, size_t bytes) {
   int remain = bytes;
   uint32_t start = millis();
 
@@ -47,9 +46,7 @@ int WiFiClientWithBlockingReads::blocking_read(uint8_t *buffer, size_t bytes) {
   return bytes - remain;
 }
 
-void WiFiClientWithBlockingReads::setBlockingReadTimeout(uint32_t timeout) { 
-  blockingReadTimeout = timeout; 
-}
+void WiFiClientWithBlockingReads::setBlockingReadTimeout(uint32_t timeout) { blockingReadTimeout = timeout; }
 
 int WiFiClientWithBlockingReads::read() {
   uint8_t data;
@@ -64,15 +61,13 @@ int WiFiClientWithBlockingReads::read() {
   return data;
 }
 
-int WiFiClientWithBlockingReads::read(uint8_t *buf, size_t size) {
+int WiFiClientWithBlockingReads::read(uint8_t* buf, size_t size) {
   int res = blocking_read(buf, size);
   return res;
 }
 
 // WiFiConnectionManager implementation
-WiFiConnectionManager::WiFiConnectionManager(Logger& logger, WDTManager& wdtManager)
-    : logger(logger), wdtManager(wdtManager) {
-}
+WiFiConnectionManager::WiFiConnectionManager(Logger& logger, WDTManager& wdtManager) : logger(logger), wdtManager(wdtManager) {}
 
 bool WiFiConnectionManager::init() {
   bool res;
@@ -120,7 +115,7 @@ void WiFiConnectionManager::stop() {
   logger.trace("Disconnecting WiFi");
 
   unsigned long start = millis();
-  wdtManager.refresh();
+  wdtManager.ping();
 
   WiFi.persistent(false);
   WiFi.mode(WIFI_OFF);

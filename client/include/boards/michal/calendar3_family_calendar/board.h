@@ -15,6 +15,6 @@
 #define SYSLOG_PORT 514
 #define SYSLOG_MYAPPNAME "family-calendar"
 
-#define DISPLAY_ROTATION 3  // vertical with connector on the right side
+#define DISPLAY_ROTATION 3  // see hw_config.h for details
 
 #define VOLTAGE_MULTIPLICATION_COEFFICIENT 1.7683

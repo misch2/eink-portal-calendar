@@ -1,4 +1,5 @@
 #include "wdt_manager.h"
+
 #include "hw_config.h"
 #include "logger.h"
 
@@ -6,8 +7,7 @@
 #include <esp_task_wdt.h>
 #endif
 
-WDTManager::WDTManager(Logger& logger) : logger(logger), enabled(false) {
-}
+WDTManager::WDTManager(Logger& logger) : logger(logger), enabled(false) {}
 
 void WDTManager::init() {
 #ifdef USE_WDT
@@ -18,7 +18,7 @@ void WDTManager::init() {
 #endif
 }
 
-void WDTManager::refresh() {
+void WDTManager::ping() {
 #ifdef USE_WDT
   if (enabled) {
     // logger.trace("(WDT ping)");

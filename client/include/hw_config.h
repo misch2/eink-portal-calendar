@@ -4,6 +4,11 @@
 
 // Default for an optional display rotation (1 = vertical with connector on the left side).
 // This is used only for error messages. Every other usage is configurable on the server side.
+
+// 0 = Landscape, FPC connector on the bottom
+// 1 = Portrait, FPC connector on the left side
+// 2 = Landscape, FPC connector on the top
+// 3 = Portrait, FPC connector on the right side
 #ifndef DISPLAY_ROTATION
 #define DISPLAY_ROTATION 1
 #endif

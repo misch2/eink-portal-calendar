@@ -15,4 +15,4 @@
 #define SYSLOG_PORT 514
 #define SYSLOG_MYAPPNAME "epaper"
 
-#define DISPLAY_ROTATION 1  // vertical with connector on the left side
+#define DISPLAY_ROTATION 1  // see hw_config.h for details

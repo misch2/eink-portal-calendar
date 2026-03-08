@@ -3,8 +3,7 @@
 
 #define DISPLAY_WIDTH 800
 #define DISPLAY_HEIGHT 480
-#define DISPLAY_TYPE_4C     // 4 colors - black, white, red, and yellow
-#define DISPLAY_ROTATION 1  // vertical with connector on the left side
+#define DISPLAY_TYPE_4C  // 4 colors - black, white, red, and yellow
 
 #define DISPLAY_CLASS_TYPE GxEPD2_4C<GxEPD2_750c_GDEM075F52, GxEPD2_750c_GDEM075F52::HEIGHT / 2>
 #define DISPLAY_CLASS_ARGUMENTS (GxEPD2_750c_GDEM075F52(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN))

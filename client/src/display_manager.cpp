@@ -1,4 +1,5 @@
 #include "display_manager.h"
+
 #include <ArduinoOTA.h>
 
 #include "hw_config.h"
@@ -13,9 +14,7 @@
 
 extern DISPLAY_CLASS_TYPE display;
 
-DisplayManager::DisplayManager(Logger& logger, WDTManager& wdtManager, OTAManager& otaManager)
-    : logger(logger), wdtManager(wdtManager), otaManager(otaManager) {
-}
+DisplayManager::DisplayManager(Logger& logger, WDTManager& wdtManager, OTAManager& otaManager) : logger(logger), wdt(wdtManager), ota(otaManager) {}
 
 void DisplayManager::init() {
   logger.debug("Display setup start");
@@ -24,7 +23,7 @@ void DisplayManager::init() {
   delay(100);
 
 #ifdef SPI_BUS
-  SPIClass *spi = new SPIClass(SPI_BUS);
+  SPIClass* spi = new SPIClass(SPI_BUS);
 #ifdef REMAP_SPI
   logger.debug("remapping SPI");
   spi->begin(PIN_SPI_CLK, PIN_SPI_MISO, PIN_SPI_MOSI, PIN_SPI_SS);
@@ -40,18 +39,18 @@ void DisplayManager::init() {
 
 void DisplayManager::stop() {
   logger.debug("stopDisplay()");
-  wdtManager.refresh();
+  wdt.ping();
   display.powerOff();
-  wdtManager.refresh();
+  wdt.ping();
 }
 
-void DisplayManager::displayText(String message, const GFXfont *font) {
-  display.setRotation(DISPLAY_ROTATION);
+void DisplayManager::displayText(String message, const GFXfont* font) {
+  display.setRotation(DISPLAY_ROTATION);  // see hw_config.h for details
 
   if (font == nullptr) {
     font = &Open_Sans_Regular_24;
   }
-  
+
   display.setFont(font);
   display.setTextColor(GxEPD_BLACK);
   int16_t tbx, tby;
@@ -60,23 +59,18 @@ void DisplayManager::displayText(String message, const GFXfont *font) {
   uint16_t x = ((display.width() - tbw) / 2) - tbx;
   uint16_t y = ((display.height() - tbh) / 2) - tby;
 
-  wdtManager.refresh();
+  wdt.ping();
   display.firstPage();
   do {
-    otaManager.loop();
+    ota.loop();
     display.fillScreen(GxEPD_WHITE);
     display.setCursor(x, y);
     display.print(message);
-    wdtManager.refresh();
+    wdt.ping();
   } while (display.nextPage());
-  display.refresh();
-  wdtManager.refresh();
+  wdt.ping();
 }
 
-int DisplayManager::displayWidth() {
-  return display.width();
-}
+int DisplayManager::displayWidth() { return display.width(); }
 
-int DisplayManager::displayHeight() {
-  return display.height();
-}
+int DisplayManager::displayHeight() { return display.height(); }
