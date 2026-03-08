@@ -73,11 +73,21 @@ bool HTTPClientManager::loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMod
   configLoadTime = millis();
 
   HTTPClient http;
-  String url = serverUrl + "/api/device/config?mac=" + WiFi.macAddress() + "&adc=" + String(voltageReader.getAdcRaw()) +
-               "&v=" + String(voltageReader.getVoltageReal()) + "&vmin=" + String(VOLTAGE_MIN) + "&vmax=" + String(VOLTAGE_MAX) +
-               "&vlmin=" + String(VOLTAGE_LINEAR_MIN) + "&vlmax=" + String(VOLTAGE_LINEAR_MAX) + "&w=" + String(DISPLAY_WIDTH) +
-               "&h=" + String(DISPLAY_HEIGHT) + "&c=" + String(defined_color_type) + "&fw=" + String(FIRMWARE_VERSION) +
-               "&reset=" + systemInfo.resetReasonAsString() + "&wakeup=" + systemInfo.wakeupReasonAsString();
+  String url = serverUrl + "/api/device/config?mac=" + WiFi.macAddress() +  //
+               "&fmt=1" +  // new in 2.1.1, not used for anything yet. Will become a format version to allow for non-breaking changes in the future.
+               "&adc=" + String(voltageReader.getAdcRaw()) +     //
+               "&v=" + String(voltageReader.getVoltageReal()) +  //
+               "&vmin=" + String(VOLTAGE_MIN) +                  //
+               "&vmax=" + String(VOLTAGE_MAX) +                  //
+               "&vlmin=" + String(VOLTAGE_LINEAR_MIN) +          //
+               "&vlmax=" + String(VOLTAGE_LINEAR_MAX) +          //
+               "&w=" + String(DISPLAY_WIDTH) +                   //
+               "&h=" + String(DISPLAY_HEIGHT) +                  //
+               "&c=" + String(defined_color_type) +              //
+               "&fw=" + String(FIRMWARE_VERSION) +               //
+               "&rot=" + String(DISPLAY_ROTATION) +              // new in 2.1.1, not used for anything yet
+               "&reset=" + systemInfo.resetReasonAsString() +    //
+               "&wakeup=" + systemInfo.wakeupReasonAsString();
 
   logger.trace("URL: %s", url.c_str());
   http.begin(url);
