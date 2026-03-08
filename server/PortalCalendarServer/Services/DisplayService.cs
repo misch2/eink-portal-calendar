@@ -496,12 +496,36 @@ public class DisplayService(
             img.SaveAsPng(ms);
             return new BitmapResult { Data = ms.ToArray(), ContentType = "image/png" };
         }
-        else if (options.Format == OutputFormat.EpaperSpecific)
+        else if (options.Format == OutputFormat.EpaperSpecificV1)
         {
             // FIXME use a reasonable default! Or, ideally, in the setup and have this as non-nullable and required in BitmapOptions
             var colorVariant = display.ColorVariant
                 ?? throw new InvalidOperationException("Display has no ColorVariant assigned");
             var bitmap = _convertToEpaperFormat(img, colorVariant);
+            var checksum = ComputeSHA1(bitmap);
+
+            // Output format: "MM\n" + checksum + "\n" + bitmap data
+            var output = Encoding.ASCII.GetBytes("MM\n")
+                .Concat(Encoding.ASCII.GetBytes(checksum + "\n"))
+                .Concat(bitmap)
+                .ToArray();
+
+            return new BitmapResult
+            {
+                Data = output,
+                ContentType = "application/octet-stream",
+                Headers = new Dictionary<string, string>
+                {
+                    ["Content-Transfer-Encoding"] = "binary"
+                }
+            };
+        }
+        else if (options.Format == OutputFormat.EpaperSpecificV2)
+        {
+            // FIXME use a reasonable default! Or, ideally, in the setup and have this as non-nullable and required in BitmapOptions
+            var colorVariant = display.ColorVariant
+                ?? throw new InvalidOperationException("Display has no ColorVariant assigned");
+            var bitmap = _convertToEpaperFormatV2(img, colorVariant);   // FIXME size!
             var checksum = ComputeSHA1(bitmap);
 
             // Output format: "MM\n" + checksum + "\n" + bitmap data
@@ -693,6 +717,63 @@ public class DisplayService(
             else
             {
                 throw new ArgumentException($"Unknown display type: {displayType}");
+            }
+        });
+
+        return ms.ToArray();
+    }
+
+    private byte[] _convertToEpaperFormatV2(Image<Rgba32> img, ColorVariant colorVariant)
+    {
+        using var ms = new MemoryStream();
+
+        var displayType = colorVariant.DisplayType
+            ?? throw new InvalidOperationException("ColorVariant has no associated DisplayType");
+
+        //GxEPD_WHITE,   // 0 = white
+        //GxEPD_BLACK,   // 1 = black
+        //GxEPD_RED,     // 2 = red
+        //GxEPD_YELLOW,  // 3 = yellow
+        //GxEPD_BLUE,    // 4 = blue
+        //GxEPD_GREEN,   // 5 = green
+        //GxEPD_ORANGE,  // 6 = orange
+        //GxEPD_WHITE    // 7 = white (fallback)
+
+        // Process each row of pixels
+        img.ProcessPixelRows(accessor =>
+        {
+            // The image is already quantized to the exact palette, so classify
+            // each pixel by its RGB values into one of the known e-paper colors.
+
+            var epdColors = colorVariant.EpdColors.ToArray();
+            for (int y = 0; y < accessor.Height; y++)
+            {
+                var rowSpan = accessor.GetRowSpan(y);
+                var buffer = new List<byte>();
+
+                foreach (var pixel in rowSpan)
+                {
+                    var detectedColor = ClassifyPixelColor(pixel, epdColors);
+                    if (detectedColor.IsWhite)
+                    {
+                        ms.WriteByte(0);
+                    } else if (detectedColor.IsBlack)
+                    {
+                        ms.WriteByte(1);
+                    }
+                    else if (detectedColor.IsRed)
+                    {
+                        ms.WriteByte(2);
+                    }
+                    else if (detectedColor.IsYellow)
+                    {
+                        ms.WriteByte(3);
+                    }
+                    // FIXME TODO others
+
+
+                    // FIXME speed!!!!!!!!!
+                }
             }
         });
 
