@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "logger.h"
+// #include "logger.h"
 
 // LaskaKit ESPink v3.5 - enable on GPIO47, voltage divider on GPIO 9
 // https://www.laskakit.cz/laskakit-espink-esp32-e-paper-pcb-antenna/?variantId=12419
@@ -18,8 +18,8 @@
 
 inline void boardSpecificInit() {
   // power on the ePaper and I2C
-  logger.debug("Board specific init: powering on ePaper and I2C");
-  logger.debug(" - Setting GPIO 47 to HIGH");
+  // logger.debug("Board specific init: powering on ePaper and I2C");
+  // logger.debug(" - Setting GPIO 47 to HIGH");
   pinMode(47, OUTPUT);
   digitalWrite(47, HIGH);
   delay(50);
@@ -27,7 +27,7 @@ inline void boardSpecificInit() {
 
 inline void boardSpecificDone() {
   // power off the ePaper and I2C
-  logger.debug("Board specific done: powering off ePaper and I2C");
-  logger.debug(" - Setting GPIO 47 to LOW");
+  // logger.debug("Board specific done: powering off ePaper and I2C");
+  // logger.debug(" - Setting GPIO 47 to LOW");
   digitalWrite(47, LOW);
 }

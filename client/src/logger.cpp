@@ -1,20 +1,21 @@
-#include <Arduino.h>
-#include "hw_config.h"
 #include "logger.h"
 
+#include <Arduino.h>
+
+#include "hw_config.h"
+
 #ifdef SYSLOG_SERVER
-Logger::Logger(WiFiUDP& udpClient, Syslog& syslog) 
-  : udpClient(udpClient), syslog(syslog), syslogEnabled(false), debugEnabled(false) {
-  #ifdef DEBUG
-    debugEnabled = true;
-    syslogEnabled = true;
-  #endif
+Logger::Logger(WiFiUDP& udpClient, Syslog& syslog) : udpClient(udpClient), syslog(syslog), syslogEnabled(false), debugEnabled(false) {
+#ifdef DEBUG
+  debugEnabled = true;
+  syslogEnabled = true;
+#endif
 }
 #else
 Logger::Logger() : debugEnabled(false) {
-  #ifdef DEBUG
-    debugEnabled = true;
-  #endif
+#ifdef DEBUG
+  debugEnabled = true;
+#endif
 }
 #endif
 
@@ -70,10 +71,6 @@ void Logger::trace(const char* format, ...) {
 #endif
 }
 
-void Logger::setEnabled(bool enable) {
-  debugEnabled = enable;
-}
+void Logger::setEnabled(bool enable) { debugEnabled = enable; }
 
-bool Logger::isEnabled() const {
-  return debugEnabled;
-}
+bool Logger::isEnabled() const { return debugEnabled; }
