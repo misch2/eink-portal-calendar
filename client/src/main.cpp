@@ -170,7 +170,10 @@ void setup() {
 }
 
 void loop() {
-  httpClientManager.showRawBitmapFrom_HTTP("/api/device/bitmap/epaper", 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+  if (!httpClientManager.showRawBitmapFrom_HTTP("/api/device/bitmap/epaper", 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT)) {
+    nextSleepTime = SLEEP_TIME_PERMANENT_ERROR;
+    showErrorOnDisplay(String("Failed to load bitmap:\n") + httpClientManager.lastErrorMessage);
+  }
 
   disconnectWiFiAndHibernateAll();
 }

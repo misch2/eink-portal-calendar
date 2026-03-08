@@ -1,8 +1,8 @@
-#ifndef LOGGER_H
-#define LOGGER_H
-
+#pragma once
 #include <Arduino.h>
 #include <WiFi.h>
+
+#include "hw_config.h"
 
 #ifdef SYSLOG_SERVER
 #include <Syslog.h>
@@ -34,5 +34,3 @@ class Logger {
 
 // Global logger instance (defined in main.cpp)
 extern Logger logger;
-
-#endif  // LOGGER_H

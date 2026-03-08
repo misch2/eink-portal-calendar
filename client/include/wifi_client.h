@@ -28,7 +28,7 @@ class WiFiConnectionManager {
 
  public:
   WiFiConnectionManager(Logger& logger, WDTManager& wdtManager);
-  
+
   bool init();
   void stop();
 };

@@ -40,8 +40,9 @@ class HTTPClientManager {
   HTTPClientManager(Logger& logger, WDTManager& wdtManager, OTAManager& otaManager, VoltageReader& voltageReader, SystemInfo& systemInfo,
                     DisplayManager& displayManager, int& sleepTime, char* lastChecksum, const char* defined_color_type);
 
-  void loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMode);
-  void showRawBitmapFrom_HTTP(const char* path, int16_t x, int16_t y, int16_t w, int16_t h);
+  String lastErrorMessage = "";
+  bool loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMode);
+  bool showRawBitmapFrom_HTTP(const char* path, int16_t x, int16_t y, int16_t w, int16_t h);
 };
 
 #endif  // HTTP_CLIENT_MANAGER_H

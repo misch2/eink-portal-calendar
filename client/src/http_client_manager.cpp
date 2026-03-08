@@ -13,8 +13,6 @@
 #include "voltage.h"
 #include "wdt_manager.h"
 
-extern DISPLAY_CLASS_TYPE display;
-
 HTTPClientManager::HTTPClientManager(Logger& logger, WDTManager& wdtManager, OTAManager& otaManager, VoltageReader& voltageReader, SystemInfo& systemInfo,
                                      DisplayManager& displayManager, int& sleepTime, char* lastChecksum, const char* defined_color_type)
     : logger(logger),
@@ -70,7 +68,7 @@ int HTTPClientManager::readLineFromStream(WiFiClient* stream, String& result) {
   return bytesRead;
 }
 
-void HTTPClientManager::loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMode) {
+bool HTTPClientManager::loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMode) {
   logger.debug("loadConfigFromWeb()");
   configLoadTime = millis();
 
@@ -92,9 +90,8 @@ void HTTPClientManager::loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMod
     sleepTime = SLEEP_TIME_TEMPORARY_ERROR;
     logger.debug("Failed to load config, HTTP code: %d", httpCode);
     http.end();
-    extern void showErrorOnDisplay(String message);  // FIXME not nice
-    showErrorOnDisplay(String("Failed to load config\nHTTP: ") + statusCodeAsString(httpCode));
-    return;
+    lastErrorMessage = "Failed to load config, HTTP code: " + String(httpCode) + " (" + statusCodeAsString(httpCode) + ")";
+    return false;
   }
 
   String jsonText = http.getString();
@@ -106,9 +103,8 @@ void HTTPClientManager::loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMod
   if (errorStr) {
     logger.debug("JSON parse error: %s", errorStr.c_str());
     sleepTime = SLEEP_TIME_TEMPORARY_ERROR;
-    extern void showErrorOnDisplay(String message);  // FIXME not nice
-    showErrorOnDisplay("Can't parse response");
-    return;
+    lastErrorMessage = "Can't parse JSON response: " + String(errorStr.c_str()) + "\nResponse was: " + jsonText;
+    return false;
   }
 
   int tmpi = response["sleep"];
@@ -130,30 +126,20 @@ void HTTPClientManager::loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMod
   }
 
   wdtManager.ping();
+  return true;
 }
 
-void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int16_t y, int16_t w, int16_t h) {
+bool HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int16_t y, int16_t w, int16_t h) {
   logger.debug("showRawBitmapFrom_HTTP(%s)", path);
 
-  // FIXME this definitely should go to the DisplayManager!
-
-#ifdef DISPLAY_TYPE_BW
-  static unsigned char input_row_mono_buffer[DISPLAY_BUFFER_SIZE];
-#endif
-
-#ifdef DISPLAY_TYPE_3C
-  static unsigned char input_row_mono_buffer[DISPLAY_BUFFER_SIZE];
-  static unsigned char input_row_color_buffer[DISPLAY_BUFFER_SIZE];
-#endif
-
-#ifdef DISPLAY_TYPE_4C
-  static unsigned char input_row_native_buffer[DISPLAY_BUFFER_SIZE];
-#endif
+  int rowBytes = displayManager.bytesPerRow();
+  static unsigned char row_buffer[DISPLAY_BUFFER_SIZE * 2];  // max needed (3C uses 2x)
 
   uint32_t startTime = millis();
   if ((x >= displayManager.displayWidth()) || (y >= displayManager.displayHeight())) {
     logger.debug("Invalid coordinates: x=%d, y=%d", x, y);
-    return;
+    lastErrorMessage = "Invalid coordinates requested";
+    return false;
   }
 
   String url = serverUrl + String(path) + "?mac=" + WiFi.macAddress();
@@ -162,9 +148,7 @@ void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
   bool ok = false;
   String newChecksum = String(lastChecksum);
 
-#ifdef DISPLAY_REQUIRES_PIXEL_DRAW
-  display.fillScreen(GxEPD_WHITE);  // make sure we start with a blank screen
-#endif
+  displayManager.beginBitmapDraw();
 
   for (int attempt = 1; attempt <= 5; attempt++) {
     if (attempt > 1) {
@@ -183,7 +167,7 @@ void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
       http.end();
       if (httpCode == 304) {
         logger.debug("Image not modified (304), skipping");
-        return;
+        return true;
       }
       continue;
     }
@@ -200,10 +184,9 @@ void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
     logger.debug("Magic: %s", line.c_str());
     if (line != "MM") {
       sleepTime = SLEEP_TIME_PERMANENT_ERROR;
-      extern void showErrorOnDisplay(String message);  // FIXME not nice
-      showErrorOnDisplay(String("Invalid bitmap: ") + line);
       http.end();
-      return;
+      lastErrorMessage = "Invalid magic header: " + line;
+      return false;
     }
 
     // Read checksum
@@ -217,7 +200,7 @@ void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
     if (newChecksum == String(lastChecksum)) {
       logger.debug("Checksum unchanged, skipping");
       http.end();
-      return;
+      return true;
     }
 
     logger.debug("Reading bitmap data for %d rows", h);
@@ -228,21 +211,19 @@ void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
       wdtManager.ping();
       otaManager.loop();
 
-#ifdef DISPLAY_TYPE_BW
-      size_t bytesAvail = 0;
       int timeout = 100;  // 1 second timeout per row
-      while (stream->available() < DISPLAY_BUFFER_SIZE && timeout > 0) {
+      while (stream->available() < rowBytes && timeout > 0) {
         delay(10);
         timeout--;
       }
 
-      if (stream->available() >= DISPLAY_BUFFER_SIZE) {
-        size_t read = stream->readBytes(input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
-        if (read == DISPLAY_BUFFER_SIZE) {
-          display.writeImage(input_row_mono_buffer, x, y + row, w, 1);
+      if (stream->available() >= rowBytes) {
+        size_t read = stream->readBytes(row_buffer, rowBytes);
+        if (read == (size_t)rowBytes) {
+          displayManager.drawBitmapRow(row_buffer, x, y + row, w);
           totalBytesRead += read;
         } else {
-          logger.debug("WARNING: Read %d bytes, expected %d on row %d", read, DISPLAY_BUFFER_SIZE, row);
+          logger.debug("WARNING: Read %d bytes, expected %d on row %d", read, rowBytes, row);
           readError = true;
           break;
         }
@@ -251,84 +232,6 @@ void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
         readError = true;
         break;
       }
-#endif
-
-#ifdef DISPLAY_TYPE_3C
-      int timeout = 100;
-      while (stream->available() < DISPLAY_BUFFER_SIZE * 2 && timeout > 0) {
-        delay(10);
-        timeout--;
-      }
-
-      if (stream->available() >= DISPLAY_BUFFER_SIZE * 2) {
-        size_t read1 = stream->readBytes(input_row_mono_buffer, DISPLAY_BUFFER_SIZE);
-        size_t read2 = stream->readBytes(input_row_color_buffer, DISPLAY_BUFFER_SIZE);
-
-        if (read1 == DISPLAY_BUFFER_SIZE && read2 == DISPLAY_BUFFER_SIZE) {
-#ifdef DISPLAY_REQUIRES_PIXEL_DRAW
-          // Ugly hack to convert 1bpp mono + 1bpp color buffers into actual pixel colors
-          for (int i = 0; i < DISPLAY_BUFFER_SIZE; i++) {
-            uint8_t monoByte = input_row_mono_buffer[i];
-            uint8_t colorByte = input_row_color_buffer[i];
-
-            for (int bit = 7; bit >= 0; bit--) {
-              uint16_t color;
-              bool isBlack = (monoByte & (1 << bit)) == 0;
-              bool isColor = (colorByte & (1 << bit)) == 0;
-
-              if (isBlack) {
-                color = GxEPD_BLACK;
-              } else if (isColor) {
-                color = GxEPD_RED;  // or GxEPD_YELLOW depending on your display
-              } else {
-                color = GxEPD_WHITE;
-              }
-
-              int pixelX = x + (i * 8 + (7 - bit));
-              int pixelY = y + row;
-              display.drawPixel(pixelX, pixelY, color);
-            }
-          }
-#else
-          display.writeImage(input_row_mono_buffer, input_row_color_buffer, x, y + row, w, 1);
-#endif
-          totalBytesRead += read1 + read2;
-        } else {
-          logger.debug("WARNING: Read %d+%d bytes, expected %d+%d on row %d", read1, read2, DISPLAY_BUFFER_SIZE, DISPLAY_BUFFER_SIZE, row);
-          readError = true;
-          break;
-        }
-      } else {
-        logger.debug("WARNING: Timeout waiting for data on row %d", row);
-        readError = true;
-        break;
-      }
-#endif
-
-#ifdef DISPLAY_TYPE_4C
-      int timeout = 100;
-      while (stream->available() < DISPLAY_BUFFER_SIZE && timeout > 0) {
-        delay(10);
-        timeout--;
-      }
-
-      if (stream->available() >= DISPLAY_BUFFER_SIZE) {
-        size_t read = stream->readBytes(input_row_native_buffer, DISPLAY_BUFFER_SIZE);
-
-        if (read == DISPLAY_BUFFER_SIZE) {
-          display.writeNative(input_row_native_buffer, nullptr, x, y + row, w, 1, false, false, false);
-          totalBytesRead += read;
-        } else {
-          logger.debug("WARNING: Read %d bytes, expected %d on row %d", read, DISPLAY_BUFFER_SIZE, row);
-          readError = true;
-          break;
-        }
-      } else {
-        logger.debug("WARNING: Timeout waiting for data on row %d", row);
-        readError = true;
-        break;
-      }
-#endif
     }
 
     http.end();
@@ -345,25 +248,17 @@ void HTTPClientManager::showRawBitmapFrom_HTTP(const char* path, int16_t x, int1
 
   if (!ok) {
     sleepTime = SLEEP_TIME_PERMANENT_ERROR;
-    extern void showErrorOnDisplay(String message);  // FIXME not nice
-    showErrorOnDisplay("Failed to download image after all attempts");
-    return;
+    lastErrorMessage = "Failed to download image after all attempts";
+    return false;
   }
 
-  // Refresh display
-  logger.debug("Refreshing display");
-  wdtManager.ping();
-  startTime = millis();
-#ifdef DISPLAY_REQUIRES_PIXEL_DRAW
-  display.display();  // for pixel-drawn displays, we need to call display() to actually update the screen
-#else
-  display.refresh();  // not .display() because we have been writing directly to the display, not to an internal full-page buffer.
-#endif
-  logger.debug("Display refresh time: %lu ms", millis() - startTime);
+  displayManager.endBitmapDraw();
 
   // Update checksum
   strncpy(lastChecksum, newChecksum.c_str(), 64);
   lastChecksum[64] = '\0';
 
   wdtManager.ping();
+
+  return true;
 }
