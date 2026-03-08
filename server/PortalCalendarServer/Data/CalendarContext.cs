@@ -121,7 +121,9 @@ public partial class CalendarContext : DbContext
             entity.Property(e => e.Name)
                 .HasColumnType("VARCHAR")
                 .HasColumnName("name");
-            entity.Property(e => e.Rotation).HasColumnName("rotation");
+            entity.Property(e => e.Rotation)
+                .HasColumnName("rotation")
+                .HasConversion<int>();
             entity.Property(e => e.Width).HasColumnName("width");
             entity.Property(e => e.ThemeId).HasColumnName("theme_id");
             entity.Property(e => e.DitheringTypeCode).HasColumnName("dithering_type_code");

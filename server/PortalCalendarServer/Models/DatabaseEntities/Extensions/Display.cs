@@ -1,3 +1,4 @@
+using PortalCalendarServer.Models.POCOs;
 using SixLabors.ImageSharp;
 
 namespace PortalCalendarServer.Models.DatabaseEntities
@@ -11,12 +12,12 @@ namespace PortalCalendarServer.Models.DatabaseEntities
 
         public int VirtualWidth()
         {
-            return Rotation % 180 == 0 ? Width : Height;
+            return Rotation is DisplayRotation.None or DisplayRotation.Rotate180 ? Width : Height;
         }
 
         public int VirtualHeight()
         {
-            return Rotation % 180 == 0 ? Height : Width;
+            return Rotation is DisplayRotation.None or DisplayRotation.Rotate180 ? Height : Width;
         }
 
         public Dictionary<string, string> CssColorMap(bool forPreview)

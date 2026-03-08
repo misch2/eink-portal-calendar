@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PortalCalendarServer.Controllers;
 using PortalCalendarServer.Data;
+using PortalCalendarServer.Models.POCOs;
 using PortalCalendarServer.Models.POCOs.Bitmap;
 using PortalCalendarServer.Models.POCOs.Board;
 using PortalCalendarServer.Services;
@@ -365,7 +366,7 @@ public class ApiControllerTests : IntegrationServiceTestBase
             .Setup(b => b.ConvertExistingRawBitmap(
                 display.Id,
                 It.IsAny<OutputFormat>(),
-                It.IsAny<int?>(), It.IsAny<string?>()
+                It.IsAny<DisplayRotation?>(), It.IsAny<string?>()
                 ))
             .Returns(new BitmapResult { ErrorMessage = errMsg });
 

@@ -1,3 +1,5 @@
+using PortalCalendarServer.Models.POCOs;
+
 namespace PortalCalendarServer.Models.DatabaseEntities;
 
 public partial class Display
@@ -12,7 +14,7 @@ public partial class Display
 
     public int Height { get; set; } = 0;
 
-    public int Rotation { get; set; }
+    public DisplayRotation Rotation { get; set; }
 
     public string? DisplayTypeCode { get; set; }
     public virtual DisplayType? DisplayType { get; set; }

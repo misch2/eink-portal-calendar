@@ -61,10 +61,10 @@
         <div class="col-md-6">
             <label for="display_rotation">Rotation</label>
             <select id="display_rotation" name="display_rotation" class="form-select">
-                <option value="0" selected="@(Model.Rotation == 0)">0° (@Model.Width × @Model.Height)</option>
-                <option value="1" selected="@(Model.Rotation == 1)">90° (@Model.Height × @Model.Width)</option>
-                <option value="2" selected="@(Model.Rotation == 2)">180° (@Model.Width × @Model.Height but upside down)</option>
-                <option value="3" selected="@(Model.Rotation == 3)">270° (@Model.Height × @Model.Width)</option>
+                <option value="@((int)DisplayRotation.None)" selected="@(Model.Rotation == DisplayRotation.None)">0° (@Model.Width × @Model.Height)</option>
+                <option value="@((int)DisplayRotation.Rotate90)" selected="@(Model.Rotation == DisplayRotation.Rotate90)">90° (@Model.Height × @Model.Width)</option>
+                <option value="@((int)DisplayRotation.Rotate180)" selected="@(Model.Rotation == DisplayRotation.Rotate180)">180° (@Model.Width × @Model.Height but upside down)</option>
+                <option value="@((int)DisplayRotation.Rotate270)" selected="@(Model.Rotation == DisplayRotation.Rotate270)">270° (@Model.Height × @Model.Width)</option>
             </select>
         </div>
         <div class="col-md-6">
