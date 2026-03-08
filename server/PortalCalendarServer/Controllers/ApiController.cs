@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.DatabaseEntities;
+using PortalCalendarServer.Models.POCOs;
 using PortalCalendarServer.Models.POCOs.Bitmap;
 using PortalCalendarServer.Services;
 using PortalCalendarServer.Services.Integrations;
@@ -130,7 +131,7 @@ public class ApiController : ControllerBase
                 DisplayTypeCode = c,
                 ColorVariantCode = null,
                 Firmware = fw ?? string.Empty,
-                Rotation = 0,
+                Rotation = DisplayRotation.None,
                 Gamma = 2.2,
                 BorderTop = 0,
                 BorderRight = 0,

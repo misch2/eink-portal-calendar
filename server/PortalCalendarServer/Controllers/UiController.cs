@@ -240,7 +240,7 @@ public class UiController(
             }
             if (form.ContainsKey("display_rotation") && int.TryParse(form["display_rotation"], out var rotation))
             {
-                display.Rotation = rotation;
+                display.Rotation = (DisplayRotation)rotation;
             }
             if (form.ContainsKey("display_gamma") && double.TryParse(form["display_gamma"], out var gamma))
             {
@@ -415,7 +415,7 @@ public class UiController(
         var bitmap = _displayService.ConvertExistingRawBitmap(
             displayId: display.Id,
             format: OutputFormat.Png,
-            rotate: 0,
+            rotate: DisplayRotation.None,
             flip: ""
         );
         if (bitmap.ErrorMessage != null)
