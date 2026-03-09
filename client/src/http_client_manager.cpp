@@ -143,8 +143,13 @@ bool HTTPClientManager::showRawBitmapFromWeb() {
   displayManager.beginBitmapDraw();
 
   do {
-    if (!_displayPartialPageFromWeb(newChecksum)) {
+    int status = _displayPartialPageFromWeb(newChecksum);
+    if (status < 0) {
+      // error
       return false;
+    } else if (status == 0) {
+      // not modified, no need to continue and definitely no need to switch pages
+      break;
     }
   } while (displayManager.nextPageBitmapDraw());
 
@@ -157,7 +162,7 @@ bool HTTPClientManager::showRawBitmapFromWeb() {
   return true;
 }
 
-bool HTTPClientManager::_displayPartialPageFromWeb(String& newChecksum) {
+int HTTPClientManager::_displayPartialPageFromWeb(String& newChecksum) {
   static unsigned char row_buffer[DISPLAY_WIDTH];  // 1 byte per pixel as a theoretical worst case, actual may be less depending on display type
 
   uint32_t startTime = millis();
@@ -204,7 +209,7 @@ bool HTTPClientManager::_displayPartialPageFromWeb(String& newChecksum) {
       sleepTime = SLEEP_TIME_PERMANENT_ERROR;
       http.end();
       lastErrorMessage = "Invalid magic header: " + line;
-      return false;
+      return -1;
     }
 
     // Read checksum
@@ -218,7 +223,7 @@ bool HTTPClientManager::_displayPartialPageFromWeb(String& newChecksum) {
     if (newChecksum == String(lastChecksum)) {
       logger.debug("Checksum unchanged, skipping");
       http.end();
-      return true;
+      return 0;
     }
 
     logger.debug("Reading bitmap data");
@@ -267,10 +272,10 @@ bool HTTPClientManager::_displayPartialPageFromWeb(String& newChecksum) {
   if (!ok) {
     sleepTime = SLEEP_TIME_PERMANENT_ERROR;
     lastErrorMessage = "Failed to download image after all attempts";
-    return false;
+    return -1;
   }
 
   wdtManager.ping();
 
-  return true;
+  return 1;
 }
