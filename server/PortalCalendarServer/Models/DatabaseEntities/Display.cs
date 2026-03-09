@@ -16,11 +16,11 @@ public partial class Display
 
     public DisplayRotation Rotation { get; set; }
 
-    public string? DisplayTypeCode { get; set; }
-    public virtual DisplayType? DisplayType { get; set; }
+    public required string DisplayTypeCode { get; set; }
+    public virtual DisplayType DisplayType { get; set; } = null!;
 
-    public string? ColorVariantCode { get; set; }
-    public virtual ColorVariant? ColorVariant { get; set; }
+    public required string ColorVariantCode { get; set; }
+    public virtual ColorVariant ColorVariant { get; set; } = null!;
 
     public double? Gamma { get; set; }
 

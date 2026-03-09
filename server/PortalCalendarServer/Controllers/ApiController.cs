@@ -121,6 +121,17 @@ public class ApiController : ControllerBase
 
         if (display == null)
         {
+            var displayType = _context.DisplayTypes.FirstOrDefault(dt => dt.Code == c);
+            if (displayType == null)
+            {
+                return BadRequest(new { error = $"Invalid display type code '{c}'" });
+            }
+            var defaultColorVariant = _context.ColorVariants.FirstOrDefault(cv => cv.DisplayTypeCode == c);
+            if (defaultColorVariant == null)
+            {
+                return BadRequest(new { error = $"No color variant found for display type code '{c}'" });
+            }
+
             // Create new display
             display = new Display
             {
@@ -128,8 +139,8 @@ public class ApiController : ControllerBase
                 Name = $"New display with MAC {mac.ToUpperInvariant()} added on {DateTime.UtcNow}",
                 Width = w ?? 800,
                 Height = h ?? 480,
-                DisplayTypeCode = c,
-                ColorVariantCode = null,
+                DisplayTypeCode = displayType.Code,
+                ColorVariantCode = defaultColorVariant.Code,
                 Firmware = fw ?? string.Empty,
                 Rotation = DisplayRotation.None,
                 Gamma = 2.2,

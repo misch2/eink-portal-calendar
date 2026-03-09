@@ -264,27 +264,11 @@ public class UiController(
             }
             if (form.ContainsKey("color_variant"))
             {
-                var code = form["color_variant"].ToString();
-                if (string.IsNullOrEmpty(code))
-                {
-                    display.ColorVariantCode = null;
-                }
-                else
-                {
-                    display.ColorVariantCode = form["color_variant"].ToString();
-                }
+                display.ColorVariantCode = form["color_variant"].ToString();
             }
             if (form.ContainsKey("display_type"))
             {
-                var code = form["display_type"].ToString();
-                if (string.IsNullOrEmpty(code))
-                {
-                    display.DisplayTypeCode = null;
-                }
-                else
-                {
-                    display.DisplayTypeCode = form["display_type"].ToString();
-                }
+                display.DisplayTypeCode = form["display_type"].ToString();
             }
             if (form.ContainsKey("dithering_type"))
             {

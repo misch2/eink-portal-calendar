@@ -28,7 +28,6 @@
         <div class="col-md-4">
             <label for="display_type">Display type</label>
             <select id="display_type" name="display_type" class="form-select">
-                <option value=""></option>
                 @foreach (var type in DisplayService.GetDisplayTypes())
                 {
                     <option value="@type.Code" selected="@(Model.DisplayTypeCode == type.Code)">@type.Name</option>
@@ -38,7 +37,6 @@
         <div class="col-md-4">
             <label for="color_variant">Color variant</label>
             <select id="color_variant" name="color_variant" class="form-select">
-                <option value=""></option>
                 @foreach (var variant in DisplayService.GetColorVariants().Where(cv => cv.DisplayTypeCode == Model.DisplayTypeCode))
                 {
                     <option value="@variant.Code" selected="@(Model.ColorVariantCode == variant.Code)">@variant.Name</option>

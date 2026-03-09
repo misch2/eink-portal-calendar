@@ -165,6 +165,7 @@ public abstract class IntegrationServiceTestBase : IDisposable
             Width = width,
             Height = height,
             DisplayTypeCode = colorType,
+            ColorVariantCode = colorType,
             Rotation = TestDataHelper.Displays.Common.DefaultRotation,
             Gamma = TestDataHelper.Displays.Common.DefaultGamma,
             BorderTop = TestDataHelper.Displays.Common.DefaultBorder,

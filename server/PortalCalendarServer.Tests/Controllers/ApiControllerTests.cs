@@ -176,6 +176,10 @@ public class ApiControllerTests : IntegrationServiceTestBase
         var newMac = "11:22:33:44:55:66";
         var theme = new Theme { Id = 1, DisplayName = "Default", FileName = "Default", IsDefault = true, IsActive = true };
         Context.Themes.Add(theme);
+        var displayType = new DisplayType { Code = "BW", Name = "Black & White", NumColors = 1 };
+        Context.DisplayTypes.Add(displayType);
+        var colorVariant = new ColorVariant { Code = "BW", Name = "Black & White", DisplayTypeCode = "BW" };
+        Context.ColorVariants.Add(colorVariant);
         await Context.SaveChangesAsync();
 
         _mockDisplayService.Setup(s => s.GetMissedConnects(It.IsAny<Display>())).Returns(0);
@@ -204,6 +208,10 @@ public class ApiControllerTests : IntegrationServiceTestBase
         var newMac = "aa:11:22:33:44:55";
         var theme = new Theme { Id = 2, DisplayName = "Default", FileName = "Default", IsDefault = true, IsActive = true };
         Context.Themes.Add(theme);
+        var displayType = new DisplayType { Code = "3C", Name = "3 Color", NumColors = 3 };
+        Context.DisplayTypes.Add(displayType);
+        var colorVariant = new ColorVariant { Code = "BWR", Name = "B+W+R", DisplayTypeCode = "3C" };
+        Context.ColorVariants.Add(colorVariant);
         await Context.SaveChangesAsync();
 
         _mockDisplayService.Setup(s => s.GetMissedConnects(It.IsAny<Display>())).Returns(0);
@@ -227,11 +235,15 @@ public class ApiControllerTests : IntegrationServiceTestBase
     }
 
     [Fact]
-    public async Task Config_WithUnknownMac_UsesFallbackDimensionsWhenNotProvided()
+    public async Task Config_WithMissingParameters_ReturnsBadRequest()
     {
         var newMac = "bb:22:33:44:55:66";
         var theme = new Theme { Id = 3, DisplayName = "Default", FileName = "Default", IsDefault = true, IsActive = true };
         Context.Themes.Add(theme);
+        var displayType = new DisplayType { Code = "BW", Name = "Black & White", NumColors = 1 };
+        Context.DisplayTypes.Add(displayType);
+        var colorVariant = new ColorVariant { Code = "BW", Name = "Black & White", DisplayTypeCode = "BW" };
+        Context.ColorVariants.Add(colorVariant);
         await Context.SaveChangesAsync();
 
         _mockDisplayService.Setup(s => s.GetMissedConnects(It.IsAny<Display>())).Returns(0);
@@ -242,15 +254,15 @@ public class ApiControllerTests : IntegrationServiceTestBase
         _mockDisplayService.Setup(s => s.GetConfig(It.IsAny<Display>(), It.IsAny<string>())).Returns((string?)null);
 
         var controller = CreateController();
-        await controller.Config(
+        var result = await controller.Config(
             mac: newMac, fw: null, w: null, h: null, c: null,
             adc: null, voltage_raw: null, v: null, vmin: null, vmax: null,
             vlmin: null, vlmax: null, reset: null, wakeup: null);
 
+        Assert.Equal(400, (result as BadRequestObjectResult)?.StatusCode);
+
         var created = await Context.Displays.FirstOrDefaultAsync(d => d.Mac == newMac);
-        Assert.NotNull(created);
-        Assert.Equal(800, created.Width);
-        Assert.Equal(480, created.Height);
+        Assert.Null(created);
     }
 
     #endregion
