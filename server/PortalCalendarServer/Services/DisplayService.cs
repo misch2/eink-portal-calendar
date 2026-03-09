@@ -730,15 +730,6 @@ public class DisplayService(
         var displayType = colorVariant.DisplayType
             ?? throw new InvalidOperationException("ColorVariant has no associated DisplayType");
 
-        //GxEPD_WHITE,   // 0 = white
-        //GxEPD_BLACK,   // 1 = black
-        //GxEPD_RED,     // 2 = red
-        //GxEPD_YELLOW,  // 3 = yellow
-        //GxEPD_BLUE,    // 4 = blue
-        //GxEPD_GREEN,   // 5 = green
-        //GxEPD_ORANGE,  // 6 = orange
-        //GxEPD_WHITE    // 7 = white (fallback)
-
         // Process each row of pixels
         img.ProcessPixelRows(accessor =>
         {
@@ -749,31 +740,51 @@ public class DisplayService(
             for (int y = 0; y < accessor.Height; y++)
             {
                 var rowSpan = accessor.GetRowSpan(y);
-                var buffer = new List<byte>();
 
+                byte outputByte = 0;
+                byte outBits = 0;
+                // FIXME speed!!!!!!!!!
                 foreach (var pixel in rowSpan)
                 {
                     var detectedColor = ClassifyPixelColor(pixel, epdColors);
-                    if (detectedColor.IsWhite)
-                    {
-                        ms.WriteByte(0);
-                    } else if (detectedColor.IsBlack)
-                    {
-                        ms.WriteByte(1);
-                    }
-                    else if (detectedColor.IsRed)
-                    {
-                        ms.WriteByte(2);
-                    }
-                    else if (detectedColor.IsYellow)
-                    {
-                        ms.WriteByte(3);
-                    }
-                    // FIXME TODO others
+                    var transferColor = EpdColorToTransferFormat(detectedColor);
 
+                    if (displayType.NumColors <= 2)
+                    {
+                        outputByte = (byte)((outputByte << 1) | (transferColor & 0x01));
+                        outBits++;
+                    }
+                    else if (displayType.NumColors <= 4)
+                    {
+                        outputByte = (byte)((outputByte << 2) | (transferColor & 0x03));
+                        outBits += 2;
+                    }
+                    else if (displayType.NumColors <= 8)
+                    {
+                        outputByte = (byte)((outputByte << 4) | (transferColor & 0x07));
+                        outBits += 4;
+                    }
+                    else
+                    {
+                        outputByte = transferColor;
+                        outBits = 8;
+                    }
 
-                    // FIXME speed!!!!!!!!!
+                    if (outBits == 8)
+                    {
+                        ms.WriteByte(outputByte);
+                        outputByte = 0;
+                        outBits = 0;
+                    }
                 }
+                if (outBits > 0)
+                {
+                    // final byte if needed
+                    ms.WriteByte(outputByte);
+                    outputByte = 0;
+                    outBits = 0;
+                }
+
             }
         });
 
@@ -795,6 +806,29 @@ public class DisplayService(
             }
         }
         throw new InvalidOperationException($"Pixel color #{pixel.R:X2}{pixel.G:X2}{pixel.B:X2} not found in EPD color palette");
+    }
+
+    // 1-bit (8 pixels per byte) formats:
+    //GxEPD_WHITE,   // 0 = white
+    //GxEPD_BLACK,   // 1 = black
+    // 2-bit (4 pixels per byte) formats:
+    //GxEPD_RED,     // 2 = red
+    //GxEPD_YELLOW,  // 3 = yellow
+    // 4-bit (2 pixels per byte) formats:
+    //GxEPD_BLUE,    // 4 = blue
+    //GxEPD_GREEN,   // 5 = green
+    //GxEPD_ORANGE,  // 6 = orange
+    //GxEPD_WHITE    // 7 = white (fallback)
+    private static byte EpdColorToTransferFormat(EpdColor color)
+    {
+        if (color.IsWhite) return 0;
+        if (color.IsBlack) return 1;
+        if (color.IsRed) return 2;
+        if (color.IsYellow) return 3;
+        //if (color.IsBlue) return 4;   // FIXME todo
+        //if (color.IsGreen) return 5;
+        //if (color.IsOrange) return 6;
+        return 7; // white fallback
     }
 
     private static string ComputeSHA1(byte[] data)
