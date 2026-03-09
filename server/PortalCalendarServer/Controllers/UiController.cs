@@ -283,6 +283,13 @@ public class UiController(
                 }
             }
 
+            // If the color variant is not valid for the display type (this may happen if the user changes display type or color variant), set the color variant to first available for the display type to avoid rendering errors.
+            var validColorVariants = _displayService.GetColorVariants().Where(cv => cv.DisplayTypeCode == display.DisplayTypeCode).ToList();
+            if (!validColorVariants.Any(cv => cv.Code == display.ColorVariantCode))
+            {
+                display.ColorVariantCode = validColorVariants.First().Code;
+            }
+
             _context.Update(display);
         }
 

@@ -228,7 +228,8 @@ public partial class CalendarContext : DbContext
                 new EpdColor { Code = "red", Name = "Red", HexValue = "FF0000", EpdPreviewHexValue = "aa0000" },
                 new EpdColor { Code = "yellow", Name = "Yellow", HexValue = "FFFF00", EpdPreviewHexValue = "c0a010" },
                 new EpdColor { Code = "blue", Name = "Blue", HexValue = "0000FF", EpdPreviewHexValue = "0000aa" },
-                new EpdColor { Code = "green", Name = "Green", HexValue = "00FF00", EpdPreviewHexValue = "00aa00" }
+                new EpdColor { Code = "green", Name = "Green", HexValue = "00FF00", EpdPreviewHexValue = "00aa00" },
+                new EpdColor { Code = "orange", Name = "Orange", HexValue = "FFA500", EpdPreviewHexValue = "cc8400" }
              );
         });
 

@@ -839,9 +839,9 @@ public class DisplayService(
         if (color.IsBlack) return 1;
         if (color.IsRed) return 2;
         if (color.IsYellow) return 3;
-        //if (color.IsBlue) return 4;   // FIXME todo
-        //if (color.IsGreen) return 5;
-        //if (color.IsOrange) return 6;
+        if (color.IsBlue) return 4;
+        if (color.IsGreen) return 5;
+        if (color.IsOrange) return 6;
         return 7; // white fallback
     }
 
