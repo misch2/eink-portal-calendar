@@ -21,7 +21,7 @@
 #define RST_PIN 33
 #define BUSY_PIN 27
 
-#define SPLIT_DISPLAY_INTO_N_PAGES 2  // memory issues with full page buffer
+#define SPLIT_DISPLAY_INTO_N_PAGES 1  // fits in memory, no need to split into multiple pages
 
 // 4xAAA battery pack with a voltage divider to measure the voltage on an ADC pin.
 #define VOLTAGE_ADC_PIN 32
