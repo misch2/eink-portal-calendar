@@ -264,27 +264,11 @@ public class UiController(
             }
             if (form.ContainsKey("color_variant"))
             {
-                var code = form["color_variant"].ToString();
-                if (string.IsNullOrEmpty(code))
-                {
-                    display.ColorVariantCode = null;
-                }
-                else
-                {
-                    display.ColorVariantCode = form["color_variant"].ToString();
-                }
+                display.ColorVariantCode = form["color_variant"].ToString();
             }
             if (form.ContainsKey("display_type"))
             {
-                var code = form["display_type"].ToString();
-                if (string.IsNullOrEmpty(code))
-                {
-                    display.DisplayTypeCode = null;
-                }
-                else
-                {
-                    display.DisplayTypeCode = form["display_type"].ToString();
-                }
+                display.DisplayTypeCode = form["display_type"].ToString();
             }
             if (form.ContainsKey("dithering_type"))
             {
@@ -297,6 +281,13 @@ public class UiController(
                 {
                     display.DitheringTypeCode = form["dithering_type"].ToString();
                 }
+            }
+
+            // If the color variant is not valid for the display type (this may happen if the user changes display type or color variant), set the color variant to first available for the display type to avoid rendering errors.
+            var validColorVariants = _displayService.GetColorVariants().Where(cv => cv.DisplayTypeCode == display.DisplayTypeCode).ToList();
+            if (!validColorVariants.Any(cv => cv.Code == display.ColorVariantCode))
+            {
+                display.ColorVariantCode = validColorVariants.First().Code;
             }
 
             _context.Update(display);

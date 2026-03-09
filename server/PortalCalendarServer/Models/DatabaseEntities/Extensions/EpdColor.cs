@@ -9,6 +9,9 @@ namespace PortalCalendarServer.Models.DatabaseEntities
         public bool IsBlack { get { return Code == "black"; } }
         public bool IsRed { get { return Code == "red"; } }
         public bool IsYellow { get { return Code == "yellow"; } }
+        public bool IsBlue { get { return Code == "blue"; } }
+        public bool IsGreen { get { return Code == "green"; } }
+        public bool IsOrange { get { return Code == "orange"; } }
 
         private Rgba32? _epdPreviewRgba32;
         // Parsed RGBA32 representation of HexValue for fast pixel comparison.

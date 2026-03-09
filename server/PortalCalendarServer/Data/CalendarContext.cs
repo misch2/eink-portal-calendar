@@ -226,7 +226,10 @@ public partial class CalendarContext : DbContext
                 new EpdColor { Code = "black", Name = "Black", HexValue = "000000", EpdPreviewHexValue = "111111" },
                 new EpdColor { Code = "white", Name = "White", HexValue = "FFFFFF", EpdPreviewHexValue = "dddddd" },
                 new EpdColor { Code = "red", Name = "Red", HexValue = "FF0000", EpdPreviewHexValue = "aa0000" },
-                new EpdColor { Code = "yellow", Name = "Yellow", HexValue = "FFFF00", EpdPreviewHexValue = "c0a010" }
+                new EpdColor { Code = "yellow", Name = "Yellow", HexValue = "FFFF00", EpdPreviewHexValue = "c0a010" },
+                new EpdColor { Code = "blue", Name = "Blue", HexValue = "0000FF", EpdPreviewHexValue = "5080b8" },
+                new EpdColor { Code = "green", Name = "Green", HexValue = "00FF00", EpdPreviewHexValue = "608050" },
+                new EpdColor { Code = "orange", Name = "Orange", HexValue = "FFA500", EpdPreviewHexValue = "cc8400" }
              );
         });
 
@@ -256,7 +259,8 @@ public partial class CalendarContext : DbContext
             entity.HasData(
                 new DisplayType { Code = "BW", Name = "Black and White", NumColors = 2, SortOrder = 100 },
                 new DisplayType { Code = "3C", Name = "3 Colors", NumColors = 3, SortOrder = 200 },
-                new DisplayType { Code = "4C", Name = "4 Colors", NumColors = 4, SortOrder = 300 }
+                new DisplayType { Code = "4C", Name = "4 Colors", NumColors = 4, SortOrder = 300 },
+                new DisplayType { Code = "6C", Name = "6 Colors", NumColors = 6, SortOrder = 400 }
              );
         });
 
@@ -291,14 +295,14 @@ public partial class CalendarContext : DbContext
 
 
             entity.HasMany(d => d.Displays).WithOne(p => p.ColorVariant)
-                .HasForeignKey(d => d.ColorVariantCode)
-                .OnDelete(DeleteBehavior.SetNull);
+                .HasForeignKey(d => d.ColorVariantCode);
 
             entity.HasData(
                 new ColorVariant { Code = "BW", Name = "Black and White", DisplayTypeCode = "BW", SortOrder = 1000 },
                 new ColorVariant { Code = "BWY", Name = "Black, White, Yellow", DisplayTypeCode = "3C", SortOrder = 2000 },
                 new ColorVariant { Code = "BWR", Name = "Black, White, Red", DisplayTypeCode = "3C", SortOrder = 2010 },
-                new ColorVariant { Code = "BWRY", Name = "Black, White, Red, Yellow", DisplayTypeCode = "4C", SortOrder = 3000 }
+                new ColorVariant { Code = "BWRY", Name = "Black, White, Red, Yellow", DisplayTypeCode = "4C", SortOrder = 3000 },
+                new ColorVariant { Code = "SpectraE6", Name = "Spectra E6 (Black, White, Red, Yellow, Blue, Green)", DisplayTypeCode = "6C", SortOrder = 4000 }
              );
         });
 
@@ -333,7 +337,14 @@ public partial class CalendarContext : DbContext
                 new ColorPaletteLink { Id = 9, ColorVariantCode = "BWRY", EpdColorCode = "black" },
                 new ColorPaletteLink { Id = 10, ColorVariantCode = "BWRY", EpdColorCode = "white" },
                 new ColorPaletteLink { Id = 11, ColorVariantCode = "BWRY", EpdColorCode = "red" },
-                new ColorPaletteLink { Id = 12, ColorVariantCode = "BWRY", EpdColorCode = "yellow" }
+                new ColorPaletteLink { Id = 12, ColorVariantCode = "BWRY", EpdColorCode = "yellow" },
+
+                new ColorPaletteLink { Id = 13, ColorVariantCode = "SpectraE6", EpdColorCode = "black" },
+                new ColorPaletteLink { Id = 14, ColorVariantCode = "SpectraE6", EpdColorCode = "white" },
+                new ColorPaletteLink { Id = 15, ColorVariantCode = "SpectraE6", EpdColorCode = "red" },
+                new ColorPaletteLink { Id = 16, ColorVariantCode = "SpectraE6", EpdColorCode = "yellow" },
+                new ColorPaletteLink { Id = 17, ColorVariantCode = "SpectraE6", EpdColorCode = "blue" },
+                new ColorPaletteLink { Id = 18, ColorVariantCode = "SpectraE6", EpdColorCode = "green" }
             );
         });
 

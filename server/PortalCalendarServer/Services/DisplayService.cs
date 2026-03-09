@@ -525,7 +525,7 @@ public class DisplayService(
             // FIXME use a reasonable default! Or, ideally, in the setup and have this as non-nullable and required in BitmapOptions
             var colorVariant = display.ColorVariant
                 ?? throw new InvalidOperationException("Display has no ColorVariant assigned");
-            var bitmap = _convertToEpaperFormatV2(img, colorVariant);   // FIXME size!
+            var bitmap = _convertToEpaperFormatV2(img, colorVariant);
             var checksum = ComputeSHA1(bitmap);
 
             // Output format: "MM\n" + checksum + "\n" + bitmap data
@@ -725,51 +725,67 @@ public class DisplayService(
 
     private byte[] _convertToEpaperFormatV2(Image<Rgba32> img, ColorVariant colorVariant)
     {
-        using var ms = new MemoryStream();
-
         var displayType = colorVariant.DisplayType
             ?? throw new InvalidOperationException("ColorVariant has no associated DisplayType");
 
-        // We are converting a pre-generated PNG. While quantized already to the real palette, it's still in a full RGBA format,
-        // so we need to classify each pixel into the correct e-paper color and then convert to the native format (1-bit, 2-bit, 4-bit, etc.)
-        // based on the number of colors supported by the display type.
+        // Pre-compute bits per pixel and mask based on NumColors (invariant for the whole image)
+        int bitsPerPixel;
+        byte mask;
+        if (displayType.NumColors <= 2)
+        {
+            bitsPerPixel = 1;
+            mask = 0x01;
+        }
+        else if (displayType.NumColors <= 4)
+        {
+            bitsPerPixel = 2;
+            mask = 0x03;
+        }
+        else if (displayType.NumColors <= 8)
+        {
+            bitsPerPixel = 4;
+            mask = 0x07;
+        }
+        else
+        {
+            bitsPerPixel = 8;
+            mask = 0xFF;
+        }
+
+        // Build a RGB → transfer byte lookup table upfront to avoid per-pixel ClassifyPixelColor + EpdColorToTransferFormat
+        var epdColors = colorVariant.EpdColors.ToArray();
+        var colorLookup = new Dictionary<uint, byte>(epdColors.Length);
+        foreach (var epdColor in epdColors)
+        {
+            var c = epdColor.EpdPreviewRgba32Value;
+            var key = ((uint)c.R << 16) | ((uint)c.G << 8) | c.B;
+            colorLookup[key] = EpdColorToTransferFormat(epdColor);
+        }
+
+        var ms = new MemoryStream();
 
         // Process each row of pixels
         img.ProcessPixelRows(accessor =>
         {
-            var epdColors = colorVariant.EpdColors.ToArray();
             for (int y = 0; y < accessor.Height; y++)
             {
                 var rowSpan = accessor.GetRowSpan(y);
 
                 byte outputByte = 0;
-                byte outBits = 0;
-                // FIXME speed!!!!!!!!!
-                foreach (var pixel in rowSpan)
-                {
-                    var detectedColor = ClassifyPixelColor(pixel, epdColors);
-                    var transferColor = EpdColorToTransferFormat(detectedColor);
+                int outBits = 0;
 
-                    if (displayType.NumColors <= 2)
+                for (int x = 0; x < rowSpan.Length; x++)
+                {
+                    ref readonly var pixel = ref rowSpan[x];
+                    var key = ((uint)pixel.R << 16) | ((uint)pixel.G << 8) | pixel.B;
+
+                    if (!colorLookup.TryGetValue(key, out var transferColor))
                     {
-                        outputByte = (byte)((outputByte << 1) | (transferColor & 0x01));
-                        outBits++;
+                        throw new InvalidOperationException($"Pixel color #{pixel.R:X2}{pixel.G:X2}{pixel.B:X2} not found in EPD color palette");
                     }
-                    else if (displayType.NumColors <= 4)
-                    {
-                        outputByte = (byte)((outputByte << 2) | (transferColor & 0x03));
-                        outBits += 2;
-                    }
-                    else if (displayType.NumColors <= 8)
-                    {
-                        outputByte = (byte)((outputByte << 4) | (transferColor & 0x07));
-                        outBits += 4;
-                    }
-                    else
-                    {
-                        outputByte = transferColor;
-                        outBits = 8;
-                    }
+
+                    outputByte = (byte)((outputByte << bitsPerPixel) | (transferColor & mask));
+                    outBits += bitsPerPixel;
 
                     if (outBits == 8)
                     {
@@ -782,10 +798,7 @@ public class DisplayService(
                 {
                     // final byte if needed
                     ms.WriteByte(outputByte);
-                    outputByte = 0;
-                    outBits = 0;
                 }
-
             }
         });
 
@@ -826,9 +839,9 @@ public class DisplayService(
         if (color.IsBlack) return 1;
         if (color.IsRed) return 2;
         if (color.IsYellow) return 3;
-        //if (color.IsBlue) return 4;   // FIXME todo
-        //if (color.IsGreen) return 5;
-        //if (color.IsOrange) return 6;
+        if (color.IsBlue) return 4;
+        if (color.IsGreen) return 5;
+        if (color.IsOrange) return 6;
         return 7; // white fallback
     }
 
