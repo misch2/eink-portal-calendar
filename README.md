@@ -12,8 +12,7 @@
 If you are interested in building this, please **consider using the [ZivyObraz](https://zivyobraz.eu/) service instead**. 
 It's very reasonably priced (and first year free, IIRC), comes with a precompiled firmware for LaskaKit board and it is incredibly easy to use and set up.
 
-Getting a copy of my project to work requires some non-trivial knowledge and I would only recommend it to people who like experimenting and who are willing to take this project as an inspiration for their own work. 
-I *can't guarantee* that any of READMEs is up to date and that there are not hidden obstacles in getting the client or server part running. This repository contains almost all the source files for my calendars, but there are configuration files specific for my environment (e.g. WiFi password, server IP addresses etc.) and while I tried to put an equivalent of these files to the `client/include/boards/example/` and `client/include/boards/example_4color_GDEM075F52_and_laskakit_ESPink_v2.5/` folders, I can't guarantee it's directly usable without any modifications.
+Getting a copy of my project to work requires some basic software knowledge and I would only recommend it to people who like experimenting or are willing to take this project as an inspiration for their own work. 
 
 ## Summary
 
