@@ -8,8 +8,6 @@
 #define RST_PIN 16  // RES
 #define BUSY_PIN 4  // PIN_BUSY
 
-#define SPLIT_DISPLAY_INTO_N_PAGES 2  // memory issues with full page buffer
-
 #define VOLTAGE_ADC_PIN 34
 #define VOLTAGE_MULTIPLICATION_COEFFICIENT 1.769388
 #define VOLTAGE_MIN 3.0
