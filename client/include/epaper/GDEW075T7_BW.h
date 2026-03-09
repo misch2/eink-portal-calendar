@@ -5,7 +5,7 @@
 
 #define DISPLAY_WIDTH 800
 #define DISPLAY_HEIGHT 480
-#define DISPLAY_TYPE_BW  // black and white
+#define DISPLAY_TYPE_BW
 
-#define DISPLAY_CLASS_TYPE GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2>
+#define DISPLAY_CLASS_TYPE GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT>  // or HEIGHT/2 etc. for partial page buffer and memory savings
 #define DISPLAY_CLASS_ARGUMENTS (GxEPD2_750_T7(CS_PIN, DC_PIN, RST_PIN, BUSY_PIN))

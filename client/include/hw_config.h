@@ -17,19 +17,16 @@
 // handling.
 #ifdef DISPLAY_TYPE_BW
 #define DISPLAY_COLOR_TYPE_AS_STRING "BW"
-#define BITMAP_BPP 1
 #include <GxEPD2_BW.h>
 #endif
 
 #ifdef DISPLAY_TYPE_3C
 #define DISPLAY_COLOR_TYPE_AS_STRING "3C"
-#define BITMAP_BPP 1
 #include <GxEPD2_3C.h>
 #endif
 
 #ifdef DISPLAY_TYPE_4C
 #define DISPLAY_COLOR_TYPE_AS_STRING "4C"
-#define BITMAP_BPP 2
 #include <GxEPD2_4C.h>
 #endif
 

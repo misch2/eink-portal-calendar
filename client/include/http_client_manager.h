@@ -35,6 +35,7 @@ class HTTPClientManager {
 
   String statusCodeAsString(int statusCode);
   int readLineFromStream(WiFiClient* stream, String& result);
+  bool _displayPartialPageFromWeb(String& newChecksum);
 
  public:
   HTTPClientManager(Logger& logger, WDTManager& wdtManager, OTAManager& otaManager, VoltageReader& voltageReader, SystemInfo& systemInfo,

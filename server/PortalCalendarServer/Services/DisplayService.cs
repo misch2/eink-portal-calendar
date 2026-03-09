@@ -730,12 +730,13 @@ public class DisplayService(
         var displayType = colorVariant.DisplayType
             ?? throw new InvalidOperationException("ColorVariant has no associated DisplayType");
 
+        // We are converting a pre-generated PNG. While quantized already to the real palette, it's still in a full RGBA format,
+        // so we need to classify each pixel into the correct e-paper color and then convert to the native format (1-bit, 2-bit, 4-bit, etc.)
+        // based on the number of colors supported by the display type.
+
         // Process each row of pixels
         img.ProcessPixelRows(accessor =>
         {
-            // The image is already quantized to the exact palette, so classify
-            // each pixel by its RGB values into one of the known e-paper colors.
-
             var epdColors = colorVariant.EpdColors.ToArray();
             for (int y = 0; y < accessor.Height; y++)
             {

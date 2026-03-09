@@ -13,6 +13,8 @@ class DisplayManager {
   Logger& logger;
   WDTManager& wdt;
   OTAManager& ota;
+  static const uint16_t serverByteToGxEPDColor[8];
+  uint32_t startTime;
 
  public:
   DisplayManager(Logger& logger, WDTManager& wdtManager, OTAManager& otaManager);
@@ -27,5 +29,6 @@ class DisplayManager {
   int bytesPerRow();
   void beginBitmapDraw();
   void drawBitmapRow(unsigned char* data, int16_t y);
+  bool nextPageBitmapDraw();
   void endBitmapDraw();
 };
