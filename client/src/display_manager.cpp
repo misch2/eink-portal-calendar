@@ -14,6 +14,20 @@
 
 extern DISPLAY_CLASS_TYPE display;
 
+const uint16_t DisplayManager::serverByteToGxEPDColor[8] = {
+    // 1-bit (2 combinations) variants
+    GxEPD_WHITE,  // 0 = white
+    GxEPD_BLACK,  // 1 = black
+    // 2-bit (4 combinations) variants
+    GxEPD_RED,     // 2 = red
+    GxEPD_YELLOW,  // 3 = yellow
+    // 3-bit (8 combinations) variants
+    GxEPD_BLUE,    // 4 = blue
+    GxEPD_GREEN,   // 5 = green
+    GxEPD_ORANGE,  // 6 = orange
+    GxEPD_WHITE    // 7 = white (fallback)
+};
+
 DisplayManager::DisplayManager(Logger& logger, WDTManager& wdtManager, OTAManager& otaManager) : logger(logger), wdt(wdtManager), ota(otaManager) {}
 
 void DisplayManager::init() {
@@ -76,69 +90,94 @@ int DisplayManager::displayWidth() { return display.width(); }
 int DisplayManager::displayHeight() { return display.height(); }
 
 int DisplayManager::bytesPerRow() {
-#ifdef DISPLAY_TYPE_3C
-  return DISPLAY_BUFFER_SIZE * 2;
-#else
-  return DISPLAY_BUFFER_SIZE;
+#ifdef DISPLAY_TYPE_BW
+  return DISPLAY_WIDTH / 8;  // 8 pixels per byte
+#endif
+#if defined(DISPLAY_TYPE_3C) || defined(DISPLAY_TYPE_4C)
+  return DISPLAY_WIDTH / 4;  // 4 pixels per byte
+#endif
+#ifdef DISPLAY_TYPE_7C
+  return DISPLAY_WIDTH / 2;  // 2 pixels per byte
 #endif
 }
 
 void DisplayManager::beginBitmapDraw() {
-#ifdef DISPLAY_USE_PIXEL_DRAW
+  startTime = millis();
   display.fillScreen(GxEPD_WHITE);
-#endif
+  display.firstPage();
 }
 
 void DisplayManager::drawBitmapRow(unsigned char* data, int16_t y) {
-  int16_t x = 0;
   int16_t w = displayWidth();
+
+  int byteIndex = 0;
+  int16_t x = 0;
+  uint16_t color;
+  while (x < w) {
+    uint8_t byte = data[byteIndex];
+
 #ifdef DISPLAY_TYPE_BW
-  display.writeImage(data, x, y, w, 1);
+    // 1 bit per pixel = 8 pixels per byte
+    color = serverByteToGxEPDColor[(byte >> 7) & 0x01];
+    display.drawPixel(x, y, color);
+    x++;
+    color = serverByteToGxEPDColor[(byte >> 6) & 0x01];
+    display.drawPixel(x, y, color);
+    x++;
+    color = serverByteToGxEPDColor[(byte >> 5) & 0x01];
+    display.drawPixel(x, y, color);
+    x++;
+    color = serverByteToGxEPDColor[(byte >> 4) & 0x01];
+    display.drawPixel(x, y, color);
+    x++;
+    color = serverByteToGxEPDColor[(byte >> 3) & 0x01];
+    display.drawPixel(x, y, color);
+    x++;
+    color = serverByteToGxEPDColor[(byte >> 2) & 0x01];
+    display.drawPixel(x, y, color);
+    x++;
+    color = serverByteToGxEPDColor[(byte >> 1) & 0x01];
+    display.drawPixel(x, y, color);
+    x++;
+    color = serverByteToGxEPDColor[byte & 0x01];
+    display.drawPixel(x, y, color);
+    x++;
 #endif
-
-#ifdef DISPLAY_TYPE_3C
-  unsigned char* monoData = data;
-  unsigned char* colorData = data + DISPLAY_BUFFER_SIZE;
-#ifdef DISPLAY_USE_PIXEL_DRAW
-  for (int i = 0; i < DISPLAY_BUFFER_SIZE; i++) {
-    uint8_t monoByte = monoData[i];
-    uint8_t colorByte = colorData[i];
-
-    for (int bit = 7; bit >= 0; bit--) {
-      uint16_t color;
-      bool isBlack = (monoByte & (1 << bit)) == 0;
-      bool isColor = (colorByte & (1 << bit)) == 0;
-
-      if (isBlack) {
-        color = GxEPD_BLACK;
-      } else if (isColor) {
-        color = GxEPD_RED;
-      } else {
-        color = GxEPD_WHITE;
-      }
-
-      int pixelX = x + (i * 8 + (7 - bit));
-      display.drawPixel(pixelX, y, color);
-    }
+#if defined(DISPLAY_TYPE_3C) || defined(DISPLAY_TYPE_4C)
+    // 2 bits per pixel = 4 pixels per byte
+    color = serverByteToGxEPDColor[(byte >> 6) & 0x03];
+    display.drawPixel(x, y, color);
+    x++;
+    color = serverByteToGxEPDColor[(byte >> 4) & 0x03];
+    display.drawPixel(x, y, color);
+    x++;
+    color = serverByteToGxEPDColor[(byte >> 2) & 0x03];
+    display.drawPixel(x, y, color);
+    x++;
+    color = serverByteToGxEPDColor[byte & 0x03];
+    display.drawPixel(x, y, color);
+    x++;
+#endif
+#ifdef DISPLAY_TYPE_7C
+    // 3 bits per pixel = 2 pixels per byte (lower 3 bits used)
+    color = serverByteToGxEPDColor[(byte >> 4) & 0x07];
+    display.drawPixel(x, y, color);
+    x++;
+    color = serverByteToGxEPDColor[byte & 0x07];
+    display.drawPixel(x, y, color);
+    x++;
+#endif
+    byteIndex++;
   }
-#else
-  display.writeImage(monoData, colorData, x, y, w, 1);
-#endif
-#endif
+}
 
-#ifdef DISPLAY_TYPE_4C
-  display.writeNative(data, nullptr, x, y, w, 1, false, false, false);
-#endif
+bool DisplayManager::nextPageBitmapDraw() {
+  wdt.ping();
+  logger.debug("Refreshing display page");
+  return display.nextPage();
 }
 
 void DisplayManager::endBitmapDraw() {
-  logger.debug("Refreshing display");
-  wdt.ping();
-  uint32_t startTime = millis();
-#ifdef DISPLAY_USE_PIXEL_DRAW
-  display.display();
-#else
-  display.refresh();
-#endif
+  //
   logger.debug("Display refresh time: %lu ms", millis() - startTime);
 }

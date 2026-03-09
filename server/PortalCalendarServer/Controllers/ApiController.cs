@@ -261,11 +261,12 @@ public class ApiController : ControllerBase
         return Ok(response);
     }
 
-    // GET /api/device/bitmap/epaper?mac=XX:XX:XX:XX:XX:XX
+    // GET /api/device/bitmap/epaper?mac=XX:XX:XX:XX:XX:XX[&fmt=1]
     [HttpGet("device/bitmap/epaper")]
     [Tags("Device API")]
     public async Task<IActionResult> BitmapEpaper(
-        [FromQuery] string? mac
+        [FromQuery] string? mac,
+        [FromQuery] int fmt = 1
         )
     {
         var display = await GetDisplayByMacAsync(mac);
@@ -288,7 +289,7 @@ public class ApiController : ControllerBase
         // API:
         var bitmap = _displayService.ConvertExistingRawBitmap(
             displayId: display.Id,
-            format: OutputFormat.EpaperSpecific,
+            format: fmt == 2 ? OutputFormat.EpaperSpecificV2 : OutputFormat.EpaperSpecificV1,
             rotate: null,
             flip: null
             );

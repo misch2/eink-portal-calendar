@@ -139,23 +139,38 @@ bool HTTPClientManager::loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMod
 }
 
 bool HTTPClientManager::showRawBitmapFromWeb() {
-  String path = "/api/device/bitmap/epaper";
+  String newChecksum = "?";
+  displayManager.beginBitmapDraw();
 
-  int rowBytes = displayManager.bytesPerRow();
-  static unsigned char row_buffer[DISPLAY_BUFFER_SIZE * 2];  // max needed (3C uses 2x)
+  do {
+    if (!_displayPartialPageFromWeb(newChecksum)) {
+      return false;
+    }
+  } while (displayManager.nextPageBitmapDraw());
+
+  displayManager.endBitmapDraw();
+
+  // Update checksum in semi-permanent storage for next time
+  strncpy(lastChecksum, newChecksum.c_str(), 64);
+  lastChecksum[64] = '\0';
+
+  return true;
+}
+
+bool HTTPClientManager::_displayPartialPageFromWeb(String& newChecksum) {
+  static unsigned char row_buffer[DISPLAY_WIDTH];  // 1 byte per pixel as a theoretical worst case, actual may be less depending on display type
 
   uint32_t startTime = millis();
 
+  String path = "/api/device/bitmap/epaper";
   String url = serverUrl + path + "?" +      //
                "mac=" + WiFi.macAddress() +  //
-               "&fmt=1"                      // format 1 = raw bitmap with header (see below), format 2 = TODO
+               "&fmt=2"                      // format 2 = optimized for simple pixel drawing, no HW-specific code on server side
       ;
   logger.debug("Loading bitmap from: %s", url.c_str());
 
+  int rowBytes = displayManager.bytesPerRow();
   bool ok = false;
-  String newChecksum = String(lastChecksum);
-
-  displayManager.beginBitmapDraw();
 
   for (int attempt = 1; attempt <= 5; attempt++) {
     if (attempt > 1) {
@@ -254,12 +269,6 @@ bool HTTPClientManager::showRawBitmapFromWeb() {
     lastErrorMessage = "Failed to download image after all attempts";
     return false;
   }
-
-  displayManager.endBitmapDraw();
-
-  // Update checksum
-  strncpy(lastChecksum, newChecksum.c_str(), 64);
-  lastChecksum[64] = '\0';
 
   wdtManager.ping();
 

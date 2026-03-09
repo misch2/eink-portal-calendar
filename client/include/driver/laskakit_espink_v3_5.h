@@ -9,6 +9,8 @@
 #define RST_PIN 45   // RES
 #define BUSY_PIN 38  // PIN_BUSY
 
+#define SPLIT_DISPLAY_INTO_N_PAGES 1  // fits in memory, no need to split into multiple pages
+
 #define VOLTAGE_ADC_PIN 9
 #define VOLTAGE_MULTIPLICATION_COEFFICIENT 1.769388
 #define VOLTAGE_MIN 3.0

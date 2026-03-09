@@ -6,7 +6,8 @@ namespace PortalCalendarServer.Models.POCOs.Bitmap
     public enum OutputFormat
     {
         Png,
-        EpaperSpecific
+        EpaperSpecificV1,
+        EpaperSpecificV2
     }
 
     public class BitmapOptions

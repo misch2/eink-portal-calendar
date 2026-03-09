@@ -15,4 +15,3 @@
 #define SYSLOG_MYAPPNAME "epaper"
 
 #define DISPLAY_ROTATION 2  // see hw_config.h for details
-

@@ -496,12 +496,36 @@ public class DisplayService(
             img.SaveAsPng(ms);
             return new BitmapResult { Data = ms.ToArray(), ContentType = "image/png" };
         }
-        else if (options.Format == OutputFormat.EpaperSpecific)
+        else if (options.Format == OutputFormat.EpaperSpecificV1)
         {
             // FIXME use a reasonable default! Or, ideally, in the setup and have this as non-nullable and required in BitmapOptions
             var colorVariant = display.ColorVariant
                 ?? throw new InvalidOperationException("Display has no ColorVariant assigned");
             var bitmap = _convertToEpaperFormat(img, colorVariant);
+            var checksum = ComputeSHA1(bitmap);
+
+            // Output format: "MM\n" + checksum + "\n" + bitmap data
+            var output = Encoding.ASCII.GetBytes("MM\n")
+                .Concat(Encoding.ASCII.GetBytes(checksum + "\n"))
+                .Concat(bitmap)
+                .ToArray();
+
+            return new BitmapResult
+            {
+                Data = output,
+                ContentType = "application/octet-stream",
+                Headers = new Dictionary<string, string>
+                {
+                    ["Content-Transfer-Encoding"] = "binary"
+                }
+            };
+        }
+        else if (options.Format == OutputFormat.EpaperSpecificV2)
+        {
+            // FIXME use a reasonable default! Or, ideally, in the setup and have this as non-nullable and required in BitmapOptions
+            var colorVariant = display.ColorVariant
+                ?? throw new InvalidOperationException("Display has no ColorVariant assigned");
+            var bitmap = _convertToEpaperFormatV2(img, colorVariant);   // FIXME size!
             var checksum = ComputeSHA1(bitmap);
 
             // Output format: "MM\n" + checksum + "\n" + bitmap data
@@ -699,6 +723,75 @@ public class DisplayService(
         return ms.ToArray();
     }
 
+    private byte[] _convertToEpaperFormatV2(Image<Rgba32> img, ColorVariant colorVariant)
+    {
+        using var ms = new MemoryStream();
+
+        var displayType = colorVariant.DisplayType
+            ?? throw new InvalidOperationException("ColorVariant has no associated DisplayType");
+
+        // We are converting a pre-generated PNG. While quantized already to the real palette, it's still in a full RGBA format,
+        // so we need to classify each pixel into the correct e-paper color and then convert to the native format (1-bit, 2-bit, 4-bit, etc.)
+        // based on the number of colors supported by the display type.
+
+        // Process each row of pixels
+        img.ProcessPixelRows(accessor =>
+        {
+            var epdColors = colorVariant.EpdColors.ToArray();
+            for (int y = 0; y < accessor.Height; y++)
+            {
+                var rowSpan = accessor.GetRowSpan(y);
+
+                byte outputByte = 0;
+                byte outBits = 0;
+                // FIXME speed!!!!!!!!!
+                foreach (var pixel in rowSpan)
+                {
+                    var detectedColor = ClassifyPixelColor(pixel, epdColors);
+                    var transferColor = EpdColorToTransferFormat(detectedColor);
+
+                    if (displayType.NumColors <= 2)
+                    {
+                        outputByte = (byte)((outputByte << 1) | (transferColor & 0x01));
+                        outBits++;
+                    }
+                    else if (displayType.NumColors <= 4)
+                    {
+                        outputByte = (byte)((outputByte << 2) | (transferColor & 0x03));
+                        outBits += 2;
+                    }
+                    else if (displayType.NumColors <= 8)
+                    {
+                        outputByte = (byte)((outputByte << 4) | (transferColor & 0x07));
+                        outBits += 4;
+                    }
+                    else
+                    {
+                        outputByte = transferColor;
+                        outBits = 8;
+                    }
+
+                    if (outBits == 8)
+                    {
+                        ms.WriteByte(outputByte);
+                        outputByte = 0;
+                        outBits = 0;
+                    }
+                }
+                if (outBits > 0)
+                {
+                    // final byte if needed
+                    ms.WriteByte(outputByte);
+                    outputByte = 0;
+                    outBits = 0;
+                }
+
+            }
+        });
+
+        return ms.ToArray();
+    }
+
     /// <summary>
     /// Classify a quantized pixel into the closest e-paper color.
     /// The image is expected to already be quantized to the exact palette
@@ -714,6 +807,29 @@ public class DisplayService(
             }
         }
         throw new InvalidOperationException($"Pixel color #{pixel.R:X2}{pixel.G:X2}{pixel.B:X2} not found in EPD color palette");
+    }
+
+    // 1-bit (8 pixels per byte) formats:
+    //GxEPD_WHITE,   // 0 = white
+    //GxEPD_BLACK,   // 1 = black
+    // 2-bit (4 pixels per byte) formats:
+    //GxEPD_RED,     // 2 = red
+    //GxEPD_YELLOW,  // 3 = yellow
+    // 4-bit (2 pixels per byte) formats:
+    //GxEPD_BLUE,    // 4 = blue
+    //GxEPD_GREEN,   // 5 = green
+    //GxEPD_ORANGE,  // 6 = orange
+    //GxEPD_WHITE    // 7 = white (fallback)
+    private static byte EpdColorToTransferFormat(EpdColor color)
+    {
+        if (color.IsWhite) return 0;
+        if (color.IsBlack) return 1;
+        if (color.IsRed) return 2;
+        if (color.IsYellow) return 3;
+        //if (color.IsBlue) return 4;   // FIXME todo
+        //if (color.IsGreen) return 5;
+        //if (color.IsOrange) return 6;
+        return 7; // white fallback
     }
 
     private static string ComputeSHA1(byte[] data)
