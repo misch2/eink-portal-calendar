@@ -7,6 +7,6 @@ namespace PortalCalendarServer.Models.DatabaseEntities
         public string HexValue { get; set; } = null!;
         public string EpdPreviewHexValue { get; set; } = null!;
 
-        public virtual ICollection<ColorVariant> ColorVariants { get; set; } = new List<ColorVariant>();
+        public ICollection<ColorVariant> ColorVariants { get; set; } = new List<ColorVariant>();
     }
 }

@@ -28,28 +28,35 @@ public class DisplayService(
             .ToList();
     }
 
-    public Display? GetDisplayById(int displayNumber)
+    public Display GetDisplayById(int displayNumber)
     {
         var display = context.Displays
             .Include(d => d.Configs)
             .Include(d => d.DisplayType)
             .Include(d => d.ColorVariant)
+                .ThenInclude(cv => cv.EpdColors)
+            .Include(d => d.ColorVariant)
+                .ThenInclude(cv => cv.DisplayType)
             .Include(d => d.Theme)
-            .FirstOrDefault(d => d.Id == displayNumber);
+            .AsSplitQuery()
+            .Single(d => d.Id == displayNumber);
         return display;
     }
 
     public Display GetDefaultDisplay()
     {
-        return context.Displays.Single(d => d.Id == 0);
+        return context.Displays
+            .Include(d => d.Configs)
+            .Single(d => d.Id == 0);
     }
 
     public List<DisplayType> GetDisplayTypes()
     {
         return context.DisplayTypes
             .Include(dt => dt.ColorVariants)
-            .ThenInclude(cv => cv.EpdColors)
+                .ThenInclude(cv => cv.EpdColors)
             .OrderBy(dt => dt.SortOrder)
+            .AsSplitQuery()
             .ToList();
     }
 
@@ -501,9 +508,7 @@ public class DisplayService(
         }
         else if (options.Format == OutputFormat.EpaperSpecificV1)
         {
-            // FIXME use a reasonable default! Or, ideally, in the setup and have this as non-nullable and required in BitmapOptions
-            var colorVariant = display.ColorVariant
-                ?? throw new InvalidOperationException("Display has no ColorVariant assigned");
+            var colorVariant = display.ColorVariant;
             var bitmap = _convertToEpaperFormat(img, colorVariant);
             var checksum = ComputeSHA1(bitmap);
 
@@ -525,9 +530,7 @@ public class DisplayService(
         }
         else if (options.Format == OutputFormat.EpaperSpecificV2)
         {
-            // FIXME use a reasonable default! Or, ideally, in the setup and have this as non-nullable and required in BitmapOptions
-            var colorVariant = display.ColorVariant
-                ?? throw new InvalidOperationException("Display has no ColorVariant assigned");
+            var colorVariant = display.ColorVariant;
             var bitmap = _convertToEpaperFormatV2(img, colorVariant);
             var checksum = ComputeSHA1(bitmap);
 
@@ -564,8 +567,7 @@ public class DisplayService(
     {
         using var ms = new MemoryStream();
 
-        var displayType = colorVariant.DisplayType
-            ?? throw new InvalidOperationException("ColorVariant has no associated DisplayType");
+        var displayType = colorVariant.DisplayType;
 
         // Process each row of pixels
         img.ProcessPixelRows(accessor =>
@@ -728,8 +730,7 @@ public class DisplayService(
 
     private byte[] _convertToEpaperFormatV2(Image<Rgba32> img, ColorVariant colorVariant)
     {
-        var displayType = colorVariant.DisplayType
-            ?? throw new InvalidOperationException("ColorVariant has no associated DisplayType");
+        var displayType = colorVariant.DisplayType;
 
         // Pre-compute bits per pixel and mask based on NumColors (invariant for the whole image)
         int bitsPerPixel;
@@ -894,11 +895,6 @@ public class DisplayService(
             ret.ErrorMessage = "No rendered bitmap available for this display yet";
             return ret;
         }
-        if (display.DisplayType == null)
-        {
-            ret.ErrorMessage = "Display type information is missing for this display";
-            return ret;
-        }
 
         rotate ??= display.Rotation;
         flip ??= "";
@@ -914,10 +910,10 @@ public class DisplayService(
             Rotate = rotate!.Value,
             Flip = flip,
             Gamma = display.Gamma!.Value,
-            NumColors = display.DisplayType!.NumColors,
+            NumColors = display.DisplayType.NumColors,
             ColormapColors = color_palette,
             Format = format,
-            DisplayType = display.DisplayType!,
+            DisplayType = display.DisplayType,
             DitheringType = display.DitheringTypeCode
         };
 

@@ -10,5 +10,5 @@ public partial class Config
 
     public int DisplayId { get; set; }
 
-    public virtual Display Display { get; set; } = null!;
+    public Display Display { get; set; } = null!;
 }

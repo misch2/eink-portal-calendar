@@ -17,10 +17,12 @@ public partial class Display
     public DisplayRotation Rotation { get; set; }
 
     public required string DisplayTypeCode { get; set; }
-    public virtual DisplayType DisplayType { get; set; } = null!;
+
+    public DisplayType DisplayType { get; set; } = null!;
 
     public required string ColorVariantCode { get; set; }
-    public virtual ColorVariant ColorVariant { get; set; } = null!;
+
+    public ColorVariant ColorVariant { get; set; } = null!;
 
     public double? Gamma { get; set; }
 
@@ -35,13 +37,13 @@ public partial class Display
     public string? Firmware { get; set; }
 
     public int? ThemeId { get; set; }
-    public virtual Theme? Theme { get; set; }
+    public Theme? Theme { get; set; }
 
     public string? DitheringTypeCode { get; set; }
-    public virtual DitheringType? DitheringType { get; set; }
+    public DitheringType? DitheringType { get; set; }
 
     public DateTime? RenderedAt { get; set; }
     public string? RenderErrors { get; set; }
 
-    public virtual ICollection<Config> Configs { get; set; } = new List<Config>();
+    public ICollection<Config> Configs { get; set; } = new List<Config>();
 }

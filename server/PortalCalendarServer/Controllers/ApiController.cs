@@ -50,7 +50,9 @@ public class ApiController : ControllerBase
         }
 
         mac = mac.ToLowerInvariant();
-        var display = await _context.Displays.FirstOrDefaultAsync(d => d.Mac == mac);
+        var display = await _context.Displays
+            .Include(d => d.Configs)
+            .SingleOrDefaultAsync(d => d.Mac == mac);
 
         if (display == null)
         {

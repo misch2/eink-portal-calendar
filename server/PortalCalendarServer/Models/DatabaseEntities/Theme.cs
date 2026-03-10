@@ -16,5 +16,5 @@ public class Theme
 
     public bool IsDefault { get; set; } = false;
 
-    public virtual ICollection<Display> Displays { get; set; } = new List<Display>();
+    public ICollection<Display> Displays { get; set; } = new List<Display>();
 }
