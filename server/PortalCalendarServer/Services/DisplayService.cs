@@ -47,6 +47,8 @@ public class DisplayService(
     public List<DisplayType> GetDisplayTypes()
     {
         return context.DisplayTypes
+            .Include(dt => dt.ColorVariants)
+            .ThenInclude(cv => cv.EpdColors)
             .OrderBy(dt => dt.SortOrder)
             .ToList();
     }
@@ -54,6 +56,7 @@ public class DisplayService(
     public List<ColorVariant> GetColorVariants()
     {
         return context.ColorVariants
+            .Include(cv => cv.EpdColors)
             .OrderBy(cv => cv.DisplayTypeCode)
             .ThenBy(cv => cv.SortOrder)
             .ToList();

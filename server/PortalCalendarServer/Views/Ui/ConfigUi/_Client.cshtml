@@ -2,7 +2,46 @@
 @using PortalCalendarServer.Models.DatabaseEntities
 @using PortalCalendarServer.Models.POCOs
 @using PortalCalendarServer.Services
+@using Microsoft.AspNetCore.Html
 @inject IDisplayService DisplayService
+
+@functions {
+    enum SwatchContext { DisplayType, ColorVariant }
+
+    // Returns the swatch span(s) for a list of EPD colors.
+    // For 3-color types with both a red and yellow color, renders a single diagonal split swatch.
+    // Otherwise renders one swatch per color.
+    static IHtmlContent SwatchSpans(IEnumerable<EpdColor> colors, SwatchContext context, string displayTypeCode)
+    {
+        var list = colors.ToList();
+        var html = new System.Text.StringBuilder();
+
+        var red    = list.FirstOrDefault(c => c.IsRed);
+        var yellow = list.FirstOrDefault(c => c.IsYellow);
+
+        bool useSplit = context == SwatchContext.DisplayType
+                        && displayTypeCode == "3C"
+                        && red != null
+                        && yellow != null;
+
+        if (useSplit)
+        {
+            foreach (var ec in list.Where(c => !c.IsRed && !c.IsYellow))
+                html.Append($"<span class=\"color-swatch\" style=\"background:#{ec.HexValue};\"></span>");
+
+            // Diagonal split: yellow (bottom-left) / red (top-right)
+            html.Append($"<span class=\"color-swatch color-swatch--split\" " +
+                        $"style=\"--swatch-color-a:#{yellow!.HexValue};--swatch-color-b:#{red!.HexValue};\"></span>");
+        }
+        else
+        {
+            foreach (var ec in list)
+                html.Append($"<span class=\"color-swatch\" style=\"background:#{ec.HexValue};\"></span>");
+        }
+
+        return new HtmlString(html.ToString());
+    }
+}
 
 <fieldset class="row mb-3">
     @await Html.PartialAsync("_ConfigCheckbox", new ConfigInputModel
@@ -25,24 +64,80 @@
     </fieldset>
 
     <fieldset class="row mb-3">
+        @{
+            var allColorVariants = DisplayService.GetColorVariants();
+        }
+
         <div class="col-md-4">
-            <label for="display_type">Display type</label>
-            <select id="display_type" name="display_type" class="form-select">
-                @foreach (var type in DisplayService.GetDisplayTypes())
-                {
-                    <option value="@type.Code" selected="@(Model.DisplayTypeCode == type.Code)">@type.Name</option>
-                }
-            </select>
+            <label for="display_type_btn">Display type</label>
+            @{
+                var selectedType = DisplayService.GetDisplayTypes().First(t => t.Code == Model.DisplayTypeCode);
+            }
+            <input type="hidden" id="display_type" name="display_type" value="@Model.DisplayTypeCode">
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex align-items-center gap-2"
+                        type="button" id="display_type_btn" data-bs-toggle="dropdown" aria-expanded="false">
+                    @{
+                        var selectedTypeVariants = allColorVariants.Where(cv => cv.DisplayTypeCode == Model.DisplayTypeCode).ToList();
+                    }
+                    <span class="d-flex gap-1">
+                        @SwatchSpans(selectedTypeVariants.SelectMany(cv => cv.EpdColors).DistinctBy(c => c.Code), SwatchContext.DisplayType, Model.DisplayTypeCode)
+                    </span>
+                    <span>@(selectedType.Name)</span>
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="display_type_btn">
+                    @foreach (var type in DisplayService.GetDisplayTypes())
+                    {
+                        var variants = allColorVariants.Where(cv => cv.DisplayTypeCode == type.Code).ToList();
+                        var swatchColors = variants.SelectMany(cv => cv.EpdColors).DistinctBy(c => c.Code).ToList();
+                        <li>
+                            <button type="button"
+                                    class="dropdown-item d-flex align-items-center gap-2 @(Model.DisplayTypeCode == type.Code ? "active" : "")"
+                                    data-value="@type.Code">
+                                <span class="d-flex gap-1">
+                                    @SwatchSpans(swatchColors, SwatchContext.DisplayType, type.Code)
+                                </span>
+                                <span>@type.Name</span>
+                            </button>
+                        </li>
+                    }
+                </ul>
+            </div>
         </div>
+
         <div class="col-md-4">
-            <label for="color_variant">Color variant</label>
-            <select id="color_variant" name="color_variant" class="form-select">
-                @foreach (var variant in DisplayService.GetColorVariants().Where(cv => cv.DisplayTypeCode == Model.DisplayTypeCode))
-                {
-                    <option value="@variant.Code" selected="@(Model.ColorVariantCode == variant.Code)">@variant.Name</option>
-                }
-            </select>
+            <label for="color_variant_btn">Color variant</label>
+            @{
+                var selectedVariant = allColorVariants.First(cv => cv.Code == Model.ColorVariantCode);
+            }
+            <input type="hidden" id="color_variant" name="color_variant" value="@Model.ColorVariantCode">
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex align-items-center gap-2"
+                        type="button" id="color_variant_btn" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="d-flex gap-1">
+                        @SwatchSpans(selectedVariant.EpdColors, SwatchContext.ColorVariant, selectedVariant.DisplayTypeCode)
+                    </span>
+                    <span>@(selectedVariant.Name)</span>
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="color_variant_btn">
+                    @foreach (var variant in allColorVariants)
+                    {
+                        <li data-display-type="@variant.DisplayTypeCode"
+                            @(variant.DisplayTypeCode != Model.DisplayTypeCode ? "style=\"display:none\"" : "")>
+                            <button type="button"
+                                    class="dropdown-item d-flex align-items-center gap-2 @(Model.ColorVariantCode == variant.Code ? "active" : "")"
+                                    data-value="@variant.Code">
+                                <span class="d-flex gap-1">
+                                    @SwatchSpans(variant.EpdColors, SwatchContext.ColorVariant, variant.DisplayTypeCode)
+                                </span>
+                                <span>@variant.Name</span>
+                            </button>
+                        </li>
+                    }
+                </ul>
+            </div>
         </div>
+
         <div class="col-md-4">
             <label for="dithering_type">Dithering</label>
             <select id="dithering_type" name="dithering_type" class="form-select">
@@ -117,3 +212,65 @@
         HelpText = "Minimal number of failures the display is considered to be frozen and before a notification is sent."
     })
 </fieldset>
+
+<script>
+    (function () {
+        function initRichDropdown(btnId, hiddenInputId) {
+            var dropdown = document.getElementById(btnId)?.closest('.dropdown');
+            if (!dropdown) return;
+            dropdown.querySelectorAll('.dropdown-item[data-value]').forEach(function (item) {
+                item.addEventListener('click', function () {
+                    document.getElementById(hiddenInputId).value = this.dataset.value;
+
+                    var btn = dropdown.querySelector('.dropdown-toggle');
+                    btn.innerHTML = this.innerHTML;
+
+                    dropdown.querySelectorAll('.dropdown-item').forEach(function (el) {
+                        el.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                });
+            });
+        }
+
+        function refreshColorVariants(displayTypeCode, autoSelect) {
+            var variantDropdown = document.getElementById('color_variant_btn')?.closest('.dropdown');
+            if (!variantDropdown) return;
+
+            var menu = variantDropdown.querySelector('.dropdown-menu');
+            var items = menu.querySelectorAll('li[data-display-type]');
+
+            items.forEach(function (li) {
+                li.style.display = li.dataset.displayType === displayTypeCode ? '' : 'none';
+            });
+
+            if (!autoSelect) return;
+
+            // Auto-select the first visible variant
+            var firstVisible = menu.querySelector('li[data-display-type="' + displayTypeCode + '"] .dropdown-item');
+            if (firstVisible) {
+                document.getElementById('color_variant').value = firstVisible.dataset.value;
+                var btn = variantDropdown.querySelector('.dropdown-toggle');
+                btn.innerHTML = firstVisible.innerHTML;
+                variantDropdown.querySelectorAll('.dropdown-item').forEach(function (el) {
+                    el.classList.remove('active');
+                });
+                firstVisible.classList.add('active');
+            }
+        }
+
+        initRichDropdown('display_type_btn', 'display_type');
+        initRichDropdown('color_variant_btn', 'color_variant');
+        refreshColorVariants(document.getElementById('display_type')?.value, false);
+
+        // When display type changes, rebuild the color variant dropdown
+        var displayTypeDropdown = document.getElementById('display_type_btn')?.closest('.dropdown');
+        if (displayTypeDropdown) {
+            displayTypeDropdown.querySelectorAll('.dropdown-item[data-value]').forEach(function (item) {
+                item.addEventListener('click', function () {
+                    refreshColorVariants(this.dataset.value, true);
+                });
+            });
+        }
+    })();
+</script>

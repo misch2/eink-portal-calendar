@@ -163,3 +163,22 @@ body {
         font-size: 1.2rem;
     }
 }
+
+/* ── Color swatches ──────────────────────────────────────────────── */
+.color-swatch {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    border: 1px solid #aaa;
+    flex-shrink: 0;
+}
+
+.color-swatch--split {
+    /* diagonal split */
+    background: linear-gradient(
+        to bottom right,
+        var(--swatch-color-a) 50%,
+        var(--swatch-color-b) 50%
+    );
+}
