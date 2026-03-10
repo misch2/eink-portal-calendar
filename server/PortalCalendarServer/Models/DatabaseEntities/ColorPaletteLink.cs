@@ -6,7 +6,7 @@ namespace PortalCalendarServer.Models.DatabaseEntities
         public required string ColorVariantCode { get; set; }
         public required string EpdColorCode { get; set; }
 
-        public virtual ColorVariant ColorVariant { get; set; } = null!;
-        public virtual EpdColor EpdColor { get; set; } = null!;
+        public ColorVariant ColorVariant { get; set; } = null!;
+        public EpdColor EpdColor { get; set; } = null!;
     }
 }

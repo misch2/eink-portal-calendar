@@ -25,8 +25,10 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var d in Model)
+        @foreach (var _d in Model)
         {
+            var d = displayService.GetDisplayById(_d.Id);
+
             var dateCulture = displayService.GetDateCultureInfo(d);
             var tz = displayService.GetTimeZoneInfo(d);
 
@@ -51,10 +53,10 @@
                 </td>
                 <td>
                     @{
-                        var colorCode = d.DisplayType?.Code;
-                        if (d.ColorVariant?.Code != d.DisplayType?.Code)
+                        var colorCode = d.DisplayType.Code;
+                        if (d.ColorVariant.Code != d.DisplayType.Code)
                         {
-                            colorCode += "/" + @d.ColorVariant?.Code;
+                            colorCode += "/" + @d.ColorVariant.Code;
                         }
                     }
                     @colorCode

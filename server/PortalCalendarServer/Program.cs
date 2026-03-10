@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using PortalCalendarServer.Controllers.ModelBinders;
@@ -57,13 +58,18 @@ foreach (var kvp in builder.Configuration.GetSection("Paths").GetChildren())
 // Configure the SQLite connection string to use an absolute path
 var defaultConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
 builder.Services.AddDbContext<CalendarContext>(options =>
-    options.UseLazyLoadingProxies()
-    .UseSqlite(defaultConnectionString));
+{
+    options.UseSqlite(defaultConnectionString);
+    options.ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning));
+});
 
 // Session store database (separate SQLite file)
 var sessionConnectionString = builder.Configuration.GetConnectionString("SessionConnection")!;
 builder.Services.AddDbContext<SessionContext>(options =>
-    options.UseSqlite(sessionConnectionString));
+{
+    options.UseSqlite(sessionConnectionString);
+    options.ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning));
+});
 
 // Add services to the container
 // Support for both API and MVC controllers

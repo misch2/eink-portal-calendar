@@ -19,7 +19,7 @@ public interface IDisplayService
     /// <summary>
     /// Get a display by its ID
     /// </summary>
-    Display? GetDisplayById(int displayNumber);
+    Display GetDisplayById(int displayNumber);
 
     /// <summary>
     /// Get the default display (ID = 0) which holds default configuration values
