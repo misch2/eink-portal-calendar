@@ -3,11 +3,11 @@ name: Build and test client (PlatformIO)
 on:
   push:
     branches:
-      - main
-      - master
+      - "**"
   pull_request:
     branches:
-      - "*"
+      - main
+      - master
 
 jobs:
   build:
@@ -40,5 +40,10 @@ jobs:
       - name: Install PlatformIO
         run: pip install platformio
 
-      - name: Build
+      - name: Build (full suite)
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.event_name == 'pull_request'
         run: pio run -e test1 -e test2 -e test3 -e test4 -e example1 -e example2 -e example3
+
+      - name: Build (basic)
+        if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' && github.event_name != 'pull_request'
+        run: pio run -e example1
