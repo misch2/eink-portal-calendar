@@ -39,8 +39,9 @@ jobs:
         run: |
           TAG="${{ github.event.release.tag_name }}"
           REPO="${{ github.repository }}"
-          LINK="<a href=\\\"https://github.com/${REPO}/releases/tag/${TAG}\\\">${TAG}</a>"
-          sed -i "s|{DeployedVersion}|${LINK}|g" publish/appsettings.json
+          LINK="<a href=\"https://github.com/${REPO}/releases/tag/${TAG}\">${TAG}</a>"
+          jq --arg v "$LINK" '(.Deployment.Version) = $v' publish/appsettings.json > publish/appsettings.tmp.json
+          mv publish/appsettings.tmp.json publish/appsettings.json
 
       - name: Create ZIP
         run: cd publish && zip -r ../portal-calendar-server-windows-x64-${{ github.event.release.tag_name }}.zip .
