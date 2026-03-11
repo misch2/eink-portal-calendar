@@ -348,7 +348,13 @@ public class MdnsAdvertisementService : BackgroundService
     private record NicAddress(string NicName, IPAddress Address, int PrefixLength);
 
     /// <summary>
-    /// Returns IPv4 addresses with subnet info from physical LAN network interfaces.
+    /// Returns IPv4 addresses with subnet info from physical LAN network interfaces, excluding:
+    /// <list type="bullet">
+    ///   <item>Loopback (127.x)</item>
+    ///   <item>Link-local (169.254.x)</item>
+    ///   <item>Tailscale / CGNAT (100.64.0.0/10, i.e. 100.64–100.127.x.x)</item>
+    ///   <item>Tunnel and loopback adapters</item>
+    /// </list>
     /// </summary>
     private static List<NicAddress> GetLanNicAddresses()
     {
@@ -369,6 +375,9 @@ public class MdnsAdvertisementService : BackgroundService
                 if (ua.Address.AddressFamily != AddressFamily.InterNetwork)
                     continue;
 
+                if (IsExcludedAddress(ua.Address))
+                    continue;
+
                 result.Add(new NicAddress(nic.Name, ua.Address, ua.PrefixLength));
             }
         }
@@ -376,4 +385,22 @@ public class MdnsAdvertisementService : BackgroundService
         return result;
     }
 
+    private static bool IsExcludedAddress(IPAddress ip)
+    {
+        var bytes = ip.GetAddressBytes();
+
+        // Loopback 127.0.0.0/8
+        if (bytes[0] == 127)
+            return true;
+
+        // Link-local 169.254.0.0/16
+        if (bytes[0] == 169 && bytes[1] == 254)
+            return true;
+
+        // Tailscale CGNAT range 100.64.0.0/10 (100.64.x.x – 100.127.x.x)
+        if (bytes[0] == 100 && bytes[1] >= 64 && bytes[1] <= 127)
+            return true;
+
+        return false;
+    }
 }
