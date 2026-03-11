@@ -62,24 +62,115 @@ void DisplayManager::displayText(String message, const GFXfont* font) {
   display.setRotation(DISPLAY_ROTATION);  // see hw_config.h for details
 
   if (font == nullptr) {
-    font = &Open_Sans_Regular_24;
+    font = &Open_Sans_Regular_16;
   }
 
-  display.setFont(font);
-  display.setTextColor(GxEPD_BLACK);
+  const int16_t margin = 10;
+  const int16_t lineSpacing = 4;
+  const int16_t titleGap = 24;
+  const GFXfont* titleFont = &Open_Sans_Regular_24;
+  const char* titleText = "Error";
+
+  // Measure title
   int16_t tbx, tby;
   uint16_t tbw, tbh;
-  display.getTextBounds(message, 0, 0, &tbx, &tby, &tbw, &tbh);
-  uint16_t x = ((display.width() - tbw) / 2) - tbx;
-  uint16_t y = ((display.height() - tbh) / 2) - tby;
+  display.setFont(titleFont);
+  display.getTextBounds(titleText, 0, 0, &tbx, &tby, &tbw, &tbh);
+  int16_t titleHeight = tbh;
+  int16_t titleBaselineOffset = -tby;  // distance from top of bounding box to baseline
+
+  // Split message into lines
+  String lines[20];
+  int lineCount = 0;
+  int start = 0;
+  for (int i = 0; i <= (int)message.length(); i++) {
+    if (i == (int)message.length() || message[i] == '\n') {
+      lines[lineCount++] = message.substring(start, i);
+      start = i + 1;
+      if (lineCount >= 20) break;
+    }
+  }
+
+  // Word-wrap lines that exceed the available width
+  int16_t maxWidth = display.width() - 2 * margin;
+  String wrappedLines[40];
+  int wrappedCount = 0;
+  display.setFont(font);
+  for (int i = 0; i < lineCount && wrappedCount < 40; i++) {
+    if (lines[i].length() == 0) {
+      wrappedLines[wrappedCount++] = "";
+      continue;
+    }
+    display.getTextBounds(lines[i], 0, 0, &tbx, &tby, &tbw, &tbh);
+    if ((int16_t)tbw <= maxWidth) {
+      wrappedLines[wrappedCount++] = lines[i];
+    } else {
+      // Wrap by words
+      String remaining = lines[i];
+      while (remaining.length() > 0 && wrappedCount < 40) {
+        String candidate = "";
+        int pos = 0;
+        int lastSpace = -1;
+        while (pos < (int)remaining.length()) {
+          char c = remaining[pos];
+          String test = candidate + c;
+          display.getTextBounds(test, 0, 0, &tbx, &tby, &tbw, &tbh);
+          if ((int16_t)tbw > maxWidth && candidate.length() > 0) break;
+          candidate = test;
+          if (c == ' ') lastSpace = pos;
+          pos++;
+        }
+        if (pos < (int)remaining.length() && lastSpace > 0) {
+          wrappedLines[wrappedCount++] = remaining.substring(0, lastSpace);
+          remaining = remaining.substring(lastSpace + 1);
+        } else {
+          wrappedLines[wrappedCount++] = candidate;
+          remaining = remaining.substring(pos);
+        }
+      }
+    }
+  }
+
+  // Measure body line height
+  display.setFont(font);
+  display.getTextBounds("Ag", 0, 0, &tbx, &tby, &tbw, &tbh);
+  int16_t bodyLineHeight = tbh + lineSpacing;
+  int16_t bodyBaselineOffset = -tby;
+
+  // Total height: title + gap + body lines
+  int16_t totalHeight = titleHeight + titleGap + wrappedCount * bodyLineHeight;
+  int16_t startY = (display.height() - totalHeight) / 2;
+  if (startY < margin) startY = margin;
 
   wdt.ping();
   display.firstPage();
   do {
     ota.loop();
     display.fillScreen(GxEPD_WHITE);
-    display.setCursor(x, y);
-    display.print(message);
+
+    // Draw title centered
+    display.setFont(titleFont);
+    display.setTextColor(GxEPD_BLACK);
+    display.getTextBounds(titleText, 0, 0, &tbx, &tby, &tbw, &tbh);
+    int16_t tx = (display.width() - tbw) / 2 - tbx;
+    display.setCursor(tx, startY + titleBaselineOffset);
+    display.print(titleText);
+
+    // Draw body lines, each horizontally centered
+    display.setFont(font);
+    display.setTextColor(GxEPD_BLACK);
+    int16_t y = startY + titleHeight + titleGap + bodyBaselineOffset;
+    for (int i = 0; i < wrappedCount; i++) {
+      if (wrappedLines[i].length() > 0) {
+        display.getTextBounds(wrappedLines[i], 0, 0, &tbx, &tby, &tbw, &tbh);
+        int16_t lx = (display.width() - tbw) / 2 - tbx;
+        if (lx < margin) lx = margin;
+        display.setCursor(lx, y);
+        display.print(wrappedLines[i]);
+      }
+      y += bodyLineHeight;
+    }
+
     wdt.ping();
   } while (display.nextPage());
   wdt.ping();
