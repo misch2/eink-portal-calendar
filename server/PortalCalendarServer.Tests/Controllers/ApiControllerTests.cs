@@ -146,8 +146,8 @@ public class ApiControllerTests : IntegrationServiceTestBase
         var controller = CreateController();
 
         var result = await controller.Config(
-            mac: null, fw: null, w: null, h: null, c: null,
-            adc: null, voltage_raw: null, v: null, vmin: null, vmax: null,
+            mac: null, fw: null, w: null, h: null, c: null, rotation: null,
+            voltage_raw: null, v: null, vmin: null, vmax: null,
             vlmin: null, vlmax: null, reset: null, wakeup: null);
 
         Assert.IsType<BadRequestObjectResult>(result);
@@ -159,8 +159,8 @@ public class ApiControllerTests : IntegrationServiceTestBase
         var controller = CreateController();
 
         var result = await controller.Config(
-            mac: "   ", fw: null, w: null, h: null, c: null,
-            adc: null, voltage_raw: null, v: null, vmin: null, vmax: null,
+            mac: "   ", fw: null, w: null, h: null, c: null, rotation: null,
+            voltage_raw: null, v: null, vmin: null, vmax: null,
             vlmin: null, vlmax: null, reset: null, wakeup: null);
 
         Assert.IsType<BadRequestObjectResult>(result);
@@ -191,8 +191,8 @@ public class ApiControllerTests : IntegrationServiceTestBase
 
         var controller = CreateController();
         var result = await controller.Config(
-            mac: newMac, fw: "1.0", w: 800, h: 480, c: "BW",
-            adc: null, voltage_raw: null, v: null, vmin: null, vmax: null,
+            mac: newMac, fw: "1.0", w: 800, h: 480, c: "BW", rotation: 0,
+            voltage_raw: null, v: null, vmin: null, vmax: null,
             vlmin: null, vlmax: null, reset: null, wakeup: null);
 
         Assert.IsType<OkObjectResult>(result);
@@ -223,8 +223,8 @@ public class ApiControllerTests : IntegrationServiceTestBase
 
         var controller = CreateController();
         await controller.Config(
-            mac: newMac, fw: null, w: 1200, h: 960, c: "3C",
-            adc: null, voltage_raw: null, v: null, vmin: null, vmax: null,
+            mac: newMac, fw: null, w: 1200, h: 960, c: "3C", rotation: 2,
+            voltage_raw: null, v: null, vmin: null, vmax: null,
             vlmin: null, vlmax: null, reset: null, wakeup: null);
 
         var created = await Context.Displays.FirstOrDefaultAsync(d => d.Mac == newMac);
@@ -255,8 +255,8 @@ public class ApiControllerTests : IntegrationServiceTestBase
 
         var controller = CreateController();
         var result = await controller.Config(
-            mac: newMac, fw: null, w: null, h: null, c: null,
-            adc: null, voltage_raw: null, v: null, vmin: null, vmax: null,
+            mac: newMac, fw: null, w: null, h: null, c: null, rotation: null,
+            voltage_raw: null, v: null, vmin: null, vmax: null,
             vlmin: null, vlmax: null, reset: null, wakeup: null);
 
         Assert.Equal(400, (result as BadRequestObjectResult)?.StatusCode);
@@ -283,8 +283,8 @@ public class ApiControllerTests : IntegrationServiceTestBase
 
         var controller = CreateController();
         var result = await controller.Config(
-            mac: display.Mac, fw: "2.5", w: null, h: null, c: null,
-            adc: null, voltage_raw: null, v: null, vmin: null, vmax: null,
+            mac: display.Mac, fw: "2.5", w: null, h: null, c: null, rotation: null,
+            voltage_raw: null, v: null, vmin: null, vmax: null,
             vlmin: null, vlmax: null, reset: null, wakeup: null);
 
         Assert.IsType<OkObjectResult>(result);
@@ -308,8 +308,8 @@ public class ApiControllerTests : IntegrationServiceTestBase
 
         var controller = CreateController();
         var result = await controller.Config(
-            mac: display.Mac, fw: null, w: null, h: null, c: null,
-            adc: null, voltage_raw: null, v: null, vmin: null, vmax: null,
+            mac: display.Mac, fw: null, w: null, h: null, c: null, rotation: null,
+            voltage_raw: null, v: null, vmin: null, vmax: null,
             vlmin: null, vlmax: null, reset: null, wakeup: null);
 
         var ok = Assert.IsType<OkObjectResult>(result);
@@ -334,8 +334,8 @@ public class ApiControllerTests : IntegrationServiceTestBase
         var controller = CreateController();
         // Supply MAC in upper-case — controller should lower-case it before looking up
         var result = await controller.Config(
-            mac: "EE:FF:00:11:22:33", fw: null, w: null, h: null, c: null,
-            adc: null, voltage_raw: null, v: null, vmin: null, vmax: null,
+            mac: "EE:FF:00:11:22:33", fw: null, w: null, h: null, c: null, rotation: null,
+            voltage_raw: null, v: null, vmin: null, vmax: null,
             vlmin: null, vlmax: null, reset: null, wakeup: null);
 
         Assert.IsType<OkObjectResult>(result);

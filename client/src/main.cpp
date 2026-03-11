@@ -112,6 +112,8 @@ void wakeupDisplayAndConnectWiFi() {
 
   voltageReader.read();
   otaManager.loop();
+  httpClientManager.init();  // must be after WiFi is connected
+
   if (!httpClientManager.loadConfigFromWeb(timing.configLoadTime, otaDebugModeNoSleep)) {
     showErrorOnDisplay(httpClientManager.lastErrorMessage);
   }

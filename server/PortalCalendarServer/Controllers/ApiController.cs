@@ -94,7 +94,6 @@ public class ApiController : ControllerBase
         return Ok(new { status = "healthy" });
     }
 
-
     // GET /api/device/config?mac=XX:XX:XX:XX:XX:XX&fw=1.0&w=800&h=480&c=BW&adc=2048&v=4.2&...
     [HttpGet("device/config")]
     [Tags("Device API")]
@@ -104,8 +103,8 @@ public class ApiController : ControllerBase
     [FromQuery] int? w,
     [FromQuery] int? h,
     [FromQuery] string? c,
-    [FromQuery] string? adc,
-    [FromQuery] string? voltage_raw,
+    [FromQuery(Name = "rot")] int? rotation,
+    [FromQuery(Name = "adc")] string? voltage_raw,
     [FromQuery] string? v,
     [FromQuery] string? vmin,
     [FromQuery] string? vmax,
@@ -138,13 +137,13 @@ public class ApiController : ControllerBase
             display = new Display
             {
                 Mac = mac.ToLowerInvariant(),
-                Name = $"New display with MAC {mac.ToUpperInvariant()} added on {DateTime.UtcNow}",
+                Name = $"New display with MAC {mac.ToUpperInvariant()}",
                 Width = w ?? 800,
                 Height = h ?? 480,
                 DisplayTypeCode = displayType.Code,
                 ColorVariantCode = defaultColorVariant.Code,
                 Firmware = fw ?? string.Empty,
-                Rotation = DisplayRotation.None,
+                Rotation = (DisplayRotation)(rotation ?? (int)DisplayRotation.None),
                 Gamma = 2.2,
                 BorderTop = 0,
                 BorderRight = 0,
@@ -158,7 +157,15 @@ public class ApiController : ControllerBase
 
             _logger.LogInformation("New display created with MAC {Mac}, ID: {Id}", mac, display.Id);
 
-            _displayService.EnqueueImageRegenerationRequest(display);
+            // Generate the bitmap NOW so that it's available immediately on the first config request.
+            try
+            {
+                await _pageGeneratorService.GenerateImageFromWebAsync(display);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to generate initial bitmap for new display {DisplayId}", display.Id);
+            }
         }
         else
         {
@@ -231,7 +238,7 @@ public class ApiController : ControllerBase
         }
 
         // Store voltage and diagnostic data
-        _displayService.SetConfig(display, "_last_voltage_raw", adc ?? voltage_raw ?? string.Empty);
+        _displayService.SetConfig(display, "_last_voltage_raw", voltage_raw ?? string.Empty);
         _displayService.SetConfig(display, "_last_voltage", v ?? string.Empty);
         _displayService.SetConfig(display, "_min_voltage", vmin ?? string.Empty);
         _displayService.SetConfig(display, "_max_voltage", vmax ?? string.Empty);

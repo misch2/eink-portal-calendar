@@ -31,17 +31,19 @@ class HTTPClientManager {
   int& sleepTime;
   char* lastChecksum;
   const char* defined_color_type;
-  const String serverUrl = String("http://") + CALENDAR_URL_HOST + ":" + String(CALENDAR_URL_PORT);
+  String serverUrl = "";
 
   String statusCodeAsString(int statusCode);
   int readLineFromStream(WiFiClient* stream, String& result);
   int _displayPartialPageFromWeb(String& newChecksum);
+  bool _verifyConfig();
 
  public:
   HTTPClientManager(Logger& logger, WDTManager& wdtManager, OTAManager& otaManager, VoltageReader& voltageReader, SystemInfo& systemInfo,
                     DisplayManager& displayManager, int& sleepTime, char* lastChecksum, const char* defined_color_type);
 
   String lastErrorMessage = "";
+  void init();
   bool loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMode);
   bool showRawBitmapFromWeb();
 };

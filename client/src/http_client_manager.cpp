@@ -1,6 +1,7 @@
 #include "http_client_manager.h"
 
 #include <ArduinoJson.h>
+#include <ESPmDNS.h>
 #include <HTTPClient.h>
 
 #include "display_manager.h"
@@ -46,6 +47,28 @@ String HTTPClientManager::statusCodeAsString(int statusCode) {
   }
 }
 
+void HTTPClientManager::init() {
+#ifdef USE_MDNS_FOR_SERVER
+  // Note: MDNS.begin() is already called by ArduinoOTA.begin() in OTAManager::init(),
+  // no need to call it again here.
+
+  logger.debug("mDNS: Querying for _portal-calendar._tcp service...");
+  int n = MDNS.queryService("portal-calendar", "tcp");
+  if (n == 0) {
+    logger.debug("mDNS: No service found");
+    lastErrorMessage = "mDNS: No portal-calendar service found";
+    return;
+  }
+
+  IPAddress ip = MDNS.IP(0);
+  uint16_t port = MDNS.port(0);
+  logger.debug("mDNS: Found server at %s:%d", ip.toString().c_str(), port);
+  serverUrl = String("http://") + ip.toString() + ":" + String(port);
+#else
+  serverUrl = String("http://") + CALENDAR_URL_HOST + ":" + String(CALENDAR_URL_PORT);
+#endif
+}
+
 int HTTPClientManager::readLineFromStream(WiFiClient* stream, String& result) {
   result = "";
   int bytesRead = 0;
@@ -68,7 +91,31 @@ int HTTPClientManager::readLineFromStream(WiFiClient* stream, String& result) {
   return bytesRead;
 }
 
+bool HTTPClientManager::_verifyConfig() {
+  if (serverUrl == "") {
+    sleepTime = SLEEP_TIME_PERMANENT_ERROR;
+#ifdef USE_MDNS_FOR_SERVER
+    lastErrorMessage =
+        "mDNS is enabled but no server found on LAN.\n"
+        "\n"
+        "Ensure that the server is running\n"
+        "on the same network as this device (" +
+        WiFi.localIP().toString() + ").\n";
+#else
+    lastErrorMessage =  //
+        "Server URL is not set. Please check your platformio.ini configuration.\n";
+#endif
+    return false;
+  }
+
+  return true;
+}
+
 bool HTTPClientManager::loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMode) {
+  if (!_verifyConfig()) {
+    return false;
+  }
+
   logger.debug("loadConfigFromWeb()");
   configLoadTime = millis();
 
@@ -139,6 +186,10 @@ bool HTTPClientManager::loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMod
 }
 
 bool HTTPClientManager::showRawBitmapFromWeb() {
+  if (!_verifyConfig()) {
+    return false;
+  }
+
   String newChecksum = "?";
   displayManager.beginBitmapDraw();
 

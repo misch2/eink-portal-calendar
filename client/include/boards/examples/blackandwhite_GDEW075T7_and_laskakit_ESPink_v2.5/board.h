@@ -6,5 +6,6 @@
 #define USE_WIFI_MANAGER
 #define HOSTNAME "epaper" /* host name for mDNS (in the .local domain) */
 
-#define CALENDAR_URL_HOST "192.168.0.100"
-#define CALENDAR_URL_PORT 5000
+#define USE_MDNS_FOR_SERVER
+// #define CALENDAR_URL_HOST "192.168.0.100"
+// #define CALENDAR_URL_PORT 5000
