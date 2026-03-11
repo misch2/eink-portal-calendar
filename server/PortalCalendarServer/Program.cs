@@ -148,6 +148,9 @@ builder.Services.AddHostedService<PortalCalendarServer.Services.BackgroundJobs.P
 builder.Services.AddSingleton<ImageRegenerationService>();
 builder.Services.AddHostedService(provider => provider.GetRequiredService<ImageRegenerationService>());
 
+// Register mDNS advertisement so ESP32 clients can discover the server on LAN
+builder.Services.AddHostedService<MdnsAdvertisementService>();
+
 // Register SQLite-backed ticket store for cookie authentication
 builder.Services.AddScoped<SqliteTicketStore>();
 
