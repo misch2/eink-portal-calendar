@@ -94,7 +94,17 @@ int HTTPClientManager::readLineFromStream(WiFiClient* stream, String& result) {
 bool HTTPClientManager::_verifyConfig() {
   if (serverUrl == "") {
     sleepTime = SLEEP_TIME_PERMANENT_ERROR;
-    lastErrorMessage = "Server URL is not set. Please check mDNS configuration or hardcoded URL.";
+#ifdef USE_MDNS_FOR_SERVER
+    lastErrorMessage =
+        "mDNS is enabled but no server found on LAN.\n"
+        "\n"
+        "Ensure that the server is running\n"
+        "on the same network as this device (" +
+        WiFi.localIP().toString() + ").\n";
+#else
+    lastErrorMessage =  //
+        "Server URL is not set. Please check your platformio.ini configuration.\n";
+#endif
     return false;
   }
 

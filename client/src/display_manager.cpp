@@ -67,7 +67,7 @@ void DisplayManager::displayText(String message, const GFXfont* font) {
 
   const int16_t margin = 10;
   const int16_t lineSpacing = 4;
-  const int16_t titleGap = 24;
+  const int16_t titleGap = 36;
   const GFXfont* titleFont = &Open_Sans_Regular_24;
   const char* titleText = "Error";
 
