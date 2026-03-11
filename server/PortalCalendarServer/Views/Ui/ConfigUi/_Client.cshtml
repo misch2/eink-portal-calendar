@@ -27,16 +27,16 @@
         if (useSplit)
         {
             foreach (var ec in list.Where(c => !c.IsRed && !c.IsYellow))
-                html.Append($"<span class=\"color-swatch\" style=\"background:#{ec.HexValue};\"></span>");
+                html.Append($"<span class=\"color-swatch\" style=\"background:#{ec.EpdPreviewHexValue};\"></span>");
 
             // Diagonal split: yellow (bottom-left) / red (top-right)
             html.Append($"<span class=\"color-swatch color-swatch--split\" " +
-                        $"style=\"--swatch-color-a:#{yellow!.HexValue};--swatch-color-b:#{red!.HexValue};\"></span>");
+                        $"style=\"--swatch-color-a:#{yellow!.EpdPreviewHexValue};--swatch-color-b:#{red!.EpdPreviewHexValue};\"></span>");
         }
         else
         {
             foreach (var ec in list)
-                html.Append($"<span class=\"color-swatch\" style=\"background:#{ec.HexValue};\"></span>");
+                html.Append($"<span class=\"color-swatch\" style=\"background:#{ec.EpdPreviewHexValue};\"></span>");
         }
 
         return new HtmlString(html.ToString());
