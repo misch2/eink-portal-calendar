@@ -39,7 +39,7 @@ jobs:
         run: |
           TAG="${{ github.event.release.tag_name }}"
           REPO="${{ github.repository }}"
-          LINK="<a href=\"https://github.com/${REPO}/releases/tag/${TAG}\">${TAG}</a>"
+          LINK="<a href=\\\"https://github.com/${REPO}/releases/tag/${TAG}\\\">${TAG}</a>"
           sed -i "s|{DeployedVersion}|${LINK}|g" publish/appsettings.json
 
       - name: Create ZIP
