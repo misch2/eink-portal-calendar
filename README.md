@@ -26,7 +26,7 @@ The software is divided into two parts:
     - integration with HomeAssistant (battery & status monitor), 
     - configuration UI
  
-I've chosen this approach because it's easier and more fun for me to implement the server part in my favourite environments (C#/.NET and HTML+CSS) than to try to do this directly on ESP32.
+I've chosen this approach because it's easier and more fun for me to implement the server part in my favourite environments (`C#/.NET` and `HTML+CSS`) than to try to do this directly on ESP32.
 
 Everything is designed for a specific e-Paper size of 480x800 pixels, but I'm trying to use relative units in CSS so it should be possible to use different size just by changing the screen and font size.
 
