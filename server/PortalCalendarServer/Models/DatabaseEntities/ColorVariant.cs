@@ -8,7 +8,7 @@ namespace PortalCalendarServer.Models.DatabaseEntities
         public int SortOrder { get; set; }
         public DisplayType DisplayType { get; set; } = null!;
 
-        public ICollection<EpdColor> EpdColors { get; set; } = new List<EpdColor>();
-        public ICollection<Display> Displays { get; set; } = new List<Display>();
+        public ICollection<EpdColor> EpdColors { get; set; } = null!;
+        public ICollection<Display> Displays { get; set; } = null!;
     }
 }

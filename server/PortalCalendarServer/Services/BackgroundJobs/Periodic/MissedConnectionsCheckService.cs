@@ -46,12 +46,21 @@ public class MissedConnectionsCheckService : PeriodicBackgroundService
 
         var now = DateTime.UtcNow;
 
-        var displays = displayService.GetAllDisplays().Where(d => !d.IsDefault()).ToList();
+        // GetAllDisplays() does NOT include Configs, and lazy loading is disabled.
+        // Collect IDs first, then load each display fully via GetDisplayById() which
+        // includes .Include(d => d.Configs) so that per-display config values
+        // (_last_visit, _missed_connects, etc.) are available.
+        var displayIds = displayService.GetAllDisplays()
+            .Where(d => !d.IsDefault())
+            .Select(d => d.Id)
+            .ToList();
 
-        foreach (var display in displays)
+        foreach (var displayId in displayIds)
         {
             try
             {
+                var display = displayService.GetDisplayById(displayId);
+
                 var lastVisit = displayService.GetLastVisit(display);
                 if (lastVisit == null)
                 {
@@ -62,7 +71,9 @@ public class MissedConnectionsCheckService : PeriodicBackgroundService
                 var wakeupInfo = displayService.GetNextWakeupTime(display, lastVisit.Value);
                 var nextExpectedTime = wakeupInfo.NextWakeup;
 
-                var safetyLagMinutes = displayService.GetConfigInt(display, "alive_check_safety_lag_minutes") ?? 0;
+                // Default to 2× the interval (if not configured at all) so a display has a full extra cycle to connect.
+                var defaultSafetyLagMinutes = (int)_interval.TotalMinutes * 2;
+                var safetyLagMinutes = displayService.GetConfigInt(display, "alive_check_safety_lag_minutes") ?? defaultSafetyLagMinutes;
                 var nowSafe = now.AddMinutes(-safetyLagMinutes);
 
                 if (nextExpectedTime < nowSafe)
@@ -117,7 +128,7 @@ public class MissedConnectionsCheckService : PeriodicBackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Error while checking missed connections for display {DisplayId}", display.Id);
+                _logger.LogWarning(ex, "Error while checking missed connections for display {DisplayId}", displayId);
             }
         }
     }
