@@ -45,5 +45,5 @@ public partial class Display
     public DateTime? RenderedAt { get; set; }
     public string? RenderErrors { get; set; }
 
-    public ICollection<Config> Configs { get; set; } = new List<Config>();
+    public ICollection<Config> Configs { get; set; } = null!;
 }

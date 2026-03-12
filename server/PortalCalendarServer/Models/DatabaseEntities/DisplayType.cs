@@ -7,7 +7,7 @@ namespace PortalCalendarServer.Models.DatabaseEntities
         public required int NumColors { get; set; }
         public int SortOrder { get; set; }
 
-        public ICollection<Display> Displays { get; set; } = new List<Display>();
-        public ICollection<ColorVariant> ColorVariants { get; set; } = new List<ColorVariant>();
+        public ICollection<Display> Displays { get; set; } = null!;
+        public ICollection<ColorVariant> ColorVariants { get; set; } = null!;
     }
 }
