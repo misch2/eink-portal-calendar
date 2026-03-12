@@ -14,7 +14,8 @@
             <th scope="col">Color type</th>
             <th scope="col">Firmware</th>
             <th scope="col">Battery</th>
-            <th scope="col">Next wakeup
+            <th scope="col">
+                Next wakeup
                 <br />
                 (local time)
             </th>
@@ -82,7 +83,7 @@
                         var nextWakeupInfo = displayService.GetNextWakeupTime(d);
                         var minutes = nextWakeupInfo.SleepInSeconds / 60;
                         var seconds = nextWakeupInfo.SleepInSeconds % 60;
-                        @($"{TimeZoneInfo.ConvertTimeFromUtc(nextWakeupInfo.NextWakeup,tz).ToString("g", dateCulture)} (in {minutes} minutes and {seconds} seconds)")
+                        @($"{TimeZoneInfo.ConvertTimeFromUtc(nextWakeupInfo.NextWakeup, tz).ToString("g", dateCulture)} (in {minutes} minutes and {seconds} seconds)")
                     }
                 </td>
                 <td>
@@ -110,8 +111,8 @@
                             var minFailures = int.TryParse(minFailuresStr, out var mf) ? mf : 1;
                             var lastVisit = displayService.GetLastVisit(d);
                             var lastVisitLocalStr = lastVisit.HasValue
-                                ? TimeZoneInfo.ConvertTimeFromUtc(lastVisit.Value, tz).ToString("g", dateCulture)
-                                : "unknown";
+                            ? TimeZoneInfo.ConvertTimeFromUtc(lastVisit.Value, tz).ToString("g", dateCulture)
+                            : "unknown";
 
                             if (missedConnects >= minFailures)
                             {
@@ -131,6 +132,11 @@
                         else
                         {
                             <span class="badge bg-success">OK</span>
+                        }
+
+                        if (displayService.GetConfigBool(d, "ota_mode"))
+                        {
+                            <span class="badge bg-warning text-dark">OTA mode active</span>
                         }
                     }
                 </td>
