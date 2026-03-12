@@ -109,14 +109,17 @@
                             var minFailuresStr = displayService.GetConfig(d, "alive_check_minimal_failure_count");
                             var minFailures = int.TryParse(minFailuresStr, out var mf) ? mf : 1;
                             var lastVisit = displayService.GetLastVisit(d);
+                            var lastVisitLocalStr = lastVisit.HasValue
+                                ? TimeZoneInfo.ConvertTimeFromUtc(lastVisit.Value, tz).ToString("g", dateCulture)
+                                : "unknown";
 
                             if (missedConnects >= minFailures)
                             {
-                                <span class="badge bg-danger">Frozen since @(lastVisit?.ToString("dd.MM.yyyy HH:mm") ?? "unknown")</span>
+                                <span class="badge bg-danger">Frozen since @lastVisitLocalStr</span>
                             }
                             else
                             {
-                                <span class="badge bg-info">Possibly frozen since @(lastVisit?.ToString("dd.MM.yyyy HH:mm") ?? "unknown")</span>
+                                <span class="badge bg-info">Possibly frozen since @lastVisitLocalStr</span>
                             }
                             <br />
                             @if (lastVisit.HasValue)

@@ -395,6 +395,14 @@ public class DisplayService(
         context.SaveChanges();
     }
 
+    public void ClearRenderInfo(Display display)
+    {
+        display.RenderedAt = null;
+        display.RenderErrors = null;
+        context.Update(display);
+        context.SaveChanges();
+    }
+
     public BitmapResult ConvertExistingWebSnapshot(Display display, BitmapOptions options)
     {
         logger.LogDebug("Converting pre-generated bitmap");

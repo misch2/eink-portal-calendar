@@ -123,6 +123,11 @@ public interface IDisplayService
     void UpdateRenderInfo(Display display, DateTime renderedAt, string? renderErrors);
 
     /// <summary>
+    /// Clear the render information for a display
+    /// </summary>
+    void ClearRenderInfo(Display display);
+
+    /// <summary>
     /// Get all available display types
     /// </summary>
     List<DisplayType> GetDisplayTypes();
