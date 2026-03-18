@@ -5,6 +5,9 @@
 @inject IDisplayService displayService
 @{
     Layout = null;
+    
+    int width = Model.Display.VirtualWidth();
+    int height = Model.Display.VirtualHeight();
 
     var dateCulture = displayService.GetDateCultureInfo(Model.Display);
     var tz = displayService.GetTimeZoneInfo(Model.Display);
@@ -29,7 +32,7 @@
     var weightSeries = Model.Weight?.GetWeightSeries(Model.Date);
     var lastWeight = Model.Weight?.GetLastWeight();
 }
-@* <!DOCTYPE html> *@
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -45,6 +48,13 @@
 
     @* EPD Colors *@
     @await Html.PartialAsync("Includes/_EpdColors.cshtml", Model.CssColors)
+
+    <style>
+        :root {
+            --display-width: @(width)px;
+            --display-height: @(height)px;
+        }
+    </style>
 
     @* Google Charts Library *@
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -133,7 +143,7 @@
     </script>
 </head>
 
-<body>
+<body style="width: @(width)px; height: @(height)px;">
     <div id="spacer">
         <div class="top-month-header">
             <div>
@@ -141,19 +151,15 @@
             </div>
         </div>
 
-        <div class="current-weight-big">
-            @if (lastWeight.HasValue)
-            {
-                <span>@lastWeight.Value.ToString("F1", CultureInfo.InvariantCulture)</span>
-            }
-            else
-            {
-                <span>--.-</span>
-            }
-            <!-- <span class="current-weight-small-kg"> kg</span> -->
-        </div>
+        @if (lastWeight != null)
+        {
+            <div class="current-weight-big">
+                @lastWeight.Value.ToString("F1", dateCulture) <span class="current-weight-small-kg">kg</span>
+            </div>
+        }
 
-        <div class="weight-chart" id="weight_chart_div">
+        <div class="weight-chart">
+            <div id="weight_chart_div"></div>
         </div>
 
         <div class="day-of-week-block">
@@ -184,7 +190,7 @@
             </div>
         }
 
-        @if (calendar.HasEntries && calendar.TodayEvents?.Any() == true)
+        @if (calendar?.HasEntries == true && calendar?.TodayEvents?.Any() == true)
         {
             <div class="calendar-container">
                 @foreach (var evt in calendar.TodayEvents)
@@ -196,7 +202,7 @@
                         }
                         else
                         {
-                            @TimeZoneInfo.ConvertTimeFromUtc(evt.StartTime, tz).ToString("t", dateCulture)
+                            @TimeZoneInfo.ConvertTimeFromUtc(evt.StartTime, tz).ToString("H:mm", dateCulture)
                             <text> </text>
                             @evt.Summary
                             @if (evt.DurationHours.HasValue)
@@ -209,13 +215,8 @@
             </div>
         }
 
-        <img id="aperture-logo" src="/images/Aperture_Laboratories_Logo.png" alt="Aperture Science" />
-
         <div id="bottom-signature">
             @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_WakeupInfo.cshtml", Model.Display)
-        </div>
-        <div id="battery-status">
-            @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_BatteryStatusIcon.cshtml", Model.Display)
         </div>
     </div>
 </body>

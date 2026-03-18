@@ -271,6 +271,9 @@ using (var scope = app.Services.CreateScope())
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
+    // Easier debugging
+    app.UseDeveloperExceptionPage();
+
     // /openapi/v1.json - Raw OpenAPI specification (JSON)
     // /scalar/v1 - Beautiful interactive API documentation UI where you can test endpoints
 

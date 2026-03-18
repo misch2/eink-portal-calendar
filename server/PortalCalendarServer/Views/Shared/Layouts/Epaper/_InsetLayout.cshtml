@@ -1,0 +1,21 @@
+@{
+    Layout = "~/Views/Shared/Layouts/Epaper/_BaseLayout.cshtml";
+}
+
+@section Head {
+    @RenderSection("Head", required: false)
+}
+
+@section CssVariables {
+    --inset: 10px;
+    @RenderSection("CssVariables", required: false)
+}
+
+@section BodyStyles {
+    padding: var(--inset);
+    @RenderSection("BodyStyles", required: false)
+}
+
+<div class="content-container inset">
+    @RenderBody()
+</div>

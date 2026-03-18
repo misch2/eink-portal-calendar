@@ -55,6 +55,28 @@ public class PageGeneratorService
         return viewModel;
     }
 
+    public PageViewModel PageViewModelForError(Display display, ErrorComponent error)
+    {
+        var cssColors = new Dictionary<string, string>();
+        try
+        {
+            cssColors = display.CssColorMap(forPreview: true);
+        }
+        catch
+        {
+            // Ignore - we're already handling an error
+        }
+
+        var viewModel = new PageViewModel
+        {
+            Display = display,
+            Date = DateTime.UtcNow,
+            CssColors = cssColors
+        };
+        viewModel.RegisterComponent("error", error);
+        return viewModel;
+    }
+
     public async Task GenerateImageFromWebAsync(Display display)
     {
         var baseUrl = _configuration["URLs:BaseURL"];
@@ -156,6 +178,11 @@ public class PageViewModel
         _components[moduleId] = componentFactory();
     }
 
+    internal void RegisterComponent(string moduleId, object? component)
+    {
+        _components[moduleId] = component;
+    }
+
     /// <summary>
     /// Retrieve a module's page-generator component by module ID.
     /// Returns <c>null</c> when the module is not registered or provides no component.
@@ -175,4 +202,5 @@ public class PageViewModel
     public NameDayComponent? NameDay => GetComponent<NameDayComponent>("nameday");
     public WeatherComponent? Weather => GetComponent<WeatherComponent>("metnoweather");
     public WebImageComponent? WebImage => GetComponent<WebImageComponent>("webimage");
+    public ErrorComponent? Error => GetComponent<ErrorComponent>("error");
 }

@@ -2,9 +2,10 @@
 
 html,
 body {
-    /* background-color: aqua; */
-    font-size: 17pt;
+    font-size: clamp(14pt, calc(var(--display-height) / 47), 18pt);
     font-family: 'Times New Roman', Times, serif;
+    padding: 0;
+    margin: 0;
 }
 
 html,
@@ -15,32 +16,7 @@ p {
     margin: 0;
 }
 
-
-/* debug */
-
-div,
-p {
-    /* border: 3px dotted gray; */
-}
-
-div {
-    /* background-color: cadetblue; */
-}
-
-    div div {
-        /* background-color: coral; */
-    }
-
-        div div div {
-            /* background-color: bisque; */
-        }
-
-            div div div div {
-                /* background-color: darkolivegreen; */
-            }
-
 body {
-    /* background-color: burlywood; */
     font-family: 'Gidole';
     letter-spacing: 0.02em;
     background-color: var(--epd-white);
@@ -48,8 +24,6 @@ body {
 }
 
 .flex-break {
-    /* Inserting this collapsed row between two flex items will make 
-     * the flex item that comes after it break to a new row */
     flex-basis: 100%;
     height: 0;
     width: 0;
@@ -57,19 +31,18 @@ body {
 
 div#spacer {
     position: absolute;
-    top: 50px;
-    left: 70px;
-    height: 700px;
-    width: 365px;
-    /* background-color: gainsboro; */
+    top: 6.25%;
+    left: 14.58%;
+    height: 87.5%;
+    width: 76.04%;
 }
 
 div#overlay-image {
     position: absolute;
     top: 0;
     left: 0;
-    width: 480px;
-    height: 800px;
+    width: 100%;
+    height: 100%;
     background-image: url("/images/broken_screen1.png");
     background-size: cover;
     background-position: 25% 50%;
@@ -87,10 +60,8 @@ div.top-month-header {
 
 div.day-number-big {
     font-family: 'DINCondensed';
-    font-size: 17.5rem;
+    font-size: clamp(10rem, 25vh, 17.5rem);
     transform: scale(0.8, 1);
-    /* translate(-0.12em, -0.19em); */
-    /* margin-bottom: -0.25em; */
     margin: -0.15em 0 -0.10em -0.12em;
 }
 
@@ -133,7 +104,6 @@ div.icons-container {
 }
 
 .icon {
-    /* sizes must be in 'px', otherwise the 'grayed' overlay gets slightly stretched and doesn't translate well into the black&white */
     height: 57px;
     width: 57px;
     border: 2px solid var(--epd-black);
@@ -164,23 +134,23 @@ div.calendar-container {
 
 img#aperture-logo {
     position: absolute;
-    top: 705px;
-    left: 0px;
+    bottom: 0;
+    left: 0;
     height: 30px;
 }
 
 div#bottom-signature {
     position: absolute;
     width: 200px;
-    top: 710px;
-    left: 130px;
+    bottom: 5px;
+    left: 35px;
     font-size: 0.7rem;
     text-align: right;
 }
 
 div#battery-status {
     position: absolute;
-    top: 705px;
-    left: 335px;
+    bottom: 0;
+    right: 0;
     font-size: 1.3rem;
 }

@@ -1,7 +1,7 @@
 /* resets */
 html,
 body {
-    font-size: 14pt;
+    font-size: clamp(12pt, calc(var(--display-height) / 57), 16pt);
     /* font-family: sans-serif; */
     /* font-family: 'Roboto', sans-serif; */
     font-family: 'Playpen Sans', sans-serif;
@@ -24,6 +24,12 @@ div#visible-area {
     width: 780px;
     overflow: hidden;
     /* background-color: gainsboro;  */
+}
+
+.content-container {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
 h1 {
@@ -49,21 +55,24 @@ img {
 }
 
 /* portrait */
-.portrait div.image-and-alt {
+.portrait .image-and-alt {
     flex-direction: row;
 }
 
-.portrait div.image-and-alt div.title-and-alt {
+.portrait .image-and-alt .title-and-alt {
     display: flex;
-    flex-direction: column
+    flex-direction: column;
+    flex: 1;
 }
 
 .portrait img {
     height: 100%;
+    max-width: 50%;
+    object-fit: contain;
 }
 
 /* landscape */
-.landscape div.image-and-alt {
+.landscape .image-and-alt {
     flex-direction: column;
     gap: 0.5rem;
 }
@@ -77,8 +86,13 @@ img {
     min-height: 50%;
     /* flex: 2; */
     flex: 0 1 auto;
+    object-fit: contain;
 }
 .landscape .alt {
     flex: 1.5;
-    /* background-color: chocolate; */
+}
+
+.alt {
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

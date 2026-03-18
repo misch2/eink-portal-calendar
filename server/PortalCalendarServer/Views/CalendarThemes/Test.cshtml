@@ -1,49 +1,40 @@
 @model PortalCalendarServer.Services.PageViewModel
 @{
-    Layout = null;
+    Layout = "~/Views/Shared/Layouts/Epaper/_FullBleedLayout.cshtml";
+    ViewBag.Title = "Calendar - Test";
 }
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>Calendar - Test</title>
-    
-    @* EPD Colors *@
-    @await Html.PartialAsync("Includes/_EpdColors.cshtml", Model.CssColors)
-    
+
+@section Head {
     @* Stylesheets *@
     <link rel="stylesheet" href="/css/calendar_themes/test.css" asp-append-version="true" />
-</head>
+}
 
-<body>
-    @* Angular rainbow gradient background (conic gradient based on angle) *@
-    <div class="color-wheel-background"></div>
-    
-    @* Main test text *@
-    <div class="text-container">
-        <div class="test-text outline">TEST</div>
-        <div class="subtitle outline">Angular Rainbow Pattern</div>
-    </div>
-    
-    @* Date and time *@
-    <div class="date-time outline">
-        @Model.Date.ToString("yyyy-MM-dd")<br>
-        @Model.Date.ToString("HH:mm:ss") UTC
-    </div>
-    
-    @* Display info *@
-    <div class="info-text outline">
-        Display: @Model.Display.Name<br>
-        Resolution: @(Model.Display.Width)×@(Model.Display.Height)<br>
-        Type: @Model.Display.DisplayTypeCode / @Model.Display.ColorVariantCode
-    </div>
-    
-    @* Color test bars at the bottom *@
-    <div class="color-test-bars">
-        <div class="color-bar black"></div>
-        <div class="color-bar white"></div>
-        <div class="color-bar red"></div>
-        <div class="color-bar yellow"></div>
-    </div>
-</body>
-</html>
+@* Angular rainbow gradient background (conic gradient based on angle) *@
+<div class="color-wheel-background"></div>
+
+@* Main test text *@
+<div class="text-container">
+    <div class="test-text outline">TEST</div>
+    <div class="subtitle outline">Angular Rainbow Pattern</div>
+</div>
+
+@* Date and time *@
+<div class="date-time outline">
+    @Model.Date.ToString("yyyy-MM-dd")<br>
+    @Model.Date.ToString("HH:mm:ss") UTC
+</div>
+
+@* Display info *@
+<div class="info-text outline">
+    Display: @Model.Display.Name<br>
+    Resolution: @(Model.Display.Width)×@(Model.Display.Height)<br>
+    Type: @Model.Display.DisplayTypeCode / @Model.Display.ColorVariantCode
+</div>
+
+@* Color test bars at the bottom *@
+<div class="color-test-bars">
+    <div class="color-bar black"></div>
+    <div class="color-bar white"></div>
+    <div class="color-bar red"></div>
+    <div class="color-bar yellow"></div>
+</div>

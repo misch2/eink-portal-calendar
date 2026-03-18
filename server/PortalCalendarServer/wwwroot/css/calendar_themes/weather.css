@@ -1,9 +1,8 @@
-/* resets */
-
 html,
 body {
-    /* background-color: aqua; */
-    font-size: 17pt;
+    font-size: clamp(10pt, 4.7vw, 20pt);
+    font-family: 'Gidole';
+    letter-spacing: 0.02em;
 }
 
 html,
@@ -14,60 +13,24 @@ p {
     margin: 0;
 }
 
-
-/* debug */
-
-div,
-p {
-    /* border: 3px dotted gray; */
-}
-
-div {
-    /* background-color: cadetblue; */
-}
-
-div div {
-    /* background-color: coral; */
-}
-
-div div div {
-    /* background-color: bisque; */
-}
-
-div div div div {
-    /* background-color: darkolivegreen; */
-    /* background-color: #eee; */
-}
-
-:root {
-    /* only for VSCode editor, real colors are overriden in the template based on the purpose (preview or real EPD) */
-    --epd-black: #000;
-    --epd-white: #fff;
-    --epd-red: #f00;
-    --epd-yellow: #ff0;
-}
-
 body {
-    /* background-color: burlywood; */
-    font-family: 'Gidole';
-    letter-spacing: 0.02em;
     background-color: var(--epd-white);
     color: var(--epd-black);
 }
 
-div#visible-area {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    height: 780px;
-    width: 460px;
-    overflow: hidden;
-    /* background-color: gainsboro; */
+.content-container {
+    display: flex;
+    flex-direction: column;
+}
+
+#weather-content {
+    position: relative;
+    width: 100%;
+    flex: 1;
 }
 
 div.date-row {
     font-size: 1.5rem;
-
     display: flex;
     flex-wrap: wrap;
     /* for the case when the date or name is too long */
@@ -100,7 +63,6 @@ div.weather-current-big {
 div.weather-forecast-container-grid {
     position: absolute;
     width: 100%;
-
     display: grid;
     grid-template-rows: repeat(5, 1fr);
     grid-column-gap: 0.2rem;
@@ -140,18 +102,21 @@ div.weather-item.weather-is-rain-or-snow {
     border-color: var(--epd-red);
 }
 
-div#bottom-signature {
-    position: absolute;
+div#bottom-bar {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
     width: 100%;
-    bottom: 0;
-    left: 0;
+}
+
+div#bottom-signature {
     font-size: 0.7rem;
 }
 
 div#battery-status {
-    position: absolute;
-    bottom: -0.1em;
-    right: 0;
     text-align: right;
     font-size: 1.3rem;
+    position: relative;
+    top: 0.6rem;
 }

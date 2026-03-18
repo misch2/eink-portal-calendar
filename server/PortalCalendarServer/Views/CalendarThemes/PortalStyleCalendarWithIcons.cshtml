@@ -5,6 +5,9 @@
 @inject IDisplayService displayService
 @{
     Layout = null;
+    
+    int width = Model.Display.VirtualWidth();
+    int height = Model.Display.VirtualHeight();
 
     var dateCulture = displayService.GetDateCultureInfo(Model.Display);
     var tz = displayService.GetTimeZoneInfo(Model.Display);
@@ -27,7 +30,7 @@
     var calendar = calendarComponent?.GetDetails(Model.Display, Model.Date);
     var icons = iconsComponent?.GenerateIcons(Model.Display, Model.Date, calendar?.HasEntries ?? false);
 }
-@* <!DOCTYPE html> *@
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -42,9 +45,16 @@
 
     @* EPD Colors *@
     @await Html.PartialAsync("Includes/_EpdColors.cshtml", Model.CssColors)
+    
+    <style>
+        :root {
+            --display-width: @(width)px;
+            --display-height: @(height)px;
+        }
+    </style>
 </head>
 
-<body>
+<body style="width: @(width)px; height: @(height)px;">
     @* Overlay image (disabled by default) *@
     @{
         var showOverlay = false;
@@ -102,7 +112,6 @@
                         @if (evt.AllDay)
                         {
                             @evt.Summary
-                            <!-- (celý den) -->
                         }
                         else
                         {

@@ -184,6 +184,9 @@
                                 <li class="nav-item">
                                     <a class="nav-link @(navLink == "compare" ? "active" : "")" href="@Url.Action(nameof(UiController.Test), "Ui", new { displayNumber = display.Id })">Test page</a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link @(navLink == "compare" ? "active" : "")" href="@Url.Action(nameof(UiController.TestMultiResolution), "Ui", new { displayNumber = display.Id })">Test multiple resolutions</a>
+                                </li>
                             }
                             <li class="nav-item">
                                 <a class="nav-link @(navLink == "config_ui" ? "active" : "")" href="@Url.Action(nameof(UiController.ConfigUiShow), "Ui", new { displayNumber = display.Id })">Config</a>

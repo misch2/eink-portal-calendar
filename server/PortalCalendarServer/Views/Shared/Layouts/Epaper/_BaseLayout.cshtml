@@ -1,0 +1,49 @@
+@model PortalCalendarServer.Services.PageViewModel
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title</title>
+
+    @RenderSection("Head", required: false)
+
+    <style>
+        :root {
+            @* EPD Colors *@
+            @if (Model.CssColors != null && Model.CssColors.Count > 0)
+            {
+                foreach (var (colorName, colorValue) in Model.CssColors)
+                {
+                    @: @("--epd-" + colorName) : @colorValue;
+                }
+            }
+            @RenderSection("CssVariables", required: false)
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            @RenderSection("BodyStyles", required: false)
+        }
+
+        .content-container {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    @RenderBody()
+</body>
+</html>

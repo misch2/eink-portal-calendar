@@ -1,13 +1,12 @@
-namespace PortalCalendarServer.Models.POCOs;
+namespace PortalCalendarServer.Services.PageGeneratorComponents;
 
 /// <summary>
-/// View model for the error theme displayed when calendar rendering fails.
+/// Component that carries error information for the error theme view.
 /// </summary>
-public class ErrorViewModel
+public class ErrorComponent
 {
     public required string Message { get; set; }
     public string? Details { get; set; }
     public bool ShowDetails { get; set; }
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
-    public Dictionary<string, string>? CssColors { get; set; }
 }

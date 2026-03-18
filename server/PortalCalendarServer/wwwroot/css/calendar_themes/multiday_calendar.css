@@ -43,7 +43,7 @@ div div div div {
 */
 
 :root {
-    /* only for VSCode editor, real colors are overriden in the template based on the purpose (preview or real EPD) */
+    /* EPD colors - overridden by template */
     --epd-black: #000;
     --epd-white: #fff;
     --epd-red: #f00;
@@ -51,7 +51,9 @@ div div div div {
 }
 
 body {
-    /* background-color: burlywood; */
+    font-size: clamp(14pt, calc(var(--display-height) / 44), 20pt);
+    font-family: 'Gidole';
+    letter-spacing: 0.02em;
     background-color: var(--epd-white);
     color: var(--epd-black);
     padding: 10px; /* creates the 10px inset */
@@ -61,10 +63,7 @@ body {
     overflow: hidden;
 }
 
-/* content inside just flows normally */
-div#visible-area {
-    flex: 1 1 auto;
-    overflow: hidden;
+.content-container {
     display: flex;
     flex-direction: column;
 }
@@ -100,56 +99,29 @@ div.calendar-event-block-title {
     color: var(--epd-white);
 }
 
-div.calendar-event-block-today div.calendar-event-block-title {
-    background-color: var(--epd-red);
-    color: var(--epd-white);
-}
-
-div.calendar-container > div.calendar-event-block:first-child,
-div.calendar-container > div.calendar-event-block:first-child > div.calendar-event-block-title:first-child {
-    margin-top: 0;
-}
-
 div.calendar-event-block-content {
+    margin-top: 0.5rem;
 }
 
-/* "Saturday 28th (+2)" */
+/* "Monday, 2024-12-25" */
 div.calendar-day-title {
     font-weight: bold;
-    margin-top: 0.4rem;
-    padding-left: 0.1rem;
+    margin-top: 0.5rem;
 }
 
-/* "11:00 Event name" */
 div.calendar-event {
-    padding-top: 0.25rem;
-    padding-left: 0.1rem;
-}
-
-div#overflow-indicator {
-    text-align: center;
     margin-top: 0.25rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
-div.calendar-event-block-title + div.calendar-event-block-content > div.calendar-day-title {
-    padding-top: 0.25rem;
+#bottom-row {
+    margin-top: auto;
+    padding-top: 1rem;
 }
 
-div#bottom-row {
-    display: flex;
-    flex: 0 0 auto; /* do not grow or shrink — take only what it needs */
-    width: 100%;
-    justify-content: space-between;
-    align-items: flex-end;
-    background-color: var(--epd-white);
-}
-
-div#bottom-signature {
+#bottom-signature {
     font-size: 0.7rem;
-}
-
-div#battery-status {
     text-align: right;
-    font-size: 1.3rem;
-    margin-bottom: -0.25rem;
 }
