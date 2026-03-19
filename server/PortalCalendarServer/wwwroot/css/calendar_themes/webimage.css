@@ -30,8 +30,8 @@ body {
     overflow: hidden;
 }
 
-#visible-area img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
+    #visible-area img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }

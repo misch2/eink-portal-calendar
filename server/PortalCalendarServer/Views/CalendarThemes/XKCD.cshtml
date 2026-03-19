@@ -10,47 +10,31 @@
 
     var xkcd = Model.Xkcd;
     var xkcdInfo = xkcd?.GetInfo();
-    string? mockOrientation = null; // or "landscape" for testing
-    
-    var isLandscape = (mockOrientation == "landscape") || (xkcdInfo?.ImageIsLandscape ?? false);
+
+    string? mockOrientation = null; // or "portrait" or "landscape" for testing
+    var imageIsLandscape = (mockOrientation == "landscape") || (xkcdInfo?.ImageIsLandscape ?? false);
+    var imageClass = imageIsLandscape ? "image-landscape" : "image-portrait";
 }
 
 @section Head {
     @* Icon library *@
     <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
-    
+
     @* Stylesheets *@
     <link rel="stylesheet" href="/css/calendar_themes/xkcd.css" asp-append-version="true" />
-    
+
     @* Google Fonts *@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playpen+Sans:wght@100..800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
 }
 
-@if (isLandscape)
-{
-    <div class="landscape">
-        <div class="image-and-alt">
-            <h1>@(xkcdInfo?.Title ?? "XKCD Comic")</h1>
-            <img src="@(mockOrientation == "landscape" ? "/images/landscape_example.jpg" : xkcdInfo?.ImageAsDataUrl ?? "")" alt="XKCD comic" />
-            <div class="alt">
-                @(xkcdInfo?.Alt ?? "")
-            </div>
+<div id="xkcd-flex" class="@imageClass">
+    <img src="@(mockOrientation != null ? $"/images/{mockOrientation}_example.jpg" : xkcdInfo?.ImageAsDataUrl ?? "")" alt="XKCD comic" />
+    <div class="title-and-alt">
+        <h1>@(xkcdInfo?.Title ?? "XKCD Comic")</h1>
+        <div class="alt">
+            @(xkcdInfo?.Alt ?? "")
         </div>
     </div>
-}
-else
-{
-    <div class="portrait">
-        <div class="image-and-alt">
-            <img src="@(mockOrientation == "portrait" ? "/images/portrait_example.jpg" : xkcdInfo?.ImageAsDataUrl ?? "")" alt="XKCD comic" />
-            <div class="title-and-alt">
-                <h1>@(xkcdInfo?.Title ?? "XKCD Comic")</h1>
-                <div class="alt">
-                    @(xkcdInfo?.Alt ?? "")
-                </div>
-            </div>
-        </div>
-    </div>
-}
+</div>
