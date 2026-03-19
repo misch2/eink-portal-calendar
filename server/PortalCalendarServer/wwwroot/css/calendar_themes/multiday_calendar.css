@@ -115,13 +115,3 @@ div.calendar-event {
     overflow: hidden;
     white-space: nowrap;
 }
-
-#bottom-row {
-    margin-top: auto;
-    padding-top: 1rem;
-}
-
-#bottom-signature {
-    font-size: 0.7rem;
-    text-align: right;
-}

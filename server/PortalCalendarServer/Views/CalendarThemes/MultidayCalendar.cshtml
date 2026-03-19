@@ -5,7 +5,7 @@
 @using PortalCalendarServer.Services.PageGeneratorComponents
 @inject IDisplayService displayService
 @{
-    Layout = "~/Views/Shared/Layouts/_InsetLayout.cshtml";
+    Layout = "~/Views/Shared/Layouts/Epaper/_InsetLayout.cshtml";
     ViewBag.Title = "Calendar - Multiday";
 
     var dateCulture = displayService.GetDateCultureInfo(Model.Display);
@@ -61,9 +61,6 @@
     @* Stylesheets *@
     <link rel="stylesheet" href="/css/fonts.css" asp-append-version="true" />
     <link rel="stylesheet" href="/css/calendar_themes/multiday_calendar.css" asp-append-version="true" />
-
-    @* EPD Colors *@
-    @await Html.PartialAsync("Includes/_EpdColors.cshtml", Model.CssColors)
 }
 
 <h3 id="calendar-title">
@@ -135,8 +132,4 @@
     }
 </div>
 
-<div id="bottom-row">
-    <div id="bottom-signature">
-        @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_WakeupInfo.cshtml", Model.Display)
-    </div>
-</div>
+@await Html.PartialAsync("~/Views/CalendarThemes/Includes/BottomStatusBar.cshtml", Model.Display)

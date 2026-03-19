@@ -21,10 +21,13 @@ public class WeatherComponent(
 {
     public async Task<WeatherInfo?> GetWeatherAsync(Display display, DateTime date)
     {
+        var displayRows = displayService.GetConfigInt(display, "weather_forecast_display_rows") ?? 6;
+
         // Try Met.no first
         var metNoWeather = await GetMetNoWeatherAsync(display, date);
         if (metNoWeather != null)
         {
+            metNoWeather.DisplayRows = displayRows;
             return metNoWeather;
         }
         // FIXME add fallback to OpenWeatherMap
@@ -155,6 +158,7 @@ public class WeatherInfo
 {
     public AggregatedWeatherData? CurrentWeather { get; set; }
     public List<AggregatedWeatherData> Forecast { get; set; } = [];
+    public int DisplayRows { get; set; }
 }
 
 /// <summary>

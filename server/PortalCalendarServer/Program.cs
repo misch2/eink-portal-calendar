@@ -136,6 +136,7 @@ moduleRegistry.Register(new NameDayModule());
 moduleRegistry.Register(new PortalIconsModule());
 moduleRegistry.Register(new ThemeConfigStatusIndicatorsModule());
 moduleRegistry.Register(new WebImageModule());
+moduleRegistry.Register(new WeatherForecastModule());
 builder.Services.AddSingleton(moduleRegistry);
 
 // Register periodic background services

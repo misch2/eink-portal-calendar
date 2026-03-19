@@ -2,4 +2,10 @@
 @using PortalCalendarServer.Models.DatabaseEntities
 @using PortalCalendarServer.Models.POCOs
 
-@await Html.PartialAsync("~/Views/CalendarThemes/Configs/_StatusIcons.cshtml")
+@await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+{
+    Display = Model, Key = "weather_forecast_display_rows", Label = "Number of rows displayed",
+        ColClass = "col-md-3"
+})
+
+@await Html.PartialAsync("~/Views/CalendarThemes/Configs/_BottomStatusBar.cshtml")
