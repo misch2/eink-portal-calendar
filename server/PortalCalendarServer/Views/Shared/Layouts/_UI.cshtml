@@ -249,7 +249,7 @@
 
             // ── Display-switching shortcut ──
             // Patterns where we know how to swap the display number: /home/{n}, /test/{n}, /config_ui/{n}
-            var displayUrlPattern = /^(\/(?:home|test|config_ui)\/)(\d+)(\/.*)?$/;
+            var displayUrlPattern = /^(\/(?:home|test|config_ui|test-multi-resolution)\/)(\d+)(\/.*)?$/;
 
             document.querySelectorAll('[data-display-id]').forEach(function (a) {
                 a.addEventListener('click', function (e) {

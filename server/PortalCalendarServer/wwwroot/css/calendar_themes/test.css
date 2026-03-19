@@ -8,7 +8,7 @@ body {
 
 .outline {
     color: black;
-    -webkit-text-stroke: 1px white;
+    -webkit-text-stroke: 0.05rem white;
 }
 
 /* Angular rainbow gradient background using conic gradient */
@@ -18,60 +18,37 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: conic-gradient(
-        from 0deg at 50% 50%,
-        red 0deg,
-        orange 51deg,
-        yellow 102deg,
-        lime 153deg,
-        cyan 204deg,
-        blue 255deg,
-        magenta 306deg,
-        red 360deg
-    );
+    background: conic-gradient( from 0deg at 50% 50%, red 0deg, orange 51deg, yellow 102deg, lime 153deg, cyan 204deg, blue 255deg, magenta 306deg, red 360deg );
+    z-index: -10;
 }
 
-/* Text container */
+.content-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
 .text-container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     text-align: center;
-    z-index: 10;
 }
 
 .test-text {
-    font-size: clamp(60px, 15vw, 120px);
+    font-size: clamp(6rem, 15vw, 10rem);
     color: var(--epd-black);
     letter-spacing: 0.05em;
 }
 
 .subtitle {
-    font-size: clamp(16px, 3vw, 30px);
+    font-size: clamp(2rem, 3vw, 4rem);
     margin-top: 0.5em;
-}
-
-/* Date and time */
-.date-time {
-    position: absolute;
-    top: 2%;
-    right: 2%;
-    font-size: clamp(12px, 2.5vw, 20px);
-    text-align: right;
-    z-index: 10;
 }
 
 /* Display info */
 .info-text {
-    position: absolute;
-    bottom: 15%;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: clamp(12px, 2.5vw, 18px);
-    text-align: center;
-    z-index: 10;
+    font-size: clamp(1.5rem, 2.5vw, 3rem);
     line-height: 1.5;
+    margin-top: 1em;
 }
 
 /* Color test bars */
@@ -82,7 +59,6 @@ body {
     width: 100%;
     height: 8%;
     display: flex;
-    z-index: 10;
 }
 
 .color-bar {
@@ -90,7 +66,26 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.color-bar.black { background-color: var(--epd-black); }
-.color-bar.white { background-color: var(--epd-white); }
-.color-bar.red { background-color: var(--epd-red); }
-.color-bar.yellow { background-color: var(--epd-yellow); }
+    .color-bar.black {
+        background-color: var(--epd-black);
+    }
+
+    .color-bar.white {
+        background-color: var(--epd-white);
+    }
+
+    .color-bar.red {
+        background-color: var(--epd-red);
+    }
+
+    .color-bar.yellow {
+        background-color: var(--epd-yellow);
+    }
+
+    .color-bar.green {
+        background-color: var(--epd-green);
+    }
+
+    .color-bar.blue {
+        background-color: var(--epd-blue);
+    }
