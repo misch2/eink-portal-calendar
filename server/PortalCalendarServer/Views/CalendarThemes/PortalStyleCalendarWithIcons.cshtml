@@ -4,10 +4,8 @@
 @using PortalCalendarServer.Services
 @inject IDisplayService displayService
 @{
-    Layout = null;
-    
-    int width = Model.Display.VirtualWidth();
-    int height = Model.Display.VirtualHeight();
+    Layout = "~/Views/Shared/Layouts/Epaper/_InsetLayout.cshtml";
+    ViewBag.Title = "Calendar - Portal Style with Icons";
 
     var dateCulture = displayService.GetDateCultureInfo(Model.Display);
     var tz = displayService.GetTimeZoneInfo(Model.Display);
@@ -30,97 +28,92 @@
     var calendar = calendarComponent?.GetDetails(Model.Display, Model.Date);
     var icons = iconsComponent?.GenerateIcons(Model.Display, Model.Date, calendar?.HasEntries ?? false);
 }
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>Calendar - Portal Style with Icons</title>
 
+@section Head {
     @* Icon library *@
     <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
 
     @* Stylesheets *@
     <link rel="stylesheet" href="/css/fonts.css" asp-append-version="true" />
     <link rel="stylesheet" href="/css/calendar_themes/calendar.css" asp-append-version="true" />
-</head>
+}
 
-<body style="width: @(width)px; height: @(height)px;">
-    @* Overlay image (disabled by default) *@
-    @{
-        var showOverlay = false;
-    }
-    @if (showOverlay)
-    {
-        <div id="overlay-image"></div>
-    }
+@* Overlay image (disabled by default) *@
+@{
+    var showOverlay = false;
+}
+@if (showOverlay)
+{
+    <div id="overlay-image"></div>
+}
 
-    <div id="spacer">
-        <div class="top-month-header">
-            <div>
-                @decorator(Model.Date.ToString("MMMM", dateCulture))
-            </div>
+<div id="spacer">
+    <div class="top-month-header">
+        <div>
+            @decorator(Model.Date.ToString("MMMM", dateCulture))
         </div>
-
-        <div class="day-number-big">
-            @Model.Date.ToString("dd")
-        </div>
-
-        <div class="day-of-week-block">
-            <div class="dow-number-and-name">
-                <div>
-                    @Model.Date.Day/@DateTime.DaysInMonth(Model.Date.Year, Model.Date.Month)
-                </div>
-                <div>
-                    @decorator(Model.Date.ToString("dddd", dateCulture))
-                </div>
-            </div>
-            <div class="separator"></div>
-            <div class="bunch-of-bars">
-                @for (int i = 1; i <= Model.Date.Day; i++)
-                {
-                    <div class="bar"></div>
-                }
-            </div>
-        </div>
-
-        @if (icons?.Any() == true)
-        {
-            <div class="icons-container">
-                @foreach (var icon in icons)
-                {
-                    <img src="/images/portal_icons/@(icon.Name).png" class="icon@(icon.Grayed ? " grayed" : "")" alt="Portal icon" />
-                }
-            </div>
-        }
-
-        @if (calendar?.HasEntries == true && calendar?.TodayEvents?.Any() == true)
-        {
-            <div class="calendar-container">
-                @foreach (var evt in calendar.TodayEvents)
-                {
-                    <div>
-                        @if (evt.AllDay)
-                        {
-                            @evt.Summary
-                        }
-                        else
-                        {
-                            @TimeZoneInfo.ConvertTimeFromUtc(evt.StartTime, tz).ToString("H:mm", dateCulture)
-                            <text> </text>
-                            @evt.Summary
-                            @if (evt.DurationHours.HasValue)
-                            {
-                                <text> (~@((int)(evt.DurationHours.Value + 0.5)) hod.)</text>
-                            }
-                        }
-                    </div>
-                }
-            </div>
-        }
-
-        <img id="aperture-logo" src="/images/Aperture_Laboratories_Logo.png" alt="Aperture Science" />
-
-        @await Html.PartialAsync("~/Views/CalendarThemes/Includes/BottomStatusBar.cshtml", Model.Display)
     </div>
-</body>
-</html>
+
+    <div class="day-number-big">
+        @Model.Date.ToString("dd")
+    </div>
+
+    <div class="day-of-week-block">
+        <div class="dow-number-and-name">
+            <div>
+                @Model.Date.Day/@DateTime.DaysInMonth(Model.Date.Year, Model.Date.Month)
+            </div>
+            <div>
+                @decorator(Model.Date.ToString("dddd", dateCulture))
+            </div>
+        </div>
+        <div class="separator"></div>
+        <div class="bunch-of-bars">
+            @for (int i = 1; i <= Model.Date.Day; i++)
+            {
+                <div class="bar"></div>
+            }
+        </div>
+    </div>
+
+    @if (icons?.Any() == true)
+    {
+        <div class="icons-container">
+            @foreach (var icon in icons)
+            {
+                <img src="/images/portal_icons/@(icon.Name).png" class="icon@(icon.Grayed ? " grayed" : "")" alt="Portal icon" />
+            }
+        </div>
+    }
+
+    @if (calendar?.HasEntries == true && calendar?.TodayEvents?.Any() == true)
+    {
+        <div class="calendar-container">
+            @foreach (var evt in calendar.TodayEvents)
+            {
+                <div>
+                    @if (evt.AllDay)
+                    {
+                        @evt.Summary
+                        <!-- (celý den) -->
+                    }
+                    else
+                    {
+                        @TimeZoneInfo.ConvertTimeFromUtc(evt.StartTime, tz).ToString("H:mm", dateCulture)
+                        <text> </text>
+                        @evt.Summary
+                        @if (evt.DurationHours.HasValue)
+                        {
+                            <text> (~@((int)(evt.DurationHours.Value + 0.5)) hod.)</text>
+                        }
+                    }
+                </div>
+            }
+        </div>
+    }
+
+    <img id="aperture-logo" src="/images/Aperture_Laboratories_Logo.png" alt="Aperture Science" />
+
+    @await Html.PartialAsync("~/Views/CalendarThemes/Includes/BottomStatusBar.cshtml", Model.Display)
+</div>
+
