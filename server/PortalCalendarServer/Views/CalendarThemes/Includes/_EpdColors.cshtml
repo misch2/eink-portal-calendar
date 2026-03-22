@@ -1,0 +1,16 @@
+@* Partial view for EPD color CSS variables *@
+@model Dictionary<string, string>?
+
+    @* FIXME remove as soon as it's not  referenced from anywhere *@
+
+<style type="text/css">
+    :root {
+        @if (Model != null)
+        {
+            foreach (var (colorName, colorValue) in Model)
+            {
+                @: --epd-@colorName : @colorValue;
+            }
+        }
+    }
+</style>
