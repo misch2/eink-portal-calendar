@@ -1,125 +1,99 @@
-/* resets */
-html,
 body {
-}
-
-html,
-body,
-div,
-p {
-    padding: 0;
     margin: 0;
+    font-size: clamp(10pt, 2.2vw, 18pt);
+    font-family: 'Playpen Sans', sans-serif;
 }
 
-/* main flex container */
-#xkcd-flex {
-    display: flex;
+#xkcd-container {
+    display: grid;
     gap: 0.5rem;
     overflow: hidden;
+    height: 100%; /* necessary for grid to fill the full height */
 }
 
-img {
+#xkcd-image {
     width: 100%;
     height: 100%;
-    padding: 0;
     object-fit: contain;
-    flex: 1;
+    grid-area: image;
 }
 
-.title-and-alt {
-    font-size: clamp(12pt, 2.5vw, 16pt);
-    font-family: 'Playpen Sans', sans-serif;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    min-height: 0;
-}
-
-h1 {
+#xkcd-title {
     font-size: 1.5rem;
     font-weight: bold;
     margin: 0;
     padding: 0 0 0.5rem 0;
     color: var(--epd-black);
+    grid-area: title;
 }
 
-.alt {
+#xkcd-alt-description {
     overflow: hidden;
     text-overflow: ellipsis;
+    grid-area: alt;
 }
 
-/*
- * 4 combinations:
- *   display orientation (via @media) × image orientation (via .image-portrait/.image-landscape)
- *
- * Portrait display: always stacked (image top, text bottom)
- * Landscape display + portrait image: side by side (image left, text right)
- * Landscape display + landscape image: stacked (image top, text bottom)
- */
 
-/* --- Portrait display --- */
-@media (orientation: portrait) {
-
-    /* portrait display + landscape image: stacked */
-    #xkcd-flex {
-        flex-direction: column;
-    }
-
-        #xkcd-flex img {
-            max-width: 100%;
-            flex: 0 1 auto;
-        }
-
-        #xkcd-flex h1 {
-            padding: 0;
-        }
-
-        #xkcd-flex .alt {
-            flex: 1;
-        }
-}
-
-/* --- Landscape display --- */
 @media (orientation: landscape) {
-    #xkcd-flex {
-        flex-direction: row;
-        height: 100%;
+    #xkcd-container.image-orientation-landscape {
+        grid-template-rows: max-content 1fr max-content;
+        grid-template-areas:
+            "title"
+            "image"
+            "alt"
     }
 
-        /* landscape display + portrait image: side by side */
-        #xkcd-flex.image-portrait {
-            flex-direction: row;
-            align-items: stretch;
-            gap: 1rem;
+        /* Constrain the image in landscape mode */
+        #xkcd-container.image-orientation-landscape #xkcd-image {
+            max-height: 70vh;
+            max-width: 100%;
+            width: 100%; /* allow shrinking */
+            height: auto; /* maintain aspect ratio */
+            object-fit: contain;
+            margin: 0 auto;
         }
 
-            #xkcd-flex.image-portrait img {
-                flex: 3 1 0;
-                min-width: 0;
-                min-height: 0;
-                object-fit: contain;
-            }
 
-            #xkcd-flex.image-portrait .title-and-alt {
-                flex: 1 1 0;
-            }
+    #xkcd-container.image-orientation-portrait {
+        grid-template-rows: auto 1fr;
+        grid-template-columns: max-content minmax(33vw, 1fr);
+        grid-template-areas:
+            "image title"
+            "image alt"
+    }
 
-        /* landscape display + landscape image: stacked */
-        #xkcd-flex.image-landscape {
-            flex-direction: column;
+        /* Ensure the image column grows as much as possible */
+        #xkcd-container.image-orientation-portrait #xkcd-image {
+            max-height: 100vh;
+        }
+}
+
+@media (orientation: portrait) {
+    #xkcd-container.image-orientation-landscape {
+        grid-template-rows: max-content max-content 1fr max-content;
+        grid-template-areas:
+            "title"
+            "image"
+            "empty"
+            "alt"
+    }
+        /* Ensure the image column grows as much as possible */
+        #xkcd-container.image-orientation-landscape #xkcd-image {
+            max-height: 100vh;
         }
 
-            #xkcd-flex.image-landscape img {
-                max-width: 100%;
-                min-height: 50%;
-                flex: 0 1 auto;
-            }
+    #xkcd-container.image-orientation-portrait {
+        grid-template-rows: max-content 1fr max-content;
+        grid-template-areas:
+            "title"
+            "image"
+            "alt"
+    }
 
-            #xkcd-flex.image-landscape h1 {
-                padding: 0;
-            }
-
-            #xkcd-flex.image-landscape .alt {
-                flex: 1.5;
-            }
+        /* Constrain the image in portrait mode */
+        #xkcd-container.image-orientation-portrait #xkcd-image {
+            max-height: 70vh; /* or 80vh depending on taste */
+            width: auto; /* prevent forced stretching */
+            object-fit: contain;
+        }
 }

@@ -11,9 +11,14 @@
     var xkcd = Model.Xkcd;
     var xkcdInfo = xkcd?.GetInfo();
 
+    var imageIsLandscape = xkcdInfo?.ImageIsLandscape ?? false;
+
     string? mockOrientation = null; // or "portrait" or "landscape" for testing
-    var imageIsLandscape = (mockOrientation == "landscape") || (xkcdInfo?.ImageIsLandscape ?? false);
-    var imageClass = imageIsLandscape ? "image-landscape" : "image-portrait";
+    if (mockOrientation != null)
+    {
+        imageIsLandscape = mockOrientation == "landscape";
+    }
+    var imageClass = imageIsLandscape ? "image-orientation-landscape" : "image-orientation-portrait";
 }
 
 @section Head {
@@ -29,12 +34,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Playpen+Sans:wght@100..800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
 }
 
-<div id="xkcd-flex" class="@imageClass">
-    <img src="@(mockOrientation != null ? $"/images/{mockOrientation}_example.jpg" : xkcdInfo?.ImageAsDataUrl ?? "")" alt="XKCD comic" />
-    <div class="title-and-alt">
-        <h1>@(xkcdInfo?.Title ?? "XKCD Comic")</h1>
-        <div class="alt">
-            @(xkcdInfo?.Alt ?? "")
-        </div>
+<div id="xkcd-container" class="@imageClass">
+    <img id="xkcd-image" src="@(mockOrientation != null ? $"/images/{mockOrientation}_example.jpg" : xkcdInfo?.ImageAsDataUrl ?? "")" alt="XKCD comic" />
+    <div id="xkcd-title">@(xkcdInfo?.Title ?? "XKCD Comic")</div>
+    <div id="xkcd-alt-description">
+        @(xkcdInfo?.Alt ?? "")
     </div>
 </div>
