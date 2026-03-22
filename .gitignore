@@ -12,3 +12,4 @@
 # .NET artifacts:
 /server/**/bin/
 /server/**/obj/
+/server/localdata/gallery_images/1

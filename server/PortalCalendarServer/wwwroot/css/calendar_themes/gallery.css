@@ -1,0 +1,62 @@
+html,
+body,
+div,
+p {
+    padding: 0;
+    margin: 0;
+}
+
+:root {
+    --epd-black: #000;
+    --epd-white: #fff;
+}
+
+body {
+    background-color: var(--epd-white);
+    color: var(--epd-black);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: sans-serif;
+}
+
+div#visible-area {
+    flex: 1 1 auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.image-container {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.description {
+    flex: 0 0 auto;
+    padding: 4px 8px;
+    margin-top: 4px;
+    text-align: center;
+    font-size: 14px;
+    background-color: var(--epd-black);
+    color: var(--epd-white);
+}
+
+.no-image {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    padding: 20px;
+    text-align: center;
+}

@@ -1,0 +1,23 @@
+@model Display
+@using PortalCalendarServer.Models.DatabaseEntities
+@using PortalCalendarServer.Services
+@inject IDisplayService displayService
+@inject GalleryService galleryService
+
+@{
+    var galleries = await galleryService.GetAllGalleriesAsync();
+    var currentValue = displayService.GetConfigWithoutDefaults(Model, "gallery_id");
+}
+
+<div class="col-md-6 mt-2">
+    <label for="gallery_id">Gallery</label>
+    <select id="gallery_id" name="gallery_id" class="form-select">
+        <option value="">— select a gallery —</option>
+        @foreach (var gallery in galleries)
+        {
+            <option value="@gallery.Id" selected="@(currentValue == gallery.Id.ToString())">
+                @gallery.Name (@gallery.Images.Count images)
+            </option>
+        }
+    </select>
+</div>

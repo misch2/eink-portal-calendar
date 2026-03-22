@@ -1,0 +1,53 @@
+@model PortalCalendarServer.Models.DatabaseEntities.Gallery
+
+<p>
+    <a href="/galleries">&larr; Back to galleries</a>
+</p>
+
+<h4>Upload Image</h4>
+<form method="post" action="/galleries/@Model.Id/upload" enctype="multipart/form-data" class="row g-3 mb-4" style="max-width: 600px;">
+    @Html.AntiForgeryToken()
+    <div class="col-12">
+        <label class="form-label">Image file</label>
+        <input type="file" name="file" class="form-control" accept="image/*" required />
+    </div>
+    <div class="col-12">
+        <label class="form-label">Description (optional)</label>
+        <input type="text" name="description" class="form-control" />
+    </div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Upload</button>
+    </div>
+</form>
+
+@if (Model.Images.Count == 0)
+{
+    <p class="text-muted">No images in this gallery yet.</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var image in Model.Images.OrderBy(i => i.UploadedAt))
+        {
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="card">
+                    <img src="/galleries/@Model.Id/images/@image.Id"
+                         class="card-img-top"
+                         alt="@(image.Description ?? "Gallery image")"
+                         style="max-height: 200px; object-fit: contain; background: #f8f9fa;" />
+                    <div class="card-body">
+                        @if (!string.IsNullOrEmpty(image.Description))
+                        {
+                            <p class="card-text">@image.Description</p>
+                        }
+                        <p class="card-text"><small class="text-muted">@image.UploadedAt.ToString("yyyy-MM-dd HH:mm")</small></p>
+                        <form method="post" action="/galleries/@Model.Id/images/delete/@image.Id">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
