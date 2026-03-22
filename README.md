@@ -42,6 +42,7 @@ I also added a voltage monitoring because with ePaper it's not easily detectable
   + [Waveshare 7.5" 800x480 ePaper B/W display](https://www.laskakit.cz/waveshare-7-5--800x480-epaper-raw-displej-bw/)
   + or [WFT0583CZ61 7.5" 800x480 ePaper B/W/R display](https://www.aliexpress.com/item/1005005121813674.html)
   + or [GDEM075F52 7.5" 4C 800x480 ePaper B/W/R/Y display](https://www.aliexpress.com/item/1005010179550278.html)
+  + or [GDEP073E01 7.3" 6C 400x480 ePaper Spectra E6](https://www.aliexpress.com/item/1005007253583430.html)
 * ESP32 board: [LaskaKit low power ePaper ESP32 board with USB-C and LiPol charging circuit](https://www.laskakit.cz/laskakit-espink-esp32-e-paper-pcb-antenna/)
 * Power source: [LiPol battery](https://www.laskakit.cz/geb-lipol-baterie-805060-3000mah-3-7v-jst-ph-2-0/)
 * ePaper frame: [3D printed frame by @MultiTricker](https://www.printables.com/model/541552-ramecek-pro-epaper-75-waveshare-i-good-display-v1/related)
