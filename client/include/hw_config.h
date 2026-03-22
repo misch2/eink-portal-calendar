@@ -30,6 +30,16 @@
 #include <GxEPD2_4C.h>
 #endif
 
+#ifdef DISPLAY_TYPE_6C
+#define DISPLAY_COLOR_TYPE_AS_STRING "6C"
+#include <GxEPD2_7C.h>
+#endif
+
+#ifdef DISPLAY_TYPE_7C
+#define DISPLAY_COLOR_TYPE_AS_STRING "7C"
+#include <GxEPD2_7C.h>
+#endif
+
 // TODO
 // #ifdef DISPLAY_TYPE_GRAYSCALE
 // #define DISPLAY_COLOR_TYPE_AS_STRING "4G"

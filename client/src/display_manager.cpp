@@ -187,7 +187,7 @@ int DisplayManager::bytesPerRow() {
 #if defined(DISPLAY_TYPE_3C) || defined(DISPLAY_TYPE_4C)
   return DISPLAY_WIDTH / 4;  // 4 pixels per byte
 #endif
-#ifdef DISPLAY_TYPE_7C
+#if defined(DISPLAY_TYPE_6C) || defined(DISPLAY_TYPE_7C)
   return DISPLAY_WIDTH / 2;  // 2 pixels per byte
 #endif
 }
@@ -249,7 +249,7 @@ void DisplayManager::drawBitmapRow(unsigned char* data, int16_t y) {
     display.drawPixel(x, y, color);
     x++;
 #endif
-#ifdef DISPLAY_TYPE_7C
+#if defined(DISPLAY_TYPE_6C) || defined(DISPLAY_TYPE_7C)
     // 3 bits per pixel = 2 pixels per byte (lower 3 bits used)
     color = serverByteToGxEPDColor[(byte >> 4) & 0x07];
     display.drawPixel(x, y, color);
