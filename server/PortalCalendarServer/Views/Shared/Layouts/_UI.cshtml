@@ -3,6 +3,7 @@
 @using PortalCalendarServer.Services
 @using PortalCalendarServer.Services.BackgroundJobs
 @inject IDisplayService displayService
+@inject IGalleryService galleryService
 @inject ImageRegenerationService imageRegenerationService
 @inject IWebHostEnvironment environment
 @inject IConfiguration configuration
@@ -78,8 +79,21 @@
                     <span class="nav-section-title mt-3">Image galleries</span>
                     <a class="nav-link @(navLink == "galleries" ? "active" : "")"
                        href="/galleries">
-                        Galleries
+                        All galleries
                     </a>
+
+                    @{
+                        var allGalleries = await galleryService.GetAllGalleriesAsync();
+                        var currentGalleryId = ViewData["GalleryId"] as int?;
+                    }
+                    @foreach (var gal in allGalleries)
+                    {
+                        var isGallerySelected = navLink == "gallery" && currentGalleryId == gal.Id;
+                        <a class="nav-link nav-link--sub-item @(isGallerySelected ? "active" : "")"
+                           href="/galleries/@gal.Id">
+                            @gal.Name
+                        </a>
+                    }
 
                     <span class="nav-section-title mt-3">Administration</span>
                     <a class="nav-link @(navLink == "users" ? "active" : "")"
