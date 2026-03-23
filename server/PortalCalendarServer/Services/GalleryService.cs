@@ -4,7 +4,7 @@ using PortalCalendarServer.Models.DatabaseEntities;
 
 namespace PortalCalendarServer.Services;
 
-public class GalleryService(CalendarContext context, IConfiguration configuration)
+public class GalleryService(CalendarContext context, IConfiguration configuration) : IGalleryService
 {
     private readonly CalendarContext _context = context;
     private readonly string _galleryImagesPath = configuration["Paths:GalleryImages"]!;

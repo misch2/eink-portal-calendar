@@ -4,7 +4,7 @@ namespace PortalCalendarServer.Services.PageGeneratorComponents;
 
 public class GalleryComponent(
     IDisplayService displayService,
-    GalleryService galleryService,
+    IGalleryService galleryService,
     IConfiguration configuration
     )
 {

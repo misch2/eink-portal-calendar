@@ -16,7 +16,7 @@ public class GalleryModule : IPortalModule
     public object? CreatePageGeneratorComponent(IServiceProvider services, Display display, DateTime date)
     {
         var displayService = services.GetRequiredService<IDisplayService>();
-        var galleryService = services.GetRequiredService<GalleryService>();
+        var galleryService = services.GetRequiredService<IGalleryService>();
         var configuration = services.GetRequiredService<IConfiguration>();
 
         return new GalleryComponent(displayService, galleryService, configuration);

@@ -1,27 +1,8 @@
-html,
-body,
-div,
-p {
-    padding: 0;
+body {
     margin: 0;
 }
 
-:root {
-    --epd-black: #000;
-    --epd-white: #fff;
-}
-
-body {
-    background-color: var(--epd-white);
-    color: var(--epd-black);
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    font-family: sans-serif;
-}
-
-div#visible-area {
+#gallery-image-container {
     flex: 1 1 auto;
     overflow: hidden;
     display: flex;

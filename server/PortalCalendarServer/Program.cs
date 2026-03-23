@@ -119,7 +119,7 @@ builder.Services.AddScoped<IMqttService, MqttService>();
 builder.Services.AddScoped<INameDayService, NameDayService>();
 builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();
 builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<GalleryService>();
+builder.Services.AddScoped<IGalleryService, GalleryService>();
 
 // Register module registry with all built-in modules
 var moduleRegistry = new ModuleRegistry();

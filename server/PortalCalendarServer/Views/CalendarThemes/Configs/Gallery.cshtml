@@ -2,7 +2,7 @@
 @using PortalCalendarServer.Models.DatabaseEntities
 @using PortalCalendarServer.Services
 @inject IDisplayService displayService
-@inject GalleryService galleryService
+@inject IGalleryService galleryService
 
 @{
     var galleries = await galleryService.GetAllGalleriesAsync();

@@ -6,7 +6,7 @@ namespace PortalCalendarServer.Controllers;
 
 [Controller]
 [Authorize]
-public class GalleriesController(GalleryService galleryService) : Controller
+public class GalleriesController(IGalleryService galleryService) : Controller
 {
     // GET /galleries
     [HttpGet("/galleries")]
