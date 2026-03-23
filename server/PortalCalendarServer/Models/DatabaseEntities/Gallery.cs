@@ -1,10 +1,11 @@
-namespace PortalCalendarServer.Models.DatabaseEntities;
-
-public class Gallery
+namespace PortalCalendarServer.Models.DatabaseEntities
 {
-    public int Id { get; set; }
-    public required string Name { get; set; }
-    public DateTime CreatedAt { get; set; }
+    public class Gallery
+    {
+        public int Id { get; set; }
+        public required string Name { get; set; }
+        public DateTime CreatedAt { get; set; }
 
-    public List<GalleryImage> Images { get; set; } = [];
+        public List<GalleryImage> Images { get; set; } = [];
+    }
 }
