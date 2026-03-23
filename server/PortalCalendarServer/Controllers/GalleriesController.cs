@@ -63,7 +63,8 @@ public class GalleriesController(IGalleryService galleryService) : Controller
             return NotFound();
         }
 
-        ViewData["NavLink"] = "galleries";
+        ViewData["NavLink"] = "gallery";
+        ViewData["GalleryId"] = gallery.Id;
         ViewData["Title"] = gallery.Name;
 
         return View("~/Views/Galleries/Detail.cshtml", gallery);
