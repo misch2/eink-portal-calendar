@@ -119,6 +119,7 @@ builder.Services.AddScoped<IMqttService, MqttService>();
 builder.Services.AddScoped<INameDayService, NameDayService>();
 builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<IGalleryService, GalleryService>();
 
 // Register module registry with all built-in modules
 var moduleRegistry = new ModuleRegistry();
@@ -137,6 +138,7 @@ moduleRegistry.Register(new PortalIconsModule());
 moduleRegistry.Register(new ThemeConfigStatusIndicatorsModule());
 moduleRegistry.Register(new WebImageModule());
 moduleRegistry.Register(new WeatherForecastModule());
+moduleRegistry.Register(new GalleryModule());
 builder.Services.AddSingleton(moduleRegistry);
 
 // Register periodic background services

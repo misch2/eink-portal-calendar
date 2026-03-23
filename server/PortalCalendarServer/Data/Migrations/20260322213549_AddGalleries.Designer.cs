@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PortalCalendarServer.Data;
 
@@ -10,9 +11,11 @@ using PortalCalendarServer.Data;
 namespace PortalCalendarServer.Migrations
 {
     [DbContext(typeof(CalendarContext))]
-    partial class CalendarContextModelSnapshot : ModelSnapshot
+    [Migration("20260322213549_AddGalleries")]
+    partial class AddGalleries
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.12");
@@ -770,16 +773,6 @@ namespace PortalCalendarServer.Migrations
                             IsActive = true,
                             IsDefault = false,
                             SortOrder = 600
-                        },
-                        new
-                        {
-                            Id = 9,
-                            DisplayName = "Gallery",
-                            FileName = "Gallery",
-                            HasCustomConfig = true,
-                            IsActive = true,
-                            IsDefault = false,
-                            SortOrder = 700
                         },
                         new
                         {

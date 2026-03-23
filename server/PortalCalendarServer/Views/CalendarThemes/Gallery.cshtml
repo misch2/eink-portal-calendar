@@ -1,0 +1,38 @@
+@model PortalCalendarServer.Services.PageViewModel
+@using PortalCalendarServer.Models.DatabaseEntities
+@using PortalCalendarServer.Services
+@inject IDisplayService displayService
+
+@{
+    Layout = "~/Views/Shared/Layouts/Epaper/_FullBleedLayout.cshtml";
+    ViewBag.Title = "Image gallery";
+
+    var gallery = Model.Gallery;
+    var imageInfo = gallery?.GetRandomImage(Model.Display);
+    var hasDescription = imageInfo != null && !string.IsNullOrEmpty(imageInfo.Description);
+}
+
+@section Head {
+    <link rel="stylesheet" href="/css/calendar_themes/gallery.css" asp-append-version="true" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+25&display=swap" rel="stylesheet">
+}
+
+@if (imageInfo != null)
+{
+    <div id="gallery-container" class="@(hasDescription ? "with-description" : "")">
+        <img id="gallery-image" src="@imageInfo.ImageAsDataUrl" alt="@(imageInfo.Description ?? "Gallery image")" />
+        @if (hasDescription)
+        {
+            <div id="gallery-description">@imageInfo.Description</div>
+        }
+    </div>
+}
+else
+{
+    <div id="gallery-no-image">
+        No image available. Please configure a gallery with images.
+    </div>
+}

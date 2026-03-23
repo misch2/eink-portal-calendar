@@ -203,4 +203,5 @@ public class PageViewModel
     public WeatherComponent? Weather => GetComponent<WeatherComponent>("metnoweather");
     public WebImageComponent? WebImage => GetComponent<WebImageComponent>("webimage");
     public ErrorComponent? Error => GetComponent<ErrorComponent>("error");
+    public GalleryComponent? Gallery => GetComponent<GalleryComponent>("gallery");
 }

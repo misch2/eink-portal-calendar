@@ -34,6 +34,10 @@ public partial class CalendarContext : DbContext
 
     public virtual DbSet<AppUser> Users { get; set; }
 
+    public virtual DbSet<Gallery> Galleries { get; set; }
+
+    public virtual DbSet<GalleryImage> GalleryImages { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Cache>(entity =>
@@ -197,6 +201,7 @@ public partial class CalendarContext : DbContext
                 new Theme { Id = 5, FileName = "MultidayCalendar", DisplayName = "Multi-day Calendar", HasCustomConfig = true, SortOrder = 400 },
                 new Theme { Id = 6, FileName = "XKCD", DisplayName = "XKCD", HasCustomConfig = false, SortOrder = 500 },
                 new Theme { Id = 8, FileName = "WebImage", DisplayName = "Image from web", HasCustomConfig = true, SortOrder = 600 },
+                new Theme { Id = 9, FileName = "Gallery", DisplayName = "Gallery", HasCustomConfig = true, SortOrder = 700 },
                 new Theme { Id = 7, FileName = "Test", DisplayName = "Test - Color Wheel", HasCustomConfig = false, SortOrder = 10000 }
              );
         });
@@ -365,6 +370,51 @@ public partial class CalendarContext : DbContext
                 .IsRequired()
                 .HasColumnType("VARCHAR")
                 .HasColumnName("password_hash");
+        });
+
+        modelBuilder.Entity<Gallery>(entity =>
+        {
+            entity.ToTable("galleries");
+
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasColumnType("VARCHAR")
+                .HasColumnName("name");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("DATETIME")
+                .HasColumnName("created_at");
+
+            entity.HasMany(e => e.Images)
+                .WithOne(e => e.Gallery)
+                .HasForeignKey(e => e.GalleryId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<GalleryImage>(entity =>
+        {
+            entity.ToTable("gallery_images");
+
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.GalleryId).HasColumnName("gallery_id");
+            entity.Property(e => e.FileName)
+                .IsRequired()
+                .HasColumnType("VARCHAR")
+                .HasColumnName("file_name");
+            entity.Property(e => e.Description)
+                .HasColumnType("VARCHAR")
+                .HasColumnName("description");
+            entity.Property(e => e.ContentType)
+                .IsRequired()
+                .HasColumnType("VARCHAR")
+                .HasColumnName("content_type");
+            entity.Property(e => e.UploadedAt)
+                .HasColumnType("DATETIME")
+                .HasColumnName("uploaded_at");
         });
 
         OnModelCreatingPartial(modelBuilder);
