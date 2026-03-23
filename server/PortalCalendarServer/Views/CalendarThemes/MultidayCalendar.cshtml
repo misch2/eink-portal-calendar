@@ -5,7 +5,8 @@
 @using PortalCalendarServer.Services.PageGeneratorComponents
 @inject IDisplayService displayService
 @{
-    Layout = null;
+    Layout = "~/Views/Shared/Layouts/Epaper/_InsetLayout.cshtml";
+    ViewBag.Title = "Calendar - Multiday";
 
     var dateCulture = displayService.GetDateCultureInfo(Model.Display);
     var tz = displayService.GetTimeZoneInfo(Model.Display);
@@ -52,12 +53,8 @@
         }
     };
 }
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>Calendar - Multiday</title>
 
+@section Head {
     @* Icon library *@
     <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
 
@@ -65,96 +62,6 @@
     <link rel="stylesheet" href="/css/fonts.css" asp-append-version="true" />
     <link rel="stylesheet" href="/css/calendar_themes/multiday_calendar.css" asp-append-version="true" />
 
-    @* EPD Colors *@
-    @await Html.PartialAsync("Includes/_EpdColors.cshtml", Model.CssColors)
-</head>
-
-@{
-            int width = Model.Display.VirtualWidth();
-            int height = Model.Display.VirtualHeight();
-}
-<body style="width: @(width)px; height: @(height)px;">
-    <div id="visible-area">
-
-        <h3 id="calendar-title">
-            @displayService.GetConfig(Model.Display, "display_title")
-        </h3>
-
-        <div class="calendar-container">
-            @{
-                var lastTitle = "";
-            }
-            @foreach (var block in eventBlocks)
-            {
-                var eventsForBlock = nearestEvents.Where(block.Condition).ToList();
-
-                if (eventsForBlock.Any())
-                {
-                    <div class="calendar-event-block @block.Class">
-                        <div class="calendar-event-block-title">@block.Title</div>
-                        @{
-                            lastTitle = "";
-                        }
-                        <div class="calendar-event-block-content">
-                            @foreach (var evt in eventsForBlock)
-                            {
-                                var dt = evt.StartTime;
-                                var deltaDays = (dt.Date - Model.Date.Date).Days;
-                                var dt_local = TimeZoneInfo.ConvertTimeFromUtc(dt, tz);
-
-                                var dayDescription = dateCulture.DateTimeFormat.GetDayName(dt_local.DayOfWeek);
-                                var title = $"{dayDescription}, {dt_local:d. M. yyyy}";
-
-                                if (deltaDays > 0)
-                                {
-                                    title += $" (+{deltaDays})";
-                                }
-
-                                if (title != lastTitle)
-                                {
-                                    lastTitle = title;
-                                    <div class="calendar-day-title">
-                                        @title
-                                    </div>
-                                }
-
-                                <div class="calendar-event">
-                                    @if (evt.IsRecurrent)
-                                    {
-                                        <text>?</text>
-                                    }
-                                    @if (evt.AllDay)
-                                    {
-                                        @evt.Summary
-                                        <!-- (celý den) -->
-                                    }
-                                    else
-                                    {
-                                        @dt_local.ToString("t", dateCulture)
-                                        <text> </text>
-                                        @evt.Summary
-                                        @if (evt.DurationHours.HasValue)
-                                        {
-                                            <text> (~@((int)(evt.DurationHours.Value + 0.5)) hod.)</text>
-                                        }
-                                    }
-                                </div>
-                            }
-                        </div>  @* class="calendar-event-block-content" *@
-                    </div>  @* class="calendar-event-block-..." *@
-                }
-            }
-        </div>
-
-        <div id="bottom-row">
-            <div id="bottom-signature">
-                @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_WakeupInfo.cshtml", Model.Display)
-            </div>
-            <div id="battery-status">
-                @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_BatteryStatusIcon.cshtml", Model.Display)
-            </div>
-        </div>
-    </div>
     <script>
         document.fonts.ready.then(function () {
             const container = document.querySelector(".calendar-container");
@@ -198,5 +105,79 @@
             }
         });
     </script>
-</body>
-</html>
+}
+
+<div id="visible-area">
+
+    <h3 id="calendar-title">
+        @displayService.GetConfig(Model.Display, "display_title")
+    </h3>
+
+    <div class="calendar-container">
+        @{
+            var lastTitle = "";
+        }
+        @foreach (var block in eventBlocks)
+        {
+            var eventsForBlock = nearestEvents.Where(block.Condition).ToList();
+
+            if (eventsForBlock.Any())
+            {
+                <div class="calendar-event-block @block.Class">
+                    <div class="calendar-event-block-title">@block.Title</div>
+                    @{
+                        lastTitle = "";
+                    }
+                    <div class="calendar-event-block-content">
+                        @foreach (var evt in eventsForBlock)
+                        {
+                            var dt = evt.StartTime;
+                            var deltaDays = (dt.Date - Model.Date.Date).Days;
+                            var dt_local = TimeZoneInfo.ConvertTimeFromUtc(dt, tz);
+
+                            var dayDescription = dateCulture.DateTimeFormat.GetDayName(dt_local.DayOfWeek);
+                            var title = $"{dayDescription}, {dt_local:d. M. yyyy}";
+
+                            if (deltaDays > 0)
+                            {
+                                title += $" (+{deltaDays})";
+                            }
+
+                            if (title != lastTitle)
+                            {
+                                lastTitle = title;
+                                <div class="calendar-day-title">
+                                    @title
+                                </div>
+                            }
+
+                            <div class="calendar-event">
+                                @if (evt.IsRecurrent)
+                                {
+                                    <text>↻</text>
+                                }
+                                @if (evt.AllDay)
+                                {
+                                    @evt.Summary
+                                    <!-- (celý den) -->
+                                }
+                                else
+                                {
+                                    @dt_local.ToString("t", dateCulture)
+                                    <text> </text>
+                                    @evt.Summary
+                                    @if (evt.DurationHours.HasValue)
+                                    {
+                                        <text> (~@((int)(evt.DurationHours.Value + 0.5)) hod.)</text>
+                                    }
+                                }
+                            </div>
+                        }
+                    </div>  @* class="calendar-event-block-content" *@
+                </div>  @* class="calendar-event-block-..." *@
+            }
+        }
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Views/CalendarThemes/Includes/BottomStatusBar.cshtml", Model.Display)

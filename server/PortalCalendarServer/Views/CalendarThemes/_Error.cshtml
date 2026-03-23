@@ -1,37 +1,27 @@
 @using PortalCalendarServer.Models.POCOs
-@model ErrorViewModel
+@model PortalCalendarServer.Services.PageViewModel
 @{
-    Layout = null;
+    Layout = "~/Views/Shared/Layouts/Epaper/_FullBleedLayout.cshtml";
+    ViewBag.Title = "Page Rendering Error";
+
+    var error = Model.Error;
 }
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>Page Rendering Error</title>
 
-    @* EPD Colors *@
-    @if (Model.CssColors != null)
-    {
-        @await Html.PartialAsync("Includes/_EpdColors.cshtml", Model.CssColors)
-    }
-
+@section Head {
     @* Stylesheets *@
     <link rel="stylesheet" href="/css/calendar_themes/error.css" asp-append-version="true" />
-</head>
+}
 
-<body>
-    <div id="visible-area">
-        <div class="error-icon">⚠️</div>
-        <div class="error-title">Error</div>
-        <div class="error-subtitle">Page rendering failed</div>
-        <div class="error-message">
-            @Model.Message
-            @if (Model.ShowDetails && !string.IsNullOrEmpty(Model.Details))
-            {
-                <pre>@Model.Details</pre>
-            }
-        </div>
-        <div class="error-timestamp">@Model.Timestamp.ToString("yyyy-MM-dd HH:mm:ss") UTC</div>
+<div class="error-content">
+    <div class="error-icon">⚠️</div>
+    <div class="error-title">Error</div>
+    <div class="error-subtitle">Page rendering failed</div>
+    <div class="error-message">
+        @error?.Message
+        @if (error != null && error.ShowDetails && !string.IsNullOrEmpty(error.Details))
+        {
+            <pre>@error.Details</pre>
+        }
     </div>
-</body>
-</html>
+    <div class="error-timestamp">@(error?.Timestamp.ToString("yyyy-MM-dd HH:mm:ss") ?? "") UTC</div>
+</div>

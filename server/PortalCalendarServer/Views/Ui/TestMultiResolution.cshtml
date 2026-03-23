@@ -1,0 +1,56 @@
+@model Display
+@using PortalCalendarServer.Controllers
+@using PortalCalendarServer.Models.DatabaseEntities
+
+<!-- https://css-tricks.com/snippets/css/a-guide-to-flexbox/ -->
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    @{
+        var pageUrl = Url.Action(nameof(UiController.CalendarHtmlDefaultDate), "Ui", new { displayNumber = Model.Id, preview_colors = true });
+
+        var commonResolutions = new (int width, int height)[]
+        {
+        // 6":
+        (800, 600),
+        // (1448, 1072),
+
+        // 7.5":
+        (800, 480),
+        (640, 384),
+
+        // 7.8":
+        // (1872, 1404), 
+
+        // 10.2":
+        // (960, 640), 
+
+        // 13.3":
+        // (960, 680), 
+        // (1600, 1200)
+        };
+
+        foreach (var (width, height) in commonResolutions)
+        {
+            <div>
+                <div style="display: flex; flex-direction: row; gap: 1.5rem; align-items: flex-start;">
+                    <div>
+                        <h5>@width x @height Landscape</h5>
+                        <iframe src="@pageUrl"
+                                width="@width"
+                                height="@height"
+                                style="border: 1px solid black">
+                        </iframe>
+                    </div>
+                    <div>
+                        <h5>@height x @width Portrait</h5>
+                        <iframe src="@pageUrl"
+                                width="@height"
+                                height="@width"
+                                style="border: 1px solid black">
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+        }
+
+    }
+</div>

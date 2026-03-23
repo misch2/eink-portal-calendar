@@ -4,7 +4,8 @@
 @using PortalCalendarServer.Services
 @inject IDisplayService displayService
 @{
-    Layout = null;
+    Layout = "~/Views/Shared/Layouts/Epaper/_InsetLayout.cshtml";
+    ViewBag.Title = "Calendar - Google Fit Weight";
 
     var dateCulture = displayService.GetDateCultureInfo(Model.Display);
     var tz = displayService.GetTimeZoneInfo(Model.Display);
@@ -29,12 +30,8 @@
     var weightSeries = Model.Weight?.GetWeightSeries(Model.Date);
     var lastWeight = Model.Weight?.GetLastWeight();
 }
-@* <!DOCTYPE html> *@
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>Calendar - Google Fit Weight</title>
 
+@section Head {
     @* Icon library *@
     <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
 
@@ -42,9 +39,6 @@
     <link rel="stylesheet" href="/css/fonts.css" asp-append-version="true" />
     <link rel="stylesheet" href="/css/calendar_themes/calendar.css" asp-append-version="true" />
     <link rel="stylesheet" href="/css/calendar_themes/googlefit.css" asp-append-version="true" />
-
-    @* EPD Colors *@
-    @await Html.PartialAsync("Includes/_EpdColors.cshtml", Model.CssColors)
 
     @* Google Charts Library *@
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -131,92 +125,84 @@
             chart.draw(data, options);
         }
     </script>
-</head>
+}
 
-<body>
-    <div id="spacer">
-        <div class="top-month-header">
-            <div>
-                @decorator(Model.Date.ToString("MMMM", dateCulture))
-            </div>
-        </div>
-
-        <div class="current-weight-big">
-            @if (lastWeight.HasValue)
-            {
-                <span>@lastWeight.Value.ToString("F1", CultureInfo.InvariantCulture)</span>
-            }
-            else
-            {
-                <span>--.-</span>
-            }
-            <!-- <span class="current-weight-small-kg"> kg</span> -->
-        </div>
-
-        <div class="weight-chart" id="weight_chart_div">
-        </div>
-
-        <div class="day-of-week-block">
-            <div class="dow-number-and-name">
-                <div>
-                    @Model.Date.Day/@DateTime.DaysInMonth(Model.Date.Year, Model.Date.Month)
-                </div>
-                <div>
-                    @decorator(Model.Date.ToString("dddd", dateCulture))
-                </div>
-            </div>
-            <div class="separator"></div>
-            <div class="bunch-of-bars">
-                @for (int i = 1; i <= Model.Date.Day; i++)
-                {
-                    <div class="bar"></div>
-                }
-            </div>
-        </div>
-
-        @if (icons?.Any() == true)
-        {
-            <div class="icons-container">
-                @foreach (var icon in icons)
-                {
-                    <img src="/images/portal_icons/@(icon.Name).png" class="icon@(icon.Grayed ? " grayed" : "")" alt="Portal icon" />
-                }
-            </div>
-        }
-
-        @if (calendar.HasEntries && calendar.TodayEvents?.Any() == true)
-        {
-            <div class="calendar-container">
-                @foreach (var evt in calendar.TodayEvents)
-                {
-                    <div>
-                        @if (evt.AllDay)
-                        {
-                            @evt.Summary
-                        }
-                        else
-                        {
-                            @TimeZoneInfo.ConvertTimeFromUtc(evt.StartTime, tz).ToString("t", dateCulture)
-                            <text> </text>
-                            @evt.Summary
-                            @if (evt.DurationHours.HasValue)
-                            {
-                                <text> (~@((int)(evt.DurationHours.Value + 0.5)) hod.)</text>
-                            }
-                        }
-                    </div>
-                }
-            </div>
-        }
-
-        <img id="aperture-logo" src="/images/Aperture_Laboratories_Logo.png" alt="Aperture Science" />
-
-        <div id="bottom-signature">
-            @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_WakeupInfo.cshtml", Model.Display)
-        </div>
-        <div id="battery-status">
-            @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_BatteryStatusIcon.cshtml", Model.Display)
+<div id="spacer">
+    <div class="top-month-header">
+        <div>
+            @decorator(Model.Date.ToString("MMMM", dateCulture))
         </div>
     </div>
-</body>
-</html>
+
+    <div class="current-weight-big">
+        @if (lastWeight.HasValue)
+        {
+            <span>@lastWeight.Value.ToString("F1", CultureInfo.InvariantCulture)</span>
+        }
+        else
+        {
+            <span>--.-</span>
+        }
+        <!-- <span class="current-weight-small-kg"> kg</span> -->
+    </div>
+
+    <div class="weight-chart" id="weight_chart_div">
+    </div>
+
+    <div class="day-of-week-block">
+        <div class="dow-number-and-name">
+            <div>
+                @Model.Date.Day/@DateTime.DaysInMonth(Model.Date.Year, Model.Date.Month)
+            </div>
+            <div>
+                @decorator(Model.Date.ToString("dddd", dateCulture))
+            </div>
+        </div>
+        <div class="separator"></div>
+        <div class="bunch-of-bars">
+            @for (int i = 1; i <= Model.Date.Day; i++)
+            {
+                <div class="bar"></div>
+            }
+        </div>
+    </div>
+
+    @if (icons?.Any() == true)
+    {
+        <div class="icons-container">
+            @foreach (var icon in icons)
+            {
+                <img src="/images/portal_icons/@(icon.Name).png" class="icon@(icon.Grayed ? " grayed" : "")" alt="Portal icon" />
+            }
+        </div>
+    }
+
+    @if (calendar.HasEntries && calendar.TodayEvents?.Any() == true)
+    {
+        <div class="calendar-container">
+            @foreach (var evt in calendar.TodayEvents)
+            {
+                <div>
+                    @if (evt.AllDay)
+                    {
+                        @evt.Summary
+                    }
+                    else
+                    {
+                        @TimeZoneInfo.ConvertTimeFromUtc(evt.StartTime, tz).ToString("t", dateCulture)
+                        <text> </text>
+                        @evt.Summary
+                        @if (evt.DurationHours.HasValue)
+                        {
+                            <text> (~@((int)(evt.DurationHours.Value + 0.5)) hod.)</text>
+                        }
+                    }
+                </div>
+            }
+        </div>
+    }
+
+    <img id="aperture-logo" src="/images/Aperture_Laboratories_Logo.png" alt="Aperture Science" />
+
+    @await Html.PartialAsync("~/Views/CalendarThemes/Includes/BottomStatusBar.cshtml", Model.Display)
+</div>

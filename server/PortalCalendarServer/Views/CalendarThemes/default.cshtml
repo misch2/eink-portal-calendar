@@ -1,47 +1,43 @@
 @model PortalCalendarServer.Services.PageViewModel
 @{
-    Layout = null;
+    Layout = "~/Views/Shared/Layouts/Epaper/_FullBleedLayout.cshtml";
+    ViewBag.Title = "Calendar - Default";
 }
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>Calendar - Default</title>
-    
-    @* EPD Colors *@
-    @await Html.PartialAsync("Includes/_EpdColors.cshtml", Model.CssColors)
-    
+
+@section Head {
     <style>
         body {
-            margin: 0;
-            padding: 0;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
             font-family: Arial, sans-serif;
             text-align: center;
+            background-color: var(--epd-white);
+        }
+        
+        .content-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
         
         h1 {
-            font-size: 120px;
+            font-size: clamp(60px, 15vw, 120px);
             font-weight: bold;
             margin: 0;
             padding: 20px;
-            color: var(--color-black);
+            color: var(--epd-black);
         }
         
         p {
-            font-size: 60px;
+            font-size: clamp(30px, 7.5vw, 60px);
             margin: 20px 0 0 0;
-            color: var(--color-black);
+            color: var(--epd-black);
         }
     </style>
-</head>
+}
 
-<body>
-    <h1>It works!</h1>
-    <p>This is display @Model.Display.Mac</p>
-</body>
-</html>
+<h1>It works!</h1>
+<p>This is display @Model.Display.Mac</p>

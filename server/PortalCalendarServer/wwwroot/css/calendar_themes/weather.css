@@ -1,9 +1,8 @@
-/* resets */
-
 html,
 body {
-    /* background-color: aqua; */
-    font-size: 17pt;
+    font-size: clamp(10pt, 4.75vw, 20pt);
+    font-family: 'Gidole';
+    letter-spacing: 0.02em;
 }
 
 html,
@@ -14,104 +13,115 @@ p {
     margin: 0;
 }
 
-
-/* debug */
-
-div,
-p {
-    /* border: 3px dotted gray; */
-}
-
-div {
-    /* background-color: cadetblue; */
-}
-
-div div {
-    /* background-color: coral; */
-}
-
-div div div {
-    /* background-color: bisque; */
-}
-
-div div div div {
-    /* background-color: darkolivegreen; */
-    /* background-color: #eee; */
-}
-
-:root {
-    /* only for VSCode editor, real colors are overriden in the template based on the purpose (preview or real EPD) */
-    --epd-black: #000;
-    --epd-white: #fff;
-    --epd-red: #f00;
-    --epd-yellow: #ff0;
-}
-
 body {
-    /* background-color: burlywood; */
-    font-family: 'Gidole';
-    letter-spacing: 0.02em;
     background-color: var(--epd-white);
     color: var(--epd-black);
 }
 
-div#visible-area {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    height: 780px;
-    width: 460px;
-    overflow: hidden;
-    /* background-color: gainsboro; */
+.content-container {
+    display: flex;
+    flex-direction: column;
 }
+
+#weather-content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    flex: 1;
+}
+
+/* --- Date row --- */
 
 div.date-row {
     font-size: 1.5rem;
-
     display: flex;
     flex-wrap: wrap;
     /* for the case when the date or name is too long */
     justify-content: space-between;
-    position: absolute;
     width: 100%;
 }
 
-div.top-date-row {
-    top: 0;
-    left: 0;
-}
+/* --- Horizontal separators --- */
 
 div.horizontal-separator {
-    position: absolute;
     width: 100%;
-    top: 0;
-    left: 0;
     border-bottom: 2px solid var(--epd-black);
 }
 
+    div.horizontal-separator.separator-top {
+        margin-top: 0.1rem;
+        margin-bottom: 0.1rem;
+    }
+
+    div.horizontal-separator.separator-forecast {
+        margin-top: 0.5rem;
+        margin-bottom: 0.2rem;
+    }
+
+/* --- Current weather (big) --- */
+
 div.weather-current-big {
-    position: absolute;
+    position: relative;
     width: 100%;
-    top: 2.15rem;
-    left: 0;
     height: 8.8rem;
 }
 
-div.weather-forecast-container-grid {
+.current-temp {
     position: absolute;
+    top: 0.25em;
+    left: 0;
+    margin: auto;
     width: 100%;
+    text-align: center;
+    font-size: 5rem;
+}
 
+.current-description {
+    position: absolute;
+    top: 0.5rem;
+    left: 0;
+    text-align: left;
+}
+
+.current-wind {
+    position: absolute;
+    top: 0.5rem;
+    right: 0;
+    text-align: right;
+}
+
+.current-clouds {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    text-align: left;
+}
+
+.current-precip {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    text-align: right;
+}
+
+.wi-inline {
+    font-size: 1rem;
+    margin-top: 0.15rem;
+}
+
+/* --- Forecast grid --- */
+
+div.weather-forecast-container-grid {
+    width: 100%;
     display: grid;
     grid-template-rows: repeat(5, 1fr);
-    grid-column-gap: 0.2rem;
-    grid-row-gap: 0.2rem;
+    gap: 0.2rem;
 }
 
 div.weather-single-day-container-grid {
     display: grid;
     grid-template-columns: 1fr 1.5fr 1.2fr 1fr 1.2fr;
-    grid-column-gap: 0.2rem;
-    grid-row-gap: 0.2rem;
+    gap: 0.2rem;
 }
 
 div.weather-item {
@@ -127,6 +137,41 @@ div.weather-item-night {
     font-weight: bold;
 }
 
+.forecast-description {
+    font-weight: bold;
+    max-height: 1em;
+    overflow: visible;
+}
+
+.forecast-icon {
+    font-size: 2rem;
+    margin-top: 0.5rem;
+    margin-left: 0.5rem;
+}
+
+.forecast-temp {
+    text-align: center;
+}
+
+.forecast-temp-separator {
+    margin-top: -0.6em;
+    margin-bottom: -0.3em;
+}
+
+.forecast-precip {
+    text-align: center;
+}
+
+.forecast-precip-icon {
+    font-size: 1rem;
+}
+
+.forecast-precip-amount {
+    margin-top: 0.2rem;
+}
+
+/* --- Color modifiers --- */
+
 div.weather-is-rain-or-snow {
     color: var(--epd-red);
 }
@@ -138,20 +183,4 @@ div.weather-item-night.weather-is-rain-or-snow {
 
 div.weather-item.weather-is-rain-or-snow {
     border-color: var(--epd-red);
-}
-
-div#bottom-signature {
-    position: absolute;
-    width: 100%;
-    bottom: 0;
-    left: 0;
-    font-size: 0.7rem;
-}
-
-div#battery-status {
-    position: absolute;
-    bottom: -0.1em;
-    right: 0;
-    text-align: right;
-    font-size: 1.3rem;
 }

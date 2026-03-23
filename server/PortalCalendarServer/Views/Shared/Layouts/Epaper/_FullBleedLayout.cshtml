@@ -1,0 +1,19 @@
+@{
+    Layout = "~/Views/Shared/Layouts/Epaper/_BaseLayout.cshtml";
+}
+
+@section Head {
+    @RenderSection("Head", required: false)
+}
+
+@section CssVariables {
+    @RenderSection("CssVariables", required: false)
+}
+
+@section BodyStyles {
+    @RenderSection("BodyStyles", required: false)
+}
+
+<div class="content-container full-bleed">
+    @RenderBody()
+</div>
