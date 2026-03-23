@@ -22,6 +22,22 @@
                 <td>@gallery.Images.Count</td>
                 <td>@gallery.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
                 <td class="text-end">
+                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#rename_gallery_modal"
+                            data-gallery-id="@gallery.Id"
+                            data-gallery-name="@gallery.Name"
+                            title="Rename gallery">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#copy_gallery_modal"
+                            data-gallery-id="@gallery.Id"
+                            data-gallery-name="@gallery.Name"
+                            title="Copy gallery">
+                        <i class="bi bi-copy"></i>
+                    </button>
                     <button type="button" class="btn btn-sm btn-outline-danger"
                             data-bs-toggle="modal"
                             data-bs-target="#delete_gallery_modal"
@@ -87,6 +103,57 @@
     </div>
 </div>
 
+<!-- Copy Gallery Modal -->
+<div class="modal fade" id="copy_gallery_modal" tabindex="-1">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Copy gallery</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="copy_gallery_form" method="post" action="">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <p>Copy gallery <b>"<span class="copy_modal_gallery_name"></span>"</b> and all its images.</p>
+                    <div>
+                        <label class="form-label">New gallery name</label>
+                        <input type="text" name="name" id="copy_gallery_name_input" class="form-control" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-copy me-1"></i> Copy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Rename Gallery Modal -->
+<div class="modal fade" id="rename_gallery_modal" tabindex="-1">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Rename gallery</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="rename_gallery_form" method="post" action="">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div>
+                        <label class="form-label">New name</label>
+                        <input type="text" name="name" id="rename_gallery_name_input" class="form-control" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Rename</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
 <script>
     var deleteGalleryModal = document.getElementById('delete_gallery_modal');
@@ -96,6 +163,35 @@
         var galleryName = button.getAttribute('data-gallery-name');
         deleteGalleryModal.querySelector('.delete_modal_gallery_name').textContent = galleryName;
         deleteGalleryModal.querySelector('#delete_gallery_form').action = '/galleries/delete/' + galleryId;
+    });
+
+    var copyGalleryModal = document.getElementById('copy_gallery_modal');
+    copyGalleryModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var galleryId = button.getAttribute('data-gallery-id');
+        var galleryName = button.getAttribute('data-gallery-name');
+        copyGalleryModal.querySelector('.copy_modal_gallery_name').textContent = galleryName;
+        copyGalleryModal.querySelector('#copy_gallery_form').action = '/galleries/copy/' + galleryId;
+        copyGalleryModal.querySelector('#copy_gallery_name_input').value = galleryName + ' (copy)';
+    });
+    copyGalleryModal.addEventListener('shown.bs.modal', function () {
+        var input = copyGalleryModal.querySelector('#copy_gallery_name_input');
+        input.focus();
+        input.select();
+    });
+
+    var renameGalleryModal = document.getElementById('rename_gallery_modal');
+    renameGalleryModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var galleryId = button.getAttribute('data-gallery-id');
+        var galleryName = button.getAttribute('data-gallery-name');
+        renameGalleryModal.querySelector('#rename_gallery_form').action = '/galleries/rename/' + galleryId;
+        renameGalleryModal.querySelector('#rename_gallery_name_input').value = galleryName;
+    });
+    renameGalleryModal.addEventListener('shown.bs.modal', function () {
+        var input = renameGalleryModal.querySelector('#rename_gallery_name_input');
+        input.focus();
+        input.select();
     });
 
     var createGalleryModal = document.getElementById('create_gallery_modal');

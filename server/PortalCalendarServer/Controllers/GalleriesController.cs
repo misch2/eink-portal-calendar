@@ -36,6 +36,53 @@ public class GalleriesController(IGalleryService galleryService) : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    // POST /galleries/copy/{id}
+    [HttpPost("/galleries/copy/{id:int}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Copy(int id, [FromForm] string name)
+    {
+        var source = await galleryService.GetGalleryByIdAsync(id);
+        if (source == null)
+        {
+            TempData["Error"] = "Source gallery not found.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            TempData["Error"] = "Gallery name is required.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var copy = await galleryService.CopyGalleryAsync(id, name);
+        TempData["Message"] = $"Gallery '{source.Name}' copied as '{copy.Name}'.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    // POST /galleries/rename/{id}
+    [HttpPost("/galleries/rename/{id:int}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Rename(int id, [FromForm] string name)
+    {
+        var gallery = await galleryService.GetGalleryByIdAsync(id);
+        if (gallery == null)
+        {
+            TempData["Error"] = "Gallery not found.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            TempData["Error"] = "Gallery name is required.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var oldName = gallery.Name;
+        await galleryService.RenameGalleryAsync(id, name);
+        TempData["Message"] = $"Gallery '{oldName}' renamed to '{name}'.";
+        return RedirectToAction(nameof(Index));
+    }
+
     // POST /galleries/delete/{id}
     [HttpPost("/galleries/delete/{id:int}")]
     [ValidateAntiForgeryToken]
@@ -71,6 +118,7 @@ public class GalleriesController(IGalleryService galleryService) : Controller
     }
 
     // POST /galleries/{id}/upload
+    [RequestSizeLimit(10 * 1024 * 1024)] // Limit uploads to 10 MB
     [HttpPost("/galleries/{id:int}/upload")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Upload(int id, IFormFile file, [FromForm] string? description)
@@ -97,7 +145,7 @@ public class GalleriesController(IGalleryService galleryService) : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteImage(int galleryId, int imageId)
     {
-        await galleryService.DeleteImageAsync(imageId);
+        await galleryService.DeleteImageAsync(galleryId, imageId);
         TempData["Message"] = "Image deleted.";
         return RedirectToAction(nameof(Detail), new { id = galleryId });
     }

@@ -40,11 +40,46 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
         return gallery;
     }
 
+    public async Task<Gallery> CopyGalleryAsync(int sourceGalleryId, string newName)
+    {
+        var source = await _context.Galleries
+            .Include(g => g.Images)
+            .FirstOrDefaultAsync(g => g.Id == sourceGalleryId);
+        if (source == null) throw new ArgumentException($"Gallery {sourceGalleryId} not found");
+
+        var copy = new Gallery
+        {
+            Name = newName,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        // Link the same images (many-to-many, no file duplication)
+        foreach (var image in source.Images)
+        {
+            copy.Images.Add(image);
+        }
+
+        _context.Galleries.Add(copy);
+        await _context.SaveChangesAsync();
+
+        return copy;
+    }
+
+    public async Task RenameGalleryAsync(int id, string newName)
+    {
+        var gallery = await _context.Galleries.FindAsync(id);
+        if (gallery == null) throw new ArgumentException($"Gallery {id} not found");
+
+        gallery.Name = newName;
+        await _context.SaveChangesAsync();
+    }
+
     public async Task DeleteGalleryAsync(int id)
     {
         var gallery = await _context.Galleries
             .Include(g => g.Images)
                 .ThenInclude(i => i.Galleries)
+            .AsSingleQuery()
             .FirstOrDefaultAsync(g => g.Id == id);
         if (gallery == null) return;
 
@@ -99,18 +134,31 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
         return image;
     }
 
-    public async Task DeleteImageAsync(int imageId)
+    public async Task DeleteImageAsync(int galleryId, int imageId)
     {
-        var image = await _context.GalleryImages.FindAsync(imageId);
+        var image = await _context.GalleryImages
+            .Include(i => i.Galleries)
+            .FirstOrDefaultAsync(i => i.Id == imageId);
         if (image == null) return;
 
-        var filePath = Path.Combine(GetImageDirectory(image.PrimaryFolder), image.FileName);
-        if (File.Exists(filePath))
+        var gallery = image.Galleries.FirstOrDefault(g => g.Id == galleryId);
+        if (gallery != null)
         {
-            File.Delete(filePath);
+            image.Galleries.Remove(gallery);
         }
 
-        _context.GalleryImages.Remove(image);
+        // Only delete the file and entity if the image is no longer in any gallery
+        if (image.Galleries.Count == 0)
+        {
+            var filePath = Path.Combine(GetImageDirectory(image.PrimaryFolder), image.FileName);
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+
+            _context.GalleryImages.Remove(image);
+        }
+
         await _context.SaveChangesAsync();
     }
 
