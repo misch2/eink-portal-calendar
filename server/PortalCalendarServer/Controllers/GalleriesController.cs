@@ -101,6 +101,16 @@ public class GalleriesController(IGalleryService galleryService) : Controller
         return RedirectToAction(nameof(Detail), new { id = galleryId });
     }
 
+    // POST /galleries/{galleryId}/images/{imageId}/description
+    [HttpPost("/galleries/{galleryId:int}/images/{imageId:int}/description")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateImageDescription(int galleryId, int imageId, [FromForm] string? description)
+    {
+        await galleryService.UpdateImageDescriptionAsync(imageId, description);
+        TempData["Message"] = "Description updated.";
+        return RedirectToAction(nameof(Detail), new { id = galleryId });
+    }
+
     // GET /galleries/{galleryId}/images/{imageId}
     [HttpGet("/galleries/{galleryId:int}/images/{imageId:int}")]
     public async Task<IActionResult> ServeImage(int galleryId, int imageId)

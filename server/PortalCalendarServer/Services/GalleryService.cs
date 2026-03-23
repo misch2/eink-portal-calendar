@@ -97,6 +97,15 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
         await _context.SaveChangesAsync();
     }
 
+    public async Task UpdateImageDescriptionAsync(int imageId, string? description)
+    {
+        var image = await _context.GalleryImages.FindAsync(imageId);
+        if (image == null) return;
+
+        image.Description = description;
+        await _context.SaveChangesAsync();
+    }
+
     public string GetImageFilePath(GalleryImage image)
     {
         return Path.Combine(GetGalleryDirectory(image.GalleryId), image.FileName);
