@@ -5,11 +5,13 @@
 .vscode/
 .vs
 /server/_data*
+
+# Local data:
 /server/localdata/data-protection-keys/
-/server/localdata/database/*
-/server/localdata/generated_images/*.png
-/server/PortalCalendarServer/publish.cmd
+/server/localdata/database/
+/server/localdata/gallery_images/
+/server/localdata/generated_images/
+
 # .NET artifacts:
 /server/**/bin/
 /server/**/obj/
-/server/localdata/gallery_images/1
