@@ -9,6 +9,7 @@ using PortalCalendarServer.Models.POCOs;
 using PortalCalendarServer.Models.POCOs.Bitmap;
 using PortalCalendarServer.Modules;
 using PortalCalendarServer.Services;
+using PortalCalendarServer.Services.PageGeneratorComponents;
 
 namespace PortalCalendarServer.Controllers;
 
@@ -78,6 +79,23 @@ public class UiController(
         ViewBag.Display = display; // for global layout
 
         return View("Test", display);
+    }
+
+    // GET /test-multi-resolution/{display_number}
+    [HttpGet("/test-multi-resolution/{displayNumber:int}")]
+    public IActionResult TestMultiResolution(int displayNumber)
+    {
+        var display = _displayService.GetDisplayById(displayNumber);
+        if (display == null)
+        {
+            return NotFound();
+        }
+
+        ViewData["NavLink"] = "compare";
+        ViewData["Title"] = $"Test - {display.Name}";
+        ViewBag.Display = display; // for global layout
+
+        return View("TestMultiResolution", display);
     }
 
     // POST /delete/{display_number}
@@ -365,27 +383,17 @@ public class UiController(
     /// Used both from action methods (for view model preparation errors)
     /// and from the result filter (for .cshtml rendering errors).
     /// </summary>
-    private ViewResult CalendarErrorView(Exception ex, Display? display)
+    private ViewResult CalendarErrorView(Exception ex, Display display)
     {
-        Dictionary<string, string>? cssColors = null;
-        try
-        {
-            cssColors = display?.CssColorMap(false);
-        }
-        catch
-        {
-            // Ignore - we're already handling an error
-        }
-
-        var errorModel = new ErrorViewModel
+        var error = new ErrorComponent
         {
             Message = ex.Message,
             Details = ex.ToString(),
-            ShowDetails = _environment.IsDevelopment(),
-            CssColors = cssColors
+            ShowDetails = _environment.IsDevelopment()
         };
 
-        return View("~/Views/CalendarThemes/_Error.cshtml", errorModel);
+        var viewModel = _pageGeneratorService.PageViewModelForError(display, error);
+        return View("~/Views/CalendarThemes/_Error.cshtml", viewModel);
     }
 
     // GET /calendar/{displayNumber}/bitmap?rotate=0&flip=&format=png&...
@@ -450,7 +458,17 @@ public class UiController(
             context.HttpContext.Response.ContentType = "text/html";
             context.HttpContext.Response.Headers.ContentLength = null;
 
-            var errorViewResult = CalendarErrorView(resultContext.Exception, null);
+            // Try to recover display info for correct error page dimensions
+            Display? display = null;
+            if (context.RouteData.Values.TryGetValue("displayNumber", out var dn)
+                && int.TryParse(dn?.ToString(), out var displayNumber))
+            {
+                try { display = _displayService.GetDisplayById(displayNumber); }
+                catch { /* ignore */ }
+            }
+            display ??= _displayService.GetDefaultDisplay();
+
+            var errorViewResult = CalendarErrorView(resultContext.Exception, display);
             await errorViewResult.ExecuteResultAsync(context);
 
             resultContext.ExceptionHandled = true;

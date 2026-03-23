@@ -6,7 +6,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using PortalCalendarServer.Controllers.ModelBinders;
 using PortalCalendarServer.Data;
-using PortalCalendarServer.Infrastructure;
 using PortalCalendarServer.Modules;
 using PortalCalendarServer.Modules.Builtin;
 using PortalCalendarServer.Services;
@@ -138,6 +137,7 @@ moduleRegistry.Register(new NameDayModule());
 moduleRegistry.Register(new PortalIconsModule());
 moduleRegistry.Register(new ThemeConfigStatusIndicatorsModule());
 moduleRegistry.Register(new WebImageModule());
+moduleRegistry.Register(new WeatherForecastModule());
 moduleRegistry.Register(new GalleryModule());
 builder.Services.AddSingleton(moduleRegistry);
 
@@ -274,6 +274,9 @@ using (var scope = app.Services.CreateScope())
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
+    // Easier debugging
+    app.UseDeveloperExceptionPage();
+
     // /openapi/v1.json - Raw OpenAPI specification (JSON)
     // /scalar/v1 - Beautiful interactive API documentation UI where you can test endpoints
 

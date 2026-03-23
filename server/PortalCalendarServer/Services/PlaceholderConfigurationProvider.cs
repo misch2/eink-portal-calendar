@@ -1,4 +1,4 @@
-namespace PortalCalendarServer.Infrastructure;
+namespace PortalCalendarServer.Services;
 
 /// <summary>
 /// Configuration provider that replaces placeholder tokens in all string values
@@ -81,7 +81,7 @@ public static class PlaceholderConfigurationExtensions
         this IConfigurationBuilder builder,
         Dictionary<string, string> replacements)
     {
-        var baseConfig = (builder as IConfigurationRoot) ?? builder.Build();
+        var baseConfig = builder as IConfigurationRoot ?? builder.Build();
         builder.Add(new PlaceholderConfigurationSource(baseConfig, replacements));
         return builder;
     }

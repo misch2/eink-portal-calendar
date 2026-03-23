@@ -5,7 +5,8 @@
 @using PortalCalendarServer.Services
 @inject IDisplayService displayService
 @{
-    Layout = null;
+    Layout = "~/Views/Shared/Layouts/Epaper/_InsetLayout.cshtml";
+    ViewBag.Title = "Calendar - Weather";
 
     var dateCulture = displayService.GetDateCultureInfo(Model.Display);
     var tz = displayService.GetTimeZoneInfo(Model.Display);
@@ -34,12 +35,8 @@
 
     var precipitationLimit = 0.5; // mm
 }
-@* <!DOCTYPE html> *@
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>Calendar - Weather</title>
 
+@section Head {
     @* Icon library *@
     <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.7/dist/iconify-icon.min.js"></script>
 
@@ -47,180 +44,171 @@
     <link rel="stylesheet" href="/css/fonts.css" asp-append-version="true" />
     <link rel="stylesheet" href="/css/weather-icons.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="/css/calendar_themes/weather.css" asp-append-version="true" />
+}
 
-    @* EPD Colors *@
-    @await Html.PartialAsync("Includes/_EpdColors.cshtml", Model.CssColors)
-</head>
+<div id="weather-content">
 
-<body>
-    <div id="visible-area">
-        @if (currentWeather != null)
-        {
-            <div class="weather-current-big">
-                @{
-                    var temp = (int)(currentWeather.TemperatureAvg + 0.5);
-                    var wind = (int)(currentWeather.WindSpeedAvg + 0.5);
-                    var totalPrecip = currentWeather.PrecipitationSum;
-                    var dt = currentWeather.TimeStart.ToUniversalTime();
-                    dt = TimeZoneInfo.ConvertTimeFromUtc(dt, tz);
-
-                    var dayOrNight = currentWeather.TimeIsDay ? "day" : "night";
-                    var classRainOrSnow = totalPrecip >= precipitationLimit ? "weather-is-rain-or-snow" : "";
-                }
-
-                <div style="position: absolute; top: 0.25em; left: 0; margin: auto; width: 100%; text-align: center; font-size: 5rem" class="@classRainOrSnow">
-                    @temp °C
-                </div>
-
-                <div style="position: absolute; top: 0.5rem; left: 0; text-align: left">
-                    <p>
-                        <div>
-                            @* https://erikflowers.github.io/weather-icons/api-list.html *@
-                            <i class="wi wi-owm-@(dayOrNight)-@(currentWeather.WiSymbolCodes.FirstOrDefault())"></i> @currentWeather.Descriptions.FirstOrDefault()?.ToUpper()?.Substring(0, 1)@currentWeather.Descriptions.FirstOrDefault()?.Substring(1)
-                        </div>
-                    </p>
-                </div>
-
-                <div style="position: absolute; top: 0.5rem; right: 0; text-align: right">
-                    <i class="wi wi-strong-wind" style="font-size: 1rem; margin-top: 0.2rem"></i> @wind m/s
-                    @{
-                        var windFrom = (int)(currentWeather.WindFrom / 45 + 0.5) % 8; // 0 - 7, 0 = N, 1 = NE, ...
-                        var windNameCz = new[] { "S", "SV", "V", "JV", "J", "JZ", "Z", "SZ" }[windFrom];
-                    }
-                    <br>
-                    @windNameCz
-                </div>
-
-                <div style="position: absolute; bottom: 0; left: 0; text-align: left">
-                    <i class="wi wi-cloud" style="font-size: 1rem; margin-top: 0.15rem"></i> @(5 * (int)(currentWeather.CloudPercentAvg / 5 + 0.5)) <text>%</text>
-                    @if (currentWeather.FogPercentAvg > 0)
-                    {
-                        <i class="wi wi-fog" style="font-size: 1rem; margin-top: 0.15rem"></i>
-                        @(5 * (int)(currentWeather.FogPercentAvg / 5 + 0.5)) <text>%</text>
-                    }
-                </div>
-
-                @if (totalPrecip > 0)
-                {
-                    <div style="position: absolute; bottom: 0; right: 0; text-align: right" class="@classRainOrSnow">
-                        <i class="wi wi-rain FIXME-or-wi-snow" style="font-size: 1rem"></i> @totalPrecip mm
-                    </div>
-                }
-            </div>
-        }
-
-        <div class="date-row top-date-row">
-            <div>
-                @decorator(Model.Date.ToString("M", dateCulture))
-            </div>
-            <div>
-                @* Name day *@
-                @{
-                    string? nameForDay = null;
-                    if (holidayInfo != null)
-                    {
-                        nameForDay = holidayInfo.LocalName;
-                    }
-                    else if (nameDayInfo != null)
-                    {
-                        nameForDay = nameDayInfo.Name;
-                    }
-
-                    @decorator(nameForDay ?? "?")
-                }
-            </div>
+    <div class="date-row top-date-row">
+        <div>
+            @decorator(Model.Date.ToString("M", dateCulture))
         </div>
-
-        <div class="horizontal-separator" style="top: 2rem"></div>
-
-        <div class="horizontal-separator" style="top: 11.5rem"></div>
-        <div class="weather-forecast-container-grid" style="top: 11.8rem">
+        <div>
+            @* Name day *@
             @{
-                var cnt = 0;
+                string? nameForDay = null;
+                if (holidayInfo != null)
+                {
+                    nameForDay = holidayInfo.LocalName;
+                }
+                else if (nameDayInfo != null)
+                {
+                    nameForDay = nameDayInfo.Name;
+                }
+
+                @decorator(nameForDay ?? "?")
             }
-            @foreach (var item in forecast)
-            {
-                cnt++;
-                if (cnt > 6) break; // FIXME do it better, via flex wrap or so
-
-                var totalPrecip = item.PrecipitationSum;
-                var dayOrNight = item.TimeIsDay ? "day" : "night";
-
-                var dt = item.TimeStart.ToUniversalTime();
-                dt = TimeZoneInfo.ConvertTimeFromUtc(dt, tz);
-
-                string dayDescription;
-                if (dt.Date == Model.Date.Date)
-                {
-                    dayDescription = "dnes";
-                }
-                else if (dt.Date == Model.Date.Date.AddDays(1))
-                {
-                    dayDescription = "zítra";
-                }
-                else
-                {
-                    dayDescription = dateCulture.DateTimeFormat.GetDayName(dt.DayOfWeek);
-                }
-
-                <div class="weather-item weather-item-@(dayOrNight) @(totalPrecip >= precipitationLimit ? "weather-is-rain-or-snow" : "") weather-single-day-container-grid">
-                    <div>
-                        @dayDescription
-                        <br>
-                        @dt.ToString("HH:00")
-                    </div>
-                    <div>
-                        @foreach (var description in item.Descriptions.Take(1))
-                        {
-                            <div style="font-weight: bold; max-height: 1em; overflow:visible">@description.ToLower()</div>
-                        }
-                    </div>
-                    <div>
-                        @foreach (var wiSymbolCode in item.WiSymbolCodes.Take(1))
-                        {
-                            @* https://erikflowers.github.io/weather-icons/api-list.html *@
-                            <i class="wi wi-owm-@(dayOrNight)-@(wiSymbolCode)" style="font-size: 2rem; margin-top: 0.5rem; margin-left: 0.5rem"></i>
-                        }
-                    </div>
-                    <div style="text-align: center">
-                        <div>
-                            @((int)(item.TemperatureMin - 0.5)) &deg;C
-                        </div>
-                        <div style="margin-top: -0.6em; margin-bottom: -0.3em">
-                            -
-                        </div>
-                        <div>
-                            @((int)(item.TemperatureMax + 0.5)) &deg;C
-                        </div>
-                    </div>
-                    <div style="text-align: center">
-                        @if (totalPrecip > 0)
-                        {
-                            <div>
-                                @if (item.ProviderSymbolCodes.Any(c => c.Contains("rain")))
-                                {
-                                    <i class="wi wi-rain" style="font-size: 1rem"></i>
-                                }
-                                @if (item.ProviderSymbolCodes.Any(c => c.Contains("snow")))
-                                {
-                                    <i class="wi wi-snow" style="font-size: 1rem"></i>
-                                }
-                            </div>
-                            <div style="margin-top: 0.2rem">
-                                @totalPrecip.ToString("F1", CultureInfo.InvariantCulture) mm
-                            </div>
-                        }
-                    </div>
-                </div>
-            }
-        </div>
-
-        <div id="bottom-signature">
-            @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_WakeupInfo.cshtml", Model.Display)
-        </div>
-        <div id="battery-status">
-            @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_BatteryStatusIcon.cshtml", Model.Display)
         </div>
     </div>
-</body>
-</html>
+
+    <div class="horizontal-separator separator-top"></div>
+
+    @if (currentWeather != null)
+    {
+        <div class="weather-current-big">
+            @{
+                var temp = (int)(currentWeather.TemperatureAvg + 0.5);
+                var wind = (int)(currentWeather.WindSpeedAvg + 0.5);
+                var totalPrecip = currentWeather.PrecipitationSum;
+                var dt = currentWeather.TimeStart.ToUniversalTime();
+                dt = TimeZoneInfo.ConvertTimeFromUtc(dt, tz);
+
+                var dayOrNight = currentWeather.TimeIsDay ? "day" : "night";
+                var classRainOrSnow = totalPrecip >= precipitationLimit ? "weather-is-rain-or-snow" : "";
+            }
+
+            <div class="current-temp @classRainOrSnow">
+                @temp °C
+            </div>
+
+            <div class="current-description">
+                <p>
+                    <div>
+                        @* https://erikflowers.github.io/weather-icons/api-list.html *@
+                        <i class="wi wi-owm-@(dayOrNight)-@(currentWeather.WiSymbolCodes.FirstOrDefault())"></i> @currentWeather.Descriptions.FirstOrDefault()?.ToUpper()?.Substring(0, 1)@currentWeather.Descriptions.FirstOrDefault()?.Substring(1)
+                    </div>
+                </p>
+            </div>
+
+            <div class="current-wind">
+                <i class="wi wi-strong-wind wi-inline"></i> @wind m/s
+                @{
+                    var windFrom = (int)(currentWeather.WindFrom / 45 + 0.5) % 8; // 0 - 7, 0 = N, 1 = NE, ...
+                    var windNameCz = new[] { "S", "SV", "V", "JV", "J", "JZ", "Z", "SZ" }[windFrom];
+                }
+                <br>
+                @windNameCz
+            </div>
+
+            <div class="current-clouds">
+                <i class="wi wi-cloud wi-inline"></i> @(5 * (int)(currentWeather.CloudPercentAvg / 5 + 0.5)) <text>%</text>
+                @if (currentWeather.FogPercentAvg > 0)
+                {
+                    <i class="wi wi-fog wi-inline"></i>
+                    @(5 * (int)(currentWeather.FogPercentAvg / 5 + 0.5)) <text>%</text>
+                }
+            </div>
+
+            @if (totalPrecip > 0)
+            {
+                <div class="current-precip @classRainOrSnow">
+                    <i class="wi wi-rain FIXME-or-wi-snow forecast-precip-icon"></i> @totalPrecip mm
+                </div>
+            }
+        </div>
+    }
+
+    <div class="horizontal-separator separator-forecast"></div>
+
+    <div class="weather-forecast-container-grid">
+        @{
+            var cnt = 0;
+        }
+        @foreach (var item in forecast)
+        {
+            cnt++;
+            if (cnt > weatherInfo?.DisplayRows) break; // FIXME do it better, via flex wrap or so?
+
+            var totalPrecip = item.PrecipitationSum;
+            var dayOrNight = item.TimeIsDay ? "day" : "night";
+
+            var dt = item.TimeStart.ToUniversalTime();
+            dt = TimeZoneInfo.ConvertTimeFromUtc(dt, tz);
+
+            string dayDescription;
+            if (dt.Date == Model.Date.Date)
+            {
+                dayDescription = "dnes";
+            }
+            else if (dt.Date == Model.Date.Date.AddDays(1))
+            {
+                dayDescription = "zítra";
+            }
+            else
+            {
+                dayDescription = dateCulture.DateTimeFormat.GetDayName(dt.DayOfWeek);
+            }
+
+            <div class="weather-item weather-item-@(dayOrNight) @(totalPrecip >= precipitationLimit ? "weather-is-rain-or-snow" : "") weather-single-day-container-grid">
+                <div>
+                    @dayDescription
+                    <br>
+                    @dt.ToString("HH:00")
+                </div>
+                <div>
+                    @foreach (var description in item.Descriptions.Take(1))
+                    {
+                        <div class="forecast-description">@description.ToLower()</div>
+                    }
+                </div>
+                <div>
+                    @foreach (var wiSymbolCode in item.WiSymbolCodes.Take(1))
+                    {
+                        @* https://erikflowers.github.io/weather-icons/api-list.html *@
+                        <i class="wi wi-owm-@(dayOrNight)-@(wiSymbolCode) forecast-icon"></i>
+                    }
+                </div>
+                <div class="forecast-temp">
+                    <div>
+                        @((int)(item.TemperatureMin - 0.5)) &deg;C
+                    </div>
+                    <div class="forecast-temp-separator">
+                        -
+                    </div>
+                    <div>
+                        @((int)(item.TemperatureMax + 0.5)) &deg;C
+                    </div>
+                </div>
+                <div class="forecast-precip">
+                    @if (totalPrecip > 0)
+                    {
+                        <div>
+                            @if (item.ProviderSymbolCodes.Any(c => c.Contains("rain")))
+                            {
+                                <i class="wi wi-rain forecast-precip-icon"></i>
+                            }
+                            @if (item.ProviderSymbolCodes.Any(c => c.Contains("snow")))
+                            {
+                                <i class="wi wi-snow forecast-precip-icon"></i>
+                            }
+                        </div>
+                        <div class="forecast-precip-amount">
+                            @totalPrecip.ToString("F1", CultureInfo.InvariantCulture) mm
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Views/CalendarThemes/Includes/BottomStatusBar.cshtml", Model.Display)

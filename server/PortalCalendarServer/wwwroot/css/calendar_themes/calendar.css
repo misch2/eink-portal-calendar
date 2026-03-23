@@ -139,6 +139,7 @@ div.icons-container {
     border: 2px solid var(--epd-black);
     padding: 2px;
     margin: 0;
+    box-sizing: content-box;
 }
 
 .grayed {

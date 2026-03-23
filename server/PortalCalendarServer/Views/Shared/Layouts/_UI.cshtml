@@ -188,6 +188,9 @@
                                 <li class="nav-item">
                                     <a class="nav-link @(navLink == "compare" ? "active" : "")" href="@Url.Action(nameof(UiController.Test), "Ui", new { displayNumber = display.Id })">Test page</a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link @(navLink == "compare" ? "active" : "")" href="@Url.Action(nameof(UiController.TestMultiResolution), "Ui", new { displayNumber = display.Id })">Test multiple resolutions</a>
+                                </li>
                             }
                             <li class="nav-item">
                                 <a class="nav-link @(navLink == "config_ui" ? "active" : "")" href="@Url.Action(nameof(UiController.ConfigUiShow), "Ui", new { displayNumber = display.Id })">Config</a>
@@ -250,7 +253,7 @@
 
             // ── Display-switching shortcut ──
             // Patterns where we know how to swap the display number: /home/{n}, /test/{n}, /config_ui/{n}
-            var displayUrlPattern = /^(\/(?:home|test|config_ui)\/)(\d+)(\/.*)?$/;
+            var displayUrlPattern = /^(\/(?:home|test|config_ui|test-multi-resolution)\/)(\d+)(\/.*)?$/;
 
             document.querySelectorAll('[data-display-id]').forEach(function (a) {
                 a.addEventListener('click', function (e) {
