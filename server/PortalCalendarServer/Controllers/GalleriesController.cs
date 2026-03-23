@@ -104,10 +104,16 @@ public class GalleriesController(IGalleryService galleryService) : Controller
     // POST /galleries/{galleryId}/images/{imageId}/description
     [HttpPost("/galleries/{galleryId:int}/images/{imageId:int}/description")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UpdateImageDescription(int galleryId, int imageId, [FromForm] string? description)
+    public async Task<IActionResult> UpdateImage(int galleryId, int imageId, [FromForm] string? description, IFormFile? file)
     {
         await galleryService.UpdateImageDescriptionAsync(imageId, description);
-        TempData["Message"] = "Description updated.";
+
+        if (file != null && file.Length > 0)
+        {
+            await galleryService.ReplaceImageFileAsync(imageId, file);
+        }
+
+        TempData["Message"] = "Image updated.";
         return RedirectToAction(nameof(Detail), new { id = galleryId });
     }
 

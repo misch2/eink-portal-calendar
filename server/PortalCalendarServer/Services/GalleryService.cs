@@ -106,6 +106,34 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
         await _context.SaveChangesAsync();
     }
 
+    public async Task ReplaceImageFileAsync(int imageId, IFormFile file)
+    {
+        var image = await _context.GalleryImages.FindAsync(imageId);
+        if (image == null) return;
+
+        var galleryDir = GetGalleryDirectory(image.GalleryId);
+
+        // Delete old file
+        var oldPath = Path.Combine(galleryDir, image.FileName);
+        if (File.Exists(oldPath))
+        {
+            File.Delete(oldPath);
+        }
+
+        // Save new file with a new name
+        image.FileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+        image.ContentType = file.ContentType;
+        image.UploadedAt = DateTime.UtcNow;
+
+        var newPath = Path.Combine(galleryDir, image.FileName);
+        using (var stream = new FileStream(newPath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
     public string GetImageFilePath(GalleryImage image)
     {
         return Path.Combine(GetGalleryDirectory(image.GalleryId), image.FileName);

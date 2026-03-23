@@ -31,7 +31,7 @@ else
         {
             <div class="col-md-4 col-lg-3 mb-4">
                 <div class="card">
-                    <img src="/galleries/@Model.Id/images/@image.Id"
+                    <img src="/galleries/@Model.Id/images/@image.Id?v=@(image.UploadedAt.Ticks)"
                          class="card-img-top"
                          alt="@(image.Description ?? "Gallery image")"
                          style="max-height: 200px; object-fit: contain; background: #f8f9fa;" />
@@ -65,19 +65,25 @@ else
     </div>
 }
 
-<!-- Edit Description Modal -->
+<!-- Edit Image Modal -->
 <div class="modal fade" id="edit_description_modal" tabindex="-1">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Edit description</h5>
+                <h5 class="modal-title">Edit image</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="edit_description_form" method="post" action="">
+            <form id="edit_description_form" method="post" action="" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
                 <div class="modal-body">
-                    <label for="edit_description_input" class="form-label">Description</label>
-                    <input type="text" id="edit_description_input" name="description" class="form-control" />
+                    <div class="mb-3">
+                        <label for="edit_description_input" class="form-label">Description</label>
+                        <input type="text" id="edit_description_input" name="description" class="form-control" />
+                    </div>
+                    <div>
+                        <label for="edit_file_input" class="form-label">Replace image (optional)</label>
+                        <input type="file" id="edit_file_input" name="file" class="form-control" accept="image/*" />
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -96,6 +102,7 @@ else
         var imageId = button.data('image-id');
         var description = button.data('image-description');
         modal.find('#edit_description_input').val(description);
+        modal.find('#edit_file_input').val('');
         modal.find('#edit_description_form').attr('action', '/galleries/@Model.Id/images/' + imageId + '/description');
     });
     $('#edit_description_modal').on('shown.bs.modal', function () {
