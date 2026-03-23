@@ -1,42 +1,49 @@
 body {
-    margin: 0;
+    font-size: clamp(10pt, 2.2vw, 18pt);
+    font-family: "Jersey 25", sans-serif;
+    font-weight: 400;
+    font-style: normal;
 }
 
-#gallery-image-container {
-    flex: 1 1 auto;
+#gallery-container {
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-areas: "image";
+    height: 100%;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
 }
 
-.image-container {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow: hidden;
-    display: flex;
-}
+    #gallery-container.with-description {
+        grid-template-rows: 1fr max-content;
+        grid-template-areas:
+            "image"
+            "description";
+        gap: 4px;
+    }
 
-.image-container img {
+#gallery-image {
+    grid-area: image;
     width: 100%;
     height: 100%;
     object-fit: contain;
+    min-height: 0;
 }
 
-.description {
-    flex: 0 0 auto;
+#gallery-description {
+      grid-area: description;
     padding: 4px 8px;
-    margin-top: 4px;
     text-align: center;
     font-size: 14px;
-    background-color: var(--epd-black);
-    color: var(--epd-white);
+    /*    background-color: var(--epd-black);
+    color: var(--epd-white);*/
+    font-size: 1.5rem;
 }
 
-.no-image {
-    flex: 1 1 auto;
+#gallery-no-image {
     display: flex;
     align-items: center;
     justify-content: center;
+    height: 100%;
     font-size: 18px;
     padding: 20px;
     text-align: center;

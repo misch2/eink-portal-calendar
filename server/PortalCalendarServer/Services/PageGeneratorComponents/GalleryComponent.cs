@@ -10,6 +10,9 @@ public class GalleryComponent(
 {
     public GalleryImageInfo? GetRandomImage(Display display)
     {
+        var datetime = DateTime.UtcNow;
+        var seed = int.Parse(datetime.ToString("ddHHmm"));  // seed changes every minute
+
         var galleryIdStr = displayService.GetConfig(display, "gallery_id");
         if (string.IsNullOrEmpty(galleryIdStr) || !int.TryParse(galleryIdStr, out var galleryId))
         {
@@ -22,7 +25,7 @@ public class GalleryComponent(
             return null;
         }
 
-        var random = new Random();
+        var random = new Random(seed);
         var image = gallery.Images[random.Next(gallery.Images.Count)];
 
         var filePath = galleryService.GetImageFilePath(image);

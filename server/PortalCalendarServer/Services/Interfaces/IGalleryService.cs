@@ -1,4 +1,3 @@
-using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.DatabaseEntities;
 
 namespace PortalCalendarServer.Services

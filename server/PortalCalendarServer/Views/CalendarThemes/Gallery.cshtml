@@ -9,29 +9,30 @@
 
     var gallery = Model.Gallery;
     var imageInfo = gallery?.GetRandomImage(Model.Display);
+    var hasDescription = imageInfo != null && !string.IsNullOrEmpty(imageInfo.Description);
 }
 
 @section Head {
     <link rel="stylesheet" href="/css/calendar_themes/gallery.css" asp-append-version="true" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+25&display=swap" rel="stylesheet">
 }
 
-<div id="gallery-image-container">
-    @if (imageInfo != null)
-    {
-        <div class="image-container">
-            <img src="@imageInfo.ImageAsDataUrl" alt="@(imageInfo.Description ?? "Gallery image")" />
-        </div>
-        @if (!string.IsNullOrEmpty(imageInfo.Description))
+@if (imageInfo != null)
+{
+    <div id="gallery-container" class="@(hasDescription ? "with-description" : "")">
+        <img id="gallery-image" src="@imageInfo.ImageAsDataUrl" alt="@(imageInfo.Description ?? "Gallery image")" />
+        @if (hasDescription)
         {
-            <div class="description">
-                @imageInfo.Description
-            </div>
+            <div id="gallery-description">@imageInfo.Description</div>
         }
-    }
-    else
-    {
-        <div class="no-image">
-            No image available. Please configure a gallery with images.
-        </div>
-    }
-</div>
+    </div>
+}
+else
+{
+    <div id="gallery-no-image">
+        No image available. Please configure a gallery with images.
+    </div>
+}
