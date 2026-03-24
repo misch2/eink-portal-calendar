@@ -195,6 +195,7 @@
     {
         Display = Model, Key = "wakeup_schedule", Label = "Wake up (redraw) schedule",
         ColClass = "col-md-4",
+        HelpTextIsHtml = true,
         HelpText = "Schedule is in the <a href=\"https://crontab.guru/\" target=\"_blank\">crontab format</a>, for example \"0 * * * *\"."
     })
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel

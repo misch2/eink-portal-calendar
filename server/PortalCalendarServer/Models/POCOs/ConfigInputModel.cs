@@ -19,6 +19,8 @@ public class ConfigInputModel
     /// <summary>Optional helper text rendered below the input.</summary>
     public string? HelpText { get; init; }
 
+    public bool HelpTextIsHtml { get; init; } = false;
+
     /// <summary>
     /// Bootstrap column class applied to the wrapping div, e.g. <c>"col-md-4"</c>.
     /// Defaults to <c>"col-md-12"</c>.

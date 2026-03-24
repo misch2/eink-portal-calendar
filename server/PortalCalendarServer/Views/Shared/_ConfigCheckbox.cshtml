@@ -16,6 +16,13 @@
     </div>
     @if (!string.IsNullOrEmpty(Model.HelpText))
     {
-        <div class="form-text">@Model.HelpText</div>
+        @if (Model.HelpTextIsHtml) 
+        {
+            <div class="form-text">@Html.Raw(Model.HelpText)</div>
+        }
+        else
+        {
+            <div class="form-text">@Model.HelpText</div>
+        }
     }
 </div>
