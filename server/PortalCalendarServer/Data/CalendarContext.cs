@@ -388,9 +388,14 @@ public partial class CalendarContext : DbContext
                 .HasColumnName("created_at");
 
             entity.HasMany(e => e.Images)
-                .WithOne(e => e.Gallery)
-                .HasForeignKey(e => e.GalleryId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .WithMany(e => e.Galleries)
+                .UsingEntity("gallery_image_galleries",
+                    l => l.HasOne(typeof(GalleryImage)).WithMany().HasForeignKey("gallery_image_id").OnDelete(DeleteBehavior.Cascade),
+                    r => r.HasOne(typeof(Gallery)).WithMany().HasForeignKey("gallery_id").OnDelete(DeleteBehavior.Cascade),
+                    j =>
+                    {
+                        j.HasKey("gallery_id", "gallery_image_id");
+                    });
         });
 
         modelBuilder.Entity<GalleryImage>(entity =>
@@ -400,7 +405,10 @@ public partial class CalendarContext : DbContext
             entity.HasKey(e => e.Id);
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.GalleryId).HasColumnName("gallery_id");
+            entity.Property(e => e.PrimaryFolder)
+                .IsRequired()
+                .HasColumnType("VARCHAR")
+                .HasColumnName("primary_folder");
             entity.Property(e => e.FileName)
                 .IsRequired()
                 .HasColumnType("VARCHAR")
