@@ -14,11 +14,11 @@
     </fieldset>
 
     <fieldset class="row mb-4">
-        <legend class="w-auto">Theme</legend>
+        <legend class="col-md-12">Theme</legend>
         @{
             var themes = (List<Theme>)ViewData["Themes"]!;
         }
-        <div class="col-md-12">
+        <div class="col-md-2">
             <select id="theme_id" name="theme_id" class="form-select">
                 <option value=""></option>
                 @foreach (var theme in themes)
@@ -32,8 +32,8 @@
             </select>
         </div>
 
-        <div class="col-md-12 mt-3">
-            <div class="card border-start border-primary border-3 bg-light">
+        <div class="col-md-10">
+            <div class="card Xborder-primary Xborder-1 Xbg-light">
                 <div class="card-body">
                     <h6 class="card-subtitle mb-3 text-muted">
                         <i class="bi bi-gear"></i> Theme-specific Settings
