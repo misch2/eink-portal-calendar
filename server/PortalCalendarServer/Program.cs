@@ -89,17 +89,29 @@ builder.Services.AddMemoryCache(options =>
     options.SizeLimit = 100 * 1024 * 1024; // 100MB cache limit
 });
 
-// Rate limiting: restrict expensive device API endpoints to prevent DoS
-// The bitmap endpoint triggers a full Playwright render, so we cap it at
-// 10 requests per IP per 10 minutes (a real display wakes every 15+ min).
+// Rate limiting: restrict device API endpoints to prevent DoS / database flooding.
+// Real displays wake every 15+ min, so these limits are generous for legitimate use.
 builder.Services.AddRateLimiter(options =>
 {
+    // Bitmap: triggers a full Playwright render — very expensive
     options.AddPolicy("device-bitmap", context =>
         RateLimitPartition.GetFixedWindowLimiter(
             partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
             factory: _ => new FixedWindowRateLimiterOptions
             {
                 PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(10),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0
+            }));
+
+    // Config: auto-creates a Display row for unknown MACs — cap to prevent DB flooding
+    options.AddPolicy("device-config", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 20,
                 Window = TimeSpan.FromMinutes(10),
                 QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                 QueueLimit = 0
@@ -316,6 +328,31 @@ if (app.Environment.IsDevelopment())
 //app.UseRequestLocalization();
 
 //app.UseHttpsRedirection();    // Not needed since this is typically run behind a reverse proxy that handles TLS termination
+
+// Security headers
+// Notes on CSP:
+//   - 'unsafe-inline' for scripts is required by the inline <script> block in _UI.cshtml layout.
+//   - cdn.jsdelivr.net / code.jquery.com are used for Bootstrap and jQuery.
+//   - data: in img-src allows base64-encoded images used in calendar e-ink views.
+//   - HSTS is intentionally omitted — the reverse proxy handles TLS termination.
+app.Use(async (context, next) =>
+{
+    var headers = context.Response.Headers;
+    headers["X-Frame-Options"] = "SAMEORIGIN";
+    headers["X-Content-Type-Options"] = "nosniff";
+    headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+    headers["X-XSS-Protection"] = "1; mode=block";
+    headers["Content-Security-Policy"] =
+        "default-src 'self'; " +
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com; " +
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
+        "font-src 'self' https://cdn.jsdelivr.net; " +
+        "img-src 'self' data:; " +
+        "connect-src 'self'; " +
+        "frame-ancestors 'self'";
+    await next();
+});
+
 app.UseStaticFiles(); // For serving static content (CSS, JS, images)
 
 app.UseRateLimiter();

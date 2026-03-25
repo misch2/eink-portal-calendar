@@ -98,6 +98,7 @@ public class ApiController : ControllerBase
     // GET /api/device/config?mac=XX:XX:XX:XX:XX:XX&fw=1.0&w=800&h=480&c=BW&adc=2048&v=4.2&...
     [HttpGet("device/config")]
     [Tags("Device API")]
+    [EnableRateLimiting("device-config")]
     public async Task<IActionResult> Config(
     [FromQuery] string? mac,
     [FromQuery] string? fw,
