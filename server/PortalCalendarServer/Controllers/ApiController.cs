@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.DatabaseEntities;
@@ -284,6 +285,7 @@ public class ApiController : ControllerBase
     // GET /api/device/bitmap/epaper?mac=XX:XX:XX:XX:XX:XX[&fmt=1]
     [HttpGet("device/bitmap/epaper")]
     [Tags("Device API")]
+    [EnableRateLimiting("device-bitmap")]
     public async Task<IActionResult> BitmapEpaper(
         [FromQuery] string? mac,
         [FromQuery] int fmt = 1

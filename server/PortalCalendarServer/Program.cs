@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Options;
@@ -14,6 +15,7 @@ using PortalCalendarServer.Services.Caches;
 using PortalCalendarServer.Services.Integrations;
 using Scalar.AspNetCore;
 using System.Globalization;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -85,6 +87,25 @@ builder.Services.AddAntiforgery(options =>
 builder.Services.AddMemoryCache(options =>
 {
     options.SizeLimit = 100 * 1024 * 1024; // 100MB cache limit
+});
+
+// Rate limiting: restrict expensive device API endpoints to prevent DoS
+// The bitmap endpoint triggers a full Playwright render, so we cap it at
+// 10 requests per IP per 10 minutes (a real display wakes every 15+ min).
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddPolicy("device-bitmap", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(10),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0
+            }));
+
+    options.RejectionStatusCode = 429;
 });
 
 // Configure HttpClient with caching
@@ -297,6 +318,7 @@ if (app.Environment.IsDevelopment())
 //app.UseHttpsRedirection();    // Not needed since this is typically run behind a reverse proxy that handles TLS termination
 app.UseStaticFiles(); // For serving static content (CSS, JS, images)
 
+app.UseRateLimiter();
 app.UseRouting();
 
 app.UseAuthentication();
