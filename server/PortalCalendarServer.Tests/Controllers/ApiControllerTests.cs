@@ -17,11 +17,13 @@ public class ApiControllerTests : IntegrationServiceTestBase
 {
     private readonly Mock<IDisplayService> _mockDisplayService;
     private readonly Mock<IMqttService> _mockMqttService;
+    private readonly PairingModeService _pairingMode;
 
     public ApiControllerTests()
     {
         _mockDisplayService = new Mock<IDisplayService>();
         _mockMqttService = new Mock<IMqttService>();
+        _pairingMode = new PairingModeService();
 
         // Default MQTT setup — most tests don't care about MQTT internals
         _mockMqttService
@@ -56,7 +58,8 @@ public class ApiControllerTests : IntegrationServiceTestBase
             pageGenService,
             themeService,
             Mock.Of<IWeb2PngService>(),
-            _mockMqttService.Object);
+            _mockMqttService.Object,
+            _pairingMode);
 
         controller.ControllerContext = new ControllerContext
         {
@@ -128,7 +131,8 @@ public class ApiControllerTests : IntegrationServiceTestBase
             stubPageGenService,
             new ThemeService(emptyContext),
             Mock.Of<IWeb2PngService>(),
-            _mockMqttService.Object);
+            _mockMqttService.Object,
+            new PairingModeService());
 
         var result = controller.Health();
 
@@ -148,7 +152,7 @@ public class ApiControllerTests : IntegrationServiceTestBase
         var result = await controller.Config(
             mac: null, fw: null, w: null, h: null, c: null, rotation: null,
             voltage_raw: null, v: null, vmin: null, vmax: null,
-            vlmin: null, vlmax: null, reset: null, wakeup: null);
+            vlmin: null, vlmax: null, reset: null, wakeup: null, key: null);
 
         Assert.IsType<BadRequestObjectResult>(result);
     }
@@ -161,7 +165,7 @@ public class ApiControllerTests : IntegrationServiceTestBase
         var result = await controller.Config(
             mac: "   ", fw: null, w: null, h: null, c: null, rotation: null,
             voltage_raw: null, v: null, vmin: null, vmax: null,
-            vlmin: null, vlmax: null, reset: null, wakeup: null);
+            vlmin: null, vlmax: null, reset: null, wakeup: null, key: null);
 
         Assert.IsType<BadRequestObjectResult>(result);
     }
@@ -189,11 +193,12 @@ public class ApiControllerTests : IntegrationServiceTestBase
         _mockDisplayService.Setup(s => s.GetConfigBool(It.IsAny<Display>(), It.IsAny<string>(), It.IsAny<bool>())).Returns(false);
         _mockDisplayService.Setup(s => s.GetConfig(It.IsAny<Display>(), It.IsAny<string>())).Returns((string?)null);
 
+        _pairingMode.Activate();
         var controller = CreateController();
         var result = await controller.Config(
             mac: newMac, fw: "1.0", w: 800, h: 480, c: "BW", rotation: 0,
             voltage_raw: null, v: null, vmin: null, vmax: null,
-            vlmin: null, vlmax: null, reset: null, wakeup: null);
+            vlmin: null, vlmax: null, reset: null, wakeup: null, key: null);
 
         Assert.IsType<OkObjectResult>(result);
         var created = await Context.Displays.FirstOrDefaultAsync(d => d.Mac == newMac);
@@ -221,11 +226,12 @@ public class ApiControllerTests : IntegrationServiceTestBase
         _mockDisplayService.Setup(s => s.GetConfigBool(It.IsAny<Display>(), It.IsAny<string>(), It.IsAny<bool>())).Returns(false);
         _mockDisplayService.Setup(s => s.GetConfig(It.IsAny<Display>(), It.IsAny<string>())).Returns((string?)null);
 
+        _pairingMode.Activate();
         var controller = CreateController();
         await controller.Config(
             mac: newMac, fw: null, w: 1200, h: 960, c: "3C", rotation: 2,
             voltage_raw: null, v: null, vmin: null, vmax: null,
-            vlmin: null, vlmax: null, reset: null, wakeup: null);
+            vlmin: null, vlmax: null, reset: null, wakeup: null, key: null);
 
         var created = await Context.Displays.FirstOrDefaultAsync(d => d.Mac == newMac);
         Assert.NotNull(created);
@@ -253,11 +259,12 @@ public class ApiControllerTests : IntegrationServiceTestBase
         _mockDisplayService.Setup(s => s.GetConfigBool(It.IsAny<Display>(), It.IsAny<string>(), It.IsAny<bool>())).Returns(false);
         _mockDisplayService.Setup(s => s.GetConfig(It.IsAny<Display>(), It.IsAny<string>())).Returns((string?)null);
 
+        _pairingMode.Activate();
         var controller = CreateController();
         var result = await controller.Config(
             mac: newMac, fw: null, w: null, h: null, c: null, rotation: null,
             voltage_raw: null, v: null, vmin: null, vmax: null,
-            vlmin: null, vlmax: null, reset: null, wakeup: null);
+            vlmin: null, vlmax: null, reset: null, wakeup: null, key: null);
 
         Assert.Equal(400, (result as BadRequestObjectResult)?.StatusCode);
 
@@ -285,7 +292,7 @@ public class ApiControllerTests : IntegrationServiceTestBase
         var result = await controller.Config(
             mac: display.Mac, fw: "2.5", w: null, h: null, c: null, rotation: null,
             voltage_raw: null, v: null, vmin: null, vmax: null,
-            vlmin: null, vlmax: null, reset: null, wakeup: null);
+            vlmin: null, vlmax: null, reset: null, wakeup: null, key: null);
 
         Assert.IsType<OkObjectResult>(result);
         var updated = await Context.Displays.FindAsync(display.Id);
@@ -310,7 +317,7 @@ public class ApiControllerTests : IntegrationServiceTestBase
         var result = await controller.Config(
             mac: display.Mac, fw: null, w: null, h: null, c: null, rotation: null,
             voltage_raw: null, v: null, vmin: null, vmax: null,
-            vlmin: null, vlmax: null, reset: null, wakeup: null);
+            vlmin: null, vlmax: null, reset: null, wakeup: null, key: null);
 
         var ok = Assert.IsType<OkObjectResult>(result);
         var propNames = ok.Value!.GetType().GetProperties().Select(p => p.Name).ToArray();
@@ -336,7 +343,7 @@ public class ApiControllerTests : IntegrationServiceTestBase
         var result = await controller.Config(
             mac: "EE:FF:00:11:22:33", fw: null, w: null, h: null, c: null, rotation: null,
             voltage_raw: null, v: null, vmin: null, vmax: null,
-            vlmin: null, vlmax: null, reset: null, wakeup: null);
+            vlmin: null, vlmax: null, reset: null, wakeup: null, key: null);
 
         Assert.IsType<OkObjectResult>(result);
         // Should NOT have created a second display

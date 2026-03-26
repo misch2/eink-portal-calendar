@@ -4,6 +4,13 @@
 @using PortalCalendarServer.Services
 @inject IDisplayService displayService
 
+<div class="mb-3">
+    @Html.AntiForgeryToken()
+    <button id="pairing-btn" class="btn btn-secondary btn-sm" onclick="togglePairing()">
+        Enable Pairing Mode (5 min)
+    </button>
+</div>
+
 <table class="table table-hover">
     <thead>
         <tr>
@@ -193,6 +200,66 @@
 
 @section Scripts {
     <script>
+        // Pairing mode UI
+        var pairingTimer = null;
+        var pairingActive = false;
+
+        function togglePairing() {
+            if (pairingActive) {
+                fetch('/api/pairing/deactivate', { method: 'POST', headers: { 'RequestVerificationToken': getAntiForgeryToken() } })
+                    .then(() => stopPairingCountdown());
+            } else {
+                fetch('/api/pairing/activate', { method: 'POST', headers: { 'RequestVerificationToken': getAntiForgeryToken() } })
+                    .then(r => r.json())
+                    .then(data => startPairingCountdown(data.secondsRemaining));
+            }
+        }
+
+        function getAntiForgeryToken() {
+            var el = document.querySelector('input[name="__RequestVerificationToken"]');
+            return el ? el.value : '';
+        }
+
+        function stopPairingCountdown() {
+            clearInterval(pairingTimer);
+            pairingActive = false;
+            document.getElementById('pairing-btn').textContent = 'Enable Pairing Mode (5 min)';
+        }
+
+        function startPairingCountdown(seconds) {
+            pairingActive = true;
+            var remaining = seconds;
+            document.getElementById('pairing-btn').textContent = 'Pairing active, ' + remaining + 's remaining (click to disable)';
+
+            clearInterval(pairingTimer);
+            pairingTimer = setInterval(function () {
+                remaining--;
+                if (remaining <= 0) {
+                    stopPairingCountdown();
+                } else {
+                    document.getElementById('pairing-btn').textContent = 'Pairing active, ' + remaining + 's remaining (click to disable)';
+                }
+
+                // Poll status every 5s to catch early close (device paired)
+                if (remaining % 5 === 0) {
+                    fetch('/api/pairing/status')
+                        .then(r => r.json())
+                        .then(data => {
+                            if (!data.active) {
+                                stopPairingCountdown();
+                                // Reload to show the newly paired display
+                                window.location.reload();
+                            }
+                        });
+                }
+            }, 1000);
+        }
+
+        // Restore countdown if pairing is already active (e.g. page refresh)
+        fetch('/api/pairing/status')
+            .then(r => r.json())
+            .then(data => { if (data.active && data.secondsRemaining > 0) startPairingCountdown(data.secondsRemaining); });
+
         $('#delete_modal').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget);
             var modal = $(this);

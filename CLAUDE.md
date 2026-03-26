@@ -97,3 +97,18 @@ Registered in `Program.cs`: bitmap pre-generation, cache cleanup, missed connect
 - `.github/workflows/client-build.yml` — PlatformIO builds on self-hosted Linux runner
 - `.github/workflows/server-build.yml` — .NET 9 build + xUnit tests
 - `.github/workflows/server-release.yml` — Release automation
+
+
+## Additional instructions
+
+Any database migrations should be created and applied via EF Core CLI:
+```bash
+cd server/PortalCalendarServer
+dotnet ef migrations add <MigrationName> -c CalendarContext
+```
+
+No need to run `dotnet ef database update` the server applies pending migrations at startup.
+
+With Linq check whether `.AsSingleQuery()` is needed to avoid cartesian explosion when including multiple related entities. Use `.AsSplitQuery()` if you want to force separate queries instead.
+
+When updating client firmware always increment the version constant in `client/include/version.h`.

@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Options;
@@ -237,6 +236,9 @@ builder.Services.AddAuthorization(options =>
 
 // Register the singleton internal token service (must come before services that depend on it)
 builder.Services.AddSingleton<InternalTokenService>();
+
+// Pairing mode: in-memory singleton, controls whether unknown devices can register
+builder.Services.AddSingleton<PairingModeService>();
 
 // Configure localization to not disturb number formatting in HTML forms, date printing in logs etc.
 var invariant = CultureInfo.InvariantCulture;

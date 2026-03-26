@@ -7,11 +7,9 @@ using PortalCalendarServer.Models.POCOs;
 using PortalCalendarServer.Models.POCOs.Bitmap;
 using PortalCalendarServer.Services;
 using PortalCalendarServer.Services.Integrations;
+using System.Security.Cryptography;
 
 namespace PortalCalendarServer.Controllers;
-
-// FIXME: Add authentication and authorization for these endpoints, especially the device config and bitmap endpoints.
-// They currently rely on the obscurity/randomness of the MAC address, but it would be more secure to require an API key or so.
 
 [ApiController]
 [Route("api")]
@@ -23,6 +21,7 @@ public class ApiController : ControllerBase
     private readonly PageGeneratorService _pageGeneratorService;
     private readonly ThemeService _themeService;
     private readonly IMqttService _mqttService;
+    private readonly PairingModeService _pairingMode;
 
     public ApiController(
         CalendarContext context,
@@ -31,7 +30,8 @@ public class ApiController : ControllerBase
         PageGeneratorService pageGeneratorService,
         ThemeService themeService,
         IWeb2PngService web2PngService,
-        IMqttService mqttService)
+        IMqttService mqttService,
+        PairingModeService pairingMode)
     {
         _context = context;
         _logger = logger;
@@ -39,7 +39,11 @@ public class ApiController : ControllerBase
         _pageGeneratorService = pageGeneratorService;
         _themeService = themeService;
         _mqttService = mqttService;
+        _pairingMode = pairingMode;
     }
+
+    private static string GenerateApiKey() =>
+        Convert.ToHexString(RandomNumberGenerator.GetBytes(32)).ToLowerInvariant();
 
     // Helper to get display by MAC address
     private async Task<Display?> GetDisplayByMacAsync(string? mac)
@@ -113,7 +117,8 @@ public class ApiController : ControllerBase
     [FromQuery] string? vlmin,
     [FromQuery] string? vlmax,
     [FromQuery] string? reset,
-    [FromQuery] string? wakeup)
+    [FromQuery] string? wakeup,
+    [FromQuery] string? key)
     {
         if (string.IsNullOrWhiteSpace(mac))
         {
@@ -122,8 +127,18 @@ public class ApiController : ControllerBase
 
         var display = await GetDisplayByMacAsync(mac);
 
+        // Key that will be sent back to the device (only set when a new key is assigned)
+        string? newApiKey = null;
+
         if (display == null)
         {
+            // Unknown device, only allow in pairing mode
+            if (!_pairingMode.IsActive)
+            {
+                _logger.LogWarning("Rejected unknown MAC {Mac}, pairing mode is not active", mac);
+                return Unauthorized(new { error = "Pairing mode is not active. Enable it in the admin UI to register new displays." });
+            }
+
             var displayType = _context.DisplayTypes.FirstOrDefault(dt => dt.Code == c);
             if (displayType == null)
             {
@@ -134,6 +149,8 @@ public class ApiController : ControllerBase
             {
                 return BadRequest(new { error = $"No color variant found for display type code '{c}'" });
             }
+
+            newApiKey = GenerateApiKey();
 
             // Create new display
             display = new Display
@@ -151,13 +168,16 @@ public class ApiController : ControllerBase
                 BorderRight = 0,
                 BorderBottom = 0,
                 BorderLeft = 0,
-                ThemeId = (await _themeService.GetDefaultThemeAsync()).Id
+                ThemeId = (await _themeService.GetDefaultThemeAsync()).Id,
+                ApiKey = newApiKey
             };
 
             _context.Displays.Add(display);
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("New display created with MAC {Mac}, ID: {Id}", mac, display.Id);
+            // Close pairing window, one device paired
+            _pairingMode.Deactivate();
+            _logger.LogInformation("New display paired: MAC {Mac}, ID: {Id}", mac, display.Id);
 
             // Generate the bitmap NOW so that it's available immediately on the first config request.
             try
@@ -169,20 +189,27 @@ public class ApiController : ControllerBase
                 _logger.LogError(ex, "Failed to generate initial bitmap for new display {DisplayId}", display.Id);
             }
         }
-        else
+        else if (display.ApiKey == null)
         {
-            // Update existing display
-            if (!string.IsNullOrWhiteSpace(fw))
-            {
-                display.Firmware = fw;
-            }
-            if (!string.IsNullOrWhiteSpace(c))
-            {
-                display.DisplayTypeCode = c;
-            }
-            _context.Update(display);
-            await _context.SaveChangesAsync();
+            // Existing display without a key (pre-pairing firmware or NVS cleared).
+            // Grace period: assign a key now and return it so the device can store it.
+            newApiKey = GenerateApiKey();
+            display.ApiKey = newApiKey;
+            _logger.LogInformation("Assigned API key to existing keyless display {DisplayId}", display.Id);
         }
+        else if (!string.Equals(key, display.ApiKey, StringComparison.Ordinal))
+        {
+            _logger.LogWarning("Invalid API key for display MAC {Mac}", mac);
+            return Unauthorized(new { error = "Invalid API key" });
+        }
+
+        // Update firmware / display type for all existing display requests
+        if (!string.IsNullOrWhiteSpace(fw))
+            display.Firmware = fw;
+        if (!string.IsNullOrWhiteSpace(c))
+            display.DisplayTypeCode = c;
+        _context.Update(display);
+        await _context.SaveChangesAsync();
 
         // Update last visit timestamp
         _displayService.SetConfig(display, "_last_visit", DateTime.UtcNow.ToString("O"));
@@ -277,7 +304,10 @@ public class ApiController : ControllerBase
         {
             sleep = wakeupInfo.SleepInSeconds,
             battery_percent = _displayService.GetBatteryPercent(display),
-            ota_mode = _displayService.GetConfigBool(display, "ota_mode")
+            ota_mode = _displayService.GetConfigBool(display, "ota_mode"),
+            // Only present when a new key is assigned (first pairing or grace period upgrade).
+            // The device must persist this value to NVS and send it on all future requests.
+            api_key = newApiKey
         };
 
         return Ok(response);
@@ -289,8 +319,8 @@ public class ApiController : ControllerBase
     [EnableRateLimiting("device-bitmap")]
     public async Task<IActionResult> BitmapEpaper(
         [FromQuery] string? mac,
-        [FromQuery] int fmt = 1
-        )
+        [FromQuery] int fmt = 1,
+        [FromQuery] string? key = null)
     {
         var display = await GetDisplayByMacAsync(mac);
         if (display == null)
@@ -298,18 +328,12 @@ public class ApiController : ControllerBase
             return NotFound(new { error = "Display not found" });
         }
 
-        // UI:
-        // FIXME 
-        //var bitmap = _bitmapService.GetStoredBitmap(
-        //    display.Id, out var errorMessage,
-        //    rotate, flip, gamma, colors, colormap_name, format);
+        if (display.ApiKey != null && !string.Equals(key, display.ApiKey, StringComparison.Ordinal))
+        {
+            _logger.LogWarning("Invalid API key for bitmap request, display MAC {Mac}", mac);
+            return Unauthorized(new { error = "Invalid API key" });
+        }
 
-        //if (bitmap == null)
-        //{
-        //    return NotFound(errorMessage);
-        //}
-
-        // API:
         var bitmap = _displayService.ConvertExistingRawBitmap(
             displayId: display.Id,
             format: fmt == 2 ? OutputFormat.EpaperSpecificV2 : OutputFormat.EpaperSpecificV1,
@@ -325,4 +349,3 @@ public class ApiController : ControllerBase
         return this.ReturnBitmap(bitmap);
     }
 }
-

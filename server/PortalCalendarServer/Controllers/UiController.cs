@@ -214,7 +214,7 @@ public class UiController(
             }
             else if (checkboxKeys.Contains(paramName))
             {
-                // Unchecked checkboxes are absent from the form — explicitly clear them
+                // Unchecked checkboxes are absent from the form, explicitly clear them
                 _displayService.SetConfig(display, paramName, "");
             }
         }
