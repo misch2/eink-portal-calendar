@@ -2,8 +2,6 @@
 
 <img src="https://github.com/misch2/eink-portal-calendar/assets/16558674/b2b185de-a960-480c-99a1-aa7d521ed9d6" height="450">
 <img src="https://github.com/misch2/eink-portal-calendar/assets/16558674/66098158-f8c2-456c-95e3-673dab4ea655" height="450">
-<img src="https://github.com/user-attachments/assets/764e34b6-ca7a-4c1e-94f6-5d36a68978d6" height="450">
-
 
 ## Examples (screenshots)
 
