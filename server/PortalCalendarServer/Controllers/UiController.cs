@@ -252,6 +252,14 @@ public class UiController(
             {
                 display.Mac = null;
             }
+            if (form.ContainsKey("display_api_key"))
+            {
+                display.ApiKey = form["display_api_key"].ToString().Trim();
+                if (string.IsNullOrEmpty(display.ApiKey))
+                {
+                    display.ApiKey = null;
+                }
+            }
             if (form.ContainsKey("display_rotation") && int.TryParse(form["display_rotation"], out var rotation))
             {
                 display.Rotation = (DisplayRotation)rotation;
