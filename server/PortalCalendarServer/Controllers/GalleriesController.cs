@@ -171,7 +171,7 @@ public class GalleriesController(IGalleryService galleryService) : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ToggleVisibility(int galleryId, int imageId, [FromForm] bool isHidden)
     {
-        await galleryService.SetImageVisibilityAsync(imageId, isHidden);
+        await galleryService.SetImageVisibilityAsync(galleryId, imageId, isHidden);
         return RedirectToAction(nameof(Detail), new { id = galleryId });
     }
 

@@ -7,6 +7,13 @@
     </button>
 </div>
 
+@{
+    var hiddenImageIds = Model.ImageLinks
+        .Where(l => l.IsHidden)
+        .Select(l => l.GalleryImageId)
+        .ToHashSet();
+}
+
 @if (Model.Images.Count == 0)
 {
     <p class="text-muted">No images in this gallery yet.</p>
@@ -16,8 +23,9 @@ else
     <div class="row">
         @foreach (var image in Model.Images.OrderByDescending(i => i.UploadedAt))
         {
+            var isHidden = hiddenImageIds.Contains(image.Id);
             <div class="col-md-4 col-lg-3 mb-4">
-                <div class="card h-100 @(image.IsHidden ? "gallery-card--hidden" : "")">
+                <div class="card h-100 @(isHidden ? "gallery-card--hidden" : "")">
                     <div class="position-relative">
                         <a href="#" class="gallery-preview-link"
                            data-bs-toggle="modal"
@@ -33,11 +41,11 @@ else
                                   action="/galleries/@Model.Id/images/@image.Id/toggle-visibility"
                                   style="margin:0">
                                 @Html.AntiForgeryToken()
-                                <input type="hidden" name="isHidden" value="@(image.IsHidden ? "false" : "true")" />
+                                <input type="hidden" name="isHidden" value="@(isHidden ? "false" : "true")" />
                                 <button type="submit"
                                         class="gallery-action-btn"
-                                        title="@(image.IsHidden ? "Show" : "Hide")">
-                                    <i class="bi @(image.IsHidden ? "bi-eye-slash" : "bi-eye")"></i>
+                                        title="@(isHidden ? "Show" : "Hide")">
+                                    <i class="bi @(isHidden ? "bi-eye-slash" : "bi-eye")"></i>
                                 </button>
                             </form>
                             <a href="#" class="gallery-action-btn edit-description-link"
@@ -186,7 +194,7 @@ else
         filter: grayscale(100%);
     }
     .gallery-card--hidden:hover {
-        opacity: 1.0;
+        opacity: 0.7;
         filter: none;
     }
     .gallery-action-btn {

@@ -6,6 +6,7 @@ namespace PortalCalendarServer.Models.DatabaseEntities
         public required string Name { get; set; }
         public DateTime CreatedAt { get; set; }
 
+        public List<GalleryImageLink> ImageLinks { get; set; } = [];
         public List<GalleryImage> Images { get; set; } = [];
     }
 }
