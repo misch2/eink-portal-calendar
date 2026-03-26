@@ -10,8 +10,8 @@ public class GalleryModule : IPortalModule
     public string? ConfigTabDisplayName => null;
     public string? ConfigPartialView => null;
 
-    public IReadOnlyList<string> OwnedConfigKeys => ["gallery_id"];
-    public IReadOnlyList<string> CheckboxConfigKeys => [];
+    public IReadOnlyList<string> OwnedConfigKeys => ["gallery_id", "gallery_hide_descriptions"];
+    public IReadOnlyList<string> CheckboxConfigKeys => ["gallery_hide_descriptions"];
 
     public object? CreatePageGeneratorComponent(IServiceProvider services, Display display, DateTime date)
     {
