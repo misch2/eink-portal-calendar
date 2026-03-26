@@ -14,12 +14,13 @@ void OTAManager::init() {
     wdtManager.stop();
     logger.debug("OTA start");
   });
-  ArduinoOTA.onEnd([this]() {
-    logger.debug("OTA end");
-  });
+  ArduinoOTA.onEnd([this]() { logger.debug("OTA end"); });
 
   ArduinoOTA.begin();
   logger.debug("OTA: Ready on %s.local", HOSTNAME);
 }
 
-void OTAManager::loop() { ArduinoOTA.handle(); }
+void OTAManager::loop() {
+  ArduinoOTA.handle();
+  wdtManager.ping();
+}
