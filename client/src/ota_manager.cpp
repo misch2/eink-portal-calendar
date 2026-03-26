@@ -14,7 +14,10 @@ void OTAManager::init() {
     wdtManager.stop();
     logger.debug("OTA start");
   });
-  ArduinoOTA.onEnd([this]() { logger.debug("OTA end"); });
+  ArduinoOTA.onEnd([this]() {
+    logger.debug("OTA end");
+    otaFinished = true;
+  });
 
   ArduinoOTA.begin();
   logger.debug("OTA: Ready on %s.local", HOSTNAME);
@@ -23,4 +26,8 @@ void OTAManager::init() {
 void OTAManager::loop() {
   ArduinoOTA.handle();
   wdtManager.ping();
+  if (otaFinished) {
+    logger.debug("Rebooting after OTA update");
+    ESP.restart();
+  }
 }
