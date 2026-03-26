@@ -141,6 +141,10 @@
                             <span class="badge bg-success">OK</span>
                         }
 
+                        if (d.ApiKey == null)
+                        {
+                            <span class="badge bg-warning text-dark">Keyless</span>
+                        }
                         if (displayService.GetConfigBool(d, "ota_mode"))
                         {
                             <span class="badge bg-warning text-dark">OTA mode active</span>
