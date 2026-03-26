@@ -21,7 +21,7 @@ class DisplayManager {
 
   void init();
   void stop();
-  void displayText(String message, const GFXfont* font = nullptr);
+  void displayText(String title, String message, const GFXfont* font = nullptr);
   int displayWidth();
   int displayHeight();
 
