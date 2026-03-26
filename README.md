@@ -1,7 +1,9 @@
 # "Portal" calendar for e-ink display
 
-<img src="https://github.com/misch2/eink-portal-calendar/assets/16558674/b2b185de-a960-480c-99a1-aa7d521ed9d6" width="250">
-<img src="https://github.com/misch2/eink-portal-calendar/assets/16558674/66098158-f8c2-456c-95e3-673dab4ea655" width="250">
+<img src="https://github.com/misch2/eink-portal-calendar/assets/16558674/b2b185de-a960-480c-99a1-aa7d521ed9d6" height="450">
+<img src="https://github.com/misch2/eink-portal-calendar/assets/16558674/66098158-f8c2-456c-95e3-673dab4ea655" height="450">
+<img src="https://github.com/user-attachments/assets/319bc097-b8e9-4403-aa5c-7d91a8087890" height="450">
+
 
 ## Examples (screenshots)
 

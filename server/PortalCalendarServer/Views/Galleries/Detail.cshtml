@@ -7,6 +7,13 @@
     </button>
 </div>
 
+@{
+    var hiddenImageIds = Model.ImageLinks
+        .Where(l => l.IsHidden)
+        .Select(l => l.GalleryImageId)
+        .ToHashSet();
+}
+
 @if (Model.Images.Count == 0)
 {
     <p class="text-muted">No images in this gallery yet.</p>
@@ -16,8 +23,9 @@ else
     <div class="row">
         @foreach (var image in Model.Images.OrderByDescending(i => i.UploadedAt))
         {
+            var isHidden = hiddenImageIds.Contains(image.Id);
             <div class="col-md-4 col-lg-3 mb-4">
-                <div class="card h-100">
+                <div class="card h-100 @(isHidden ? "gallery-card--hidden" : "")">
                     <div class="position-relative">
                         <a href="#" class="gallery-preview-link"
                            data-bs-toggle="modal"
@@ -29,6 +37,17 @@ else
                                  alt="@(image.Description ?? "Gallery image")" />
                         </a>
                         <div class="position-absolute top-0 end-0 p-1 d-flex flex-column gap-1">
+                            <form method="post"
+                                  action="/galleries/@Model.Id/images/@image.Id/toggle-visibility"
+                                  style="margin:0">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="isHidden" value="@(isHidden ? "false" : "true")" />
+                                <button type="submit"
+                                        class="gallery-action-btn"
+                                        title="@(isHidden ? "Show" : "Hide")">
+                                    <i class="bi @(isHidden ? "bi-eye-slash" : "bi-eye")"></i>
+                                </button>
+                            </form>
                             <a href="#" class="gallery-action-btn edit-description-link"
                                data-bs-toggle="modal"
                                data-bs-target="#edit_description_modal"
@@ -169,6 +188,14 @@ else
         object-position: top;
         background: #f8f9fa;
         cursor: zoom-in;
+    }
+    .gallery-card--hidden {
+        opacity: 0.5;
+        filter: grayscale(100%);
+    }
+    .gallery-card--hidden:hover {
+        opacity: 0.7;
+        filter: none;
     }
     .gallery-action-btn {
         display: inline-flex;

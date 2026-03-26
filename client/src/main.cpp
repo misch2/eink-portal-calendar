@@ -119,13 +119,6 @@ void wakeupDisplayAndConnectWiFi() {
   }
 
   otaManager.loop();
-#ifdef VOLTAGE_ADC_PIN
-  if (voltageReader.getVoltageReal() > 0 && voltageReader.getVoltageReal() < VOLTAGE_MIN) {
-    nextSleepTime = SECONDS_PER_HOUR * 1;
-    showErrorOnDisplay(String("Battery voltage too low: ") + String(voltageReader.getVoltageReal()) + " V\n" + "Minimum is: " + String(VOLTAGE_MIN) + " V\n" +
-                       "Please charge the battery and try again.");
-  }
-#endif
 }
 
 void disconnectWiFiAndHibernateAll() {
@@ -174,6 +167,14 @@ void setup() {
       delay(5);
     }
   };
+
+#ifdef VOLTAGE_ADC_PIN
+  if (voltageReader.getVoltageReal() > 0 && voltageReader.getVoltageReal() < VOLTAGE_MIN) {
+    nextSleepTime = SECONDS_PER_HOUR * 1;
+    showErrorOnDisplay(String("Battery voltage too low: ") + String(voltageReader.getVoltageReal()) + " V\n" + "Minimum is: " + String(VOLTAGE_MIN) + " V\n" +
+                       "Please charge the battery and try again.");
+  }
+#endif
 }
 
 void loop() {

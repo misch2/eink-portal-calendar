@@ -9,7 +9,8 @@
 
     var gallery = Model.Gallery;
     var imageInfo = gallery?.GetRandomImage(Model.Display);
-    var hasDescription = imageInfo != null && !string.IsNullOrEmpty(imageInfo.Description);
+    var hideDescriptions = displayService.GetConfigBool(Model.Display, "gallery_hide_descriptions");
+    var hasDescription = !hideDescriptions && imageInfo != null && !string.IsNullOrEmpty(imageInfo.Description);
 }
 
 @section Head {

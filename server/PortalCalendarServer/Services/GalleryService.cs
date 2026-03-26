@@ -21,6 +21,8 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
     {
         return await _context.Galleries
             .Include(g => g.Images)
+            .Include(g => g.ImageLinks)
+            .AsSingleQuery()
             .FirstOrDefaultAsync(g => g.Id == id);
     }
 
@@ -196,6 +198,20 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
             await file.CopyToAsync(stream);
         }
 
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task SetImageVisibilityAsync(int galleryId, int imageId, bool isHidden)
+    {
+        var gallery = await _context.Galleries
+            .Include(g => g.ImageLinks)
+            .FirstOrDefaultAsync(g => g.Id == galleryId);
+        if (gallery == null) return;
+
+        var link = gallery.ImageLinks.FirstOrDefault(l => l.GalleryImageId == imageId);
+        if (link == null) return;
+
+        link.IsHidden = isHidden;
         await _context.SaveChangesAsync();
     }
 

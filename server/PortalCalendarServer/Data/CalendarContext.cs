@@ -389,12 +389,19 @@ public partial class CalendarContext : DbContext
 
             entity.HasMany(e => e.Images)
                 .WithMany(e => e.Galleries)
-                .UsingEntity("gallery_image_galleries",
-                    l => l.HasOne(typeof(GalleryImage)).WithMany().HasForeignKey("gallery_image_id").OnDelete(DeleteBehavior.Cascade),
-                    r => r.HasOne(typeof(Gallery)).WithMany().HasForeignKey("gallery_id").OnDelete(DeleteBehavior.Cascade),
+                .UsingEntity<GalleryImageLink>(
+                    "gallery_image_galleries",
+                    l => l.HasOne(e => e.GalleryImage).WithMany(e => e.GalleryLinks).HasForeignKey(e => e.GalleryImageId).OnDelete(DeleteBehavior.Cascade),
+                    r => r.HasOne(e => e.Gallery).WithMany(e => e.ImageLinks).HasForeignKey(e => e.GalleryId).OnDelete(DeleteBehavior.Cascade),
                     j =>
                     {
-                        j.HasKey("gallery_id", "gallery_image_id");
+                        j.HasKey(e => new { e.GalleryId, e.GalleryImageId });
+                        j.Property(e => e.GalleryId).HasColumnName("gallery_id");
+                        j.Property(e => e.GalleryImageId).HasColumnName("gallery_image_id");
+                        j.Property(e => e.IsHidden)
+                            .HasColumnType("INTEGER")
+                            .HasDefaultValue(false)
+                            .HasColumnName("is_hidden");
                     });
         });
 

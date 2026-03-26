@@ -1,5 +1,6 @@
 @model Display
 @using PortalCalendarServer.Models.DatabaseEntities
+@using PortalCalendarServer.Models.POCOs
 @using PortalCalendarServer.Services
 @inject IDisplayService displayService
 @inject IGalleryService galleryService
@@ -21,3 +22,10 @@
         }
     </select>
 </div>
+
+@await Html.PartialAsync("_ConfigCheckbox", new ConfigInputModel
+{
+    Display = Model, Key = "gallery_hide_descriptions",
+    Label = "Hide descriptions",
+    ColClass = "col-12", MarginClass = "mt-3"
+})
