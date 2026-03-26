@@ -199,6 +199,15 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
         await _context.SaveChangesAsync();
     }
 
+    public async Task SetImageVisibilityAsync(int imageId, bool isHidden)
+    {
+        var image = await _context.GalleryImages.FindAsync(imageId);
+        if (image == null) return;
+
+        image.IsHidden = isHidden;
+        await _context.SaveChangesAsync();
+    }
+
     public string GetImageFilePath(GalleryImage image)
     {
         return Path.Combine(GetImageDirectory(image.PrimaryFolder), image.FileName);

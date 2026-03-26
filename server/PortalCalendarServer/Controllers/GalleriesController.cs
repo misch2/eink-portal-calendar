@@ -166,6 +166,15 @@ public class GalleriesController(IGalleryService galleryService) : Controller
         return RedirectToAction(nameof(Detail), new { id = galleryId });
     }
 
+    // POST /galleries/{galleryId}/images/{imageId}/toggle-visibility
+    [HttpPost("/galleries/{galleryId:int}/images/{imageId:int}/toggle-visibility")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ToggleVisibility(int galleryId, int imageId, [FromForm] bool isHidden)
+    {
+        await galleryService.SetImageVisibilityAsync(imageId, isHidden);
+        return RedirectToAction(nameof(Detail), new { id = galleryId });
+    }
+
     // GET /galleries/{galleryId}/images/{imageId}
     [HttpGet("/galleries/{galleryId:int}/images/{imageId:int}")]
     public async Task<IActionResult> ServeImage(int galleryId, int imageId)

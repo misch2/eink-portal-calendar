@@ -423,6 +423,10 @@ public partial class CalendarContext : DbContext
             entity.Property(e => e.UploadedAt)
                 .HasColumnType("DATETIME")
                 .HasColumnName("uploaded_at");
+            entity.Property(e => e.IsHidden)
+                .HasColumnType("INTEGER")
+                .HasDefaultValue(false)
+                .HasColumnName("is_hidden");
         });
 
         OnModelCreatingPartial(modelBuilder);
