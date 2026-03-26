@@ -47,7 +47,29 @@ String HTTPClientManager::statusCodeAsString(int statusCode) {
   }
 }
 
+void HTTPClientManager::_loadApiKeyFromNvs() {
+  Preferences prefs;
+  prefs.begin(NVS_NAMESPACE, /*readOnly=*/true);
+  apiKey = prefs.getString(NVS_KEY_API_KEY, "");
+  prefs.end();
+  if (apiKey.length() > 0) {
+    logger.debug("API key loaded from NVS (%d chars)", apiKey.length());
+  } else {
+    logger.debug("No API key in NVS — will request one from server");
+  }
+}
+
+void HTTPClientManager::_saveApiKeyToNvs(const String& key) {
+  Preferences prefs;
+  prefs.begin(NVS_NAMESPACE, /*readOnly=*/false);
+  prefs.putString(NVS_KEY_API_KEY, key);
+  prefs.end();
+  logger.debug("API key saved to NVS");
+}
+
 void HTTPClientManager::init() {
+  _loadApiKeyFromNvs();
+
 #ifdef USE_MDNS_FOR_SERVER
   // Note: MDNS.begin() is already called by ArduinoOTA.begin() in OTAManager::init(),
   // no need to call it again here.
@@ -133,9 +155,13 @@ bool HTTPClientManager::loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMod
                "&h=" + String(DISPLAY_HEIGHT) +                             //
                "&c=" + String(defined_color_type) +                         //
                "&fw=" + String(FIRMWARE_VERSION) +                          //
-               "&rot=" + String(DISPLAY_ROTATION) +                         // new in 2.1.1, not used for anything yet
+               "&rot=" + String(DISPLAY_ROTATION) +                         //
                "&reset=" + systemInfo.resetReasonAsString() +               //
                "&wakeup=" + systemInfo.wakeupReasonAsString();
+
+  if (apiKey.length() > 0) {
+    url += "&key=" + apiKey;
+  }
 
   logger.trace("URL: %s", url.c_str());
   http.begin(url);
@@ -174,6 +200,14 @@ bool HTTPClientManager::loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMod
   bool tmpb = response["ota_mode"];
   logger.trace("otaMode from JSON: %d", tmpb);
   otaMode = tmpb;
+
+  // If the server assigned a new API key, persist it to NVS for all future requests
+  const char* receivedKey = response["api_key"];
+  if (receivedKey != nullptr && strlen(receivedKey) > 0) {
+    apiKey = String(receivedKey);
+    _saveApiKeyToNvs(apiKey);
+    logger.debug("New API key received and stored");
+  }
   if (otaMode) {
     logger.debug("Permanent OTA mode enabled in remote config");
     if (esp_reset_reason() == ESP_RST_SW || esp_reset_reason() == ESP_RST_DEEPSLEEP) {
@@ -223,8 +257,11 @@ int HTTPClientManager::_displayPartialPageFromWeb(String& newChecksum) {
   String path = "/api/device/bitmap/epaper";
   String url = serverUrl + path + "?" +      //
                "mac=" + WiFi.macAddress() +  //
-               "&fmt=2"                      // format 2 = optimized for simple pixel drawing, no HW-specific code on server side
-      ;
+               "&fmt=2";                     // format 2 = optimized for simple pixel drawing, no HW-specific code on server side
+
+  if (apiKey.length() > 0) {
+    url += "&key=" + apiKey;
+  }
   logger.debug("Loading bitmap from: %s", url.c_str());
 
   int rowBytes = displayManager.bytesPerRow();
