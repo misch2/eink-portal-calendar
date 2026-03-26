@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Options;
@@ -86,6 +87,14 @@ builder.Services.AddAntiforgery(options =>
 builder.Services.AddMemoryCache(options =>
 {
     options.SizeLimit = 100 * 1024 * 1024; // 100MB cache limit
+});
+
+// Trust X-Forwarded-For from the local reverse proxy so rate limiting uses the real client IP.
+// By default only loopback (127.0.0.1 / ::1) is a known proxy, which is correct for local deployments.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // KnownNetworks and KnownProxies default to loopback only — no change needed for standard setups.
 });
 
 // Rate limiting: restrict device API endpoints to prevent DoS / database flooding.
@@ -356,6 +365,10 @@ app.Use(async (context, next) =>
 });
 
 app.UseStaticFiles(); // For serving static content (CSS, JS, images)
+
+// Populate RemoteIpAddress from X-Forwarded-For before rate limiting evaluates it.
+// Must run before UseRateLimiter so partitions reflect the real client IP, not the proxy IP.
+app.UseForwardedHeaders();
 
 app.UseRateLimiter();
 app.UseRouting();
