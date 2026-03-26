@@ -2,17 +2,20 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PortalCalendarServer.Data;
 
 #nullable disable
 
-namespace PortalCalendarServer.Migrations
+namespace PortalCalendarServer.Data.Migrations
 {
     [DbContext(typeof(CalendarContext))]
-    partial class CalendarContextModelSnapshot : ModelSnapshot
+    [Migration("20260326074755_AddGalleryImageIsHidden")]
+    partial class AddGalleryImageIsHidden
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.12");
@@ -643,6 +646,12 @@ namespace PortalCalendarServer.Migrations
                         .HasColumnType("VARCHAR")
                         .HasColumnName("file_name");
 
+                    b.Property<bool>("IsHidden")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_hidden");
+
                     b.Property<string>("PrimaryFolder")
                         .IsRequired()
                         .HasColumnType("VARCHAR")
@@ -794,23 +803,15 @@ namespace PortalCalendarServer.Migrations
 
             modelBuilder.Entity("gallery_image_galleries", b =>
                 {
-                    b.Property<int>("GalleryId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("gallery_id");
+                    b.Property<int>("gallery_id")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<int>("GalleryImageId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("gallery_image_id");
+                    b.Property<int>("gallery_image_id")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<bool>("IsHidden")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_hidden");
+                    b.HasKey("gallery_id", "gallery_image_id");
 
-                    b.HasKey("GalleryId", "GalleryImageId");
-
-                    b.HasIndex("GalleryImageId");
+                    b.HasIndex("gallery_image_id");
 
                     b.ToTable("gallery_image_galleries");
                 });
@@ -890,21 +891,17 @@ namespace PortalCalendarServer.Migrations
 
             modelBuilder.Entity("gallery_image_galleries", b =>
                 {
-                    b.HasOne("PortalCalendarServer.Models.DatabaseEntities.Gallery", "Gallery")
-                        .WithMany("ImageLinks")
-                        .HasForeignKey("GalleryId")
+                    b.HasOne("PortalCalendarServer.Models.DatabaseEntities.Gallery", null)
+                        .WithMany()
+                        .HasForeignKey("gallery_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PortalCalendarServer.Models.DatabaseEntities.GalleryImage", "GalleryImage")
-                        .WithMany("GalleryLinks")
-                        .HasForeignKey("GalleryImageId")
+                    b.HasOne("PortalCalendarServer.Models.DatabaseEntities.GalleryImage", null)
+                        .WithMany()
+                        .HasForeignKey("gallery_image_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Gallery");
-
-                    b.Navigation("GalleryImage");
                 });
 
             modelBuilder.Entity("PortalCalendarServer.Models.DatabaseEntities.ColorVariant", b =>
@@ -927,16 +924,6 @@ namespace PortalCalendarServer.Migrations
             modelBuilder.Entity("PortalCalendarServer.Models.DatabaseEntities.DitheringType", b =>
                 {
                     b.Navigation("Displays");
-                });
-
-            modelBuilder.Entity("PortalCalendarServer.Models.DatabaseEntities.Gallery", b =>
-                {
-                    b.Navigation("ImageLinks");
-                });
-
-            modelBuilder.Entity("PortalCalendarServer.Models.DatabaseEntities.GalleryImage", b =>
-                {
-                    b.Navigation("GalleryLinks");
                 });
 
             modelBuilder.Entity("PortalCalendarServer.Models.DatabaseEntities.Theme", b =>

@@ -9,6 +9,7 @@ namespace PortalCalendarServer.Models.DatabaseEntities
         public required string ContentType { get; set; }
         public DateTime UploadedAt { get; set; }
 
+        public List<GalleryImageLink> GalleryLinks { get; set; } = [];
         public List<Gallery> Galleries { get; set; } = [];
     }
 }

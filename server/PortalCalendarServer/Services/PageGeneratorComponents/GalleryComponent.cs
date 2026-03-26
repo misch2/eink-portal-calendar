@@ -25,8 +25,19 @@ public class GalleryComponent(
             return null;
         }
 
+        var hiddenImageIds = gallery.ImageLinks
+            .Where(l => l.IsHidden)
+            .Select(l => l.GalleryImageId)
+            .ToHashSet();
+
+        var visibleImages = gallery.Images.Where(i => !hiddenImageIds.Contains(i.Id)).ToList();
+        if (visibleImages.Count == 0)
+        {
+            return null;
+        }
+
         var random = new Random(seed);
-        var image = gallery.Images[random.Next(gallery.Images.Count)];
+        var image = visibleImages[random.Next(visibleImages.Count)];
 
         var filePath = galleryService.GetImageFilePath(image);
         if (!File.Exists(filePath))
