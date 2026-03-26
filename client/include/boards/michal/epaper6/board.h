@@ -6,7 +6,7 @@
 // #define MODE_EPAPER_LOCAL_TEST_ONLY
 
 #define USE_WIFI_MANAGER
-#define HOSTNAME "esp64-test"
+#define HOSTNAME "esp64-epaper6"
 #define CALENDAR_URL_HOST "portal-calendar.localnet" /* .NET server on Proxmox LXC */
 #define CALENDAR_URL_PORT 8084                       /* nginx port to log requests, real server runs on 5000 */
 

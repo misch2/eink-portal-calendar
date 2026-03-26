@@ -28,6 +28,29 @@ HTTPClientManager::HTTPClientManager(Logger& logger, WDTManager& wdtManager, OTA
 
 String HTTPClientManager::statusCodeAsString(int statusCode) {
   switch (statusCode) {
+    case HTTPC_ERROR_CONNECTION_REFUSED:
+      return "Connection Refused";
+    case HTTPC_ERROR_SEND_HEADER_FAILED:
+      return "Send Header Failed";
+    case HTTPC_ERROR_SEND_PAYLOAD_FAILED:
+      return "Send Payload Failed";
+    case HTTPC_ERROR_NOT_CONNECTED:
+      return "Not Connected";
+    case HTTPC_ERROR_CONNECTION_LOST:
+      return "Connection Lost";
+    case HTTPC_ERROR_NO_STREAM:
+      return "No Stream";
+    case HTTPC_ERROR_NO_HTTP_SERVER:
+      return "No HTTP Server";
+    case HTTPC_ERROR_TOO_LESS_RAM:
+      return "Too Less RAM";
+    case HTTPC_ERROR_ENCODING:
+      return "Encoding Not Supported";
+    case HTTPC_ERROR_STREAM_WRITE:
+      return "Stream Write Error";
+    case HTTPC_ERROR_READ_TIMEOUT:
+      return "Read Timeout";
+
     case 200:
       return "OK";
     case 304:
@@ -146,17 +169,17 @@ bool HTTPClientManager::loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMod
                "&adc=" + String(voltageReader.getAdcRaw()) +                //
                "&v=" + String(voltageReader.getVoltageReal()) +             //
 #ifdef VOLTAGE_ADC_PIN
-               "&vmin=" + String(VOLTAGE_MIN) +                             //
-               "&vmax=" + String(VOLTAGE_MAX) +                             //
-               "&vlmin=" + String(VOLTAGE_LINEAR_MIN) +                     //
-               "&vlmax=" + String(VOLTAGE_LINEAR_MAX) +                     //
+               "&vmin=" + String(VOLTAGE_MIN) +          //
+               "&vmax=" + String(VOLTAGE_MAX) +          //
+               "&vlmin=" + String(VOLTAGE_LINEAR_MIN) +  //
+               "&vlmax=" + String(VOLTAGE_LINEAR_MAX) +  //
 #endif
-               "&w=" + String(DISPLAY_WIDTH) +                              //
-               "&h=" + String(DISPLAY_HEIGHT) +                             //
-               "&c=" + String(defined_color_type) +                         //
-               "&fw=" + String(FIRMWARE_VERSION) +                          //
-               "&rot=" + String(DISPLAY_ROTATION) +                         //
-               "&reset=" + systemInfo.resetReasonAsString() +               //
+               "&w=" + String(DISPLAY_WIDTH) +                 //
+               "&h=" + String(DISPLAY_HEIGHT) +                //
+               "&c=" + String(defined_color_type) +            //
+               "&fw=" + String(FIRMWARE_VERSION) +             //
+               "&rot=" + String(DISPLAY_ROTATION) +            //
+               "&reset=" + systemInfo.resetReasonAsString() +  //
                "&wakeup=" + systemInfo.wakeupReasonAsString();
 
   if (apiKey.length() > 0) {
@@ -174,7 +197,13 @@ bool HTTPClientManager::loadConfigFromWeb(uint32_t& configLoadTime, bool& otaMod
     sleepTime = SLEEP_TIME_TEMPORARY_ERROR;
     logger.debug("Failed to load config, HTTP code: %d", httpCode);
     http.end();
-    lastErrorMessage = "Failed to load config, HTTP code: " + String(httpCode) + " (" + statusCodeAsString(httpCode) + ")";
+
+    lastErrorMessage = "Failed to load config.\nHTTP code: " + String(httpCode) + " (" + statusCodeAsString(httpCode) + ")";
+    if (httpCode == 401) {
+      lastErrorMessage += "\n\nThis may be caused by an invalid API key. Check the server logs.";
+      lastErrorMessage += "\n\nIf this is a new device ensure the pairing is enabled on the server and try again.";
+    }
+
     return false;
   }
 
