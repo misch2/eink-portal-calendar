@@ -74,6 +74,8 @@ public class Web2PngService : IWeb2PngService, IAsyncDisposable
         string destinationPath,
         int delayMs = 2000,
         Dictionary<string, string>? extraHeaders = null,
+        bool bypassCsp = true,
+        bool tolerateNetworkErrors = false,
         CancellationToken cancellationToken = default)
     {
         await InitializeAsync();
@@ -102,7 +104,11 @@ public class Web2PngService : IWeb2PngService, IAsyncDisposable
             var context = await _browser.NewContextAsync(new BrowserNewContextOptions
             {
                 ViewportSize = new ViewportSize { Width = width, Height = height },
-                DeviceScaleFactor = 1
+                DeviceScaleFactor = 1,
+                // Bypass Content-Security-Policy headers so that external resources
+                // (e.g. Google Fonts, Google Charts) are not blocked by a stale or
+                // overly-restrictive CSP delivered by the server or a reverse proxy.
+                BypassCSP = bypassCsp
                 // Do NOT set ExtraHTTPHeaders here — they would be sent on all
                 // requests including cross-origin ones, breaking CORS for external
                 // resources like Google Fonts.
@@ -223,12 +229,18 @@ public class Web2PngService : IWeb2PngService, IAsyncDisposable
 
                     if (networkErrors.Count > 0)
                     {
-                        //_logger.LogWarning(
-                        //    "PNG created but {Count} network issue(s) were encountered during page load for {Url}",
-                        //    networkErrors.Count, url);
-                        throw new AggregateException(
-                            $"PNG created but {networkErrors.Count} network issue(s) occurred while loading {url}",
-                            networkErrors.Select(e => new HttpRequestException(e)));
+                        if (tolerateNetworkErrors)
+                        {
+                            _logger.LogWarning(
+                                "PNG created but {Count} network issue(s) were encountered during page load for {Url}: {Errors}",
+                                networkErrors.Count, url, string.Join("; ", networkErrors));
+                        }
+                        else
+                        {
+                            throw new AggregateException(
+                                $"PNG created but {networkErrors.Count} network issue(s) occurred while loading {url}",
+                                networkErrors.Select(e => new HttpRequestException(e)));
+                        }
                     }
                 }
                 finally
