@@ -7,7 +7,6 @@ using PortalCalendarServer.Models.POCOs;
 using PortalCalendarServer.Models.POCOs.Bitmap;
 using PortalCalendarServer.Services;
 using PortalCalendarServer.Services.Integrations;
-using System.Security.Cryptography;
 
 namespace PortalCalendarServer.Controllers;
 
@@ -22,6 +21,8 @@ public class ApiController : ControllerBase
     private readonly ThemeService _themeService;
     private readonly IMqttService _mqttService;
     private readonly PairingModeService _pairingMode;
+
+    private readonly static Version firmwareVersionWithApiKeySupport = new Version("2.3.0");
 
     public ApiController(
         CalendarContext context,
@@ -42,8 +43,26 @@ public class ApiController : ControllerBase
         _pairingMode = pairingMode;
     }
 
-    private static string GenerateApiKey() =>
-        Convert.ToHexString(RandomNumberGenerator.GetBytes(32)).ToLowerInvariant();
+    private static string? GenerateApiKeyForDisplayIfNeeded(Display display)
+    {
+        var displayVersion = new Version(display.Firmware ?? "0.0.0");
+
+        if (displayVersion >= firmwareVersionWithApiKeySupport)
+        {
+            if (string.IsNullOrWhiteSpace(display.ApiKey))
+            {
+                // Device supports API keys, but display doesn't have one assigned yet
+                return Guid.NewGuid().ToString("D");
+            }
+            else
+            {
+                return display.ApiKey;
+            }
+        }
+
+        // Device firmware doesn't support API keys
+        return null;
+    }
 
     // Helper to get display by MAC address
     private async Task<Display?> GetDisplayByMacAsync(string? mac)
@@ -142,15 +161,15 @@ public class ApiController : ControllerBase
             var displayType = _context.DisplayTypes.FirstOrDefault(dt => dt.Code == c);
             if (displayType == null)
             {
+                _logger.LogWarning("Invalid display type code '{Code}' for new display with MAC {Mac}", c, mac);
                 return BadRequest(new { error = $"Invalid display type code '{c}'" });
             }
             var defaultColorVariant = _context.ColorVariants.FirstOrDefault(cv => cv.DisplayTypeCode == c);
             if (defaultColorVariant == null)
             {
+                _logger.LogWarning("No color variant found for display type code '{Code}' when pairing new display with MAC {Mac}", c, mac);
                 return BadRequest(new { error = $"No color variant found for display type code '{c}'" });
             }
-
-            newApiKey = GenerateApiKey();
 
             // Create new display
             display = new Display
@@ -168,9 +187,21 @@ public class ApiController : ControllerBase
                 BorderRight = 0,
                 BorderBottom = 0,
                 BorderLeft = 0,
-                ThemeId = (await _themeService.GetDefaultThemeAsync()).Id,
-                ApiKey = newApiKey
+                ThemeId = (await _themeService.GetDefaultThemeAsync()).Id
             };
+
+            display.ApiKey = GenerateApiKeyForDisplayIfNeeded(display);
+            if (display.ApiKey == null)
+            {
+                _logger.LogWarning("Device firmware {Firmware} does not support API keys for display with MAC {Mac}", fw, mac);
+                return BadRequest(new { error = "Device firmware too old to support API keys." });
+            }
+            else
+            {
+                newApiKey = display.ApiKey;
+                key = newApiKey;    // pass validation this time
+                _logger.LogInformation("Assigned new API key to newly paired display with MAC {Mac}: {ApiKey}", mac, newApiKey);
+            }
 
             _context.Displays.Add(display);
             await _context.SaveChangesAsync();
@@ -189,23 +220,35 @@ public class ApiController : ControllerBase
                 _logger.LogError(ex, "Failed to generate initial bitmap for new display {DisplayId}", display.Id);
             }
         }
-        else if (display.ApiKey == null)
+
+        if (!string.IsNullOrWhiteSpace(fw))
+        {
+            display.Firmware = fw;
+        }
+
+        // Check API key if display FW supports it.
+        // Allows EXISTING old displays without keys to continue working but requires new devices to have a key assigned (see above).
+        if (display.ApiKey == null)
         {
             // Existing display without a key (pre-pairing firmware or NVS cleared).
             // Grace period: assign a key now and return it so the device can store it.
-            newApiKey = GenerateApiKey();
-            display.ApiKey = newApiKey;
-            _logger.LogInformation("Assigned API key to existing keyless display {DisplayId}", display.Id);
+            display.ApiKey = GenerateApiKeyForDisplayIfNeeded(display);
+            if (display.ApiKey != null)
+            {
+                newApiKey = display.ApiKey;
+                _logger.LogInformation("Assigned new API key to existing keyless display {DisplayId}: {ApiKey}", display.Id, newApiKey);
+            }
         }
-        else if (!string.Equals(key, display.ApiKey, StringComparison.Ordinal))
+        else
         {
-            _logger.LogWarning("Invalid API key for display MAC {Mac}", mac);
-            return Unauthorized(new { error = "Invalid API key" });
+            if (!string.Equals(key, display.ApiKey, StringComparison.Ordinal))
+            {
+                _logger.LogWarning("Invalid API key for display MAC {Mac}", mac);
+                return Unauthorized(new { error = "Invalid API key" });
+            }
         }
 
-        // Update firmware / display type for all existing display requests
-        if (!string.IsNullOrWhiteSpace(fw))
-            display.Firmware = fw;
+        // Update display type for all existing display requests
         if (!string.IsNullOrWhiteSpace(c))
             display.DisplayTypeCode = c;
         _context.Update(display);
