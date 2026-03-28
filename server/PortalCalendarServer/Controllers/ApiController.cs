@@ -196,12 +196,13 @@ public class ApiController : ControllerBase
                 _logger.LogWarning("Device firmware {Firmware} does not support API keys for display with MAC {Mac}", fw, mac);
                 return BadRequest(new { error = "Device firmware too old to support API keys." });
             }
-            else
-            {
-                newApiKey = display.ApiKey;
-                key = newApiKey;    // pass validation this time
-                _logger.LogInformation("Assigned new API key to newly paired display with MAC {Mac}: {ApiKey}", mac, newApiKey);
-            }
+
+            newApiKey = display.ApiKey;
+            _logger.LogInformation("Assigned new API key to newly paired display with MAC {Mac}: {ApiKey}", mac, newApiKey);
+
+            // Update display type before the single save
+            if (!string.IsNullOrWhiteSpace(c))
+                display.DisplayTypeCode = c;
 
             _context.Displays.Add(display);
             await _context.SaveChangesAsync();
@@ -220,39 +221,38 @@ public class ApiController : ControllerBase
                 _logger.LogError(ex, "Failed to generate initial bitmap for new display {DisplayId}", display.Id);
             }
         }
-
-        if (!string.IsNullOrWhiteSpace(fw))
-        {
-            display.Firmware = fw;
-        }
-
-        // Check API key if display FW supports it.
-        // Allows EXISTING old displays without keys to continue working but requires new devices to have a key assigned (see above).
-        if (display.ApiKey == null)
-        {
-            // Existing display without a key (pre-pairing firmware or NVS cleared).
-            // Grace period: assign a key now and return it so the device can store it.
-            display.ApiKey = GenerateApiKeyForDisplayIfNeeded(display);
-            if (display.ApiKey != null)
-            {
-                newApiKey = display.ApiKey;
-                _logger.LogInformation("Assigned new API key to existing keyless display {DisplayId}: {ApiKey}", display.Id, newApiKey);
-            }
-        }
         else
         {
-            if (!string.Equals(key, display.ApiKey, StringComparison.Ordinal))
+            // Existing display — update firmware and display type if provided
+            if (!string.IsNullOrWhiteSpace(fw))
+                display.Firmware = fw;
+
+            // Check API key if display FW supports it.
+            // Allows EXISTING old displays without keys to continue working but requires new devices to have a key assigned (see above).
+            if (display.ApiKey == null)
+            {
+                // Existing display without a key (pre-pairing firmware or NVS cleared).
+                // Grace period: assign a key now and return it so the device can store it.
+                display.ApiKey = GenerateApiKeyForDisplayIfNeeded(display);
+                if (display.ApiKey != null)
+                {
+                    newApiKey = display.ApiKey;
+                    _logger.LogInformation("Assigned new API key to existing keyless display {DisplayId}: {ApiKey}", display.Id, newApiKey);
+                }
+            }
+            else if (!string.Equals(key, display.ApiKey, StringComparison.Ordinal))
             {
                 _logger.LogWarning("Invalid API key for display MAC {Mac}", mac);
                 return Unauthorized(new { error = "Invalid API key" });
             }
-        }
 
-        // Update display type for all existing display requests
-        if (!string.IsNullOrWhiteSpace(c))
-            display.DisplayTypeCode = c;
-        _context.Update(display);
-        await _context.SaveChangesAsync();
+            // Update display type
+            if (!string.IsNullOrWhiteSpace(c))
+                display.DisplayTypeCode = c;
+
+            _context.Update(display);
+            await _context.SaveChangesAsync();
+        }
 
         // Update last visit timestamp
         _displayService.SetConfig(display, "_last_visit", DateTime.UtcNow.ToString("O"));

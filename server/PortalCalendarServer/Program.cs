@@ -341,20 +341,8 @@ if (app.Environment.IsDevelopment())
 //app.UseHttpsRedirection();    // Not needed since this is typically run behind a reverse proxy that handles TLS termination
 
 // Security headers
-// Notes on CSP:
-//   - 'unsafe-inline' for scripts is required by the inline <script> block in _UI.cshtml layout.
-//   - cdn.jsdelivr.net / code.jquery.com are used for Bootstrap and jQuery.
-//   - www.gstatic.com is used by Google Charts (loaded in the GoogleFit theme).
-//   - fonts.googleapis.com / fonts.gstatic.com are used by Google Fonts (Gallery, XKCD themes).
-//   - api.iconify.design is the runtime API for the iconify-icon web component.
-//   - data: in img-src allows base64-encoded images used in calendar e-ink views.
-//   - HSTS is intentionally omitted — the reverse proxy handles TLS termination.
-//   - In development, connect-src is relaxed to allow BrowserLink and Hot Reload
-//     SignalR/WebSocket connections that are injected into all pages (including
-//     e-paper HTML pages rendered by the headless Playwright browser).
-var connectSrc = app.Environment.IsDevelopment()
-    ? "connect-src 'self' https://api.iconify.design ws: wss: http://localhost:* https://localhost:*; "
-    : "connect-src 'self' https://api.iconify.design; ";
+// TODO: Add Content-Security-Policy once ready (see git history for a draft policy)
+// HSTS is intentionally omitted — the reverse proxy handles TLS termination.
 app.Use(async (context, next) =>
 {
     var headers = context.Response.Headers;
@@ -362,15 +350,6 @@ app.Use(async (context, next) =>
     headers["X-Content-Type-Options"] = "nosniff";
     headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
     headers["X-XSS-Protection"] = "1; mode=block";
-    // Ignore for now:
-    //headers["Content-Security-Policy"] =
-    //    "default-src 'self'; " +
-    //    "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com https://www.gstatic.com; " +
-    //    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; " +
-    //    "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com; " +
-    //    "img-src 'self' data:; " +
-    //    connectSrc +
-    //    "frame-ancestors 'self'";
     await next();
 });
 

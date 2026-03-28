@@ -224,6 +224,8 @@
             return el ? el.value : '';
         }
 
+        function pairingLabel(s) { return 'Pairing active, ' + s + 's remaining (click to disable)'; }
+
         function stopPairingCountdown() {
             clearInterval(pairingTimer);
             pairingActive = false;
@@ -233,7 +235,7 @@
         function startPairingCountdown(seconds) {
             pairingActive = true;
             var remaining = seconds;
-            document.getElementById('pairing-btn').textContent = 'Pairing active, ' + remaining + 's remaining (click to disable)';
+            document.getElementById('pairing-btn').textContent = pairingLabel(remaining);
 
             clearInterval(pairingTimer);
             pairingTimer = setInterval(function () {
@@ -241,7 +243,7 @@
                 if (remaining <= 0) {
                     stopPairingCountdown();
                 } else {
-                    document.getElementById('pairing-btn').textContent = 'Pairing active, ' + remaining + 's remaining (click to disable)';
+                    document.getElementById('pairing-btn').textContent = pairingLabel(remaining);
                 }
 
                 // Poll status every 5s to catch early close (device paired)

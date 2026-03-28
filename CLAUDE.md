@@ -98,17 +98,21 @@ Registered in `Program.cs`: bitmap pre-generation, cache cleanup, missed connect
 - `.github/workflows/server-build.yml` — .NET 9 build + xUnit tests
 - `.github/workflows/server-release.yml` — Release automation
 
+### Command Execution (ALL AGENTS)
+- **Stay in project root** - never `cd` to subdirectories
 
-## Additional instructions
+### Memory Refresh Rule
+- **🚨 ALL AGENTS: Read the relevant AGENTS.md file before concluding work to refresh memory about current project rules and requirements.**
 
-Any database migrations should be created and applied via EF Core CLI:
-```bash
-cd server/PortalCalendarServer
-dotnet ef migrations add <MigrationName> -c CalendarContext
-```
 
-No need to run `dotnet ef database update` the server applies pending migrations at startup.
+### Database migrations
 
-With Linq check whether `.AsSingleQuery()` is needed to avoid cartesian explosion when including multiple related entities. Use `.AsSplitQuery()` if you want to force separate queries instead.
+- Any database migrations should be created and applied via EF Core CLI (`dotnet ef migrations`)
+- `CalendarContext` is the common DB context here.
+- Do not run `dotnet ef database update`, I want to preview all changes (and the server applies pending migrations at startup)
 
-When updating client firmware always increment the version constant in `client/include/version.h`.
+### .NET code standards
+- With Linq check whether `.AsSingleQuery()` is needed to avoid cartesian explosion when including multiple related entities. Use `.AsSplitQuery()` if you want to force separate queries instead.
+
+### C++ code standards
+- When updating client firmware always increment the version constant in `client/include/version.h`
