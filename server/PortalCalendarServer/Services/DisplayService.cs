@@ -345,6 +345,16 @@ public class DisplayService(
             nextWakeup = GetNextWakeupTimeForDateTime(schedule, nextWakeup.AddSeconds(1), timeZone);
         }
 
+        // Add deterministic per-display jitter to spread out simultaneous wakeups.
+        // The jitter is derived from the display ID so it's stable and predictable
+        // (important for the pre-generation service to know the exact wakeup time).
+        var maxJitterSeconds = GetConfigInt(display, "wakeup_jitter_seconds") ?? 0;
+        if (maxJitterSeconds > 0)
+        {
+            var jitterSeconds = GetDeterministicJitter(display.Id, maxJitterSeconds);
+            nextWakeup = nextWakeup.AddSeconds(jitterSeconds);
+        }
+
         var sleepInSeconds = (int)(nextWakeup - now).TotalSeconds;
 
         return new WakeUpInfo
@@ -353,6 +363,17 @@ public class DisplayService(
             SleepInSeconds = sleepInSeconds,
             Schedule = schedule
         };
+    }
+
+    /// <summary>
+    /// Compute a stable jitter value in [0, maxSeconds) for a given display ID.
+    /// Uses a simple hash so each display always gets the same offset.
+    /// </summary>
+    private static int GetDeterministicJitter(int displayId, int maxSeconds)
+    {
+        // Knuth multiplicative hash to spread display IDs evenly
+        var hash = unchecked((uint)displayId * 2654435761u);
+        return (int)(hash % (uint)maxSeconds);
     }
 
     public void ResetMissedConnectsCount(Display display)
