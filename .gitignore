@@ -4,6 +4,7 @@
 .vstags
 .vscode/
 .vs
+/.claude/
 /server/_data*
 
 # Local data:
@@ -15,4 +16,3 @@
 # .NET artifacts:
 /server/**/bin/
 /server/**/obj/
-/.claude/settings.local.json
