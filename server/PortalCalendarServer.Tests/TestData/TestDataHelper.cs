@@ -37,7 +37,7 @@ public static class TestDataHelper
         public static class Common
         {
             public const int DefaultRotation = 0;
-            public const double DefaultGamma = 2.2;
+            public const double DefaultGamma = 1.0;
             public const int DefaultBorder = 0;
             public const string DefaultFirmware = "1.0.0";
         }
