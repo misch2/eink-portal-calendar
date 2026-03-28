@@ -182,7 +182,7 @@ public class ApiController : ControllerBase
                 ColorVariantCode = defaultColorVariant.Code,
                 Firmware = fw ?? string.Empty,
                 Rotation = (DisplayRotation)(rotation ?? (int)DisplayRotation.None),
-                Gamma = 2.2,
+                Gamma = 1.0,
                 BorderTop = 0,
                 BorderRight = 0,
                 BorderBottom = 0,

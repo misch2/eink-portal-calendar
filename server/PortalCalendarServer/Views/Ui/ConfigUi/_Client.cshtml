@@ -169,7 +169,7 @@
         <div class="col-md-6">
             <label for="display_gamma">Gamma</label>
             <input id="display_gamma" name="display_gamma" type="number" step="0.01" class="form-control" value="@Model.Gamma">
-            <div class="form-text">How should the grayscale/antialiased elements map to the pure black and white. Higher values &gt; 2.2 = darker and thicker, lower values &lt; 1.8 = lighter and thinner.</div>
+            <div class="form-text">Controls how grayscale/antialiased elements map to pure black and white. Values above 1.0 lighten the image (thinner lines), values below 1.0 darken it (thicker lines). Set to 1.0 for no correction.</div>
         </div>
     </fieldset>
 

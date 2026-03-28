@@ -454,12 +454,14 @@ public class DisplayService(
         }
 
         // Apply gamma correction using lookup table
-        if (options.Gamma != 1.0)
+        // Values > 1.0 lighten the image (thinner lines), values < 1.0 darken it (thicker lines)
+        var effectiveGamma = Math.Max(options.Gamma, 0.1);
+        if (effectiveGamma != 1.0)
         {
             var lookupTable = new byte[256];
             for (int i = 0; i < 256; i++)
             {
-                lookupTable[i] = (byte)Math.Clamp(Math.Pow(i / 255.0, options.Gamma) * 255.0 + 0.5, 0, 255);
+                lookupTable[i] = (byte)Math.Clamp(Math.Pow(i / 255.0, 1.0 / effectiveGamma) * 255.0 + 0.5, 0, 255);
             }
 
             img.Mutate(ctx =>
