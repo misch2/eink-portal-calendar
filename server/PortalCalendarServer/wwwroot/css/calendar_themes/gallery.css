@@ -6,11 +6,23 @@ body {
 }
 
 #gallery-container {
+    position: relative;
     display: grid;
     grid-template-rows: 1fr;
     grid-template-areas: "image";
     height: 100%;
     overflow: hidden;
+}
+
+#gallery-container::before {
+    content: '';
+    position: absolute;
+    inset: -40px;
+    background-image: var(--gallery-bg);
+    background-size: cover;
+    background-position: center;
+    filter: blur(20px);
+    z-index: 0;
 }
 
     #gallery-container.with-description {
@@ -27,10 +39,14 @@ body {
     height: 100%;
     object-fit: contain;
     min-height: 0;
+    position: relative;
+    z-index: 1;
 }
 
 #gallery-description {
-      grid-area: description;
+    grid-area: description;
+    position: relative;
+    z-index: 1;
     padding: 4px 8px;
     text-align: center;
     font-size: 14px;

@@ -15,3 +15,4 @@
 # .NET artifacts:
 /server/**/bin/
 /server/**/obj/
+/.claude/settings.local.json
