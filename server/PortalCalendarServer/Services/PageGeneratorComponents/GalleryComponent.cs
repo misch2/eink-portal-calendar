@@ -45,13 +45,10 @@ public class GalleryComponent(
             return null;
         }
 
-        var imageBytes = File.ReadAllBytes(filePath);
-        var base64 = Convert.ToBase64String(imageBytes);
-        var dataUrl = $"data:{image.ContentType};base64,{base64}";
-
         return new GalleryImageInfo
         {
-            ImageAsDataUrl = dataUrl,
+            GalleryId = galleryId,
+            ImageId = image.Id,
             Description = image.Description,
             GalleryName = gallery.Name
         };
@@ -60,7 +57,13 @@ public class GalleryComponent(
 
 public class GalleryImageInfo
 {
-    public required string ImageAsDataUrl { get; set; }
+    public required int GalleryId { get; set; }
+    public required int ImageId { get; set; }
     public string? Description { get; set; }
     public required string GalleryName { get; set; }
+
+    /// <summary>
+    /// Returns the relative URL to the image served by GalleriesController.ServeImage.
+    /// </summary>
+    public string ImageUrl => $"/galleries/{GalleryId}/images/{ImageId}";
 }

@@ -23,8 +23,8 @@
 
 @if (imageInfo != null)
 {
-    <div id="gallery-container" class="@(hasDescription ? "with-description" : "")">
-        <img id="gallery-image" src="@imageInfo.ImageAsDataUrl" alt="@(imageInfo.Description ?? "Gallery image")" />
+    <div id="gallery-container" class="@(hasDescription ? "with-description" : "")" style="--gallery-bg: url('@imageInfo.ImageUrl')">
+        <img id="gallery-image" src="@imageInfo.ImageUrl" alt="@(imageInfo.Description ?? "Gallery image")" />
         @if (hasDescription)
         {
             <div id="gallery-description">@imageInfo.Description</div>

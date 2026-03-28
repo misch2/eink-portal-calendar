@@ -177,6 +177,7 @@ public class GalleriesController(IGalleryService galleryService) : Controller
 
     // GET /galleries/{galleryId}/images/{imageId}
     [HttpGet("/galleries/{galleryId:int}/images/{imageId:int}")]
+    [Authorize("CookiesOrInternalToken")]
     public async Task<IActionResult> ServeImage(int galleryId, int imageId)
     {
         var gallery = await galleryService.GetGalleryByIdAsync(galleryId);
