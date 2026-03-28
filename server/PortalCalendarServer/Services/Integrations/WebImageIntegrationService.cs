@@ -2,6 +2,7 @@ using Microsoft.Extensions.Caching.Memory;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.DatabaseEntities;
 using PortalCalendarServer.Services.Caches;
+using PortalCalendarServer.Validation;
 
 namespace PortalCalendarServer.Services.Integrations;
 
@@ -32,6 +33,8 @@ public class WebImageIntegrationService(
     /// </summary>
     public async Task<byte[]> GetCachedImageDataAsync(CancellationToken cancellationToken)
     {
+        await UrlValidator.ValidateUrlIsSafe(_imageUrl);
+
         // FIXME make the time configurable too!
         var dbCacheService = databaseCacheFactory.Create(nameof(WebImageIntegrationService), TimeSpan.FromHours(_cacheHours));
 

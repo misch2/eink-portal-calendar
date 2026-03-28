@@ -115,6 +115,9 @@ public partial class CalendarContext : DbContext
             entity.Property(e => e.Firmware)
                 .HasColumnType("VARCHAR")
                 .HasColumnName("firmware");
+            entity.Property(e => e.ApiKey)
+                .HasColumnType("VARCHAR")
+                .HasColumnName("api_key");
             entity.Property(e => e.Gamma)
                 .HasColumnType("NUMERIC(4,2)")
                 .HasColumnName("gamma");

@@ -56,10 +56,16 @@
 @if (!Model.IsDefault())
 {
     <fieldset class="row mb-3">
-        <div class="col-md-12">
+        <div class="col-md-6">
             <label for="display_mac">MAC address</label>
             <input id="display_mac" name="display_mac" type="text" class="form-control" value="@Model.Mac">
             <div class="form-text">MAC address of the display in the aa:bb:cc:dd:ee:ff format.</div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="display_api_key">API key</label>
+            <input id="display_api_key" name="display_api_key" type="text" class="form-control" value="@Model.ApiKey">
+            <div class="form-text">API key for this specific display</div>
         </div>
     </fieldset>
 

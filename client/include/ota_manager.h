@@ -9,10 +9,11 @@ class OTAManager {
  private:
   Logger& logger;
   WDTManager& wdtManager;
+  bool otaFinished = false;
 
  public:
   OTAManager(Logger& logger, WDTManager& wdtManager);
-  
+
   void init();
   void loop();
 };

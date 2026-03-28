@@ -142,7 +142,7 @@ void disconnectWiFiAndHibernateAll() {
 void showErrorOnDisplay(String message) {
   strcpy(lastChecksum, "");
   DEBUG_PRINT("Displaying error: %s", message.c_str());
-  displayManager.displayText(message + "\n\nRetrying after " + String(nextSleepTime / 60) + " minutes.", &DejaVu_Sans_Mono_16);
+  displayManager.displayText("Error", message + "\n\nRetrying after " + String(nextSleepTime / 60) + " minutes.", &DejaVu_Sans_Mono_16);
   disconnectWiFiAndHibernateAll();
 }
 
@@ -160,6 +160,7 @@ void setup() {
   wakeupDisplayAndConnectWiFi();
 
   if (otaDebugModeNoSleep) {
+    displayManager.displayText("OTA Mode", "OTA mode active (draining battery)\nFirmware version: " FIRMWARE_VERSION, &DejaVu_Sans_Mono_16);
     DEBUG_PRINT("Running OTA loop on %s (%s.local)", WiFi.localIP().toString().c_str(), HOSTNAME);
     wdtManager.stop();
     while (true) {
