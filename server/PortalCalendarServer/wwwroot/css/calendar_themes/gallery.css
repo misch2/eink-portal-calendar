@@ -49,9 +49,8 @@ body {
     z-index: 1;
     padding: 4px 8px;
     text-align: center;
-    font-size: 14px;
-    /*    background-color: var(--epd-black);
-    color: var(--epd-white);*/
+    background-color: var(--epd-white);
+    color: var(--epd-black);
     font-size: 1.5rem;
 }
 
