@@ -36,6 +36,8 @@ public partial class Display
 
     public string? Firmware { get; set; }
 
+    public string? ApiKey { get; set; }
+
     public int? ThemeId { get; set; }
     public Theme? Theme { get; set; }
 

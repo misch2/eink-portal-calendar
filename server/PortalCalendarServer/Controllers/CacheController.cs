@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PortalCalendarServer.Services.Caches;
 
@@ -9,6 +10,7 @@ namespace PortalCalendarServer.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Tags("Cache Management")]
+[Authorize]
 public class CacheController : ControllerBase
 {
     private readonly CacheManagementService _cacheManagement;

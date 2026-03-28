@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Options;
@@ -14,6 +15,7 @@ using PortalCalendarServer.Services.Caches;
 using PortalCalendarServer.Services.Integrations;
 using Scalar.AspNetCore;
 using System.Globalization;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -85,6 +87,45 @@ builder.Services.AddAntiforgery(options =>
 builder.Services.AddMemoryCache(options =>
 {
     options.SizeLimit = 100 * 1024 * 1024; // 100MB cache limit
+});
+
+// Trust X-Forwarded-For from the local reverse proxy so rate limiting uses the real client IP.
+// By default only loopback (127.0.0.1 / ::1) is a known proxy, which is correct for local deployments.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // KnownNetworks and KnownProxies default to loopback only — no change needed for standard setups.
+});
+
+// Rate limiting: restrict device API endpoints to prevent DoS / database flooding.
+// Real displays wake every 15+ min, so these limits are generous for legitimate use.
+builder.Services.AddRateLimiter(options =>
+{
+    // Bitmap: triggers a full Playwright render — very expensive
+    options.AddPolicy("device-bitmap", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(10),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0
+            }));
+
+    // Config: auto-creates a Display row for unknown MACs — cap to prevent DB flooding
+    options.AddPolicy("device-config", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 20,
+                Window = TimeSpan.FromMinutes(10),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0
+            }));
+
+    options.RejectionStatusCode = 429;
 });
 
 // Configure HttpClient with caching
@@ -205,6 +246,9 @@ builder.Services.AddAuthorization(options =>
 // Register the singleton internal token service (must come before services that depend on it)
 builder.Services.AddSingleton<InternalTokenService>();
 
+// Pairing mode: in-memory singleton, controls whether unknown devices can register
+builder.Services.AddSingleton<PairingModeService>();
+
 // Configure localization to not disturb number formatting in HTML forms, date printing in logs etc.
 var invariant = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentCulture = invariant;
@@ -295,8 +339,27 @@ if (app.Environment.IsDevelopment())
 //app.UseRequestLocalization();
 
 //app.UseHttpsRedirection();    // Not needed since this is typically run behind a reverse proxy that handles TLS termination
+
+// Security headers
+// TODO: Add Content-Security-Policy once ready (see git history for a draft policy)
+// HSTS is intentionally omitted — the reverse proxy handles TLS termination.
+app.Use(async (context, next) =>
+{
+    var headers = context.Response.Headers;
+    headers["X-Frame-Options"] = "SAMEORIGIN";
+    headers["X-Content-Type-Options"] = "nosniff";
+    headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+    headers["X-XSS-Protection"] = "1; mode=block";
+    await next();
+});
+
 app.UseStaticFiles(); // For serving static content (CSS, JS, images)
 
+// Populate RemoteIpAddress from X-Forwarded-For before rate limiting evaluates it.
+// Must run before UseRateLimiter so partitions reflect the real client IP, not the proxy IP.
+app.UseForwardedHeaders();
+
+app.UseRateLimiter();
 app.UseRouting();
 
 app.UseAuthentication();

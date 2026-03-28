@@ -4,6 +4,7 @@
 .vstags
 .vscode/
 .vs
+.claude/
 /server/_data*
 
 # Local data:

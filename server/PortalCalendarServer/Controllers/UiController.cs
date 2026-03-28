@@ -214,7 +214,7 @@ public class UiController(
             }
             else if (checkboxKeys.Contains(paramName))
             {
-                // Unchecked checkboxes are absent from the form — explicitly clear them
+                // Unchecked checkboxes are absent from the form, explicitly clear them
                 _displayService.SetConfig(display, paramName, "");
             }
         }
@@ -251,6 +251,14 @@ public class UiController(
             else
             {
                 display.Mac = null;
+            }
+            if (form.ContainsKey("display_api_key"))
+            {
+                display.ApiKey = form["display_api_key"].ToString().Trim();
+                if (string.IsNullOrEmpty(display.ApiKey))
+                {
+                    display.ApiKey = null;
+                }
             }
             if (form.ContainsKey("display_rotation") && int.TryParse(form["display_rotation"], out var rotation))
             {

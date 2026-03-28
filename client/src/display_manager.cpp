@@ -58,7 +58,7 @@ void DisplayManager::stop() {
   wdt.ping();
 }
 
-void DisplayManager::displayText(String message, const GFXfont* font) {
+void DisplayManager::displayText(String title, String message, const GFXfont* font) {
   display.setRotation(DISPLAY_ROTATION);  // see hw_config.h for details
 
   if (font == nullptr) {
@@ -69,7 +69,7 @@ void DisplayManager::displayText(String message, const GFXfont* font) {
   const int16_t lineSpacing = 4;
   const int16_t titleGap = 36;
   const GFXfont* titleFont = &Open_Sans_Regular_24;
-  const char* titleText = "Error";
+  const char* titleText = title.c_str();
 
   // Measure title
   int16_t tbx, tby;

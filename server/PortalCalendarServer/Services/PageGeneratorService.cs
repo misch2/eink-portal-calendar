@@ -139,7 +139,8 @@ public class PageGeneratorService
                     display.VirtualWidth(),
                     display.VirtualHeight(),
                     outputPath,
-                    extraHeaders: headers);
+                    extraHeaders: headers,
+                    tolerateNetworkErrors: true);
 
                 _logger.LogInformation("Error page bitmap generated successfully for display {DisplayId}", display.Id);
             }
