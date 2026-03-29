@@ -1,10 +1,16 @@
 @model PortalCalendarServer.Models.DatabaseEntities.Gallery
 
+@{
+    var allGalleries = (List<PortalCalendarServer.Models.DatabaseEntities.Gallery>)ViewData["AllGalleries"]!;
+    var otherGalleries = allGalleries.Where(g => g.Id != Model.Id).ToList();
+}
+
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="mb-0">Images</h4>
     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#upload_image_modal">
         <i class="bi bi-upload me-1"></i> Upload Image
     </button>
+    <h4 class="mb-0">Images</h4>
+    <div></div>
 </div>
 
 @{
@@ -36,7 +42,7 @@ else
                                  class="card-img-top gallery-thumb"
                                  alt="@(image.Description ?? "Gallery image")" />
                         </a>
-                        <div class="position-absolute top-0 end-0 p-1 d-flex flex-column gap-1">
+                        <div class="position-absolute top-0 end-0 p-1 d-flex flex-column gap-1 gallery-actions">
                             <form method="post"
                                   action="/galleries/@Model.Id/images/@image.Id/toggle-visibility"
                                   style="margin:0">
@@ -48,6 +54,29 @@ else
                                     <i class="bi @(isHidden ? "bi-eye-slash" : "bi-eye")"></i>
                                 </button>
                             </form>
+                            @if (otherGalleries.Count > 0)
+                            {
+                                <div class="dropdown">
+                                    <a href="#" class="gallery-action-btn"
+                                       data-bs-toggle="dropdown"
+                                       title="Copy to gallery">
+                                        <i class="bi bi-copy"></i>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        @foreach (var g in otherGalleries)
+                                        {
+                                            <li>
+                                                <form method="post"
+                                                      action="/galleries/@Model.Id/images/@image.Id/copy-to/@g.Id"
+                                                      style="margin:0">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="dropdown-item">@g.Name</button>
+                                                </form>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
                             <a href="#" class="gallery-action-btn edit-description-link"
                                data-bs-toggle="modal"
                                data-bs-target="#edit_description_modal"
@@ -196,6 +225,14 @@ else
     .gallery-card--hidden:hover {
         opacity: 0.7;
         filter: none;
+    }
+    .gallery-actions {
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+    .card:hover .gallery-actions,
+    .gallery-actions:has(.dropdown-menu.show) {
+        opacity: 1;
     }
     .gallery-action-btn {
         display: inline-flex;

@@ -113,6 +113,7 @@ public class GalleriesController(IGalleryService galleryService) : Controller
         ViewData["NavLink"] = "gallery";
         ViewData["GalleryId"] = gallery.Id;
         ViewData["Title"] = gallery.Name;
+        ViewData["AllGalleries"] = await galleryService.GetAllGalleriesAsync();
 
         return View("~/Views/Galleries/Detail.cshtml", gallery);
     }
@@ -172,6 +173,23 @@ public class GalleriesController(IGalleryService galleryService) : Controller
     public async Task<IActionResult> ToggleVisibility(int galleryId, int imageId, [FromForm] bool isHidden)
     {
         await galleryService.SetImageVisibilityAsync(galleryId, imageId, isHidden);
+        return RedirectToAction(nameof(Detail), new { id = galleryId });
+    }
+
+    // POST /galleries/{galleryId}/images/{imageId}/copy-to/{targetGalleryId}
+    [HttpPost("/galleries/{galleryId:int}/images/{imageId:int}/copy-to/{targetGalleryId:int}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CopyImageToGallery(int galleryId, int imageId, int targetGalleryId)
+    {
+        var targetGallery = await galleryService.GetGalleryByIdAsync(targetGalleryId);
+        if (targetGallery == null)
+        {
+            TempData["Error"] = "Target gallery not found.";
+            return RedirectToAction(nameof(Detail), new { id = galleryId });
+        }
+
+        await galleryService.CopyImageToGalleryAsync(imageId, targetGalleryId);
+        TempData["Message"] = $"Image copied to '{targetGallery.Name}'.";
         return RedirectToAction(nameof(Detail), new { id = galleryId });
     }
 

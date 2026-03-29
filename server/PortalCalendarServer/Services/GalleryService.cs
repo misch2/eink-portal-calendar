@@ -215,6 +215,22 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
         await _context.SaveChangesAsync();
     }
 
+    public async Task CopyImageToGalleryAsync(int imageId, int targetGalleryId)
+    {
+        var image = await _context.GalleryImages
+            .Include(i => i.Galleries)
+            .FirstOrDefaultAsync(i => i.Id == imageId);
+        if (image == null) return;
+
+        var targetGallery = await _context.Galleries.FindAsync(targetGalleryId);
+        if (targetGallery == null) return;
+
+        if (image.Galleries.Any(g => g.Id == targetGalleryId)) return;
+
+        image.Galleries.Add(targetGallery);
+        await _context.SaveChangesAsync();
+    }
+
     public string GetImageFilePath(GalleryImage image)
     {
         return Path.Combine(GetImageDirectory(image.PrimaryFolder), image.FileName);
