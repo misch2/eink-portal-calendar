@@ -223,8 +223,6 @@ public class DisplayService(
             logger.LogWarning("Skipping image regeneration request for default display (ID = 0)");
             return;
         }
-        // Remove cached image first
-        // FIXME FIXME foreach (var fileName in )
         imageRegenerationService.EnqueueRequest(display.Id);
     }
 
