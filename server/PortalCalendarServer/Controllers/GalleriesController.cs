@@ -163,8 +163,7 @@ public class GalleriesController(IGalleryService galleryService) : Controller
             await galleryService.ReplaceImageFileAsync(imageId, file);
         }
 
-        TempData["Message"] = "Image updated.";
-        return RedirectToAction(nameof(Detail), new { id = galleryId });
+        return Ok(new { description });
     }
 
     // POST /galleries/{galleryId}/images/{imageId}/toggle-visibility
@@ -173,7 +172,17 @@ public class GalleriesController(IGalleryService galleryService) : Controller
     public async Task<IActionResult> ToggleVisibility(int galleryId, int imageId, [FromForm] bool isHidden)
     {
         await galleryService.SetImageVisibilityAsync(galleryId, imageId, isHidden);
-        return RedirectToAction(nameof(Detail), new { id = galleryId });
+        return Ok(new { isHidden });
+    }
+
+    // POST /galleries/{galleryId}/images/{imageId}/rotate
+    [HttpPost("/galleries/{galleryId:int}/images/{imageId:int}/rotate")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Rotate(int galleryId, int imageId, [FromForm] int rotation)
+    {
+        var nextRotation = (rotation + 90) % 360;
+        await galleryService.SetImageRotationAsync(galleryId, imageId, nextRotation);
+        return Ok(new { rotation = nextRotation });
     }
 
     // POST /galleries/{galleryId}/images/{imageId}/copy-to/{targetGalleryId}
@@ -189,8 +198,7 @@ public class GalleriesController(IGalleryService galleryService) : Controller
         }
 
         await galleryService.CopyImageToGalleryAsync(imageId, targetGalleryId);
-        TempData["Message"] = $"Image copied to '{targetGallery.Name}'.";
-        return RedirectToAction(nameof(Detail), new { id = galleryId });
+        return Ok(new { message = $"Image copied to '{targetGallery.Name}'." });
     }
 
     // GET /galleries/{galleryId}/images/{imageId}

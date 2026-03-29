@@ -18,6 +18,8 @@
         .Where(l => l.IsHidden)
         .Select(l => l.GalleryImageId)
         .ToHashSet();
+    var rotationByImageId = Model.ImageLinks
+        .ToDictionary(l => l.GalleryImageId, l => l.Rotation);
 }
 
 @if (Model.Images.Count == 0)
@@ -30,21 +32,27 @@ else
         @foreach (var image in Model.Images.OrderByDescending(i => i.UploadedAt))
         {
             var isHidden = hiddenImageIds.Contains(image.Id);
+            var imageRotation = rotationByImageId.GetValueOrDefault(image.Id, 0);
             <div class="col-md-4 col-lg-3 mb-4">
-                <div class="card h-100 @(isHidden ? "gallery-card--hidden" : "")">
+                <div class="card h-100 @(isHidden ? "gallery-card--hidden" : "")" data-image-id="@image.Id">
                     <div class="position-relative">
                         <a href="#" class="gallery-preview-link"
                            data-bs-toggle="modal"
                            data-bs-target="#preview_image_modal"
                            data-image-src="/galleries/@Model.Id/images/@image.Id?v=@(image.UploadedAt.Ticks)"
-                           data-image-alt="@(image.Description ?? "Gallery image")">
-                            <img src="/galleries/@Model.Id/images/@image.Id?v=@(image.UploadedAt.Ticks)"
-                                 class="card-img-top gallery-thumb"
-                                 alt="@(image.Description ?? "Gallery image")" />
+                           data-image-alt="@(image.Description ?? "Gallery image")"
+                           data-image-rotation="@imageRotation">
+                            <div class="gallery-thumb-wrapper">
+                                <img src="/galleries/@Model.Id/images/@image.Id?v=@(image.UploadedAt.Ticks)"
+                                     class="card-img-top gallery-thumb"
+                                     alt="@(image.Description ?? "Gallery image")"
+                                     data-rotation="@imageRotation" />
+                            </div>
                         </a>
                         <div class="position-absolute top-0 end-0 p-1 d-flex flex-column gap-1 gallery-actions">
                             <form method="post"
                                   action="/galleries/@Model.Id/images/@image.Id/toggle-visibility"
+                                  class="gallery-ajax-form"
                                   style="margin:0">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="isHidden" value="@(isHidden ? "false" : "true")" />
@@ -52,6 +60,18 @@ else
                                         class="gallery-action-btn"
                                         title="@(isHidden ? "Show" : "Hide")">
                                     <i class="bi @(isHidden ? "bi-eye-slash" : "bi-eye")"></i>
+                                </button>
+                            </form>
+                            <form method="post"
+                                  action="/galleries/@Model.Id/images/@image.Id/rotate"
+                                  class="gallery-ajax-form"
+                                  style="margin:0">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="rotation" value="@imageRotation" />
+                                <button type="submit"
+                                        class="gallery-action-btn"
+                                        title="Rotate 90°">
+                                    <i class="bi bi-arrow-clockwise"></i>
                                 </button>
                             </form>
                             @if (otherGalleries.Count > 0)
@@ -68,6 +88,7 @@ else
                                             <li>
                                                 <form method="post"
                                                       action="/galleries/@Model.Id/images/@image.Id/copy-to/@g.Id"
+                                                      class="gallery-ajax-form"
                                                       style="margin:0">
                                                     @Html.AntiForgeryToken()
                                                     <button type="submit" class="dropdown-item">@g.Name</button>
@@ -186,7 +207,7 @@ else
                 <h5 class="modal-title">Edit image</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="edit_description_form" method="post" action="" enctype="multipart/form-data">
+            <form id="edit_description_form" method="post" action="" enctype="multipart/form-data" class="gallery-ajax-form">
                 @Html.AntiForgeryToken()
                 <div class="modal-body">
                     <div class="mb-3">
@@ -209,15 +230,30 @@ else
 
 @section Styles {
 <style>
-    .gallery-thumb {
-        display: block;
+    .gallery-thumb-wrapper {
         width: 100%;
         height: 180px;
-        object-fit: contain;
-        object-position: top;
+        overflow: hidden;
         background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .gallery-thumb {
+        display: block;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
         cursor: zoom-in;
     }
+    .gallery-thumb[data-rotation="90"],
+    .gallery-thumb[data-rotation="270"] {
+        max-width: 180px;
+        max-height: none;
+    }
+    .gallery-thumb[data-rotation="90"]  { transform: rotate(90deg); }
+    .gallery-thumb[data-rotation="180"] { transform: rotate(180deg); }
+    .gallery-thumb[data-rotation="270"] { transform: rotate(270deg); }
     .gallery-card--hidden {
         opacity: 0.5;
         filter: grayscale(100%);
@@ -260,30 +296,78 @@ else
 
 @section Scripts {
 <script>
+    // Lightbox
     $('#preview_image_modal').on('show.bs.modal', function (event) {
         var link = $(event.relatedTarget);
-        var src = link.data('image-src');
-        var alt = link.data('image-alt');
-        $(this).find('#preview_image').attr('src', src).attr('alt', alt);
+        var rotation = link.data('image-rotation') || 0;
+        var isSideways = (rotation === 90 || rotation === 270);
+        $(this).find('#preview_image')
+            .attr('src', link.data('image-src'))
+            .attr('alt', link.data('image-alt'))
+            .css({
+                'transform': rotation ? 'rotate(' + rotation + 'deg)' : '',
+                'max-height': isSideways ? 'calc(100vw - 4rem)' : '90vh',
+                'max-width': isSideways ? '90vh' : '100%'
+            });
     });
 
+    // Edit description modal — stash the image ID for the AJAX handler
+    var editImageId = null;
     $('#edit_description_modal').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget);
-        var modal = $(this);
-        var imageId = button.data('image-id');
-        var description = button.data('image-description');
-        modal.find('#edit_description_input').val(description);
-        modal.find('#edit_file_input').val('');
-        modal.find('#edit_description_form').attr('action', '/galleries/@Model.Id/images/' + imageId + '/description');
+        editImageId = button.data('image-id');
+        $(this).find('#edit_description_input').val(button.data('image-description'));
+        $(this).find('#edit_file_input').val('');
+        $(this).find('#edit_description_form').attr('action', '/galleries/@Model.Id/images/' + editImageId + '/description');
     });
     $('#edit_description_modal').on('shown.bs.modal', function () {
         $('#edit_description_input').trigger('focus');
     });
 
+    // Delete modal
     $('#delete_image_modal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget);
-        var imageId = button.data('image-id');
+        var imageId = $(event.relatedTarget).data('image-id');
         $(this).find('#delete_image_form').attr('action', '/galleries/@Model.Id/images/delete/' + imageId);
+    });
+
+    // Generic AJAX handler — server returns JSON, we apply returned fields to the card
+    $(document).on('submit', '.gallery-ajax-form', function (e) {
+        e.preventDefault();
+        var form = $(this);
+        fetch(form.attr('action'), { method: 'POST', body: new FormData(form[0]) })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                // Find the card: either the form is inside the card, or it's a modal form
+                var card = form.closest('.card');
+                if (!card.length && editImageId) {
+                    card = $('.card[data-image-id="' + editImageId + '"]');
+                }
+
+                if (data.isHidden !== undefined) {
+                    card.toggleClass('gallery-card--hidden', data.isHidden);
+                    var vf = card.find('form[action*="toggle-visibility"]');
+                    vf.find('button').attr('title', data.isHidden ? 'Show' : 'Hide');
+                    vf.find('i').attr('class', 'bi ' + (data.isHidden ? 'bi-eye-slash' : 'bi-eye'));
+                    vf.find('input[name="isHidden"]').val(data.isHidden ? 'false' : 'true');
+                }
+                if (data.rotation !== undefined) {
+                    card.find('.gallery-thumb').attr('data-rotation', data.rotation);
+                    card.find('.gallery-preview-link').data('image-rotation', data.rotation);
+                    card.find('input[name="rotation"]').val(data.rotation);
+                }
+                if (data.description !== undefined) {
+                    var el = card.find('.card-text').first();
+                    if (data.description) {
+                        el.text(data.description);
+                    } else {
+                        el.html('<span class="text-muted fst-italic">No description</span>');
+                    }
+                    // Update the edit button's stored description
+                    card.find('.edit-description-link').data('image-description', data.description || '');
+                    // Close the modal if the form was in one
+                    form.closest('.modal').modal('hide');
+                }
+            });
     });
 </script>
 }
