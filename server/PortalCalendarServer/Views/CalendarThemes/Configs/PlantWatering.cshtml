@@ -32,6 +32,12 @@
     }
 }
 
+@await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+{
+    Display = Model, Key = "display_title", Label = "Title",
+    ColClass = "col-12", MarginClass = "mb-3"
+})
+
 <div class="row">
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
     {

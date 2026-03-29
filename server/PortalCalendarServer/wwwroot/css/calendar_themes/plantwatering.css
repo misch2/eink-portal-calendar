@@ -1,6 +1,6 @@
 html,
 body {
-    font-size: clamp(10pt, 4.75vw, 18pt);
+    font-size: clamp(10pt, 4vw, 14pt);
     font-family: 'Gidole';
     letter-spacing: 0.02em;
 }
@@ -29,8 +29,8 @@ body {
     font-size: 1.4rem;
     font-weight: bold;
     padding-bottom: 0.15rem;
-    border-bottom: 2px solid var(--epd-black);
-    margin-bottom: 0.3rem;
+/*    border-bottom: 2px solid var(--epd-black);*/
+    margin-bottom: 1rem;
 }
 
 /* --- Area sections --- */
@@ -44,6 +44,7 @@ body {
     font-weight: bold;
     padding: 0.1rem 0;
     border-bottom: 1px solid var(--epd-black);
+    margin-top: 0.5rem;
     margin-bottom: 0.15rem;
 }
 
@@ -106,11 +107,11 @@ body {
 
 .status-wet .plant-name,
 .status-wet .plant-moisture {
-    color: var(--epd-blue, var(--epd-black));
+    color: var(--epd-red, var(--epd-black));
 }
 
 .status-wet .moisture-bar-fill {
-    background-color: var(--epd-blue, var(--epd-black));
+    background-color: var(--epd-red, var(--epd-black));
 }
 
 /* --- Threshold markers on bar --- */

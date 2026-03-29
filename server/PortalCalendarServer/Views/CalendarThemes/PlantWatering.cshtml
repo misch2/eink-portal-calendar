@@ -5,9 +5,11 @@
 @inject IDisplayService displayService
 @{
     Layout = "~/Views/Shared/Layouts/Epaper/_InsetLayout.cshtml";
-    ViewBag.Title = "Plant Watering Monitor";
+    ViewBag.Title = "Plant Watering";
 
     var ha = Model.GetComponent<HomeAssistantComponent>("homeassistant");
+    var title = displayService.GetConfig(Model.Display, "display_title");
+    if (string.IsNullOrWhiteSpace(title)) title = "Plant Watering Monitor";
 
     // Read configured sensor entity IDs
     var sensorIds = new List<string>();
@@ -74,7 +76,7 @@
 }
 else
 {
-    <div class="header">Plant Watering Monitor</div>
+    <div class="header">@title</div>
 
     @foreach (var area in groupedByArea)
     {
