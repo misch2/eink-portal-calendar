@@ -193,8 +193,7 @@ public class GalleriesController(IGalleryService galleryService) : Controller
         var targetGallery = await galleryService.GetGalleryByIdAsync(targetGalleryId);
         if (targetGallery == null)
         {
-            TempData["Error"] = "Target gallery not found.";
-            return RedirectToAction(nameof(Detail), new { id = galleryId });
+            return NotFound(new { error = "Target gallery not found." });
         }
 
         await galleryService.CopyImageToGalleryAsync(imageId, targetGalleryId);
