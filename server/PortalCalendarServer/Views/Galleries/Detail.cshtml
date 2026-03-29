@@ -335,11 +335,36 @@ else
     });
 
     // Generic AJAX handler — server returns JSON, we apply returned fields to the card
+    function showPageAlert(message, type) {
+        var div = $('<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert"></div>')
+            .text(message)
+            .append('<button type="button" class="btn-close" data-bs-dismiss="alert"></button>');
+        $('.d-flex.justify-content-between').before(div);
+        setTimeout(function () {
+            if (window.bootstrap && window.bootstrap.Alert) {
+                new bootstrap.Alert(div[0]).close();
+            } else {
+                div.remove();
+            }
+        }, 5000);
+    }
+
     $(document).on('submit', '.gallery-ajax-form', function (e) {
         e.preventDefault();
         var form = $(this);
         fetch(form.attr('action'), { method: 'POST', body: new FormData(form[0]) })
-            .then(function (r) { return r.json(); })
+            .then(function (r) {
+                var ct = r.headers.get('Content-Type') || '';
+                if (!r.ok || !ct.includes('application/json')) {
+                    if (ct.includes('application/json')) {
+                        return r.json().then(function (errData) {
+                            throw new Error(errData.error || 'Request failed with status ' + r.status);
+                        });
+                    }
+                    throw new Error('Request failed with status ' + r.status);
+                }
+                return r.json();
+            })
             .then(function (data) {
                 // Find the card: either the form is inside the card, or it's a modal form
                 var card = form.closest('.card');
@@ -375,6 +400,13 @@ else
                         modalInstance.hide();
                     }
                 }
+                if (data.message !== undefined) {
+                    // Show success message for copy-to-gallery and similar actions
+                    showPageAlert(data.message, 'success');
+                }
+            })
+            .catch(function (err) {
+                showPageAlert('Error: ' + err.message, 'danger');
             });
     });
 </script>

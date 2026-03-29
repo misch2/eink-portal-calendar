@@ -223,18 +223,23 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
         await _context.SaveChangesAsync();
     }
 
-    public async Task SetImageRotationAsync(int galleryId, int imageId, int rotation)
+    public async Task<bool> SetImageRotationAsync(int galleryId, int imageId, int rotation)
     {
+        // Normalize to a valid multiple of 90 in [0, 360)
+        rotation = ((rotation % 360) + 360) % 360;
+        rotation = (rotation / 90) * 90;
+
         var gallery = await _context.Galleries
             .Include(g => g.ImageLinks)
             .FirstOrDefaultAsync(g => g.Id == galleryId);
-        if (gallery == null) return;
+        if (gallery == null) return false;
 
         var link = gallery.ImageLinks.FirstOrDefault(l => l.GalleryImageId == imageId);
-        if (link == null) return;
+        if (link == null) return false;
 
         link.Rotation = rotation;
         await _context.SaveChangesAsync();
+        return true;
     }
 
     public async Task CopyImageToGalleryAsync(int imageId, int targetGalleryId)

@@ -181,7 +181,11 @@ public class GalleriesController(IGalleryService galleryService) : Controller
     public async Task<IActionResult> Rotate(int galleryId, int imageId, [FromForm] int rotation)
     {
         var nextRotation = (rotation + 90) % 360;
-        await galleryService.SetImageRotationAsync(galleryId, imageId, nextRotation);
+        var success = await galleryService.SetImageRotationAsync(galleryId, imageId, nextRotation);
+        if (!success)
+        {
+            return NotFound(new { error = "Image not found in gallery." });
+        }
         return Ok(new { rotation = nextRotation });
     }
 
