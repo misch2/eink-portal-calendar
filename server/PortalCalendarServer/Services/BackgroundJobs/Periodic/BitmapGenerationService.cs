@@ -5,8 +5,8 @@ namespace PortalCalendarServer.Services.BackgroundJobs.Periodic;
 /// <summary>
 /// Background service that pre-generates display bitmaps around each display's
 /// scheduled wakeup time. Checks every minute (configurable) and enqueues regeneration
-/// for displays whose next wakeup is within the lead time (default 2 minutes before)
-/// or whose most recent wakeup occurred within the trailing period (default 5 minutes after).
+/// for displays whose next wakeup is within the lead time (default 2 minutes before).
+/// Additionally, can periodically regenerate bitmaps on a fixed interval for all displays.
 /// </summary>
 public class BitmapGenerationService : PeriodicBackgroundService
 {
@@ -14,7 +14,7 @@ public class BitmapGenerationService : PeriodicBackgroundService
     private readonly TimeSpan _interval;
     private readonly TimeSpan _startupDelay;
     private readonly TimeSpan _preGenerationLead;
-    private readonly TimeSpan _postWakeupTrailing;
+    private readonly TimeSpan? _periodicGenerationInterval;
 
     /// <summary>
     /// Tracks which wakeup time we last pre-generated for each display,
@@ -23,10 +23,9 @@ public class BitmapGenerationService : PeriodicBackgroundService
     private readonly ConcurrentDictionary<int, DateTime> _lastPreGeneratedWakeup = new();
 
     /// <summary>
-    /// Tracks the next expected wakeup for each display so we can detect
-    /// when it has just passed (i.e. the post-wakeup window).
+    /// Tracks when we last performed a periodic generation for each display.
     /// </summary>
-    private readonly ConcurrentDictionary<int, DateTime> _nextExpectedWakeup = new();
+    private readonly ConcurrentDictionary<int, DateTime> _lastPeriodicGeneration = new();
 
     public BitmapGenerationService(
         ILogger<BitmapGenerationService> logger,
@@ -45,8 +44,8 @@ public class BitmapGenerationService : PeriodicBackgroundService
         var leadMinutes = configuration.GetValue<int>("BackgroundJobs:BitmapGeneration:PreWakeupGenerationLeadingMinutes");
         _preGenerationLead = TimeSpan.FromMinutes(leadMinutes > 0 ? leadMinutes : 2);
 
-        var trailingMinutes = configuration.GetValue<int>("BackgroundJobs:BitmapGeneration:PostWakeupGenerationTrailingMinutes");
-        _postWakeupTrailing = TimeSpan.FromMinutes(trailingMinutes > 0 ? trailingMinutes : 5);
+        var periodicMinutes = configuration.GetValue<int>("BackgroundJobs:BitmapGeneration:PeriodicGenerationIntervalMinutes");
+        _periodicGenerationInterval = periodicMinutes > 0 ? TimeSpan.FromMinutes(periodicMinutes) : null;
     }
 
     protected override TimeSpan Interval => _interval;
@@ -70,6 +69,7 @@ public class BitmapGenerationService : PeriodicBackgroundService
                 var fullDisplay = displayService.GetDisplayById(display.Id);
                 var wakeupInfo = displayService.GetNextWakeupTime(fullDisplay, now);
                 var timeUntilWakeup = wakeupInfo.NextWakeup - now;
+                var enqueued = false;
 
                 // --- Pre-wakeup window: generate BEFORE the upcoming wakeup ---
                 if (timeUntilWakeup <= _preGenerationLead && timeUntilWakeup > TimeSpan.Zero)
@@ -82,27 +82,26 @@ public class BitmapGenerationService : PeriodicBackgroundService
 
                         displayService.EnqueueImageRegenerationRequest(fullDisplay);
                         _lastPreGeneratedWakeup[display.Id] = wakeupInfo.NextWakeup;
+                        enqueued = true;
                     }
                 }
 
-                // --- Post-wakeup window: generate AFTER a wakeup we previously tracked ---
-                // If the next wakeup jumped forward compared to what we last tracked,
-                // the previously expected wakeup has just passed.
-                if (_nextExpectedWakeup.TryGetValue(display.Id, out var previouslyExpected)
-                    && wakeupInfo.NextWakeup > previouslyExpected
-                    && (now - previouslyExpected) <= _postWakeupTrailing
-                    && !AlreadyGenerated(display.Id, previouslyExpected))
+                // --- Periodic generation: regenerate every N minutes regardless of wakeup schedule ---
+                if (!enqueued && _periodicGenerationInterval is not null)
                 {
-                    _logger.LogInformation(
-                        "Post-wakeup generating bitmap for display {DisplayId} — wakeup passed {Seconds:F0}s ago at {PassedWakeup}",
-                        display.Id, (now - previouslyExpected).TotalSeconds, previouslyExpected.ToString("O"));
+                    var shouldGenerate = !_lastPeriodicGeneration.TryGetValue(display.Id, out var lastGenTime)
+                                         || (now - lastGenTime) >= _periodicGenerationInterval.Value;
 
-                    displayService.EnqueueImageRegenerationRequest(fullDisplay);
-                    _lastPreGeneratedWakeup[display.Id] = previouslyExpected;
+                    if (shouldGenerate)
+                    {
+                        _logger.LogInformation(
+                            "Periodic bitmap generation for display {DisplayId} (interval: {IntervalMinutes} min)",
+                            display.Id, _periodicGenerationInterval.Value.TotalMinutes);
+
+                        displayService.EnqueueImageRegenerationRequest(fullDisplay);
+                        _lastPeriodicGeneration[display.Id] = now;
+                    }
                 }
-
-                // Always track the current next wakeup for the next tick
-                _nextExpectedWakeup[display.Id] = wakeupInfo.NextWakeup;
             }
             catch (Exception ex)
             {
