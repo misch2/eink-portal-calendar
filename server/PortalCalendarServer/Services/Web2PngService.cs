@@ -222,8 +222,21 @@ public class Web2PngService : IWeb2PngService, IAsyncDisposable
                         Directory.CreateDirectory(destDir);
                     }
 
-                    // Copy to destination (overwrite if exists)
-                    File.Copy(tempFile, destinationPath, overwrite: true);
+                    // Use a staging file in the same directory so that File.Move is
+                    // an atomic rename. This prevents readers from ever seeing a
+                    // partially-written destination file.
+                    var stagingPath = destinationPath + $".tmp.{Guid.NewGuid():N}";
+                    try
+                    {
+                        File.Copy(tempFile, stagingPath, overwrite: true);
+                        File.Move(stagingPath, destinationPath, overwrite: true);
+                    }
+                    catch
+                    {
+                        // Clean up the staging file if the move failed
+                        try { File.Delete(stagingPath); } catch { /* best effort */ }
+                        throw;
+                    }
 
                     _logger.LogInformation("PNG file created successfully: {DestinationPath}", destinationPath);
 
