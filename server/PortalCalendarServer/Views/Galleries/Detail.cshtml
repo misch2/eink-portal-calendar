@@ -368,8 +368,12 @@ else
                     }
                     // Update the edit button's stored description
                     card.find('.edit-description-link').data('image-description', data.description || '');
-                    // Close the modal if the form was in one
-                    form.closest('.modal').modal('hide');
+                    // Close the modal if the form was in one (Bootstrap 5 JS API)
+                    var modalEl = form.closest('.modal')[0];
+                    if (modalEl && window.bootstrap && window.bootstrap.Modal) {
+                        var modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                        modalInstance.hide();
+                    }
                 }
             });
     });
