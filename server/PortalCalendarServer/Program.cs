@@ -180,6 +180,7 @@ moduleRegistry.Register(new ThemeConfigStatusIndicatorsModule());
 moduleRegistry.Register(new WebImageModule());
 moduleRegistry.Register(new WeatherForecastModule());
 moduleRegistry.Register(new GalleryModule());
+moduleRegistry.Register(new HomeAssistantModule());
 builder.Services.AddSingleton(moduleRegistry);
 
 // Register periodic background services
