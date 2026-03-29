@@ -113,7 +113,7 @@ public class GalleriesController(IGalleryService galleryService) : Controller
         ViewData["NavLink"] = "gallery";
         ViewData["GalleryId"] = gallery.Id;
         ViewData["Title"] = gallery.Name;
-        ViewData["AllGalleries"] = await galleryService.GetAllGalleriesAsync();
+        ViewData["AllGalleries"] = await galleryService.GetFastGalleryListAsync();
 
         return View("~/Views/Galleries/Detail.cshtml", gallery);
     }

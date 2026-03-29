@@ -17,6 +17,14 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
             .ToListAsync();
     }
 
+    // For listing galleries without loading all images (e.g. for gallery overview)
+    public async Task<List<Gallery>> GetFastGalleryListAsync()
+    {
+        return await _context.Galleries
+            .OrderBy(g => g.Id)
+            .ToListAsync();
+    }
+
     public async Task<Gallery?> GetGalleryByIdAsync(int id)
     {
         return await _context.Galleries
