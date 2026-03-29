@@ -113,6 +113,7 @@ public class GalleriesController(IGalleryService galleryService) : Controller
         ViewData["NavLink"] = "gallery";
         ViewData["GalleryId"] = gallery.Id;
         ViewData["Title"] = gallery.Name;
+        ViewData["AllGalleries"] = await galleryService.GetFastGalleryListAsync();
 
         return View("~/Views/Galleries/Detail.cshtml", gallery);
     }
@@ -162,8 +163,7 @@ public class GalleriesController(IGalleryService galleryService) : Controller
             await galleryService.ReplaceImageFileAsync(imageId, file);
         }
 
-        TempData["Message"] = "Image updated.";
-        return RedirectToAction(nameof(Detail), new { id = galleryId });
+        return Ok(new { description });
     }
 
     // POST /galleries/{galleryId}/images/{imageId}/toggle-visibility
@@ -172,7 +172,36 @@ public class GalleriesController(IGalleryService galleryService) : Controller
     public async Task<IActionResult> ToggleVisibility(int galleryId, int imageId, [FromForm] bool isHidden)
     {
         await galleryService.SetImageVisibilityAsync(galleryId, imageId, isHidden);
-        return RedirectToAction(nameof(Detail), new { id = galleryId });
+        return Ok(new { isHidden });
+    }
+
+    // POST /galleries/{galleryId}/images/{imageId}/rotate
+    [HttpPost("/galleries/{galleryId:int}/images/{imageId:int}/rotate")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Rotate(int galleryId, int imageId, [FromForm] int rotation)
+    {
+        var nextRotation = (rotation + 90) % 360;
+        var success = await galleryService.SetImageRotationAsync(galleryId, imageId, nextRotation);
+        if (!success)
+        {
+            return NotFound(new { error = "Image not found in gallery." });
+        }
+        return Ok(new { rotation = nextRotation });
+    }
+
+    // POST /galleries/{galleryId}/images/{imageId}/copy-to/{targetGalleryId}
+    [HttpPost("/galleries/{galleryId:int}/images/{imageId:int}/copy-to/{targetGalleryId:int}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CopyImageToGallery(int galleryId, int imageId, int targetGalleryId)
+    {
+        var targetGallery = await galleryService.GetGalleryByIdAsync(targetGalleryId);
+        if (targetGallery == null)
+        {
+            return NotFound(new { error = "Target gallery not found." });
+        }
+
+        await galleryService.CopyImageToGalleryAsync(imageId, targetGalleryId);
+        return Ok(new { message = $"Image copied to '{targetGallery.Name}'." });
     }
 
     // GET /galleries/{galleryId}/images/{imageId}

@@ -86,7 +86,7 @@
                     </a>
 
                     @{
-                        var allGalleries = await galleryService.GetAllGalleriesAsync();
+                        var allGalleries = await galleryService.GetFastGalleryListAsync();
                         var currentGalleryId = ViewData["GalleryId"] as int?;
                     }
                     @foreach (var gal in allGalleries)

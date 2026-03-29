@@ -5,6 +5,7 @@ namespace PortalCalendarServer.Services
     public interface IGalleryService
     {
         Task<List<Gallery>> GetAllGalleriesAsync();
+        Task<List<Gallery>> GetFastGalleryListAsync();
         Task<Gallery?> GetGalleryByIdAsync(int id);
         Task<Gallery> CreateGalleryAsync(string name);
         Task<Gallery> CopyGalleryAsync(int sourceGalleryId, string newName);
@@ -16,6 +17,8 @@ namespace PortalCalendarServer.Services
         Task UpdateImageDescriptionAsync(int imageId, string? description);
         Task ReplaceImageFileAsync(int imageId, IFormFile file);
         Task SetImageVisibilityAsync(int galleryId, int imageId, bool isHidden);
+        Task<bool> SetImageRotationAsync(int galleryId, int imageId, int rotation);
+        Task CopyImageToGalleryAsync(int imageId, int targetGalleryId);
         string GetImageFilePath(GalleryImage image);
     }
 }

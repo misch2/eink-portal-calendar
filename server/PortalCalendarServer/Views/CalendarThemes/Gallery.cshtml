@@ -21,9 +21,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Jersey+25&display=swap" rel="stylesheet">
 }
 
+@{
+    var rotClass = imageInfo?.Rotation switch { 90 => "rot-90", 180 => "rot-180", 270 => "rot-270", _ => "" };
+}
+
 @if (imageInfo != null)
 {
-    <div id="gallery-container" class="@(hasDescription ? "with-description" : "")" style="--gallery-bg: url('@imageInfo.ImageUrl')">
+    <div id="gallery-container" class="@(hasDescription ? "with-description" : "") @rotClass" style="--gallery-bg: url('@imageInfo.ImageUrl')">
         <img id="gallery-image" src="@imageInfo.ImageUrl" alt="@(imageInfo.Description ?? "Gallery image")" />
         @if (hasDescription)
         {

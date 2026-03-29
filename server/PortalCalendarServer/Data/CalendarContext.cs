@@ -405,6 +405,10 @@ public partial class CalendarContext : DbContext
                             .HasColumnType("INTEGER")
                             .HasDefaultValue(false)
                             .HasColumnName("is_hidden");
+                        j.Property(e => e.Rotation)
+                            .HasColumnType("INTEGER")
+                            .HasDefaultValue(0)
+                            .HasColumnName("rotation");
                     });
         });
 

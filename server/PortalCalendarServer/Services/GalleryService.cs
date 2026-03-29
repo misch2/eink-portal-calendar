@@ -17,6 +17,14 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
             .ToListAsync();
     }
 
+    // For listing galleries without loading all images (e.g. for gallery overview)
+    public async Task<List<Gallery>> GetFastGalleryListAsync()
+    {
+        return await _context.Galleries
+            .OrderBy(g => g.Id)
+            .ToListAsync();
+    }
+
     public async Task<Gallery?> GetGalleryByIdAsync(int id)
     {
         return await _context.Galleries
@@ -212,6 +220,41 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
         if (link == null) return;
 
         link.IsHidden = isHidden;
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<bool> SetImageRotationAsync(int galleryId, int imageId, int rotation)
+    {
+        // Normalize to a valid multiple of 90 in [0, 360)
+        rotation = ((rotation % 360) + 360) % 360;
+        rotation = (rotation / 90) * 90;
+
+        var gallery = await _context.Galleries
+            .Include(g => g.ImageLinks)
+            .FirstOrDefaultAsync(g => g.Id == galleryId);
+        if (gallery == null) return false;
+
+        var link = gallery.ImageLinks.FirstOrDefault(l => l.GalleryImageId == imageId);
+        if (link == null) return false;
+
+        link.Rotation = rotation;
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task CopyImageToGalleryAsync(int imageId, int targetGalleryId)
+    {
+        var image = await _context.GalleryImages
+            .Include(i => i.Galleries)
+            .FirstOrDefaultAsync(i => i.Id == imageId);
+        if (image == null) return;
+
+        var targetGallery = await _context.Galleries.FindAsync(targetGalleryId);
+        if (targetGallery == null) return;
+
+        if (image.Galleries.Any(g => g.Id == targetGalleryId)) return;
+
+        image.Galleries.Add(targetGallery);
         await _context.SaveChangesAsync();
     }
 

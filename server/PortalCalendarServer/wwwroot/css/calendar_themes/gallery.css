@@ -63,3 +63,31 @@ body {
     padding: 20px;
     text-align: center;
 }
+
+#gallery-container.rot-180 #gallery-image {
+    transform: rotate(180deg);
+}
+
+#gallery-container.rot-90 #gallery-image,
+#gallery-container.rot-270 #gallery-image {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100vh;
+    height: 100vw;
+    max-width: none;
+    max-height: none;
+}
+
+#gallery-container.rot-90 #gallery-image {
+    transform: translate(-50%, -50%) rotate(90deg);
+}
+
+#gallery-container.rot-270 #gallery-image {
+    transform: translate(-50%, -50%) rotate(270deg);
+}
+
+/* Rotate the blurred background to match */
+#gallery-container.rot-90::before  { transform: rotate(90deg); }
+#gallery-container.rot-180::before { transform: rotate(180deg); }
+#gallery-container.rot-270::before { transform: rotate(270deg); }
