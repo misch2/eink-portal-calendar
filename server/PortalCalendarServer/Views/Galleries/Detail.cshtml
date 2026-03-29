@@ -77,11 +77,11 @@ else
                             @if (otherGalleries.Count > 0)
                             {
                                 <div class="dropdown">
-                                    <a href="#" class="gallery-action-btn"
+                                    <button type="button" class="gallery-action-btn"
                                        data-bs-toggle="dropdown"
                                        title="Copy to gallery">
                                         <i class="bi bi-copy"></i>
-                                    </a>
+                                    </button>
                                     <ul class="dropdown-menu dropdown-menu-end">
                                         @foreach (var g in otherGalleries)
                                         {
@@ -98,21 +98,21 @@ else
                                     </ul>
                                 </div>
                             }
-                            <a href="#" class="gallery-action-btn edit-description-link"
+                            <button type="button" class="gallery-action-btn edit-description-link"
                                data-bs-toggle="modal"
                                data-bs-target="#edit_description_modal"
                                data-image-id="@image.Id"
                                data-image-description="@(image.Description ?? "")"
                                title="Edit">
                                 <i class="bi bi-pencil"></i>
-                            </a>
-                            <a href="#" class="gallery-action-btn gallery-action-btn--danger delete-image-link"
+                            </button>
+                            <button type="button" class="gallery-action-btn gallery-action-btn--danger delete-image-link"
                                data-bs-toggle="modal"
                                data-bs-target="#delete_image_modal"
                                data-image-id="@image.Id"
                                title="Delete">
                                 <i class="bi bi-trash"></i>
-                            </a>
+                            </button>
                         </div>
                     </div>
                     <div class="card-body py-2 px-3">
@@ -282,6 +282,10 @@ else
         color: #fff;
         text-decoration: none;
         transition: background 0.15s;
+        border: none;
+        padding: 0;
+        font: inherit;
+        cursor: pointer;
     }
     .gallery-action-btn:hover {
         background: rgba(0, 0, 0, 0.8);
