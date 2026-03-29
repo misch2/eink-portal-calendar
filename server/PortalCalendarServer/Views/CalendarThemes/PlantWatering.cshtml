@@ -1,0 +1,113 @@
+@model PortalCalendarServer.Services.PageViewModel
+@using PortalCalendarServer.Modules.Builtin
+@using PortalCalendarServer.Services
+@using PortalCalendarServer.Services.PageGeneratorComponents
+@inject IDisplayService displayService
+@{
+    Layout = "~/Views/Shared/Layouts/Epaper/_InsetLayout.cshtml";
+    ViewBag.Title = "Plant Watering Monitor";
+
+    var ha = Model.GetComponent<HomeAssistantComponent>("homeassistant");
+
+    // Read configured sensor entity IDs
+    var sensorIds = new List<string>();
+    for (int i = 1; i <= PlantWateringModule.MaxSensors; i++)
+    {
+        var sensorId = displayService.GetConfig(Model.Display, $"plantwatering_sensor_{i}");
+        if (!string.IsNullOrWhiteSpace(sensorId))
+        {
+            sensorIds.Add(sensorId.Trim());
+        }
+    }
+
+    // Read thresholds
+    var dryThreshold = displayService.GetConfigInt(Model.Display, "plantwatering_threshold_dry") ?? 20;
+    var wetThreshold = displayService.GetConfigInt(Model.Display, "plantwatering_threshold_wet") ?? 80;
+
+    // Fetch entity details with device/area info
+    var details = ha != null && sensorIds.Count > 0
+        ? await ha.GetEntityDetailsAsync(Model.Display, sensorIds)
+        : [];
+
+    // Build plant info and group by area
+    var plants = details.Select(d =>
+    {
+        double? moisture = null;
+        string status = "unavailable";
+
+        if (d.Entity != null && double.TryParse(d.Entity.State, System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture, out var val))
+        {
+            moisture = val;
+            if (val < dryThreshold) status = "dry";
+            else if (val > wetThreshold) status = "wet";
+            else status = "ok";
+        }
+        else if (d.Entity != null && d.Entity.State != "unavailable" && d.Entity.State != "unknown")
+        {
+            status = "unavailable";
+        }
+
+        return new
+        {
+            Name = d.DeviceName ?? d.Entity?.FriendlyName ?? d.EntityId,
+            Area = d.AreaName ?? "Unassigned",
+            Moisture = moisture,
+            Status = status,
+        };
+    }).ToList();
+
+    var groupedByArea = plants
+        .GroupBy(p => p.Area)
+        .OrderBy(g => g.Key)
+        .ToList();
+}
+
+@section Head {
+    <link rel="stylesheet" href="/css/fonts.css" asp-append-version="true" />
+    <link rel="stylesheet" href="/css/calendar_themes/plantwatering.css" asp-append-version="true" />
+}
+
+@if (sensorIds.Count == 0)
+{
+    <div class="no-sensors">No moisture sensors configured.</div>
+}
+else
+{
+    <div class="header">Plant Watering Monitor</div>
+
+    @foreach (var area in groupedByArea)
+    {
+        <div class="area-section">
+            <div class="area-name">@area.Key</div>
+
+            @foreach (var plant in area.OrderBy(p => p.Name))
+            {
+                var barWidth = plant.Moisture.HasValue
+                    ? Math.Clamp(plant.Moisture.Value, 0, 100)
+                    : 0;
+
+                <div class="plant-row status-@plant.Status">
+                    <div class="plant-name">@plant.Name</div>
+                    <div class="plant-moisture">
+                        @if (plant.Moisture.HasValue)
+                        {
+                            @($"{plant.Moisture.Value:F0} %")
+                        }
+                        else
+                        {
+                            <text>N/A</text>
+                        }
+                    </div>
+                    <div class="moisture-bar-container">
+                        <div class="moisture-bar-fill" style="width: @($"{barWidth:F0}")%"></div>
+                        <div class="moisture-bar-marker" style="left: @dryThreshold%"></div>
+                        <div class="moisture-bar-marker" style="left: @wetThreshold%"></div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+}
+
+@await Html.PartialAsync("~/Views/CalendarThemes/Includes/BottomStatusBar.cshtml", Model.Display)
