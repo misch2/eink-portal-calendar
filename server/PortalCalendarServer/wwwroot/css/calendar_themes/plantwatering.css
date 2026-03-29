@@ -98,11 +98,11 @@ body {
 
 .status-dry .plant-name,
 .status-dry .plant-moisture {
-    color: var(--epd-red, var(--epd-black));
+    color: var(--epd-yellow, var(--epd-red, var(--epd-black)));
 }
 
 .status-dry .moisture-bar-fill {
-    background-color: var(--epd-red, var(--epd-black));
+    background-color: var(--epd-yellow, var(--epd-red, var(--epd-black)));
 }
 
 .status-wet .plant-name,
