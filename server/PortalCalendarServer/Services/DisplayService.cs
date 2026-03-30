@@ -538,7 +538,7 @@ public class DisplayService(
             img.Mutate(x => x.Quantize(quantizer));
         }
 
-        // Save intermediate bitmap for debugging purposes
+        // Save intermediate bitmap for caching purposes
         var intermediatePath = DisplayIntermediateImageName(display);
         img.SaveAsPng(intermediatePath);
 
@@ -925,6 +925,29 @@ public class DisplayService(
         var ret = Path.Combine(imagePath, $"display-{display.Id}-intermediate.png");
 
         return ret;
+    }
+
+    public string DisplayPreviewImageName(Display display)
+    {
+        var imagePath = _configuration["Paths:GeneratedImages"]
+            ?? throw new InvalidOperationException("GeneratedImages path is not configured");
+
+        return Path.Combine(imagePath, $"display-{display.Id}-preview.png");
+    }
+
+    public string? GetCachedPreviewPath(Display display)
+    {
+        if (display.RenderedAt == null)
+            return null;
+
+        var previewPath = DisplayPreviewImageName(display);
+        if (!File.Exists(previewPath))
+            return null;
+
+        if (File.GetLastWriteTimeUtc(previewPath) < display.RenderedAt.Value)
+            return null;
+
+        return previewPath;
     }
 
     public BitmapResult ConvertExistingRawBitmap( // FIXME name and purpose, this is for controllers

@@ -404,9 +404,9 @@ public class UiController(
         return View("~/Views/CalendarThemes/_Error.cshtml", viewModel);
     }
 
-    // GET /calendar/{displayNumber}/bitmap?rotate=0&flip=&format=png&...
+    // GET /calendar/{displayNumber}/bitmap
     [HttpGet("/calendar/{displayNumber:int}/bitmap")]
-    public async Task<IActionResult> Bitmap(
+    public IActionResult Bitmap(
         int displayNumber)
     {
         var display = _displayService.GetDisplayById(displayNumber);
@@ -415,18 +415,30 @@ public class UiController(
             return NotFound();
         }
 
-        var bitmap = _displayService.ConvertExistingRawBitmap(
-            displayId: display.Id,
-            format: OutputFormat.Png,
-            rotate: DisplayRotation.None,
-            flip: ""
-        );
-        if (bitmap.ErrorMessage != null)
+        if (display.RenderedAt == null)
         {
-            return NotFound(bitmap.ErrorMessage);
+            return NotFound("No rendered bitmap available for this display yet");
         }
 
-        return await Task.FromResult(this.ReturnBitmap(bitmap));
+        // Generate and cache the preview if stale or missing
+        if (_displayService.GetCachedPreviewPath(display) == null)
+        {
+            var bitmap = _displayService.ConvertExistingRawBitmap(
+                displayId: display.Id,
+                format: OutputFormat.Png,
+                rotate: DisplayRotation.None,
+                flip: ""
+            );
+            if (bitmap.ErrorMessage != null)
+            {
+                return NotFound(bitmap.ErrorMessage);
+            }
+
+            var previewPath = _displayService.DisplayPreviewImageName(display);
+            System.IO.File.WriteAllBytes(previewPath, bitmap.Data);
+        }
+
+        return PhysicalFile(_displayService.DisplayPreviewImageName(display), "image/png");
     }
 
     /// <summary>
