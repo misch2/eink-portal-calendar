@@ -12,7 +12,10 @@
         <input class="form-check-input" type="checkbox"
                id="@Model.Key" name="@Model.Key" value="1"
                @(currentValue ? "checked" : "")>
-        <label class="form-check-label" for="@Model.Key">@Model.Label</label>
+        @if (!string.IsNullOrEmpty(Model.Label))
+        {
+            <label class="form-check-label" for="@Model.Key">@Model.Label</label>
+        }
     </div>
     @if (!string.IsNullOrEmpty(Model.HelpText))
     {

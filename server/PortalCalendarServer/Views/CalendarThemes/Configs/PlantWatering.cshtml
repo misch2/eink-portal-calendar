@@ -80,7 +80,7 @@
         <div class="col-md-8">
             <label for="@key">Sensor @i</label>
             <select id="@key" name="@key" class="form-select">
-                <option value="">— none —</option>
+                <option value=""></option>
                 @foreach (var entity in moistureEntities)
                 {
                     var label = $"{entity.FriendlyName} ({entity.EntityId})";

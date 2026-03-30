@@ -1,7 +1,4 @@
 @model PortalCalendarServer.Services.PageViewModel
-@using PortalCalendarServer.Models.DatabaseEntities
-@using PortalCalendarServer.Services
-@inject IDisplayService displayService
 
 @{
     Layout = "~/Views/Shared/Layouts/Epaper/_FullBleedLayout.cshtml";
@@ -9,8 +6,7 @@
 
     var gallery = Model.Gallery;
     var imageInfo = gallery?.GetRandomImage(Model.Display);
-    var hideDescriptions = displayService.GetConfigBool(Model.Display, "gallery_hide_descriptions");
-    var hasDescription = !hideDescriptions && imageInfo != null && !string.IsNullOrEmpty(imageInfo.Description);
+    var hasDescription = imageInfo != null && !imageInfo.HideDescriptions && !string.IsNullOrEmpty(imageInfo.Description);
 }
 
 @section Head {

@@ -2,30 +2,49 @@
 @using PortalCalendarServer.Models.DatabaseEntities
 @using PortalCalendarServer.Models.POCOs
 @using PortalCalendarServer.Services
+@using PortalCalendarServer.Modules.Builtin;
 @inject IDisplayService displayService
 @inject IGalleryService galleryService
 
 @{
     var galleries = await galleryService.GetAllGalleriesAsync();
-    var currentValue = displayService.GetConfigWithoutDefaults(Model, "gallery_id");
 }
 
-<div class="col-md-6 mt-2">
-    <label for="gallery_id">Gallery</label>
-    <select id="gallery_id" name="gallery_id" class="form-select">
-        <option value="">— select a gallery —</option>
-        @foreach (var gallery in galleries)
-        {
-            <option value="@gallery.Id" selected="@(currentValue == gallery.Id.ToString())">
-                @gallery.Name (@gallery.Images.Count images)
-            </option>
-        }
-    </select>
+
+<div class="row mb-2">
+    <div class="col-md-5"><strong>Gallery</strong></div>
+    <div class="col-md-1"><strong>Hide descriptions</strong></div>
+    <div class="col-md-2"><strong>Preference ratio</strong></div>
 </div>
 
-@await Html.PartialAsync("_ConfigCheckbox", new ConfigInputModel
+@for (int i = 1; i <= GalleryModule.MaxGalleries; i++)
 {
-    Display = Model, Key = "gallery_hide_descriptions",
-    Label = "Hide descriptions",
-    ColClass = "col-12", MarginClass = "mt-3"
-})
+    var currentValue = displayService.GetConfigWithoutDefaults(Model, $"gallery_id_{i}");
+
+    <div class="row mb-2 align-items-center">
+        <div class="col-md-5">
+            <select id="@($"gallery_id_{i}")" name="@($"gallery_id_{i}")" class="form-select">
+                <option value=""></option>
+                @foreach (var gallery in galleries)
+                {
+                    <option value="@gallery.Id" selected="@(currentValue == gallery.Id.ToString())">
+                        @(i). @gallery.Name (@gallery.Images.Count images)
+                    </option>
+                }
+            </select>
+        </div>
+        @await Html.PartialAsync("_ConfigCheckbox", new ConfigInputModel
+        {
+            Display = Model, Key = $"gallery_hide_descriptions_{i}",
+            Label = "",
+            ColClass = "col-md-1"
+        })
+        @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+        {
+            Display = Model, Key = $"gallery_preference_ratio_{i}",
+            Label = "",
+            InputType = "number",
+            ColClass = "col-md-2"
+        })
+    </div>
+}

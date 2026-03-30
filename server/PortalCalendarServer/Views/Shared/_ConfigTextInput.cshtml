@@ -10,7 +10,10 @@
 }
 
 <div class="@wrapClass">
-    <label for="@Model.Key">@Model.Label</label>
+    @if (!string.IsNullOrEmpty(Model.Label))
+    {
+        <label for="@Model.Key">@Model.Label</label>
+    }
     <input id="@Model.Key" name="@Model.Key"
            type="@Model.InputType"
            class="form-control"
