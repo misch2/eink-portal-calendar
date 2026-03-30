@@ -196,6 +196,9 @@ builder.Services.AddHostedService(provider => provider.GetRequiredService<ImageR
 // Register mDNS advertisement so ESP32 clients can discover the server on LAN
 builder.Services.AddHostedService<MdnsAdvertisementService>();
 
+// One-off backfill of gallery image metadata (file size and dimensions)
+builder.Services.AddHostedService<GalleryImageMetadataBackfillService>();
+
 // Register SQLite-backed ticket store for cookie authentication
 builder.Services.AddScoped<SqliteTicketStore>();
 

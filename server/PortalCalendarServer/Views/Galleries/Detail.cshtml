@@ -1,5 +1,14 @@
 @model PortalCalendarServer.Models.DatabaseEntities.Gallery
 
+@functions {
+    static string FormatFileSize(long bytes)
+    {
+        if (bytes < 1024) return $"{bytes} B";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024.0:F1} KB";
+        return $"{bytes / 1024.0 / 1024.0:F1} MB";
+    }
+}
+
 @{
     var allGalleries = (List<PortalCalendarServer.Models.DatabaseEntities.Gallery>)ViewData["AllGalleries"]!;
     var otherGalleries = allGalleries.Where(g => g.Id != Model.Id).ToList();
@@ -126,7 +135,15 @@ else
                                 <span class="text-muted fst-italic">No description</span>
                             }
                         </p>
-                        <p class="card-text mb-0"><small class="text-muted">@image.UploadedAt.ToString("yyyy-MM-dd HH:mm")</small></p>
+                        <p class="card-text mb-0 d-flex justify-content-between">
+                            <small class="text-muted">@image.UploadedAt.ToString("yyyy-MM-dd HH:mm")</small>
+                            <small class="text-muted text-end">
+                                @if (image.Width.HasValue && image.Height.HasValue && image.FileSize.HasValue)
+                                {
+                                    <span>@(image.Width)×@(image.Height), @FormatFileSize(image.FileSize.Value)</span>
+                                }
+                            </small>
+                        </p>
                     </div>
                 </div>
             </div>
