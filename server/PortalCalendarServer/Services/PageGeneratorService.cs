@@ -102,7 +102,7 @@ public class PageGeneratorService
 
         try
         {
-            await _web2PngService.ConvertUrlAsync(
+            await _web2PngService.RenderHtmlPageAsImageSnapshotAsync(
                 url,
                 display.VirtualWidth(),
                 display.VirtualHeight(),
@@ -134,7 +134,7 @@ public class PageGeneratorService
 
                 _logger.LogInformation("Attempting to generate error page bitmap from {ErrorUrl}", errorUrl);
 
-                await _web2PngService.ConvertUrlAsync(
+                await _web2PngService.RenderHtmlPageAsImageSnapshotAsync(
                     errorUrl,
                     display.VirtualWidth(),
                     display.VirtualHeight(),

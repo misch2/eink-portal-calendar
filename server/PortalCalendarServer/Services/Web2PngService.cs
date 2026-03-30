@@ -67,7 +67,7 @@ public class Web2PngService : IWeb2PngService, IAsyncDisposable
     /// <param name="destinationPath">Path where the PNG file should be saved</param>
     /// <param name="delayMs">Delay in milliseconds to wait for web fonts and rendering (default: 2000ms)</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    public async Task ConvertUrlAsync(
+    public async Task RenderHtmlPageAsImageSnapshotAsync(
         string url,
         int width,
         int height,
