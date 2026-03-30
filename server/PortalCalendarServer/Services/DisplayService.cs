@@ -758,10 +758,9 @@ public class DisplayService(
                     }
                 }
             }
-
             else
             {
-                throw new ArgumentException($"Unknown display type: {displayType}");
+                throw new ArgumentException($"Unsupported display type '{displayType}' for v1 bitmap");
             }
         });
 
