@@ -22,13 +22,15 @@ namespace PortalCalendarServer.Models.DatabaseEntities
 
         public Dictionary<string, string> CssColorMap(bool forPreview)
         {
-            return ColorVariant.EpdColors.Select(c => (key: c.Code, value: forPreview ? c.EpdPreviewHexValue : c.HexValue))
+            return ColorVariant.ColorPaletteLinks.Select(link =>
+                    (key: link.EpdColorCode, value: forPreview ? link.EffectiveEpdPreviewHexValue : link.EffectiveHexValue))
                 .ToDictionary(x => x.key, x => $"#{x.value}");
         }
 
         public List<Color> ColorPalette(bool forPreview)
         {
-            var hexColors = ColorVariant.EpdColors.Select(c => (forPreview ? c.EpdPreviewHexValue : c.HexValue))
+            var hexColors = ColorVariant.ColorPaletteLinks
+                .Select(link => forPreview ? link.EffectiveEpdPreviewHexValue : link.EffectiveHexValue)
                 .ToList();
 
             var colors = new List<Color>();

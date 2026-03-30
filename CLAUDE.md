@@ -99,17 +99,13 @@ Registered in `Program.cs`: bitmap pre-generation, cache cleanup, missed connect
 - `.github/workflows/server-release.yml` — Release automation
 
 ### Command Execution (ALL AGENTS)
-- **Stay in project root** - never `cd` to subdirectories
-
-### Memory Refresh Rule
-- **🚨 ALL AGENTS: Read the relevant AGENTS.md file before concluding work to refresh memory about current project rules and requirements.**
-
+- Stay in project root, don't `cd` or `Set-Location` to subdirectories unless necessary for a specific command.
 
 ### Database migrations
 
 - Any database migrations should be created and applied via EF Core CLI (`dotnet ef migrations`)
 - `CalendarContext` is the common DB context here.
-- Do not run `dotnet ef database update`, I want to preview all changes (and the server applies pending migrations at startup)
+- Do not run `dotnet ef database update`. Only run `dotnet ef migrations add` as I want to preview all changes (also the server applies pending migrations at startup automatically)
 
 ### .NET code standards
 - With Linq check whether `.AsSingleQuery()` is needed to avoid cartesian explosion when including multiple related entities. Use `.AsSplitQuery()` if you want to force separate queries instead.
