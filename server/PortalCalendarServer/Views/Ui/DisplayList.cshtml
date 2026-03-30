@@ -14,11 +14,9 @@
 <table class="table table-hover">
     <thead>
         <tr>
-            <th scope="col">Id</th>
             <th scope="col">Name</th>
-            <th scope="col">MAC address</th>
-            <th scope="col">Width × height</th>
-            <th scope="col">Color type</th>
+            <th scope="col">Resolution</th>
+            <th scope="col">Display type</th>
             <th scope="col">Firmware</th>
             <th scope="col">Battery</th>
             <th scope="col">
@@ -26,9 +24,9 @@
                 <br />
                 (local time)
             </th>
-            <th scope="col">Bitmap age</th>
             <th scope="col">Status</th>
             <th scope="col">Last image</th>
+            <th scope="col">Bitmap age</th>
             <th scope="col">Action</th>
         </tr>
     </thead>
@@ -41,7 +39,6 @@
             var tz = displayService.GetTimeZoneInfo(d);
 
             <tr>
-                <td>@d.Id</td>
                 <td>
                     @if (d.IsDefault())
                     {
@@ -52,7 +49,6 @@
                         <a href="@Url.Action(nameof(UiController.Home), "Ui", new { displayNumber = d.Id })">@d.Name</a>
                     }
                 </td>
-                <td>@d.Mac</td>
                 <td>
                     @if (!d.IsDefault())
                     {
@@ -60,14 +56,7 @@
                     }
                 </td>
                 <td>
-                    @{
-                        var colorCode = d.DisplayType.Code;
-                        if (d.ColorVariant.Code != d.DisplayType.Code)
-                        {
-                            colorCode += "/" + @d.ColorVariant.Code;
-                        }
-                    }
-                    @colorCode
+                    @d.ColorVariant.Code
                 </td>
                 <td>@d.Firmware</td>
                 <td class="text-end">
@@ -78,34 +67,16 @@
                         {
                             @($"{batteryPercent.Value:F0} %")
                         }
-                        else
-                        {
-                            <span class="badge bg-danger">unknown</span>
-                        }
                     }
                 </td>
-                <td>
+                <td class="text-nowrap">
                     @if (!d.IsDefault())
                     {
                         var nextWakeupInfo = displayService.GetNextWakeupTime(d);
-                        var minutes = nextWakeupInfo.SleepInSeconds / 60;
-                        var seconds = nextWakeupInfo.SleepInSeconds % 60;
-                        @($"{TimeZoneInfo.ConvertTimeFromUtc(nextWakeupInfo.NextWakeup, tz).ToString("g", dateCulture)} (in {minutes} minutes and {seconds} seconds)")
-                    }
-                </td>
-                <td>
-                    @if (!d.IsDefault())
-                    {
-                        var bitmapAge = d.RenderedAt.HasValue ? DateTime.UtcNow - d.RenderedAt.Value : (TimeSpan?)null;
-                        if (bitmapAge.HasValue)
-                        {
-                            var minutes = (int)(bitmapAge.Value.TotalMinutes + 0.5);
-                            @($"{minutes} min")
-                        }
-                        else
-                        {
-                            <span class="badge bg-danger">N/A</span>
-                        }
+                        var minutes = Math.Round(nextWakeupInfo.SleepInSeconds / 60.0);
+                        @($"{TimeZoneInfo.ConvertTimeFromUtc(nextWakeupInfo.NextWakeup, tz).ToString("g", dateCulture)}")
+                        <br />
+                        @($"(in {minutes} minutes)")
                     }
                 </td>
                 <td>
@@ -159,6 +130,21 @@
                                  style="max-height: 6rem; width: auto; border: 1px solid gray"
                                  alt="Display preview" />
                         </a>
+                    }
+                </td>
+                <td>
+                    @if (!d.IsDefault())
+                    {
+                        var bitmapAge = d.RenderedAt.HasValue ? DateTime.UtcNow - d.RenderedAt.Value : (TimeSpan?)null;
+                        if (bitmapAge.HasValue)
+                        {
+                            var minutes = (int)(bitmapAge.Value.TotalMinutes + 0.5);
+                            @($"{minutes} min")
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">N/A</span>
+                        }
                     }
                 </td>
                 <td>
