@@ -309,6 +309,7 @@ public partial class CalendarContext : DbContext
                 new ColorVariant { Code = "BW", Name = "Black and White", DisplayTypeCode = "BW", SortOrder = 1000 },
                 new ColorVariant { Code = "BWY", Name = "Black, White, Yellow", DisplayTypeCode = "3C", SortOrder = 2000 },
                 new ColorVariant { Code = "BWR", Name = "Black, White, Red", DisplayTypeCode = "3C", SortOrder = 2010 },
+                new ColorVariant { Code = "BWR-cheap", Name = "Black, White, Red - cheap with bad contrast", DisplayTypeCode = "3C", SortOrder = 2020 },
                 new ColorVariant { Code = "BWRY", Name = "Black, White, Red, Yellow", DisplayTypeCode = "4C", SortOrder = 3000 },
                 new ColorVariant { Code = "BWRY-GDEM075F52", Name = "Black, White, Red, Yellow - GDEM075F52", DisplayTypeCode = "4C", SortOrder = 3100 },
                 new ColorVariant { Code = "SpectraE6", Name = "Spectra E6 (Black, White, Red, Yellow, Blue, Green)", DisplayTypeCode = "6C", SortOrder = 4000 }
@@ -361,7 +362,11 @@ public partial class CalendarContext : DbContext
                 new ColorPaletteLink { Id = 19, ColorVariantCode = "BWRY-GDEM075F52", EpdColorCode = "black" },
                 new ColorPaletteLink { Id = 20, ColorVariantCode = "BWRY-GDEM075F52", EpdColorCode = "white" },
                 new ColorPaletteLink { Id = 21, ColorVariantCode = "BWRY-GDEM075F52", EpdColorCode = "red", EpdPreviewHexValueOverride = "c00000" },
-                new ColorPaletteLink { Id = 22, ColorVariantCode = "BWRY-GDEM075F52", EpdColorCode = "yellow", EpdPreviewHexValueOverride = "f09d00" }    // more orange-like
+                new ColorPaletteLink { Id = 22, ColorVariantCode = "BWRY-GDEM075F52", EpdColorCode = "yellow", EpdPreviewHexValueOverride = "f09d00" },    // more orange-like
+
+                new ColorPaletteLink { Id = 23, ColorVariantCode = "BWR-cheap", EpdColorCode = "black", EpdPreviewHexValueOverride = "333" },
+                new ColorPaletteLink { Id = 24, ColorVariantCode = "BWR-cheap", EpdColorCode = "white", EpdPreviewHexValueOverride = "ddd" },
+                new ColorPaletteLink { Id = 25, ColorVariantCode = "BWR-cheap", EpdColorCode = "red", EpdPreviewHexValueOverride = "822" }
             );
         });
 
