@@ -34,7 +34,8 @@ public class DisplayService(
             .Include(d => d.Configs)
             .Include(d => d.DisplayType)
             .Include(d => d.ColorVariant)
-                .ThenInclude(cv => cv.EpdColors)
+                .ThenInclude(cv => cv.ColorPaletteLinks)
+                    .ThenInclude(cl => cl.EpdColor)
             .Include(d => d.ColorVariant)
                 .ThenInclude(cv => cv.DisplayType)
             .Include(d => d.Theme)
@@ -54,7 +55,8 @@ public class DisplayService(
     {
         return context.DisplayTypes
             .Include(dt => dt.ColorVariants)
-                .ThenInclude(cv => cv.EpdColors)
+                .ThenInclude(cv => cv.ColorPaletteLinks)
+                    .ThenInclude(cl => cl.EpdColor)
             .OrderBy(dt => dt.SortOrder)
             .AsSplitQuery()
             .ToList();
@@ -63,7 +65,8 @@ public class DisplayService(
     public List<ColorVariant> GetColorVariants()
     {
         return context.ColorVariants
-            .Include(cv => cv.EpdColors)
+            .Include(cv => cv.ColorPaletteLinks)
+                .ThenInclude(cl => cl.EpdColor)
             .OrderBy(cv => cv.DisplayTypeCode)
             .ThenBy(cv => cv.SortOrder)
             .ToList();
@@ -632,7 +635,7 @@ public class DisplayService(
             else if (displayType.Code == "3C") // FIXME constant
             {
                 // 3-color (black, white, red/yellow) - dual buffers per row
-                var epdColors = colorVariant.EpdColors.ToArray();
+                var paletteLinks = colorVariant.ColorPaletteLinks.ToArray();
                 for (int y = 0; y < accessor.Height; y++)
                 {
                     var rowSpan = accessor.GetRowSpan(y);
@@ -644,7 +647,7 @@ public class DisplayService(
 
                     foreach (var pixel in rowSpan)
                     {
-                        var detectedColor = ClassifyPixelColor(pixel, epdColors);
+                        var detectedColor = ClassifyPixelColor(pixel, paletteLinks);
 
                         // Dual-buffer encoding:
                         //   mono buffer | color buffer | result
@@ -697,7 +700,7 @@ public class DisplayService(
             else if (displayType.Code == "4C") // FIXME constant
             {
                 // 4-color (black, white, red, yellow) - single buffer with 2 bits per pixel
-                var epdColors = colorVariant.EpdColors.ToArray();
+                var paletteLinks4C = colorVariant.ColorPaletteLinks.ToArray();
                 for (int y = 0; y < accessor.Height; y++)
                 {
                     var rowSpan = accessor.GetRowSpan(y);
@@ -707,7 +710,7 @@ public class DisplayService(
 
                     foreach (var pixel in rowSpan)
                     {
-                        var detectedColor = ClassifyPixelColor(pixel, epdColors);
+                        var detectedColor = ClassifyPixelColor(pixel, paletteLinks4C);
                         byte bufferPixel = 0;
                         //if (!(color_data & 0x80)) out_data |= black_data & 0x80 ? 0x03 : 0x02; // red or yellow
                         //else out_data |= black_data & 0x80 ? 0x01 : 0x00; // white or black
@@ -786,13 +789,13 @@ public class DisplayService(
         }
 
         // Build a RGB → transfer byte lookup table upfront to avoid per-pixel ClassifyPixelColor + EpdColorToTransferFormat
-        var epdColors = colorVariant.EpdColors.ToArray();
-        var colorLookup = new Dictionary<uint, byte>(epdColors.Length);
-        foreach (var epdColor in epdColors)
+        var paletteLinks = colorVariant.ColorPaletteLinks.ToArray();
+        var colorLookup = new Dictionary<uint, byte>(paletteLinks.Length);
+        foreach (var link in paletteLinks)
         {
-            var c = epdColor.EpdPreviewRgba32Value;
+            var c = link.EffectiveEpdPreviewRgba32Value;
             var key = ((uint)c.R << 16) | ((uint)c.G << 8) | c.B;
-            colorLookup[key] = EpdColorToTransferFormat(epdColor);
+            colorLookup[key] = EpdColorToTransferFormat(link.EpdColor);
         }
 
         var ms = new MemoryStream();
@@ -840,16 +843,17 @@ public class DisplayService(
 
     /// <summary>
     /// Classify a quantized pixel into the closest e-paper color.
-    /// The image is expected to already be quantized to the exact palette
+    /// The image is expected to already be quantized to the exact palette.
+    /// Uses effective preview colors from ColorPaletteLink (respecting per-variant overrides).
     /// </summary>
-    private static EpdColor ClassifyPixelColor(Rgba32 pixel, EpdColor[] epdColors) // FIXME byref!
+    private static EpdColor ClassifyPixelColor(Rgba32 pixel, ColorPaletteLink[] paletteLinks)
     {
-        for (int i = 0; i < epdColors.Length; i++)
+        for (int i = 0; i < paletteLinks.Length; i++)
         {
-            var c = epdColors[i].EpdPreviewRgba32Value;
+            var c = paletteLinks[i].EffectiveEpdPreviewRgba32Value;
             if (pixel.R == c.R && pixel.G == c.G && pixel.B == c.B)
             {
-                return epdColors[i];
+                return paletteLinks[i].EpdColor;
             }
         }
         throw new InvalidOperationException($"Pixel color #{pixel.R:X2}{pixel.G:X2}{pixel.B:X2} not found in EPD color palette");

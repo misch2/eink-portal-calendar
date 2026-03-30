@@ -293,7 +293,7 @@ public partial class CalendarContext : DbContext
             entity.HasMany(d => d.EpdColors).WithMany(p => p.ColorVariants)
                 .UsingEntity<ColorPaletteLink>(
                     j => j.HasOne(cl => cl.EpdColor).WithMany().HasForeignKey(cl => cl.EpdColorCode).OnDelete(DeleteBehavior.Cascade),
-                    j => j.HasOne(cl => cl.ColorVariant).WithMany().HasForeignKey(cl => cl.ColorVariantCode).OnDelete(DeleteBehavior.Cascade),
+                    j => j.HasOne(cl => cl.ColorVariant).WithMany(cv => cv.ColorPaletteLinks).HasForeignKey(cl => cl.ColorVariantCode).OnDelete(DeleteBehavior.Cascade),
                     j =>
                     {
                         j.HasKey(cl => new { cl.ColorVariantCode, cl.EpdColorCode });
@@ -310,6 +310,7 @@ public partial class CalendarContext : DbContext
                 new ColorVariant { Code = "BWY", Name = "Black, White, Yellow", DisplayTypeCode = "3C", SortOrder = 2000 },
                 new ColorVariant { Code = "BWR", Name = "Black, White, Red", DisplayTypeCode = "3C", SortOrder = 2010 },
                 new ColorVariant { Code = "BWRY", Name = "Black, White, Red, Yellow", DisplayTypeCode = "4C", SortOrder = 3000 },
+                new ColorVariant { Code = "BWRY-GDEM075F52", Name = "Black, White, Red, Yellow - GDEM075F52", DisplayTypeCode = "4C", SortOrder = 3100 },
                 new ColorVariant { Code = "SpectraE6", Name = "Spectra E6 (Black, White, Red, Yellow, Blue, Green)", DisplayTypeCode = "6C", SortOrder = 4000 }
              );
         });
@@ -329,6 +330,9 @@ public partial class CalendarContext : DbContext
             entity.Property(e => e.EpdColorCode)
                 .HasColumnType("VARCHAR")
                 .HasColumnName("epd_color_code");
+            entity.Property(e => e.EpdPreviewHexValueOverride)
+                .HasColumnType("VARCHAR")
+                .HasColumnName("epd_preview_hex_value_override");
 
             entity.HasData(
                 new ColorPaletteLink { Id = 1, ColorVariantCode = "BW", EpdColorCode = "black" },
@@ -352,7 +356,12 @@ public partial class CalendarContext : DbContext
                 new ColorPaletteLink { Id = 15, ColorVariantCode = "SpectraE6", EpdColorCode = "red" },
                 new ColorPaletteLink { Id = 16, ColorVariantCode = "SpectraE6", EpdColorCode = "yellow" },
                 new ColorPaletteLink { Id = 17, ColorVariantCode = "SpectraE6", EpdColorCode = "blue" },
-                new ColorPaletteLink { Id = 18, ColorVariantCode = "SpectraE6", EpdColorCode = "green" }
+                new ColorPaletteLink { Id = 18, ColorVariantCode = "SpectraE6", EpdColorCode = "green" },
+
+                new ColorPaletteLink { Id = 19, ColorVariantCode = "BWRY-GDEM075F52", EpdColorCode = "black" },
+                new ColorPaletteLink { Id = 20, ColorVariantCode = "BWRY-GDEM075F52", EpdColorCode = "white" },
+                new ColorPaletteLink { Id = 21, ColorVariantCode = "BWRY-GDEM075F52", EpdColorCode = "red", EpdPreviewHexValueOverride = "c00000" },
+                new ColorPaletteLink { Id = 22, ColorVariantCode = "BWRY-GDEM075F52", EpdColorCode = "yellow", EpdPreviewHexValueOverride = "f09d00" }    // more orange-like
             );
         });
 

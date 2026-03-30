@@ -2,17 +2,20 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PortalCalendarServer.Data;
 
 #nullable disable
 
-namespace PortalCalendarServer.Migrations
+namespace PortalCalendarServer.Data.Migrations
 {
     [DbContext(typeof(CalendarContext))]
-    partial class CalendarContextModelSnapshot : ModelSnapshot
+    [Migration("20260330081242_AddColorOverridesToPaletteLinks")]
+    partial class AddColorOverridesToPaletteLinks
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.12");
@@ -105,6 +108,10 @@ namespace PortalCalendarServer.Migrations
                     b.Property<string>("EpdPreviewHexValueOverride")
                         .HasColumnType("VARCHAR")
                         .HasColumnName("epd_preview_hex_value_override");
+
+                    b.Property<string>("HexValueOverride")
+                        .HasColumnType("VARCHAR")
+                        .HasColumnName("hex_value_override");
 
                     b.HasKey("Id");
 
@@ -223,32 +230,6 @@ namespace PortalCalendarServer.Migrations
                             Id = 18,
                             ColorVariantCode = "SpectraE6",
                             EpdColorCode = "green"
-                        },
-                        new
-                        {
-                            Id = 19,
-                            ColorVariantCode = "BWRY-GDEM075F52",
-                            EpdColorCode = "black"
-                        },
-                        new
-                        {
-                            Id = 20,
-                            ColorVariantCode = "BWRY-GDEM075F52",
-                            EpdColorCode = "white"
-                        },
-                        new
-                        {
-                            Id = 21,
-                            ColorVariantCode = "BWRY-GDEM075F52",
-                            EpdColorCode = "red",
-                            EpdPreviewHexValueOverride = "c00000"
-                        },
-                        new
-                        {
-                            Id = 22,
-                            ColorVariantCode = "BWRY-GDEM075F52",
-                            EpdColorCode = "yellow",
-                            EpdPreviewHexValueOverride = "f09d00"
                         });
                 });
 
@@ -306,13 +287,6 @@ namespace PortalCalendarServer.Migrations
                             DisplayTypeCode = "4C",
                             Name = "Black, White, Red, Yellow",
                             SortOrder = 3000
-                        },
-                        new
-                        {
-                            Code = "BWRY-GDEM075F52",
-                            DisplayTypeCode = "4C",
-                            Name = "Black, White, Red, Yellow - GDEM075F52",
-                            SortOrder = 3100
                         },
                         new
                         {

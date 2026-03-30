@@ -2,17 +2,20 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PortalCalendarServer.Data;
 
 #nullable disable
 
-namespace PortalCalendarServer.Migrations
+namespace PortalCalendarServer.Data.Migrations
 {
     [DbContext(typeof(CalendarContext))]
-    partial class CalendarContextModelSnapshot : ModelSnapshot
+    [Migration("20260330083244_RemoveNonPreviewColorOverride")]
+    partial class RemoveNonPreviewColorOverride
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.12");
@@ -240,15 +243,14 @@ namespace PortalCalendarServer.Migrations
                         {
                             Id = 21,
                             ColorVariantCode = "BWRY-GDEM075F52",
-                            EpdColorCode = "red",
-                            EpdPreviewHexValueOverride = "c00000"
+                            EpdColorCode = "red"
                         },
                         new
                         {
                             Id = 22,
                             ColorVariantCode = "BWRY-GDEM075F52",
                             EpdColorCode = "yellow",
-                            EpdPreviewHexValueOverride = "f09d00"
+                            EpdPreviewHexValueOverride = "e0e070"
                         });
                 });
 
