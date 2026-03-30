@@ -160,7 +160,18 @@ public class GalleriesController(IGalleryService galleryService) : Controller
 
         if (file != null && file.Length > 0)
         {
-            await galleryService.ReplaceImageFileAsync(imageId, file);
+            var image = await galleryService.ReplaceImageFileAsync(imageId, file);
+            if (image != null)
+            {
+                return Ok(new
+                {
+                    description,
+                    imageVersion = image.UploadedAt.Ticks.ToString(),
+                    width = image.Width,
+                    height = image.Height,
+                    fileSize = image.FileSize
+                });
+            }
         }
 
         return Ok(new { description });

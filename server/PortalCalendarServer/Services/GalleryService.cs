@@ -185,10 +185,10 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
         await _context.SaveChangesAsync();
     }
 
-    public async Task ReplaceImageFileAsync(int imageId, IFormFile file)
+    public async Task<GalleryImage?> ReplaceImageFileAsync(int imageId, IFormFile file)
     {
         var image = await _context.GalleryImages.FindAsync(imageId);
-        if (image == null) return;
+        if (image == null) return null;
 
         var imageDir = GetImageDirectory(image.PrimaryFolder);
 
@@ -214,6 +214,7 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
         PopulateImageDimensions(image, newPath);
 
         await _context.SaveChangesAsync();
+        return image;
     }
 
     public async Task SetImageVisibilityAsync(int galleryId, int imageId, bool isHidden)
