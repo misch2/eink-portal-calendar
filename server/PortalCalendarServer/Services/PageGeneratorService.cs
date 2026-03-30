@@ -77,7 +77,7 @@ public class PageGeneratorService
         return viewModel;
     }
 
-    public async Task GenerateImageFromWebAsync(Display display)
+    public async Task RenderDisplayImageAsync(Display display)
     {
         var baseUrl = _configuration["URLs:BaseURL"];
         if (baseUrl == null)

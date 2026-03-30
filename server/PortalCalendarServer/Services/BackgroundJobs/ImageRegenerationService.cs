@@ -48,7 +48,7 @@ public class ImageRegenerationService : QueuedBackgroundService<ImageRegeneratio
             return;
         }
 
-        await pageGeneratorService.GenerateImageFromWebAsync(display);
+        await pageGeneratorService.RenderDisplayImageAsync(display);
     }
 
     /// <summary>

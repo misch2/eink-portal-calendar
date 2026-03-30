@@ -214,7 +214,7 @@ public class ApiController : ControllerBase
             // Generate the bitmap NOW so that it's available immediately on the first config request.
             try
             {
-                await _pageGeneratorService.GenerateImageFromWebAsync(display);
+                await _pageGeneratorService.RenderDisplayImageAsync(display);
             }
             catch (Exception ex)
             {
