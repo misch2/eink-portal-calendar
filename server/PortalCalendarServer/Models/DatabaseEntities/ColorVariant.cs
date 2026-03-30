@@ -9,6 +9,7 @@ namespace PortalCalendarServer.Models.DatabaseEntities
         public DisplayType DisplayType { get; set; } = null!;
 
         public ICollection<EpdColor> EpdColors { get; set; } = null!;
+        public ICollection<ColorPaletteLink> ColorPaletteLinks { get; set; } = null!;
         public ICollection<Display> Displays { get; set; } = null!;
     }
 }
