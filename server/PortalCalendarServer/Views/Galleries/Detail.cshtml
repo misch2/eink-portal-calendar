@@ -137,7 +137,7 @@ else
                         </p>
                         <p class="card-text mb-0 d-flex justify-content-between">
                             <small class="text-muted">@image.UploadedAt.ToString("yyyy-MM-dd HH:mm")</small>
-                            <small class="text-muted text-end">
+                            <small class="text-muted text-end gallery-image-meta">
                                 @if (image.Width.HasValue && image.Height.HasValue && image.FileSize.HasValue)
                                 {
                                     <span>@(image.Width)×@(image.Height), @FormatFileSize(image.FileSize.Value)</span>
@@ -418,18 +418,8 @@ else
                         card.find('.gallery-thumb').attr('src', newSrc);
                         card.find('.gallery-preview-link').data('image-src', newSrc);
 
-                        // Update the metadata (dimensions + file size)
-                        if (data.width && data.height) {
-                            var sizeText = data.width + '\u00d7' + data.height;
-                            if (data.fileSize) {
-                                var bytes = data.fileSize;
-                                var formatted;
-                                if (bytes < 1024) formatted = bytes + ' B';
-                                else if (bytes < 1024 * 1024) formatted = (bytes / 1024).toFixed(1) + ' KB';
-                                else formatted = (bytes / 1024 / 1024).toFixed(1) + ' MB';
-                                sizeText += ', ' + formatted;
-                            }
-                            card.find('.text-muted.text-end span').text(sizeText);
+                        if (data.imageMeta) {
+                            card.find('.gallery-image-meta').html('<span>' + data.imageMeta + '</span>');
                         }
                     }
 
