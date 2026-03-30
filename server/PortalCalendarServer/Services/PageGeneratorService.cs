@@ -77,7 +77,7 @@ public class PageGeneratorService
         return viewModel;
     }
 
-    public async Task GenerateImageFromWebAsync(Display display)
+    public async Task RenderDisplayImageAsync(Display display)
     {
         var baseUrl = _configuration["URLs:BaseURL"];
         if (baseUrl == null)
@@ -102,7 +102,7 @@ public class PageGeneratorService
 
         try
         {
-            await _web2PngService.ConvertUrlAsync(
+            await _web2PngService.CreateSnapshotOfAnyWebPageAsync(
                 url,
                 display.VirtualWidth(),
                 display.VirtualHeight(),
@@ -134,7 +134,7 @@ public class PageGeneratorService
 
                 _logger.LogInformation("Attempting to generate error page bitmap from {ErrorUrl}", errorUrl);
 
-                await _web2PngService.ConvertUrlAsync(
+                await _web2PngService.CreateSnapshotOfAnyWebPageAsync(
                     errorUrl,
                     display.VirtualWidth(),
                     display.VirtualHeight(),

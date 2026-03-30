@@ -404,9 +404,9 @@ public class UiController(
         return View("~/Views/CalendarThemes/_Error.cshtml", viewModel);
     }
 
-    // GET /calendar/{displayNumber}/bitmap?rotate=0&flip=&format=png&...
+    // GET /calendar/{displayNumber}/bitmap
     [HttpGet("/calendar/{displayNumber:int}/bitmap")]
-    public async Task<IActionResult> Bitmap(
+    public IActionResult Bitmap(
         int displayNumber)
     {
         var display = _displayService.GetDisplayById(displayNumber);
@@ -419,14 +419,15 @@ public class UiController(
             displayId: display.Id,
             format: OutputFormat.Png,
             rotate: DisplayRotation.None,
-            flip: ""
+            flip: "",
+            cachePostfix: "ui-preview"
         );
         if (bitmap.ErrorMessage != null)
         {
             return NotFound(bitmap.ErrorMessage);
         }
 
-        return await Task.FromResult(this.ReturnBitmap(bitmap));
+        return this.ReturnBitmap(bitmap);
     }
 
     /// <summary>

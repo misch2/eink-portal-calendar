@@ -214,7 +214,7 @@ public class ApiController : ControllerBase
             // Generate the bitmap NOW so that it's available immediately on the first config request.
             try
             {
-                await _pageGeneratorService.GenerateImageFromWebAsync(display);
+                await _pageGeneratorService.RenderDisplayImageAsync(display);
             }
             catch (Exception ex)
             {
@@ -381,7 +381,8 @@ public class ApiController : ControllerBase
             displayId: display.Id,
             format: fmt == 2 ? OutputFormat.EpaperSpecificV2 : OutputFormat.EpaperSpecificV1,
             rotate: null,
-            flip: null
+            flip: null,
+            cachePostfix: "device"
             );
 
         if (bitmap.ErrorMessage != null)

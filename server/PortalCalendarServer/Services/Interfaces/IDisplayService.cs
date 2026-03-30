@@ -2,6 +2,8 @@ using PortalCalendarServer.Models.DatabaseEntities;
 using PortalCalendarServer.Models.POCOs;
 using PortalCalendarServer.Models.POCOs.Bitmap;
 using PortalCalendarServer.Models.POCOs.Board;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using System.Globalization;
 
 namespace PortalCalendarServer.Services;
@@ -143,22 +145,28 @@ public interface IDisplayService
     List<DitheringType> GetDitheringTypes();
 
     /// <summary>
-    /// Generate bitmap image from a full color PNG snapshot
+    /// Loads the raw web snapshot and applies the image processing pipeline:
+    /// crop, rotate, flip, gamma correction, and color quantization/dithering.
+    /// The caller is responsible for disposing the returned image.
     /// </summary>
-    BitmapResult ConvertExistingWebSnapshot(Display display, BitmapOptions options);
+    Image<Rgba32> ApplyImageAdjustmentsToPageSnapshot(Display display, BitmapOptions options);
+
+    /// <summary>
+    /// Encodes a processed image into the requested output format (PNG, e-paper V1/V2).
+    /// </summary>
+    BitmapResult EncodeBitmap(Image<Rgba32> img, Display display, BitmapOptions options);
 
     string RawWebSnapshotFileName(Display display);
 
     /// <summary>
     /// Builds a <see cref="BitmapResult"/> for the given display using the supplied rendering options.
-    /// Returns <c>null</c> when the display, its rendered bitmap, or its display-type information cannot be found;
-    /// the <paramref name="errorMessage"/> out-parameter will contain a human-readable reason in that case.
+    /// When <paramref name="cachePostfix"/> is non-null, the intermediate image (after adjustments,
+    /// before encoding) is cached on disk and reused if still fresh relative to <c>RenderedAt</c>.
     /// </summary>
     BitmapResult ConvertExistingRawBitmap(
         int displayId,
         OutputFormat format,
         DisplayRotation? rotate = null,
-        string? flip = null);
+        string? flip = null,
+        string? cachePostfix = null);
 }
-
-// FIXME ConvertExistingRawBitmap vs  ConvertExistingWebSnapshot ???

@@ -643,7 +643,8 @@ public class ApiControllerTests : IntegrationServiceTestBase
             .Setup(b => b.ConvertExistingRawBitmap(
                 display.Id,
                 It.IsAny<OutputFormat>(),
-                It.IsAny<DisplayRotation?>(), It.IsAny<string?>()
+                It.IsAny<DisplayRotation?>(), It.IsAny<string?>(),
+                It.IsAny<string?>()
                 ))
             .Returns(new BitmapResult { ErrorMessage = errMsg });
 
@@ -665,7 +666,8 @@ public class ApiControllerTests : IntegrationServiceTestBase
             .Setup(b => b.ConvertExistingRawBitmap(
                 display.Id,
                 It.IsAny<OutputFormat>(),
-                It.IsAny<DisplayRotation?>(), It.IsAny<string?>()
+                It.IsAny<DisplayRotation?>(), It.IsAny<string?>(),
+                It.IsAny<string?>()
                 ))
             .Returns(new BitmapResult { ErrorMessage = "no bitmap" });
 
@@ -715,7 +717,8 @@ public class ApiControllerTests : IntegrationServiceTestBase
             .Setup(b => b.ConvertExistingRawBitmap(
                 display.Id,
                 It.IsAny<OutputFormat>(),
-                It.IsAny<DisplayRotation?>(), It.IsAny<string?>()
+                It.IsAny<DisplayRotation?>(), It.IsAny<string?>(),
+                It.IsAny<string?>()
                 ))
             .Returns(new BitmapResult { ErrorMessage = "no bitmap" });
 

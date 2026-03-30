@@ -425,9 +425,14 @@ public class DisplayService(
         context.SaveChanges();
     }
 
-    public BitmapResult ConvertExistingWebSnapshot(Display display, BitmapOptions options)
+    /// <summary>
+    /// Loads the raw web snapshot and applies the image processing pipeline:
+    /// crop, rotate, flip, gamma correction, and color quantization/dithering.
+    /// The caller is responsible for disposing the returned image.
+    /// </summary>
+    public Image<Rgba32> ApplyImageAdjustmentsToPageSnapshot(Display display, BitmapOptions options)
     {
-        logger.LogDebug("Converting pre-generated bitmap");
+        logger.LogDebug("Processing snapshot for display {DisplayId}", display.Id);
 
         var imagePath = RawWebSnapshotFileName(display);
         if (!File.Exists(imagePath))
@@ -435,7 +440,7 @@ public class DisplayService(
             throw new FileNotFoundException($"Image file not found: {imagePath}");
         }
 
-        using var img = Image.Load<Rgba32>(imagePath);
+        var img = Image.Load<Rgba32>(imagePath);
 
         // If the generated image is larger (probably due to invalid CSS), crop it
         if (img.Height > display.VirtualHeight())
@@ -527,11 +532,14 @@ public class DisplayService(
             img.Mutate(x => x.Quantize(quantizer));
         }
 
-        // Save intermediate bitmap for debugging purposes
-        var intermediatePath = DisplayIntermediateImageName(display);
-        img.SaveAsPng(intermediatePath);
+        return img;
+    }
 
-        // Generate output based on format
+    /// <summary>
+    /// Encodes a processed image into the requested output format (PNG, e-paper V1/V2).
+    /// </summary>
+    public BitmapResult EncodeBitmap(Image<Rgba32> img, Display display, BitmapOptions options)
+    {
         if (options.Format == OutputFormat.Png)
         {
             using var ms = new MemoryStream();
@@ -750,10 +758,9 @@ public class DisplayService(
                     }
                 }
             }
-
             else
             {
-                throw new ArgumentException($"Unknown display type: {displayType}");
+                throw new ArgumentException($"Unsupported display type '{displayType}' for v1 bitmap");
             }
         });
 
@@ -899,21 +906,21 @@ public class DisplayService(
         return ret;
     }
 
-    private string DisplayIntermediateImageName(Display display)
+    private string DisplayIntermediateImageName(Display display, string? postfix = null)
     {
         var imagePath = _configuration["Paths:GeneratedImages"]
             ?? throw new InvalidOperationException("GeneratedImages path is not configured");
 
-        var ret = Path.Combine(imagePath, $"display-{display.Id}-intermediate.png");
-
-        return ret;
+        var suffix = postfix != null ? $"-{postfix}" : "";
+        return Path.Combine(imagePath, $"display-{display.Id}-intermediate{suffix}.png");
     }
 
-    public BitmapResult ConvertExistingRawBitmap( // FIXME name and purpose, this is for controllers
+    public BitmapResult ConvertExistingRawBitmap(
             int displayId,
             OutputFormat format,
             DisplayRotation? rotate = null,
-            string? flip = null)
+            string? flip = null,
+            string? cachePostfix = null)
     {
         var ret = new BitmapResult();
 
@@ -950,7 +957,20 @@ public class DisplayService(
             DitheringType = display.DitheringTypeCode
         };
 
-        ret = ConvertExistingWebSnapshot(display, bitmapOptions);
-        return ret;
+        // Check for cached intermediate image
+        var intermediatePath = DisplayIntermediateImageName(display, cachePostfix);
+        if (cachePostfix != null
+            && File.Exists(intermediatePath)
+            && File.GetLastWriteTimeUtc(intermediatePath) >= display.RenderedAt.Value)
+        {
+            logger.LogDebug("Using cached intermediate image for display {DisplayId} ({Postfix})", display.Id, cachePostfix);
+            using var cached = Image.Load<Rgba32>(intermediatePath);
+            return EncodeBitmap(cached, display, bitmapOptions);
+        }
+
+        using var img = ApplyImageAdjustmentsToPageSnapshot(display, bitmapOptions);
+        img.SaveAsPng(intermediatePath);
+
+        return EncodeBitmap(img, display, bitmapOptions);
     }
 }

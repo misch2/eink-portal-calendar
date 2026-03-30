@@ -21,7 +21,7 @@ public interface IWeb2PngService : IAsyncDisposable
     /// are logged as warnings instead of causing the method to throw.
     /// Useful for best-effort rendering such as error fallback pages.</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    Task ConvertUrlAsync(
+    Task CreateSnapshotOfAnyWebPageAsync(
         string url,
         int width,
         int height,
