@@ -1,3 +1,10 @@
+:root {
+    /* Define orange as a mix of yellow + red, but only if both exist */
+    --epd-orange: color-mix(in oklch, var(--epd-yellow) 50%, var(--epd-red) 50% );
+    --epd-darkyellow: color-mix(in oklch, var(--epd-yellow) 75%, var(--epd-black) 25% );
+}
+
+
 html,
 body {
     font-size: clamp(10pt, 4vw, 14pt);
@@ -98,11 +105,11 @@ body {
 
 .status-dry .plant-name,
 .status-dry .plant-moisture {
-    color: var(--epd-yellow, var(--epd-red, var(--epd-black)));
+    color: var(--epd-darkyellow, var(--epd-red, var(--epd-black)));
 }
 
 .status-dry .moisture-bar-fill {
-    background-color: var(--epd-yellow, var(--epd-red, var(--epd-black)));
+    background-color: var(--epd-darkyellow, var(--epd-red, var(--epd-black)));
 }
 
 .status-wet .plant-name,
