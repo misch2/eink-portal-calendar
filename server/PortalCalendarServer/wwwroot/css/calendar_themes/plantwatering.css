@@ -7,7 +7,7 @@
 
 html,
 body {
-    font-size: clamp(10pt, 4vw, 14pt);
+    font-size: clamp(12pt, 4.5vw, 18pt);
     font-family: 'Gidole';
     letter-spacing: 0.02em;
 }
@@ -36,8 +36,9 @@ body {
     font-size: 1.4rem;
     font-weight: bold;
     padding-bottom: 0.15rem;
-/*    border-bottom: 2px solid var(--epd-black);*/
+    /*    border-bottom: 2px solid var(--epd-black);*/
     margin-bottom: 1rem;
+    text-align: center;
 }
 
 /* --- Area sections --- */
