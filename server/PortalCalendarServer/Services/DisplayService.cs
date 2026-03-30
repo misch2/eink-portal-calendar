@@ -425,9 +425,20 @@ public class DisplayService(
         context.SaveChanges();
     }
 
-    public BitmapResult ConvertExistingWebSnapshot(Display display, BitmapOptions options)
+    public BitmapResult ConvertExistingPageSnapshot(Display display, BitmapOptions options)
     {
-        logger.LogDebug("Converting pre-generated bitmap");
+        using var img = ApplyImageAdjustmentsToPageSnapshot(display, options);
+        return EncodeBitmap(img, display, options);
+    }
+
+    /// <summary>
+    /// Loads the raw web snapshot and applies the image processing pipeline:
+    /// crop, rotate, flip, gamma correction, and color quantization/dithering.
+    /// The caller is responsible for disposing the returned image.
+    /// </summary>
+    public Image<Rgba32> ApplyImageAdjustmentsToPageSnapshot(Display display, BitmapOptions options)
+    {
+        logger.LogDebug("Processing snapshot for display {DisplayId}", display.Id);
 
         var imagePath = RawWebSnapshotFileName(display);
         if (!File.Exists(imagePath))
@@ -435,7 +446,7 @@ public class DisplayService(
             throw new FileNotFoundException($"Image file not found: {imagePath}");
         }
 
-        using var img = Image.Load<Rgba32>(imagePath);
+        var img = Image.Load<Rgba32>(imagePath);
 
         // If the generated image is larger (probably due to invalid CSS), crop it
         if (img.Height > display.VirtualHeight())
@@ -531,7 +542,14 @@ public class DisplayService(
         var intermediatePath = DisplayIntermediateImageName(display);
         img.SaveAsPng(intermediatePath);
 
-        // Generate output based on format
+        return img;
+    }
+
+    /// <summary>
+    /// Encodes a processed image into the requested output format (PNG, e-paper V1/V2).
+    /// </summary>
+    public BitmapResult EncodeBitmap(Image<Rgba32> img, Display display, BitmapOptions options)
+    {
         if (options.Format == OutputFormat.Png)
         {
             using var ms = new MemoryStream();
@@ -950,7 +968,7 @@ public class DisplayService(
             DitheringType = display.DitheringTypeCode
         };
 
-        ret = ConvertExistingWebSnapshot(display, bitmapOptions);
+        ret = ConvertExistingPageSnapshot(display, bitmapOptions);
         return ret;
     }
 }

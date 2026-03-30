@@ -2,6 +2,8 @@ using PortalCalendarServer.Models.DatabaseEntities;
 using PortalCalendarServer.Models.POCOs;
 using PortalCalendarServer.Models.POCOs.Bitmap;
 using PortalCalendarServer.Models.POCOs.Board;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using System.Globalization;
 
 namespace PortalCalendarServer.Services;
@@ -143,9 +145,22 @@ public interface IDisplayService
     List<DitheringType> GetDitheringTypes();
 
     /// <summary>
-    /// Generate bitmap image from a full color PNG snapshot
+    /// Generate bitmap image from a full color PNG snapshot.
+    /// Convenience method that calls <see cref="ApplyImageAdjustmentsToPageSnapshot"/> followed by <see cref="EncodeBitmap"/>.
     /// </summary>
-    BitmapResult ConvertExistingWebSnapshot(Display display, BitmapOptions options);
+    BitmapResult ConvertExistingPageSnapshot(Display display, BitmapOptions options);
+
+    /// <summary>
+    /// Loads the raw web snapshot and applies the image processing pipeline:
+    /// crop, rotate, flip, gamma correction, and color quantization/dithering.
+    /// The caller is responsible for disposing the returned image.
+    /// </summary>
+    Image<Rgba32> ApplyImageAdjustmentsToPageSnapshot(Display display, BitmapOptions options);
+
+    /// <summary>
+    /// Encodes a processed image into the requested output format (PNG, e-paper V1/V2).
+    /// </summary>
+    BitmapResult EncodeBitmap(Image<Rgba32> img, Display display, BitmapOptions options);
 
     string RawWebSnapshotFileName(Display display);
 
