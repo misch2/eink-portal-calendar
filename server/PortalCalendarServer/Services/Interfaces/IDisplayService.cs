@@ -170,12 +170,6 @@ public interface IDisplayService
     string DisplayPreviewImageName(Display display);
 
     /// <summary>
-    /// Returns the path to a cached preview PNG if it exists and is still fresh
-    /// (last-write time >= <see cref="Display.RenderedAt"/>). Returns <c>null</c> on cache miss.
-    /// </summary>
-    string? GetCachedPreviewPath(Display display);
-
-    /// <summary>
     /// Builds a <see cref="BitmapResult"/> for the given display using the supplied rendering options.
     /// Returns <c>null</c> when the display, its rendered bitmap, or its display-type information cannot be found;
     /// the <paramref name="errorMessage"/> out-parameter will contain a human-readable reason in that case.

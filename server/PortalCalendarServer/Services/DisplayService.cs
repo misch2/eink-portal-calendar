@@ -935,21 +935,6 @@ public class DisplayService(
         return Path.Combine(imagePath, $"display-{display.Id}-preview.png");
     }
 
-    public string? GetCachedPreviewPath(Display display)
-    {
-        if (display.RenderedAt == null)
-            return null;
-
-        var previewPath = DisplayPreviewImageName(display);
-        if (!File.Exists(previewPath))
-            return null;
-
-        if (File.GetLastWriteTimeUtc(previewPath) < display.RenderedAt.Value)
-            return null;
-
-        return previewPath;
-    }
-
     public BitmapResult ConvertExistingRawBitmap( // FIXME name and purpose, this is for controllers
             int displayId,
             OutputFormat format,

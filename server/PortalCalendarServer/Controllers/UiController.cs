@@ -420,8 +420,11 @@ public class UiController(
             return NotFound("No rendered bitmap available for this display yet");
         }
 
-        // Generate and cache the preview if stale or missing
-        if (_displayService.GetCachedPreviewPath(display) == null)
+        var previewPath = _displayService.DisplayPreviewImageName(display);
+        var isCached = System.IO.File.Exists(previewPath)
+                    && System.IO.File.GetLastWriteTimeUtc(previewPath) >= display.RenderedAt.Value;
+
+        if (!isCached)
         {
             var bitmap = _displayService.ConvertExistingRawBitmap(
                 displayId: display.Id,
@@ -434,11 +437,10 @@ public class UiController(
                 return NotFound(bitmap.ErrorMessage);
             }
 
-            var previewPath = _displayService.DisplayPreviewImageName(display);
             System.IO.File.WriteAllBytes(previewPath, bitmap.Data);
         }
 
-        return PhysicalFile(_displayService.DisplayPreviewImageName(display), "image/png");
+        return PhysicalFile(previewPath, "image/png");
     }
 
     /// <summary>
