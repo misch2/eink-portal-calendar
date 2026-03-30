@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PortalCalendarServer.Data;
 using PortalCalendarServer.Models.DatabaseEntities;
+using SixLabors.ImageSharp;
 
 namespace PortalCalendarServer.Services;
 
@@ -137,6 +138,9 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
             await file.CopyToAsync(stream);
         }
 
+        image.FileSize = new FileInfo(filePath).Length;
+        PopulateImageDimensions(image, filePath);
+
         image.Galleries.Add(gallery);
         _context.GalleryImages.Add(image);
         await _context.SaveChangesAsync();
@@ -206,6 +210,9 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
             await file.CopyToAsync(stream);
         }
 
+        image.FileSize = new FileInfo(newPath).Length;
+        PopulateImageDimensions(image, newPath);
+
         await _context.SaveChangesAsync();
     }
 
@@ -266,5 +273,22 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
     private string GetImageDirectory(string primaryFolder)
     {
         return Path.Combine(_galleryImagesPath, primaryFolder);
+    }
+
+    private static void PopulateImageDimensions(GalleryImage image, string filePath)
+    {
+        try
+        {
+            var info = Image.Identify(filePath);
+            if (info != null)
+            {
+                image.Width = info.Width;
+                image.Height = info.Height;
+            }
+        }
+        catch
+        {
+            // Not a recognized image format — leave dimensions null
+        }
     }
 }

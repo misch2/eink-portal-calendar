@@ -452,6 +452,12 @@ public partial class CalendarContext : DbContext
             entity.Property(e => e.UploadedAt)
                 .HasColumnType("DATETIME")
                 .HasColumnName("uploaded_at");
+            entity.Property(e => e.FileSize)
+                .HasColumnName("file_size");
+            entity.Property(e => e.Width)
+                .HasColumnName("width");
+            entity.Property(e => e.Height)
+                .HasColumnName("height");
         });
 
         OnModelCreatingPartial(modelBuilder);
