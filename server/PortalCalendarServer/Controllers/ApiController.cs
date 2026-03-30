@@ -381,7 +381,8 @@ public class ApiController : ControllerBase
             displayId: display.Id,
             format: fmt == 2 ? OutputFormat.EpaperSpecificV2 : OutputFormat.EpaperSpecificV1,
             rotate: null,
-            flip: null
+            flip: null,
+            cachePostfix: "device"
             );
 
         if (bitmap.ErrorMessage != null)

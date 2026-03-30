@@ -425,12 +425,6 @@ public class DisplayService(
         context.SaveChanges();
     }
 
-    public BitmapResult ConvertExistingPageSnapshot(Display display, BitmapOptions options)
-    {
-        using var img = ApplyImageAdjustmentsToPageSnapshot(display, options);
-        return EncodeBitmap(img, display, options);
-    }
-
     /// <summary>
     /// Loads the raw web snapshot and applies the image processing pipeline:
     /// crop, rotate, flip, gamma correction, and color quantization/dithering.
@@ -537,10 +531,6 @@ public class DisplayService(
 
             img.Mutate(x => x.Quantize(quantizer));
         }
-
-        // Save intermediate bitmap for caching purposes
-        var intermediatePath = DisplayIntermediateImageName(display);
-        img.SaveAsPng(intermediatePath);
 
         return img;
     }
@@ -917,29 +907,21 @@ public class DisplayService(
         return ret;
     }
 
-    private string DisplayIntermediateImageName(Display display)
+    private string DisplayIntermediateImageName(Display display, string? postfix = null)
     {
         var imagePath = _configuration["Paths:GeneratedImages"]
             ?? throw new InvalidOperationException("GeneratedImages path is not configured");
 
-        var ret = Path.Combine(imagePath, $"display-{display.Id}-intermediate.png");
-
-        return ret;
+        var suffix = postfix != null ? $"-{postfix}" : "";
+        return Path.Combine(imagePath, $"display-{display.Id}-intermediate{suffix}.png");
     }
 
-    public string DisplayPreviewImageName(Display display)
-    {
-        var imagePath = _configuration["Paths:GeneratedImages"]
-            ?? throw new InvalidOperationException("GeneratedImages path is not configured");
-
-        return Path.Combine(imagePath, $"display-{display.Id}-preview.png");
-    }
-
-    public BitmapResult ConvertExistingRawBitmap( // FIXME name and purpose, this is for controllers
+    public BitmapResult ConvertExistingRawBitmap(
             int displayId,
             OutputFormat format,
             DisplayRotation? rotate = null,
-            string? flip = null)
+            string? flip = null,
+            string? cachePostfix = null)
     {
         var ret = new BitmapResult();
 
@@ -976,7 +958,20 @@ public class DisplayService(
             DitheringType = display.DitheringTypeCode
         };
 
-        ret = ConvertExistingPageSnapshot(display, bitmapOptions);
-        return ret;
+        // Check for cached intermediate image
+        var intermediatePath = DisplayIntermediateImageName(display, cachePostfix);
+        if (cachePostfix != null
+            && File.Exists(intermediatePath)
+            && File.GetLastWriteTimeUtc(intermediatePath) >= display.RenderedAt.Value)
+        {
+            logger.LogDebug("Using cached intermediate image for display {DisplayId} ({Postfix})", display.Id, cachePostfix);
+            using var cached = Image.Load<Rgba32>(intermediatePath);
+            return EncodeBitmap(cached, display, bitmapOptions);
+        }
+
+        using var img = ApplyImageAdjustmentsToPageSnapshot(display, bitmapOptions);
+        img.SaveAsPng(intermediatePath);
+
+        return EncodeBitmap(img, display, bitmapOptions);
     }
 }

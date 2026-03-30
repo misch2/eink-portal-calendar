@@ -415,32 +415,19 @@ public class UiController(
             return NotFound();
         }
 
-        if (display.RenderedAt == null)
+        var bitmap = _displayService.ConvertExistingRawBitmap(
+            displayId: display.Id,
+            format: OutputFormat.Png,
+            rotate: DisplayRotation.None,
+            flip: "",
+            cachePostfix: "ui-preview"
+        );
+        if (bitmap.ErrorMessage != null)
         {
-            return NotFound("No rendered bitmap available for this display yet");
+            return NotFound(bitmap.ErrorMessage);
         }
 
-        var previewPath = _displayService.DisplayPreviewImageName(display);
-        var isCached = System.IO.File.Exists(previewPath)
-                    && System.IO.File.GetLastWriteTimeUtc(previewPath) >= display.RenderedAt.Value;
-
-        if (!isCached)
-        {
-            var bitmap = _displayService.ConvertExistingRawBitmap(
-                displayId: display.Id,
-                format: OutputFormat.Png,
-                rotate: DisplayRotation.None,
-                flip: ""
-            );
-            if (bitmap.ErrorMessage != null)
-            {
-                return NotFound(bitmap.ErrorMessage);
-            }
-
-            System.IO.File.WriteAllBytes(previewPath, bitmap.Data);
-        }
-
-        return PhysicalFile(previewPath, "image/png");
+        return this.ReturnBitmap(bitmap);
     }
 
     /// <summary>
