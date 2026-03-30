@@ -1,0 +1,25 @@
+@model PortalCalendarServer.Models.DatabaseEntities.Display
+@using PortalCalendarServer.Models.POCOs
+
+@{
+    ViewData["IntegrationName"] = "homeassistant";
+}
+
+<fieldset class="row mb-3" id="@(ViewData["IntegrationName"])_fieldset">
+    @await Html.PartialAsync("ConfigUi/_IntegrationToggle", Model, ViewData)
+
+    <div class="form-group row mt-3">
+        @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+        {
+            Display = Model, Key = "homeassistant_url", Label = "Home Assistant URL",
+            ColClass = "col-md-6",
+            HelpText = "Base URL of your Home Assistant instance (e.g. http://homeassistant.local:8123)"
+        })
+        @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+        {
+            Display = Model, Key = "homeassistant_token", Label = "Long-Lived Access Token",
+            ColClass = "col-md-6",
+            HelpText = "Generate in Home Assistant: Profile → Security → Long-Lived Access Tokens"
+        })
+    </div>
+</fieldset>

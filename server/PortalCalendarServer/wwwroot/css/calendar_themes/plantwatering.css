@@ -1,0 +1,151 @@
+:root {
+    /* Define orange as a mix of yellow + red, but only if both exist */
+    --epd-orange: color-mix(in oklch, var(--epd-yellow) 50%, var(--epd-red) 50% );
+    --epd-darkyellow: color-mix(in oklch, var(--epd-yellow) 75%, var(--epd-black) 25% );
+}
+
+
+html,
+body {
+    font-size: clamp(10pt, 4vw, 14pt);
+    font-family: 'Gidole';
+    letter-spacing: 0.02em;
+}
+
+html,
+body,
+div,
+p {
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    background-color: var(--epd-white);
+    color: var(--epd-black);
+}
+
+.content-container {
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Header --- */
+
+.header {
+    font-size: 1.4rem;
+    font-weight: bold;
+    padding-bottom: 0.15rem;
+/*    border-bottom: 2px solid var(--epd-black);*/
+    margin-bottom: 1rem;
+}
+
+/* --- Area sections --- */
+
+.area-section {
+    margin-bottom: 0.4rem;
+}
+
+.area-name {
+    font-size: 1.1rem;
+    font-weight: bold;
+    padding: 0.1rem 0;
+    border-bottom: 1px solid var(--epd-black);
+    margin-top: 0.5rem;
+    margin-bottom: 0.15rem;
+}
+
+/* --- Plant rows --- */
+
+.plant-row {
+    display: flex;
+    align-items: center;
+    padding: 0.15rem 0;
+    gap: 0.4rem;
+}
+
+.plant-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.plant-moisture {
+    width: 3.2rem;
+    text-align: right;
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+/* --- Moisture bar --- */
+
+.moisture-bar-container {
+    width: 5rem;
+    height: 0.8rem;
+    border: 1px solid var(--epd-black);
+    flex-shrink: 0;
+    position: relative;
+    background-color: var(--epd-white);
+}
+
+.moisture-bar-fill {
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+/* --- Status colors --- */
+
+.status-ok .moisture-bar-fill {
+    background-color: var(--epd-black);
+}
+
+.status-dry .plant-name,
+.status-dry .plant-moisture {
+    color: var(--epd-darkyellow, var(--epd-red, var(--epd-black)));
+}
+
+.status-dry .moisture-bar-fill {
+    background-color: var(--epd-darkyellow, var(--epd-red, var(--epd-black)));
+}
+
+.status-wet .plant-name,
+.status-wet .plant-moisture {
+    color: var(--epd-red, var(--epd-black));
+}
+
+.status-wet .moisture-bar-fill {
+    background-color: var(--epd-red, var(--epd-black));
+}
+
+/* --- Threshold markers on bar --- */
+
+.moisture-bar-marker {
+    position: absolute;
+    top: -1px;
+    bottom: -1px;
+    width: 1px;
+    border-left: 1px dashed var(--epd-black);
+    opacity: 0.5;
+}
+
+/* --- Unavailable state --- */
+
+.status-unavailable .plant-name {
+    font-style: italic;
+}
+
+.status-unavailable .moisture-bar-container {
+    opacity: 0.4;
+}
+
+/* --- No sensors message --- */
+
+.no-sensors {
+    text-align: center;
+    padding: 2rem;
+    font-style: italic;
+}

@@ -205,4 +205,5 @@ public class PageViewModel
     public WebImageComponent? WebImage => GetComponent<WebImageComponent>("webimage");
     public ErrorComponent? Error => GetComponent<ErrorComponent>("error");
     public GalleryComponent? Gallery => GetComponent<GalleryComponent>("gallery");
+    public HomeAssistantComponent? HomeAssistant => GetComponent<HomeAssistantComponent>("homeassistant");
 }

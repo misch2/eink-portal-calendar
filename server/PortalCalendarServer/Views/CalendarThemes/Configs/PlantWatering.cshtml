@@ -1,0 +1,103 @@
+@model Display
+@using PortalCalendarServer.Models.DatabaseEntities
+@using PortalCalendarServer.Models.POCOs
+@using PortalCalendarServer.Modules.Builtin
+@using PortalCalendarServer.Services
+@using PortalCalendarServer.Services.PageGeneratorComponents
+@using Microsoft.Extensions.Caching.Memory
+@inject IDisplayService displayService
+@inject IHttpClientFactory httpClientFactory
+@inject IMemoryCache memoryCache
+@inject ILoggerFactory loggerFactory
+
+@{
+    // Fetch moisture entities from Home Assistant
+    var moistureEntities = new List<HomeAssistantEntity>();
+    var haConfigured = displayService.GetConfigBool(Model, "homeassistant");
+    if (haConfigured)
+    {
+        try
+        {
+            var haComponent = new HomeAssistantComponent(displayService, httpClientFactory, memoryCache, loggerFactory);
+            var allEntities = await haComponent.GetStatesAsync(Model);
+            moistureEntities = allEntities
+                .Where(e => e.GetAttribute("device_class") == "moisture")
+                .OrderBy(e => e.FriendlyName)
+                .ToList();
+        }
+        catch
+        {
+            // HA unreachable — dropdowns will be empty
+        }
+    }
+}
+
+@await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+{
+    Display = Model, Key = "display_title", Label = "Title",
+    ColClass = "col-12", MarginClass = "mb-3"
+})
+
+<div class="row">
+    @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+    {
+        Display = Model, Key = "plantwatering_threshold_dry", Label = "Dry threshold (%)",
+        ColClass = "col-md-3", InputType = "number", Step = "1",
+        HelpText = "Below this moisture % the plant is considered too dry (default: 20)"
+    })
+    @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+    {
+        Display = Model, Key = "plantwatering_threshold_wet", Label = "Wet threshold (%)",
+        ColClass = "col-md-3", InputType = "number", Step = "1",
+        HelpText = "Above this moisture % the plant is considered too wet (default: 80)"
+    })
+</div>
+
+<div class="row mt-3">
+    <div class="col-12">
+        <label class="form-label fw-bold">Moisture sensors</label>
+        @if (!haConfigured)
+        {
+            <div class="form-text text-warning mb-2">Enable and configure Home Assistant integration first to populate sensor list.</div>
+        }
+        else if (moistureEntities.Count == 0)
+        {
+            <div class="form-text text-warning mb-2">No moisture sensors found in Home Assistant. Check your connection settings.</div>
+        }
+        else
+        {
+            <div class="form-text mb-2">Select moisture sensors to monitor (@moistureEntities.Count available).</div>
+        }
+    </div>
+</div>
+
+@for (int i = 1; i <= PlantWateringModule.MaxSensors; i++)
+{
+    var key = $"plantwatering_sensor_{i}";
+    var currentValue = displayService.GetConfigWithoutDefaults(Model, key);
+
+    <div class="row">
+        <div class="col-md-8">
+            <label for="@key">Sensor @i</label>
+            <select id="@key" name="@key" class="form-select">
+                <option value="">— none —</option>
+                @foreach (var entity in moistureEntities)
+                {
+                    var label = $"{entity.FriendlyName} ({entity.EntityId})";
+                    if (entity.State != "unavailable" && entity.State != "unknown")
+                    {
+                        label += $" — {entity.State}{entity.UnitOfMeasurement}";
+                    }
+                    <option value="@entity.EntityId" selected="@(currentValue == entity.EntityId)">@label</option>
+                }
+                @if (!string.IsNullOrEmpty(currentValue) && !moistureEntities.Any(e => e.EntityId == currentValue))
+                {
+                    @* Preserve previously saved value even if entity is no longer available *@
+                    <option value="@currentValue" selected="selected">@currentValue (not found)</option>
+                }
+            </select>
+        </div>
+    </div>
+}
+
+@await Html.PartialAsync("~/Views/CalendarThemes/Configs/_BottomStatusBar.cshtml")
