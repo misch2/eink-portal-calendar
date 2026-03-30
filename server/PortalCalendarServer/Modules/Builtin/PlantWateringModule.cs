@@ -31,6 +31,8 @@ public class PlantWateringModule : IPortalModule
         for (int i = 1; i <= MaxSensors; i++)
         {
             keys.Add($"plantwatering_sensor_{i}");
+            keys.Add($"plantwatering_sensor_{i}_threshold_dry");
+            keys.Add($"plantwatering_sensor_{i}_threshold_wet");
         }
         return keys;
     }

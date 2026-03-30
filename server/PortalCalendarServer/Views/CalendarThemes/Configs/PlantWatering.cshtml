@@ -41,13 +41,13 @@
 <div class="row">
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
     {
-        Display = Model, Key = "plantwatering_threshold_dry", Label = "Dry threshold (%)",
+        Display = Model, Key = "plantwatering_threshold_dry", Label = "Global dry threshold (%)",
         ColClass = "col-md-3", InputType = "number", Step = "1",
         HelpText = "Below this moisture % the plant is considered too dry (default: 20)"
     })
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
     {
-        Display = Model, Key = "plantwatering_threshold_wet", Label = "Wet threshold (%)",
+        Display = Model, Key = "plantwatering_threshold_wet", Label = "Global wet threshold (%)",
         ColClass = "col-md-3", InputType = "number", Step = "1",
         HelpText = "Above this moisture % the plant is considered too wet (default: 80)"
     })
@@ -76,8 +76,8 @@
     var key = $"plantwatering_sensor_{i}";
     var currentValue = displayService.GetConfigWithoutDefaults(Model, key);
 
-    <div class="row">
-        <div class="col-md-8">
+    <div class="row mb-2">
+        <div class="col-md-6">
             <label for="@key">Sensor @i</label>
             <select id="@key" name="@key" class="form-select">
                 <option value=""></option>
@@ -97,6 +97,18 @@
                 }
             </select>
         </div>
+        @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+        {
+            Display = Model, Key = $"plantwatering_sensor_{i}_threshold_dry", Label = "Dry threshold (%)",
+            ColClass = "col-md-2", InputType = "number", Step = "1",
+            HelpText = "(leave empty to use default)"
+        })
+        @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+        {
+            Display = Model, Key = $"plantwatering_sensor_{i}_threshold_wet", Label = "Wet threshold (%)",
+            ColClass = "col-md-2", InputType = "number", Step = "1",
+            HelpText = "(leave empty to use default)"
+        })
     </div>
 }
 

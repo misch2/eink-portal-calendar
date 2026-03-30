@@ -11,18 +11,25 @@
     var title = displayService.GetConfig(Model.Display, "display_title");
     if (string.IsNullOrWhiteSpace(title)) title = "Plant Watering Monitor";
 
-    // Read configured sensor entity IDs
+    // Read configured sensor entity IDs and per-sensor thresholds
     var sensorIds = new List<string>();
+    var sensorDryThresholds = new Dictionary<string, int>();
+    var sensorWetThresholds = new Dictionary<string, int>();
     for (int i = 1; i <= PlantWateringModule.MaxSensors; i++)
     {
         var sensorId = displayService.GetConfig(Model.Display, $"plantwatering_sensor_{i}");
         if (!string.IsNullOrWhiteSpace(sensorId))
         {
-            sensorIds.Add(sensorId.Trim());
+            var id = sensorId.Trim();
+            sensorIds.Add(id);
+            var perDry = displayService.GetConfigInt(Model.Display, $"plantwatering_sensor_{i}_threshold_dry");
+            if (perDry.HasValue) sensorDryThresholds[id] = perDry.Value;
+            var perWet = displayService.GetConfigInt(Model.Display, $"plantwatering_sensor_{i}_threshold_wet");
+            if (perWet.HasValue) sensorWetThresholds[id] = perWet.Value;
         }
     }
 
-    // Read thresholds
+    // Read global thresholds (used as fallback)
     var dryThreshold = displayService.GetConfigInt(Model.Display, "plantwatering_threshold_dry") ?? 20;
     var wetThreshold = displayService.GetConfigInt(Model.Display, "plantwatering_threshold_wet") ?? 80;
 
@@ -37,12 +44,16 @@
         double? moisture = null;
         string status = "unavailable";
 
+        // Use per-sensor thresholds if configured, otherwise fall back to global
+        var dry = sensorDryThresholds.GetValueOrDefault(d.EntityId, dryThreshold);
+        var wet = sensorWetThresholds.GetValueOrDefault(d.EntityId, wetThreshold);
+
         if (d.Entity != null && double.TryParse(d.Entity.State, System.Globalization.NumberStyles.Float,
                 System.Globalization.CultureInfo.InvariantCulture, out var val))
         {
             moisture = val;
-            if (val < dryThreshold) status = "dry";
-            else if (val > wetThreshold) status = "wet";
+            if (val < dry) status = "dry";
+            else if (val > wet) status = "wet";
             else status = "ok";
         }
         else if (d.Entity != null && d.Entity.State != "unavailable" && d.Entity.State != "unknown")
@@ -56,6 +67,8 @@
             Area = d.AreaName ?? "Unassigned",
             Moisture = moisture,
             Status = status,
+            DryThreshold = dry,
+            WetThreshold = wet,
         };
     }).ToList();
 
@@ -103,8 +116,8 @@ else
                     </div>
                     <div class="moisture-bar-container">
                         <div class="moisture-bar-fill" style="width: @($"{barWidth:F0}")%"></div>
-                        <div class="moisture-bar-marker" style="left: @dryThreshold%"></div>
-                        <div class="moisture-bar-marker" style="left: @wetThreshold%"></div>
+                        <div class="moisture-bar-marker" style="left: @plant.DryThreshold%"></div>
+                        <div class="moisture-bar-marker" style="left: @plant.WetThreshold%"></div>
                     </div>
                 </div>
             }
