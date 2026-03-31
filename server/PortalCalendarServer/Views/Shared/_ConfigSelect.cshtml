@@ -1,0 +1,38 @@
+@model PortalCalendarServer.Models.POCOs.ConfigSelectModel
+@using PortalCalendarServer.Services
+@inject IDisplayService DisplayService
+
+@{
+    var currentValue = DisplayService.GetConfigWithoutDefaults(Model.Display, Model.Key);
+    var wrapClass = string.Join(" ", new[] { Model.ColClass, Model.MarginClass }.Where(s => !string.IsNullOrEmpty(s)));
+}
+
+<div class="@wrapClass">
+    @if (!string.IsNullOrEmpty(Model.Label))
+    {
+        <label for="@Model.Key">@Model.Label</label>
+    }
+    <select id="@Model.Key" name="@Model.Key"
+            class="form-select"
+            @(Model.Disabled ? Html.Raw("disabled") : Html.Raw(""))>
+        @if (Model.AllowEmpty)
+        {
+            <option value=""></option>
+        }
+        @foreach (var option in Model.Options)
+        {
+            <option value="@option.Value" selected="@(currentValue == option.Value)">@option.Text</option>
+        }
+    </select>
+    @if (!string.IsNullOrEmpty(Model.HelpText))
+    {
+        @if (Model.HelpTextIsHtml)
+        {
+            <div class="form-text">@Html.Raw(Model.HelpText)</div>
+        }
+        else
+        {
+            <div class="form-text">@Model.HelpText</div>
+        }
+    }
+</div>
