@@ -13,11 +13,11 @@
 
 }
 
-@if (displayService.GetConfigBool(Model, "theme_config_status_wakeupinfo"))
+@if (displayService.GetConfigBool(Model, "theme_config_status_lastrenderinfo"))
 {
-    @* Next refresh *@
-    <iconify-icon icon="material-symbols:refresh" style="vertical-align: text-bottom"></iconify-icon>
+    @* Date rendered *@
+    <iconify-icon icon="material-symbols:screenshot-monitor-outline-rounded" style="vertical-align: text-bottom"></iconify-icon>
 
-    <span>Next wakeup at </span>
-    @TimeZoneInfo.ConvertTimeFromUtc(nextWakeup, tz).ToString("t", dateCulture)<text>.</text>
+    <span>Last render at </span>
+    @DateTime.UtcNow.ToString("t", dateCulture)
 }

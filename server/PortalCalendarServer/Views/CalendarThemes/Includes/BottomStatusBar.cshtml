@@ -1,4 +1,6 @@
 @using PortalCalendarServer.Models.DatabaseEntities
+@using PortalCalendarServer.Services
+@inject IDisplayService displayService
 @model Display
 
 <style type="text/css">
@@ -10,7 +12,7 @@
         width: 100%;
     }
 
-    div#bottom-wakeupinfo {
+    div#bottom-wakeupinfo, div#bottom-lastrenderinfo {
         margin-top: 0;
         font-size: 0.7rem;
         /* position: relative; */
@@ -18,6 +20,7 @@
     }
 
     div#battery-status {
+        margin-left: auto;
         text-align: right;
         font-size: 1.3rem;
         position: relative;
@@ -27,10 +30,24 @@
 
 
 <div id="bottom-bar">
-    <div id="bottom-wakeupinfo">
-        @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_WakeupInfo.cshtml", Model)
-    </div>
-    <div id="battery-status">
-        @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_BatteryStatusIcon.cshtml", Model)
-    </div>
+    @if (displayService.GetConfigBool(Model, "theme_config_status_lastrenderinfo"))
+    {
+        <div id="bottom-lastrenderinfo">
+            @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_LastRenderInfo.cshtml", Model)
+        </div>
+    }
+
+    @if (displayService.GetConfigBool(Model, "theme_config_status_wakeupinfo"))
+    {
+        <div id="bottom-wakeupinfo">
+            @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_WakeupInfo.cshtml", Model)
+        </div>
+    }
+
+    @if (displayService.GetConfigBool(Model, "theme_config_status_battery"))
+    {
+        <div id="battery-status">
+            @await Html.PartialAsync("~/Views/CalendarThemes/Includes/_BatteryStatusIcon.cshtml", Model)
+        </div>
+    }
 </div>

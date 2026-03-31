@@ -14,10 +14,10 @@ namespace PortalCalendarServer.Modules.Builtin
 
         public IReadOnlyList<string> OwnedConfigKeys =>
         [
-            "theme_config_status_wakeupinfo", "theme_config_status_battery"
+            "theme_config_status_wakeupinfo", "theme_config_status_lastrenderinfo", "theme_config_status_battery"
         ];
 
-        public IReadOnlyList<string> CheckboxConfigKeys => ["theme_config_status_wakeupinfo", "theme_config_status_battery"];
+        public IReadOnlyList<string> CheckboxConfigKeys => ["theme_config_status_wakeupinfo", "theme_config_status_lastrenderinfo", "theme_config_status_battery"];
 
         public object? CreatePageGeneratorComponent(IServiceProvider services, Display display, DateTime date) => null;
     }

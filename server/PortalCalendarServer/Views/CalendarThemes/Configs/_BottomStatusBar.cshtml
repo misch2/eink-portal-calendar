@@ -11,6 +11,12 @@
         })
     @await Html.PartialAsync("_ConfigCheckbox", new ConfigInputModel
         {
+        Display = Model, Key = "theme_config_status_lastrenderinfo",
+        Label = "Show last render info at the bottom",
+        ColClass = "col-3", MarginClass = ""
+        })
+    @await Html.PartialAsync("_ConfigCheckbox", new ConfigInputModel
+        {
         Display = Model, Key = "theme_config_status_battery",
         Label = "Show battery status at the bottom",
         ColClass = "col-3", MarginClass = ""
