@@ -16,7 +16,7 @@ public class MainConfigModule : IPortalModule
 
     public IReadOnlyList<string> OwnedConfigKeys =>
     [
-        "display_title", "timezone", "date_culture", "lat", "lon", "alt"
+        "display_title", "font_size", "timezone", "date_culture", "lat", "lon", "alt"
     ];
 
     public IReadOnlyList<string> CheckboxConfigKeys => [];
