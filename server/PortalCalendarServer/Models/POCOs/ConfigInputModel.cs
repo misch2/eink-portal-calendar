@@ -4,6 +4,7 @@ namespace PortalCalendarServer.Models.POCOs;
 
 /// <summary>
 /// View model passed to the <c>_ConfigCheckbox</c> and <c>_ConfigTextInput</c> shared partials.
+/// Also serves as the base class for <see cref="ConfigSelectModel"/>.
 /// </summary>
 public class ConfigInputModel
 {
