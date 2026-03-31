@@ -61,9 +61,16 @@
             status = "unavailable";
         }
 
+        var modifiedDeviceName = d.DeviceName;
+        if (!string.IsNullOrEmpty(modifiedDeviceName))
+        {
+            // Remove everything after "/" (including it) from friendly name to avoid cluttering the dropdown with device names (e.g. "Plant Sensor / Moisture" becomes just "Plant Sensor")
+            modifiedDeviceName = System.Text.RegularExpressions.Regex.Replace(modifiedDeviceName, @" */.*$", "");
+        }
+
         return new
         {
-            Name = d.DeviceName ?? d.Entity?.FriendlyName ?? d.EntityId,
+            Name = modifiedDeviceName ?? d.Entity?.FriendlyName ?? d.EntityId,
             Area = d.AreaName ?? "Unassigned",
             Moisture = moisture,
             Status = status,
@@ -99,8 +106,8 @@ else
             @foreach (var plant in area.OrderBy(p => p.Name))
             {
                 var barWidth = plant.Moisture.HasValue
-                    ? Math.Clamp(plant.Moisture.Value, 0, 100)
-                    : 0;
+                ? Math.Clamp(plant.Moisture.Value, 0, 100)
+                : 0;
 
                 <div class="plant-row status-@plant.Status">
                     <div class="plant-name">@plant.Name</div>

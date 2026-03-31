@@ -15,6 +15,36 @@
 
     <fieldset class="row mb-4">
         <legend class="col-md-12">Theme</legend>
+
+        <div class="form-group row mb-4">
+            @await Html.PartialAsync("_ConfigSelect", new ConfigSelectModel
+            {
+                Display = Model, Key = "font_size", Label = "Font size (pt, empty = auto)",
+                ColClass = "col-md-2",
+                Options = new List<SelectOption>
+                {
+                    new SelectOption { Value = "", Text = "Auto (theme default)" },
+                    new SelectOption { Value = "8", Text = "8 pt" },
+                    new SelectOption { Value = "9", Text = "9 pt" },
+                    new SelectOption { Value = "10", Text = "10 pt" },
+                    new SelectOption { Value = "11", Text = "11 pt" },
+                    new SelectOption { Value = "12", Text = "12 pt" },
+                    new SelectOption { Value = "14", Text = "14 pt" },
+                    new SelectOption { Value = "16", Text = "16 pt" },
+                    new SelectOption { Value = "18", Text = "18 pt" },
+                    new SelectOption { Value = "20", Text = "20 pt" },
+                    new SelectOption { Value = "22", Text = "22 pt" },
+                    new SelectOption { Value = "24", Text = "24 pt" },
+                    new SelectOption { Value = "26", Text = "26 pt" },
+                    new SelectOption{ Value = "28", Text = "28 pt" },
+                    new SelectOption{ Value = "30", Text = "30 pt" },
+                    new SelectOption{ Value = "32", Text = "32 pt" },
+                    new SelectOption{ Value = "34", Text = "34 pt" },
+                    new SelectOption{ Value = "36", Text = "36 pt" },
+                    }
+                })
+        </div>
+
         @{
             var themes = (List<Theme>)ViewData["Themes"]!;
         }
@@ -50,36 +80,10 @@
 }
 
 <fieldset class="row mb-3">
-    <legend class="w-auto">Display</legend>
-    <div class="form-group row">
-        @await Html.PartialAsync("_ConfigSelect", new ConfigSelectModel
-        {
-            Display = Model, Key = "font_size", Label = "Font size (pt, empty = auto)",
-            ColClass = "col-md-3", HelpText = "Leave empty to use the theme's default font size",
-            Options = new List<SelectOption>
-            {
-                new SelectOption { Value = "", Text = "Auto (theme default)" },
-                new SelectOption { Value = "8", Text = "8 pt" },
-                new SelectOption { Value = "9", Text = "9 pt" },
-                new SelectOption { Value = "10", Text = "10 pt" },
-                new SelectOption { Value = "11", Text = "11 pt" },
-                new SelectOption { Value = "12", Text = "12 pt" },
-                new SelectOption { Value = "14", Text = "14 pt" },
-                new SelectOption { Value = "16", Text = "16 pt" },
-                new SelectOption { Value = "18", Text = "18 pt" },
-                new SelectOption { Value = "20", Text = "20 pt" },
-                new SelectOption { Value = "22", Text = "22 pt" },
-                new SelectOption { Value = "24", Text = "24 pt" }
-            }
-        })
-    </div>
-</fieldset>
-
-<fieldset class="row mb-3">
     <legend class="w-auto">Location and locale</legend>
     <div class="form-group row">
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
-                {
+        {
             Display = Model, Key = "lat", Label = "Latitude (+N/-S)", ColClass = "col-md-4"
                 })
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
