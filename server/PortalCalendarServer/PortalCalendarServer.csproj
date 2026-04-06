@@ -40,4 +40,8 @@
       <Folder Include="wwwroot\fonts\d-din\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Include="Localization\*.po" CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
+
 </Project>
