@@ -74,6 +74,9 @@ msgstr "Test multiple resolutions"
 msgid "Config"
 msgstr "Config"
 
+msgid "version: {0}"
+msgstr "version: {0}"
+
 # ── Login ────────────────────────────────────────────────
 
 msgid "Portal Calendar"

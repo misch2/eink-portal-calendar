@@ -72,6 +72,9 @@ msgstr "Test více rozlišení"
 msgid "Config"
 msgstr "Konfigurace"
 
+msgid "version: {0}"
+msgstr "verze: {0}"
+
 # ── Login ────────────────────────────────────────────────
 
 msgid "Portal Calendar"
