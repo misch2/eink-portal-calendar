@@ -125,11 +125,13 @@
                             @foreach (var culture in supportedCultures)
                             {
                                 var isActive = culture.Name == currentCulture;
+                                var cultureNativeName = @culture.NativeName.Split(' ')[0]; // Get the first word of the native name (e.g., "English" from "English (United States)")
+                                var cultureCapitalizeFirst = char.ToUpper(cultureNativeName[0]) + cultureNativeName.Substring(1).ToLower();
                                 <button type="button"
                                         class="btn btn-sm @(isActive ? "btn-secondary" : "btn-outline-secondary")"
                                         @(isActive ? "disabled" : "")
                                         onclick="document.cookie='@(CookieRequestCultureProvider.DefaultCookieName)=c='+encodeURIComponent('@culture.Name')+'|uic='+encodeURIComponent('@culture.Name')+';path=/;max-age=31536000;samesite=lax';location.reload();">
-                                    @culture.NativeName.Split(' ')[0]
+                                    @cultureCapitalizeFirst
                                 </button>
                             }
                         </div>
