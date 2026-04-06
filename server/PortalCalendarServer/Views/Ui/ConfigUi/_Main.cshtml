@@ -101,10 +101,17 @@
             Display = Model, Key = "timezone", Label = "Time Zone (format: \"UTC\", \"Europe/Prague\" etc.)",
                 ColClass = "col-md-4"
                 })
-        @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+        @await Html.PartialAsync("_ConfigSelect", new ConfigSelectModel
                 {
-            Display = Model, Key = "date_culture", Label = "Date style (format: \"en-US\", \"cs-CZ\" etc.)",
-                ColClass = "col-md-4"
+            Display = Model, Key = "date_culture", Label = "Date style",
+                ColClass = "col-md-4",
+                AllowEmpty = true,
+                Options = new List<SelectOption>
+                {
+                    new SelectOption { Value = "cs-CZ", Text = "Česky" },
+                    new SelectOption { Value = "en-US", Text = "English (US)" },
+                    new SelectOption { Value = "en-GB", Text = "English (GB)" },
+                }
                 })
     </div>
 </fieldset>
