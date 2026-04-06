@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Options;
@@ -269,14 +270,16 @@ builder.Services.AddPortableObjectLocalization(options =>
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
     var supportedCultures = new[] { "en", "cs" };
-    options.SetDefaultCulture("cs") // FIXME revert back: "en")
+    options.SetDefaultCulture("en")
            .AddSupportedCultures(supportedCultures)
            .AddSupportedUICultures(supportedCultures);
 
-    // Remove the Accept-Language provider so the default culture is always used.
-    // TODO: Once a language picker is added to the UI, replace this with a
-    //       CookieRequestCultureProvider that reads the user's choice.
-    options.RequestCultureProviders.Clear();
+    // Only use the cookie provider so the language picker controls the UI culture.
+    // The cookie name matches CookieRequestCultureProvider.DefaultCookieName.
+    options.RequestCultureProviders = new List<IRequestCultureProvider>
+    {
+        new CookieRequestCultureProvider()
+    };
 });
 builder.Services.AddLocalization();
 

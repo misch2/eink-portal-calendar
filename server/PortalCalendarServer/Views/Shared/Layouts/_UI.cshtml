@@ -2,15 +2,18 @@
 @using PortalCalendarServer.Models.DatabaseEntities
 @using PortalCalendarServer.Services
 @using PortalCalendarServer.Services.BackgroundJobs
+@using Microsoft.AspNetCore.Localization
+@using Microsoft.Extensions.Options
 @inject IDisplayService displayService
 @inject IGalleryService galleryService
 @inject ImageRegenerationService imageRegenerationService
 @inject IWebHostEnvironment environment
 @inject IConfiguration configuration
 @inject IViewLocalizer Localizer
+@inject IOptions<RequestLocalizationOptions> localizationOptions
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="@System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -114,8 +117,24 @@
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     <div class="mt-auto p-2">
+                        @{
+                            var currentCulture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+                            var supportedCultures = localizationOptions.Value.SupportedUICultures!;
+                        }
+                        <div class="d-flex justify-content-center gap-1 mb-2">
+                            @foreach (var culture in supportedCultures)
+                            {
+                                var isActive = culture.Name == currentCulture;
+                                <button type="button"
+                                        class="btn btn-sm @(isActive ? "btn-secondary" : "btn-outline-secondary")"
+                                        @(isActive ? "disabled" : "")
+                                        onclick="document.cookie='@(CookieRequestCultureProvider.DefaultCookieName)=c='+encodeURIComponent('@culture.Name')+'|uic='+encodeURIComponent('@culture.Name')+';path=/;max-age=31536000;samesite=lax';location.reload();">
+                                    @culture.NativeName.Split(' ')[0]
+                                </button>
+                            }
+                        </div>
                         <div class="text-muted text-center mb-2" style="font-size: 0.7rem;">
-                            version: @deployedVersion
+                            @Localizer["version: {0}", deployedVersion]
                         </div>
                         <form method="post" action="/logout">
                             @Html.AntiForgeryToken()
