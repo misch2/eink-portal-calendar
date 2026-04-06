@@ -26,7 +26,8 @@ public class PlantWateringModule : IPortalModule
         var keys = new List<string>
         {
             "plantwatering_threshold_dry",
-            "plantwatering_threshold_wet"
+            "plantwatering_threshold_wet",
+            "plantwatering_history_days"
         };
         for (int i = 1; i <= MaxSensors; i++)
         {

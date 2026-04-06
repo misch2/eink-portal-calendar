@@ -149,3 +149,27 @@ body {
     padding: 2rem;
     font-style: italic;
 }
+
+/* --- Sparkline history chart --- */
+
+.sparkline {
+    width: 5rem;
+    height: 1.2rem;
+    flex-shrink: 0;
+}
+
+.sparkline-line {
+    fill: none;
+    stroke: var(--epd-black);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+}
+
+.sparkline-threshold {
+/*    stroke: var(--epd-black);
+    stroke-width: 0.5;
+    stroke-dasharray: 2 2;
+    opacity: 0.3;
+    vector-effect: non-scaling-stroke;*/
+    opacity: 0.0;
+}

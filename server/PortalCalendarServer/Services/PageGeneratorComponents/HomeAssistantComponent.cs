@@ -180,6 +180,45 @@ public class HomeAssistantComponent(
         }
     }
 
+    /// <summary>
+    /// Fetch state history for the given entity IDs over the specified period.
+    /// Returns a dictionary mapping entity ID to a chronological list of (timestamp, numeric value) pairs.
+    /// Non-numeric states (e.g. "unavailable") are silently skipped.
+    /// Results are cached for 5 minutes.
+    /// </summary>
+    public async Task<IReadOnlyDictionary<string, IReadOnlyList<HistoryPoint>>> GetEntityHistoryAsync(
+        Display display, IReadOnlyList<string> entityIds, DateTime from, DateTime to)
+    {
+        if (entityIds.Count == 0)
+            return new Dictionary<string, IReadOnlyList<HistoryPoint>>();
+
+        var (url, token) = GetConnectionSettings(display);
+        if (url == null || token == null)
+            return new Dictionary<string, IReadOnlyList<HistoryPoint>>();
+
+        var cacheKey = $"ha_history_{display.Id}_{from:O}_{to:O}_{string.Join(",", entityIds)}";
+        if (memoryCache.TryGetValue(cacheKey, out IReadOnlyDictionary<string, IReadOnlyList<HistoryPoint>>? cached) && cached != null)
+            return cached;
+
+        try
+        {
+            var result = await FetchHistoryAsync(url, token, entityIds, from, to);
+
+            memoryCache.Set(cacheKey, result, new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5),
+                Size = result.Values.Sum(v => v.Count) * 64
+            });
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching entity history from Home Assistant at {Url}", url);
+            return new Dictionary<string, IReadOnlyList<HistoryPoint>>();
+        }
+    }
+
     private async Task<IReadOnlyList<HomeAssistantEntity>> FetchStatesAsync(string baseUrl, string token)
     {
         using var client = httpClientFactory.CreateClient();
@@ -205,6 +244,59 @@ public class HomeAssistantComponent(
         response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadAsStringAsync();
+    }
+
+    private async Task<IReadOnlyDictionary<string, IReadOnlyList<HistoryPoint>>> FetchHistoryAsync(
+        string baseUrl, string token, IReadOnlyList<string> entityIds, DateTime from, DateTime to)
+    {
+        using var client = httpClientFactory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var filter = string.Join(",", entityIds);
+        var requestUrl = $"{baseUrl}/api/history/period/{from:O}" +
+            $"?filter_entity_id={Uri.EscapeDataString(filter)}" +
+            $"&end_time={to:O}" +
+            $"&minimal_response&significant_changes_only";
+
+        var response = await client.GetAsync(requestUrl);
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync();
+        var history = JsonSerializer.Deserialize<List<List<HistoryEntry>>>(json, JsonOptions) ?? [];
+
+        var result = new Dictionary<string, IReadOnlyList<HistoryPoint>>();
+        foreach (var entityHistory in history)
+        {
+            if (entityHistory.Count == 0) continue;
+
+            var entityId = entityHistory[0].EntityId;
+            var points = new List<HistoryPoint>();
+
+            foreach (var entry in entityHistory)
+            {
+                if (double.TryParse(entry.State, System.Globalization.NumberStyles.Float,
+                        System.Globalization.CultureInfo.InvariantCulture, out var val))
+                {
+                    points.Add(new HistoryPoint(entry.LastChanged, val));
+                }
+            }
+
+            result[entityId] = points;
+        }
+
+        return result;
+    }
+
+    private class HistoryEntry
+    {
+        [JsonPropertyName("entity_id")]
+        public string EntityId { get; set; } = "";
+
+        [JsonPropertyName("state")]
+        public string State { get; set; } = "";
+
+        [JsonPropertyName("last_changed")]
+        public DateTime LastChanged { get; set; }
     }
 
     private class EntityDetailEntry
@@ -237,6 +329,11 @@ public class HomeAssistantEntityDetails
     /// <summary>The area name assigned to this entity (or its device), if any.</summary>
     public string? AreaName { get; set; }
 }
+
+/// <summary>
+/// A single data point from a Home Assistant entity's state history.
+/// </summary>
+public record HistoryPoint(DateTime Time, double Value);
 
 /// <summary>
 /// Represents a Home Assistant entity with its current state and attributes.

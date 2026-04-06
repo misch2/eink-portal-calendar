@@ -33,10 +33,20 @@
     var dryThreshold = displayService.GetConfigInt(Model.Display, "plantwatering_threshold_dry") ?? 20;
     var wetThreshold = displayService.GetConfigInt(Model.Display, "plantwatering_threshold_wet") ?? 80;
 
+    // History chart settings
+    var historyDays = displayService.GetConfigInt(Model.Display, "plantwatering_history_days") ?? 7;
+
     // Fetch entity details with device/area info
     var details = ha != null && sensorIds.Count > 0
         ? await ha.GetEntityDetailsAsync(Model.Display, sensorIds)
         : [];
+
+    // Fetch history for sparklines
+    var historyFrom = DateTime.UtcNow.AddDays(-historyDays);
+    var historyTo = DateTime.UtcNow;
+    var history = ha != null && sensorIds.Count > 0
+        ? await ha.GetEntityHistoryAsync(Model.Display, sensorIds, historyFrom, historyTo)
+        : new Dictionary<string, IReadOnlyList<HistoryPoint>>();
 
     // Build plant info and group by area
     var plants = details.Select(d =>
@@ -70,12 +80,14 @@
 
         return new
         {
+            EntityId = d.EntityId,
             Name = modifiedDeviceName ?? d.Entity?.FriendlyName ?? d.EntityId,
             Area = d.AreaName ?? "Unassigned",
             Moisture = moisture,
             Status = status,
             DryThreshold = dry,
             WetThreshold = wet,
+            History = history.GetValueOrDefault(d.EntityId) ?? (IReadOnlyList<HistoryPoint>)[],
         };
     }).ToList();
 
@@ -126,6 +138,48 @@ else
                         <div class="moisture-bar-marker" style="left: @plant.DryThreshold%"></div>
                         <div class="moisture-bar-marker" style="left: @plant.WetThreshold%"></div>
                     </div>
+                    @{
+                        const int svgW = 80;
+                        const int svgH = 24;
+                        const int pad = 1;
+
+                        @if (plant.History.Count >= 2)
+                        {
+
+                            var minT = plant.History[0].Time.Ticks;
+                            var maxT = plant.History[^1].Time.Ticks;
+                            var rangeT = maxT - minT;
+                            if (rangeT == 0) rangeT = 1;
+
+                            var minV = 0; //  Math.Min(plant.History.Min(p => p.Value), 0);
+                            var maxV = 100; // Math.Max(plant.History.Max(p => p.Value), 100);
+
+                            var rangeV = maxV - minV;
+                            if (rangeV == 0) rangeV = 1;
+
+                            var points = string.Join(" ", plant.History.Select(p =>
+                            {
+                                var x = pad + (double)(p.Time.Ticks - minT) / rangeT * (svgW - 2 * pad);
+                                var y = pad + (1.0 - (p.Value - minV) / rangeV) * (svgH - 2 * pad);
+                                return $"{x:F1},{y:F1}";
+                            }));
+
+                            // Threshold lines as Y positions
+                            var dryY = pad + (1.0 - (plant.DryThreshold - minV) / rangeV) * (svgH - 2 * pad);
+                            var wetY = pad + (1.0 - (plant.WetThreshold - minV) / rangeV) * (svgH - 2 * pad);
+
+                            <svg class="sparkline" viewBox="0 0 @svgW @svgH" preserveAspectRatio="none">
+                                <line x1="0" y1="@($"{dryY:F1}")" x2="@svgW" y2="@($"{dryY:F1}")" class="sparkline-threshold" />
+                                <line x1="0" y1="@($"{wetY:F1}")" x2="@svgW" y2="@($"{wetY:F1}")" class="sparkline-threshold" />
+                                <polyline points="@points" class="sparkline-line" />
+                            </svg>
+                        }
+                        else
+                        {
+                            <svg class="sparkline" viewBox="0 0 @svgW @svgH" preserveAspectRatio="none">
+                            </svg>
+                        }
+                    }
                 </div>
             }
         </div>
