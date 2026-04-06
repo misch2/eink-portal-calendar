@@ -7,6 +7,7 @@
 @inject ImageRegenerationService imageRegenerationService
 @inject IWebHostEnvironment environment
 @inject IConfiguration configuration
+@inject IViewLocalizer Localizer
 
 <!DOCTYPE html>
 <html lang="en">
@@ -63,10 +64,10 @@
             <div class="sidebar-body">
                 <nav class="nav flex-column">
 
-                    <span class="nav-section-title">Displays</span>
+                    <span class="nav-section-title">@Localizer["Displays"]</span>
                     <a class="nav-link @(navLink == "index" ? "active" : "")"
                        href="@Url.Action(nameof(UiController.SelectDisplay), "Ui")">
-                        All displays
+                        @Localizer["All displays"]
                     </a>
 
                     @foreach (var disp in allDisplays)
@@ -79,10 +80,10 @@
                         </a>
                     }
 
-                    <span class="nav-section-title mt-3">Image galleries</span>
+                    <span class="nav-section-title mt-3">@Localizer["Image galleries"]</span>
                     <a class="nav-link @(navLink == "galleries" ? "active" : "")"
                        href="/galleries">
-                        All galleries
+                        @Localizer["All galleries"]
                     </a>
 
                     @{
@@ -98,14 +99,14 @@
                         </a>
                     }
 
-                    <span class="nav-section-title mt-3">Administration</span>
+                    <span class="nav-section-title mt-3">@Localizer["Administration"]</span>
                     <a class="nav-link @(navLink == "users" ? "active" : "")"
                        href="/users">
-                        Users
+                        @Localizer["Users"]
                     </a>
                     <a class="nav-link @(navLink == "change-password" ? "active" : "")"
                        href="/change-password">
-                        Change password
+                        @Localizer["Change password"]
                     </a>
 
                 </nav>
@@ -118,7 +119,7 @@
                         </div>
                         <form method="post" action="/logout">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-outline-secondary btn-sm w-100">Logout</button>
+                            <button type="submit" class="btn btn-outline-secondary btn-sm w-100">@Localizer["Logout"]</button>
                         </form>
                     </div>
                 }
@@ -140,7 +141,7 @@
                     @if (display != null)
                     {
                         <text>
-                            Selected display: @display.Name
+                            @Localizer["Selected display: {0}", display.Name]
                         </text>
                     }
                     else if (!string.IsNullOrEmpty(ViewData["Title"]?.ToString()))
@@ -165,33 +166,33 @@
                 if (!display.IsDefault())
                 {
                     <p class="row-fluid">
-                        Last contact:
+                        @Localizer["Last contact:"]
                         @if (last_contact_ago.HasValue)
                         {
                             var lc_hours = last_contact_ago.Value.Hours;
                             var lc_minutes = last_contact_ago.Value.Minutes;
                             if (lc_hours > 0)
                             {
-                                @($"{lc_hours} hours ")
+                                @Localizer["{0} hours", lc_hours]
                             }
-                            @($"{lc_minutes} minutes ago.")
+                            @Localizer["{0} minutes ago.", lc_minutes]
                         }
                         else
                         {
-                            @($"never.")
+                            @Localizer["never."]
                         }
 
-                        Next wakeup:
+                        @Localizer["Next wakeup:"]
                         @{
                             var nextWakeupInfo = displayService.GetNextWakeupTime(display);
                             int nw_minutes = nextWakeupInfo.SleepInSeconds / 60;
                             int nw_seconds = nextWakeupInfo.SleepInSeconds % 60;
-                            @($"in {nw_minutes} minutes and {nw_seconds} seconds.")
+                            @Localizer["in {0} minutes and {1} seconds.", nw_minutes, nw_seconds]
                         }
 
-                        Voltage: @(last_voltage?.ToString("F2") ?? "(unknown)") V (@(battery_percent?.ToString("F0") ?? "unknown") %).
+                        @Localizer["Voltage: {0} V ({1} %).", last_voltage?.ToString("F2") ?? "(?)", battery_percent?.ToString("F0") ?? "?"]
 
-                        OTA mode: @(displayService.GetConfigBool(display, "ota_mode") ? "on" : "off").
+                        @Localizer["OTA mode:"] @(displayService.GetConfigBool(display, "ota_mode") ? Localizer["on"] : Localizer["off"]).
 
                     </p>
                 }
@@ -202,17 +203,17 @@
                             @if (!display.IsDefault())
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link @(navLink == "home" ? "active" : "")" href="@Url.Action(nameof(UiController.Home), "Ui", new { displayNumber = display.Id })">Home</a>
+                                    <a class="nav-link @(navLink == "home" ? "active" : "")" href="@Url.Action(nameof(UiController.Home), "Ui", new { displayNumber = display.Id })">@Localizer["Home"]</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link @(navLink == "compare" ? "active" : "")" href="@Url.Action(nameof(UiController.Test), "Ui", new { displayNumber = display.Id })">Test page</a>
+                                    <a class="nav-link @(navLink == "compare" ? "active" : "")" href="@Url.Action(nameof(UiController.Test), "Ui", new { displayNumber = display.Id })">@Localizer["Test page"]</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link @(navLink == "compare" ? "active" : "")" href="@Url.Action(nameof(UiController.TestMultiResolution), "Ui", new { displayNumber = display.Id })">Test multiple resolutions</a>
+                                    <a class="nav-link @(navLink == "compare" ? "active" : "")" href="@Url.Action(nameof(UiController.TestMultiResolution), "Ui", new { displayNumber = display.Id })">@Localizer["Test multiple resolutions"]</a>
                                 </li>
                             }
                             <li class="nav-item">
-                                <a class="nav-link @(navLink == "config_ui" ? "active" : "")" href="@Url.Action(nameof(UiController.ConfigUiShow), "Ui", new { displayNumber = display.Id })">Config</a>
+                                <a class="nav-link @(navLink == "config_ui" ? "active" : "")" href="@Url.Action(nameof(UiController.ConfigUiShow), "Ui", new { displayNumber = display.Id })">@Localizer["Config"]</a>
                             </li>
                         </ul>
                     </div>

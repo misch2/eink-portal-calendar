@@ -76,7 +76,8 @@ builder.Services.AddDbContext<SessionContext>(options =>
 // Support for both API and MVC controllers
 builder.Services.AddControllersWithViews(options =>
     options.ModelBinderProviders.Insert(0, new FlexibleBoolBinderProvider())
-    );
+    )
+    .AddViewLocalization();
 
 builder.Services.AddAntiforgery(options =>
 {
@@ -84,10 +85,10 @@ builder.Services.AddAntiforgery(options =>
 });
 
 // Add memory cache for HTTP response caching
-builder.Services.AddMemoryCache(options =>
-{
-    options.SizeLimit = 100 * 1024 * 1024; // 100MB cache limit
-});
+// Note: SizeLimit is intentionally not set because OrchardCore's LocalizationManager
+// uses IMemoryCache internally without setting Size on its entries, which would throw.
+// The cache still evicts entries under memory pressure via GC compaction.
+builder.Services.AddMemoryCache();
 
 // Trust X-Forwarded-For from the local reverse proxy so rate limiting uses the real client IP.
 // By default only loopback (127.0.0.1 / ::1) is a known proxy, which is correct for local deployments.
@@ -259,6 +260,26 @@ var invariant = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentCulture = invariant;
 CultureInfo.DefaultThreadCurrentUICulture = invariant;
 
+// Localization: use OrchardCore PO files for UI string translations.
+// PO files live in Localization/ (e.g. Localization/cs.po).
+builder.Services.AddPortableObjectLocalization(options =>
+{
+    options.ResourcesPath = "Localization";
+});
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var supportedCultures = new[] { "en", "cs" };
+    options.SetDefaultCulture("cs") // FIXME revert back: "en")
+           .AddSupportedCultures(supportedCultures)
+           .AddSupportedUICultures(supportedCultures);
+
+    // Remove the Accept-Language provider so the default culture is always used.
+    // TODO: Once a language picker is added to the UI, replace this with a
+    //       CookieRequestCultureProvider that reads the user's choice.
+    options.RequestCultureProviders.Clear();
+});
+builder.Services.AddLocalization();
+
 // Configure OpenAPI with custom settings
 builder.Services.AddOpenApi(options =>
 {
@@ -340,8 +361,8 @@ if (app.Environment.IsDevelopment())
     }); // Available at /scalar/v1
 }
 
-//// Use request localization
-//app.UseRequestLocalization();
+// Use request localization (reads culture from cookie, query string, or Accept-Language header)
+app.UseRequestLocalization();
 
 //app.UseHttpsRedirection();    // Not needed since this is typically run behind a reverse proxy that handles TLS termination
 

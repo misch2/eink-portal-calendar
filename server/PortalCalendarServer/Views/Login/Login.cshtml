@@ -1,3 +1,4 @@
+@inject IViewLocalizer Localizer
 @{
     Layout = null;
     ViewData["Title"] = "Login";
@@ -14,7 +15,7 @@
 <body class="d-flex justify-content-center align-items-center vh-100 bg-light">
     <div class="card shadow" style="min-width: 320px">
         <div class="card-body p-4">
-            <h4 class="card-title mb-4">Portal Calendar</h4>
+            <h4 class="card-title mb-4">@Localizer["Portal Calendar"]</h4>
 
             @if (ViewData["Error"] != null)
             {
@@ -24,14 +25,14 @@
             <form method="post" action="/login?returnUrl=@Uri.EscapeDataString(ViewData["ReturnUrl"]?.ToString() ?? "")">
                 @Html.AntiForgeryToken()
                 <div class="mb-3">
-                    <label class="form-label">Username</label>
+                    <label class="form-label">@Localizer["Username"]</label>
                     <input type="text" name="username" class="form-control" autofocus required />
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Password</label>
+                    <label class="form-label">@Localizer["Password"]</label>
                     <input type="password" name="password" class="form-control" required />
                 </div>
-                <button type="submit" class="btn btn-primary w-100">Sign in</button>
+                <button type="submit" class="btn btn-primary w-100">@Localizer["Sign in"]</button>
             </form>
         </div>
     </div>

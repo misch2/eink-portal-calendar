@@ -3,18 +3,19 @@
 @using PortalCalendarServer.Models.POCOs
 @using PortalCalendarServer.Services
 @inject IDisplayService DisplayService
+@inject IViewLocalizer Localizer
 
 @if (!Model.IsDefault())
 {
     <fieldset class="row mb-3">
-        <legend class="w-auto">Name (title)</legend>
+        <legend class="w-auto">@Localizer["Name (title)"]</legend>
         <div class="col-md-12">
             <input id="display_name" name="display_name" type="text" class="form-control" value="@Model.Name">
         </div>
     </fieldset>
 
     <fieldset class="row mb-4">
-        <legend class="col-md-12">Theme</legend>
+        <legend class="col-md-12">@Localizer["Theme"]</legend>
 
         <div class="form-group row mb-4">
             @await Html.PartialAsync("_ConfigSelect", new ConfigSelectModel
@@ -66,11 +67,11 @@
             <div class="card Xborder-primary Xborder-1 Xbg-light">
                 <div class="card-body">
                     <h6 class="card-subtitle mb-3 text-muted">
-                        <i class="bi bi-gear"></i> Theme-specific Settings
+                        <i class="bi bi-gear"></i> @Localizer["Theme-specific Settings"]
                     </h6>
                     <div id="theme-customization" class="row">
                         <div class="col-12">
-                            <small>Select a theme above to see available customization options</small>
+                            <small>@Localizer["Select a theme above to see available customization options"]</small>
                         </div>
                     </div>
                 </div>
@@ -80,7 +81,7 @@
 }
 
 <fieldset class="row mb-3">
-    <legend class="w-auto">Location and locale</legend>
+    <legend class="w-auto">@Localizer["Location and locale"]</legend>
     <div class="form-group row">
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
         {

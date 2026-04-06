@@ -3,6 +3,7 @@
 @using PortalCalendarServer.Services
 @using PortalCalendarServer.Services.PageGeneratorComponents
 @inject IDisplayService displayService
+@inject IViewLocalizer Localizer
 @{
     Layout = "~/Views/Shared/Layouts/Epaper/_InsetLayout.cshtml";
     ViewBag.Title = "Plant Watering";
@@ -82,7 +83,7 @@
         {
             EntityId = d.EntityId,
             Name = modifiedDeviceName ?? d.Entity?.FriendlyName ?? d.EntityId,
-            Area = d.AreaName ?? "Unassigned",
+            Area = d.AreaName ?? Localizer["Unassigned"].Value,
             Moisture = moisture,
             Status = status,
             DryThreshold = dry,
@@ -104,7 +105,7 @@
 
 @if (sensorIds.Count == 0)
 {
-    <div class="no-sensors">No moisture sensors configured.</div>
+    <div class="no-sensors">@Localizer["No moisture sensors configured."]</div>
 }
 else
 {
@@ -130,7 +131,7 @@ else
                         }
                         else
                         {
-                            <text>N/A</text>
+                            <text>@Localizer["N/A"]</text>
                         }
                     </div>
                     <div class="moisture-bar-container">

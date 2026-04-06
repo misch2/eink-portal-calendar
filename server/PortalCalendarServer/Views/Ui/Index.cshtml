@@ -1,6 +1,7 @@
 @model Display
 @using PortalCalendarServer.Controllers
 @using PortalCalendarServer.Models.DatabaseEntities
+@inject IViewLocalizer Localizer
 
 @{
     var width = Model.VirtualWidth();
@@ -35,10 +36,11 @@
     </style>
 }
 
+@{
+    var testPageUrl = Url.Action(nameof(UiController.Test), "Ui", new { displayNumber = Model.Id });
+}
 <p class="row-fluid pb-3">
-    Image for the ePaper display
-    (if you'd like to see the original image generated from HTML+CSS template then look at the 
-    <a href="@Url.Action(nameof(UiController.Test), "Ui", new { displayNumber = Model.Id })">test page</a>).
+    @Localizer["Image for the ePaper display (if you'd like to see the original image generated from HTML+CSS template then look at the <a href='{0}'>test page</a>).", testPageUrl]
 </p>
 
 <p class="row-fluid">

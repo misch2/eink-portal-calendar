@@ -3,6 +3,7 @@
 @using PortalCalendarServer.Services
 @model Display
 @inject IDisplayService displayService
+@inject IViewLocalizer Localizer
 
 @{
     var wakeupInfo = displayService.GetNextWakeupTime(Model);
@@ -18,6 +19,5 @@
     @* Date rendered *@
     <iconify-icon icon="material-symbols:screenshot-monitor-outline-rounded" style="vertical-align: text-bottom"></iconify-icon>
 
-    <span>Last render at </span>
-    @DateTime.UtcNow.ToString("t", dateCulture)
+    <span>@Localizer["Last render at {0}", DateTime.UtcNow.ToString("t", dateCulture)]</span>
 }

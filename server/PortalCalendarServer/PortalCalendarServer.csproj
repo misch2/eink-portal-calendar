@@ -23,6 +23,7 @@
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.3.0" />
     <PackageReference Include="Microsoft.Playwright" Version="1.58.0" />
     <PackageReference Include="MQTTnet" Version="4.3.7.1207" />
+    <PackageReference Include="OrchardCore.Localization.Core" Version="2.2.1" />
     <PackageReference Include="PublicHoliday" Version="3.11.0" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.12.36" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />

@@ -1,0 +1,416 @@
+# Portal Calendar – Czech translation
+msgid ""
+msgstr ""
+"Language: cs\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n>=2 && n<=4 ? 1 : 2);\n"
+
+# ── Shared layout (_UI.cshtml) ──────────────────────────
+
+msgid "Displays"
+msgstr "Displeje"
+
+msgid "All displays"
+msgstr "Všechny displeje"
+
+msgid "Image galleries"
+msgstr "Galerie obrázků"
+
+msgid "All galleries"
+msgstr "Všechny galerie"
+
+msgid "Administration"
+msgstr "Administrace"
+
+msgid "Users"
+msgstr "Uživatelé"
+
+msgid "Change password"
+msgstr "Změnit heslo"
+
+msgid "Logout"
+msgstr "Odhlásit"
+
+msgid "Selected display: {0}"
+msgstr "Vybraný displej: {0}"
+
+msgid "Last contact:"
+msgstr "Poslední kontakt:"
+
+msgid "{0} hours"
+msgstr "{0} hodin"
+
+msgid "{0} minutes ago."
+msgstr "před {0} minutami."
+
+msgid "never."
+msgstr "nikdy."
+
+msgid "Next wakeup:"
+msgstr "Další probuzení:"
+
+msgid "in {0} minutes and {1} seconds."
+msgstr "za {0} minut a {1} sekund."
+
+msgid "OTA mode:"
+msgstr "OTA režim:"
+
+msgid "on"
+msgstr "zapnuto"
+
+msgid "off"
+msgstr "vypnuto"
+
+msgid "Home"
+msgstr "Domů"
+
+msgid "Test page"
+msgstr "Testovací stránka"
+
+msgid "Test multiple resolutions"
+msgstr "Test více rozlišení"
+
+msgid "Config"
+msgstr "Konfigurace"
+
+# ── Login ────────────────────────────────────────────────
+
+msgid "Portal Calendar"
+msgstr "Portal Calendar"
+
+msgid "Username"
+msgstr "Uživatelské jméno"
+
+msgid "Password"
+msgstr "Heslo"
+
+msgid "Sign in"
+msgstr "Přihlásit se"
+
+# ── Config UI – Main tab ────────────────────────────────
+
+msgid "Configuration"
+msgstr "Konfigurace"
+
+msgid "Save Configuration"
+msgstr "Uložit konfiguraci"
+
+msgid "Name (title)"
+msgstr "Název (titulek)"
+
+msgid "Theme"
+msgstr "Motiv"
+
+msgid "Theme-specific Settings"
+msgstr "Nastavení motivu"
+
+msgid "Select a theme above to see available customization options"
+msgstr "Vyberte motiv výše pro zobrazení možností přizpůsobení"
+
+msgid "Location and locale"
+msgstr "Poloha a jazyk"
+
+msgid "Override global settings"
+msgstr "Přepsat globální nastavení"
+
+msgid "Integration enabled"
+msgstr "Integrace zapnuta"
+
+# ── Config UI – Home Assistant ──────────────────────────
+
+msgid "Home Assistant URL"
+msgstr "URL Home Assistanta"
+
+msgid "Base URL of your Home Assistant instance (e.g. http://homeassistant.local:8123)"
+msgstr "Základní URL vaší instance Home Assistanta (např. http://homeassistant.local:8123)"
+
+msgid "Long-Lived Access Token"
+msgstr "Dlouhodobý přístupový token"
+
+msgid "Generate in Home Assistant: Profile → Security → Long-Lived Access Tokens"
+msgstr "Vygenerujte v Home Assistantovi: Profil → Zabezpečení → Dlouhodobé přístupové tokeny"
+
+# ── Theme views ─────────────────────────────────────────
+
+msgid "No moisture sensors configured."
+msgstr "Žádné senzory vlhkosti nejsou nakonfigurovány."
+
+msgid "N/A"
+msgstr "N/A"
+
+msgid "Unassigned"
+msgstr "Nepřiřazeno"
+
+msgid "Next wakeup at {0}."
+msgstr "Další probuzení v {0}."
+
+msgid "Last render at {0}"
+msgstr "Poslední vykreslení v {0}"
+
+# ── Voltage / battery ───────────────────────────────────
+
+msgid "Voltage: {0} V ({1} %)."
+msgstr "Napětí: {0} V ({1} %)."
+
+# ── Test page (Test.cshtml) ─────────────────────────────
+
+msgid "Calendar page <a href='{0}'>as HTML</a>:"
+msgstr "Stránka kalendáře <a href='{0}'>jako HTML</a>:"
+
+msgid "Calendar page <a href='{0}'>as IMG</a> with fixed size ({1}):"
+msgstr "Stránka kalendáře <a href='{0}'>jako IMG</a> s pevnou velikostí ({1}):"
+
+msgid "rendered {0} minutes ago"
+msgstr "vykresleno před {0} minutami"
+
+msgid "never rendered"
+msgstr "nikdy nevykresleno"
+
+# ── Home page (Index.cshtml) ────────────────────────────
+
+msgid "Image for the ePaper display (if you'd like to see the original image generated from HTML+CSS template then look at the <a href='{0}'>test page</a>)."
+msgstr "Obrázek pro ePaper displej (pokud chcete vidět původní obrázek vygenerovaný z HTML+CSS šablony, podívejte se na <a href='{0}'>testovací stránku</a>)."
+
+# ── Display list (DisplayList.cshtml) ───────────────────
+
+msgid "Enable Pairing Mode (5 min)"
+msgstr "Zapnout režim párování (5 min)"
+
+msgid "Pairing active, {0}s remaining (click to disable)"
+msgstr "Párování aktivní, zbývá {0}s (klikněte pro vypnutí)"
+
+msgid "Name"
+msgstr "Název"
+
+msgid "Resolution"
+msgstr "Rozlišení"
+
+msgid "Display type"
+msgstr "Typ displeje"
+
+msgid "Firmware"
+msgstr "Firmware"
+
+msgid "Battery"
+msgstr "Baterie"
+
+msgid "Next wakeup"
+msgstr "Další probuzení"
+
+msgid "(local time)"
+msgstr "(místní čas)"
+
+msgid "Status"
+msgstr "Stav"
+
+msgid "Last image"
+msgstr "Poslední obrázek"
+
+msgid "Bitmap age"
+msgstr "Stáří obrázku"
+
+msgid "Action"
+msgstr "Akce"
+
+msgid "(in {0} minutes)"
+msgstr "(za {0} minut)"
+
+msgid "unknown"
+msgstr "neznámé"
+
+msgid "Frozen since {0}"
+msgstr "Zamrzlý od {0}"
+
+msgid "Possibly frozen since {0}"
+msgstr "Možná zamrzlý od {0}"
+
+msgid "{0} hours, {1} missed connect(s)"
+msgstr "{0} hodin, {1} zmeškaných spojení"
+
+msgid "Keyless"
+msgstr "Bez klíče"
+
+msgid "OTA mode active"
+msgstr "OTA režim aktivní"
+
+msgid "Delete"
+msgstr "Smazat"
+
+msgid "Delete display"
+msgstr "Smazat displej"
+
+msgid "Do you really want to <b>completely delete</b> display #{0} <b>\"{1}\"</b>?"
+msgstr "Opravdu chcete <b>úplně smazat</b> displej #{0} <b>\"{1}\"</b>?"
+
+msgid "Cancel"
+msgstr "Zrušit"
+
+# ── Galleries list (Galleries/Index.cshtml) ─────────────
+
+msgid "Id"
+msgstr "Id"
+
+msgid "Images"
+msgstr "Obrázky"
+
+msgid "Created"
+msgstr "Vytvořeno"
+
+msgid "Rename gallery"
+msgstr "Přejmenovat galerii"
+
+msgid "Copy gallery"
+msgstr "Kopírovat galerii"
+
+msgid "Delete gallery"
+msgstr "Smazat galerii"
+
+msgid "New Gallery"
+msgstr "Nová galerie"
+
+msgid "Create New Gallery"
+msgstr "Vytvořit novou galerii"
+
+msgid "Create"
+msgstr "Vytvořit"
+
+msgid "Do you really want to delete gallery <b>\"{0}\"</b> and all its images?"
+msgstr "Opravdu chcete smazat galerii <b>\"{0}\"</b> a všechny její obrázky?"
+
+msgid "Copy gallery <b>\"{0}\"</b> and all its images."
+msgstr "Kopírovat galerii <b>\"{0}\"</b> a všechny její obrázky."
+
+msgid "New gallery name"
+msgstr "Nový název galerie"
+
+msgid "Copy"
+msgstr "Kopírovat"
+
+msgid "New name"
+msgstr "Nový název"
+
+msgid "Rename"
+msgstr "Přejmenovat"
+
+# ── Gallery detail (Galleries/Detail.cshtml) ────────────
+
+msgid "Upload Image"
+msgstr "Nahrát obrázek"
+
+msgid "No images in this gallery yet."
+msgstr "V této galerii zatím nejsou žádné obrázky."
+
+msgid "Show"
+msgstr "Zobrazit"
+
+msgid "Hide"
+msgstr "Skrýt"
+
+msgid "Rotate 90°"
+msgstr "Otočit o 90°"
+
+msgid "Copy to gallery"
+msgstr "Kopírovat do galerie"
+
+msgid "Edit"
+msgstr "Upravit"
+
+msgid "No description"
+msgstr "Bez popisu"
+
+msgid "Image file"
+msgstr "Soubor obrázku"
+
+msgid "Description (optional)"
+msgstr "Popis (volitelný)"
+
+msgid "Upload"
+msgstr "Nahrát"
+
+msgid "Delete image"
+msgstr "Smazat obrázek"
+
+msgid "Do you really want to delete this image?"
+msgstr "Opravdu chcete smazat tento obrázek?"
+
+msgid "Edit image"
+msgstr "Upravit obrázek"
+
+msgid "Description"
+msgstr "Popis"
+
+msgid "Replace image (optional)"
+msgstr "Nahradit obrázek (volitelné)"
+
+msgid "Save"
+msgstr "Uložit"
+
+# ── Users (Users/Index.cshtml) ──────────────────────────
+
+msgid "you"
+msgstr "vy"
+
+msgid "Add New User"
+msgstr "Přidat nového uživatele"
+
+msgid "Add User"
+msgstr "Přidat uživatele"
+
+msgid "Delete user"
+msgstr "Smazat uživatele"
+
+msgid "Do you really want to delete user <b>\"{0}\"</b>?"
+msgstr "Opravdu chcete smazat uživatele <b>\"{0}\"</b>?"
+
+# ── Change password (Users/ChangePassword.cshtml) ───────
+
+msgid "Change Password"
+msgstr "Změnit heslo"
+
+msgid "Current Password"
+msgstr "Aktuální heslo"
+
+msgid "New Password"
+msgstr "Nové heslo"
+
+msgid "Confirm New Password"
+msgstr "Potvrdit nové heslo"
+
+# ── Test multi-resolution (TestMultiResolution.cshtml) ──
+
+msgid "Landscape"
+msgstr "Na šířku"
+
+msgid "Portrait"
+msgstr "Na výšku"
+
+# ── Google Fit auth ─────────────────────────────────────
+
+msgid "Success!"
+msgstr "Úspěch!"
+
+msgid "Google Fit authentication successful."
+msgstr "Ověření Google Fit bylo úspěšné."
+
+msgid "Auth token:"
+msgstr "Autorizační token:"
+
+msgid "Refresh token:"
+msgstr "Obnovovací token:"
+
+msgid "Return to Configuration"
+msgstr "Zpět na konfiguraci"
+
+msgid "Authentication Error"
+msgstr "Chyba ověření"
+
+msgid "Authentication Failed"
+msgstr "Ověření selhalo"
+
+msgid "Return to Home"
+msgstr "Zpět na hlavní stránku"
+
+msgid "Authorize calendar to use Google Fit with the values below"
+msgstr "Autorizovat kalendář pro použití Google Fit s hodnotami níže"
+
+msgid "See <a href='{0}'>{0}</a> to get client ID and secret values:"
+msgstr "Viz <a href='{0}'>{0}</a> pro získání Client ID a Client secret:"

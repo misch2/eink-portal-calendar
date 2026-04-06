@@ -1,21 +1,22 @@
 @model Display
 @using PortalCalendarServer.Controllers
 @using PortalCalendarServer.Models.DatabaseEntities
+@inject IViewLocalizer Localizer
 
-<h1>Success!</h1>
+<h1>@Localizer["Success!"]</h1>
 
-<p>Google Fit authentication successful.</p>
+<p>@Localizer["Google Fit authentication successful."]</p>
 
 <div class="mb-3">
-    <label class="form-label">Auth token:</label>
+    <label class="form-label">@Localizer["Auth token:"]</label>
     <pre class="border p-2 bg-light">@ViewData["AccessToken"]</pre>
 </div>
 
 <div class="mb-3">
-    <label class="form-label">Refresh token:</label>
+    <label class="form-label">@Localizer["Refresh token:"]</label>
     <pre class="border p-2 bg-light">@ViewData["RefreshToken"]</pre>
 </div>
 
 <p>
-    <a href="@Url.Action(nameof(UiController.ConfigUiShow), "Ui", new { displayNumber = Model.Id })" class="btn btn-primary">Return to Configuration</a>
+    <a href="@Url.Action(nameof(UiController.ConfigUiShow), "Ui", new { displayNumber = Model.Id })" class="btn btn-primary">@Localizer["Return to Configuration"]</a>
 </p>

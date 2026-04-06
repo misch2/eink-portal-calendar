@@ -3,6 +3,7 @@
 @using PortalCalendarServer.Services
 @model Display
 @inject IDisplayService displayService
+@inject IViewLocalizer Localizer
 
 @{
     var wakeupInfo = displayService.GetNextWakeupTime(Model);
@@ -18,6 +19,5 @@
     @* Next refresh *@
     <iconify-icon icon="material-symbols:refresh" style="vertical-align: text-bottom"></iconify-icon>
 
-    <span>Next wakeup at </span>
-    @TimeZoneInfo.ConvertTimeFromUtc(nextWakeup, tz).ToString("t", dateCulture)<text>.</text>
+    <span>@Localizer["Next wakeup at {0}.", TimeZoneInfo.ConvertTimeFromUtc(nextWakeup, tz).ToString("t", dateCulture)]</span>
 }

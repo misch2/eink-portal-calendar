@@ -1,6 +1,7 @@
 @model Display
 @using PortalCalendarServer.Controllers
 @using PortalCalendarServer.Models.DatabaseEntities
+@inject IViewLocalizer Localizer
 
 <!-- https://css-tricks.com/snippets/css/a-guide-to-flexbox/ -->
 <div style="display: flex; flex-direction: column; gap: 1.5rem;">
@@ -33,7 +34,7 @@
             <div>
                 <div style="display: flex; flex-direction: row; gap: 1.5rem; align-items: flex-start;">
                     <div>
-                        <h5>@width x @height Landscape</h5>
+                        <h5>@width x @height @Localizer["Landscape"]</h5>
                         <iframe src="@pageUrl"
                                 width="@width"
                                 height="@height"
@@ -41,7 +42,7 @@
                         </iframe>
                     </div>
                     <div>
-                        <h5>@height x @width Portrait</h5>
+                        <h5>@height x @width @Localizer["Portrait"]</h5>
                         <iframe src="@pageUrl"
                                 width="@height"
                                 height="@width"
