@@ -82,7 +82,7 @@ body {
 /* --- Moisture bar --- */
 
 .moisture-bar-container {
-    width: 5rem;
+    width: 4rem;
     height: 0.8rem;
     border: 1px solid var(--epd-black);
     flex-shrink: 0;
@@ -153,7 +153,7 @@ body {
 /* --- Sparkline history chart --- */
 
 .sparkline {
-    width: 5rem;
+    width: 4rem;
     height: 1.2rem;
     flex-shrink: 0;
 }
