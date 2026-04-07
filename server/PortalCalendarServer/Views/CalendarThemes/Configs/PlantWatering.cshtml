@@ -77,7 +77,7 @@
     var currentValue = displayService.GetConfigWithoutDefaults(Model, key);
 
     <div class="row mb-2">
-        <div class="col-md-6">
+        <div class="col-md-5">
             <label for="@key">Sensor @i</label>
             <select id="@key" name="@key" class="form-select">
                 <option value=""></option>
@@ -100,15 +100,24 @@
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
         {
             Display = Model, Key = $"plantwatering_sensor_{i}_threshold_dry", Label = "Dry threshold (%)",
-            ColClass = "col-md-2", InputType = "number", Step = "1",
-            HelpText = "(leave empty to use default)"
+            ColClass = "col-md-2", InputType = "number", Step = "1"
         })
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
         {
             Display = Model, Key = $"plantwatering_sensor_{i}_threshold_wet", Label = "Wet threshold (%)",
-            ColClass = "col-md-2", InputType = "number", Step = "1",
-            HelpText = "(leave empty to use default)"
+            ColClass = "col-md-2", InputType = "number", Step = "1"
         })
+        @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+        {
+            Display = Model, Key = $"plantwatering_sensor_{i}_name_override", Label = "Name override",
+            ColClass = "col-md-2", InputType = "text"
+        })
+        @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+        {
+            Display = Model, Key = $"plantwatering_sensor_{i}_order_in_area", Label = "Order (in area)",
+            ColClass = "col-md-1", InputType = "number", Step = "1"
+        })
+
     </div>
 }
 

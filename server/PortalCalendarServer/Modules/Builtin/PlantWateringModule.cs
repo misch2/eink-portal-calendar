@@ -27,6 +27,8 @@ public class PlantWateringModule : IPortalModule
         {
             "plantwatering_threshold_dry",
             "plantwatering_threshold_wet",
+            "plantwatering_name_override",
+            "plantwatering_order_in_area",
             "plantwatering_history_days"
         };
         for (int i = 1; i <= MaxSensors; i++)
@@ -34,6 +36,8 @@ public class PlantWateringModule : IPortalModule
             keys.Add($"plantwatering_sensor_{i}");
             keys.Add($"plantwatering_sensor_{i}_threshold_dry");
             keys.Add($"plantwatering_sensor_{i}_threshold_wet");
+            keys.Add($"plantwatering_sensor_{i}_name_override");
+            keys.Add($"plantwatering_sensor_{i}_order_in_area");
         }
         return keys;
     }

@@ -16,6 +16,8 @@
     var sensorIds = new List<string>();
     var sensorDryThresholds = new Dictionary<string, int>();
     var sensorWetThresholds = new Dictionary<string, int>();
+    var sensorNameOverrides = new Dictionary<string, string>();
+    var sensorOrdersInArea = new Dictionary<string, int>();
     for (int i = 1; i <= PlantWateringModule.MaxSensors; i++)
     {
         var sensorId = displayService.GetConfig(Model.Display, $"plantwatering_sensor_{i}");
@@ -27,6 +29,10 @@
             if (perDry.HasValue) sensorDryThresholds[id] = perDry.Value;
             var perWet = displayService.GetConfigInt(Model.Display, $"plantwatering_sensor_{i}_threshold_wet");
             if (perWet.HasValue) sensorWetThresholds[id] = perWet.Value;
+            var perNameOverride = displayService.GetConfig(Model.Display, $"plantwatering_sensor_{i}_name_override");
+            if (!string.IsNullOrWhiteSpace(perNameOverride)) sensorNameOverrides[id] = perNameOverride.Trim();
+            var perOrderOnArea = displayService.GetConfigInt(Model.Display, $"plantwatering_sensor_{i}_order_in_area");
+            if (perOrderOnArea.HasValue) sensorOrdersInArea[id] = perOrderOnArea.Value;
         }
     }
 
@@ -95,8 +101,9 @@
         return new
         {
             EntityId = d.EntityId,
-            Name = modifiedDeviceName ?? d.Entity?.FriendlyName ?? d.EntityId,
+            Name = sensorNameOverrides.GetValueOrDefault(d.EntityId, modifiedDeviceName ?? d.Entity?.FriendlyName ?? d.EntityId),
             Area = d.AreaName ?? Localizer["Unassigned"].Value,
+            OrderInArea = sensorOrdersInArea.GetValueOrDefault(d.EntityId, int.MaxValue),
             Moisture = moisture,
             Status = status,
             DryThreshold = dry,
@@ -129,7 +136,7 @@ else
         <div class="area-section">
             <div class="area-name">@area.Key</div>
 
-            @foreach (var plant in area.OrderBy(p => p.Name))
+            @foreach (var plant in area.OrderBy(p => p.OrderInArea).ThenBy(p => p.Name))
             {
                 var barWidth = plant.Moisture.HasValue
                 ? Math.Clamp(plant.Moisture.Value, 0, 100)
