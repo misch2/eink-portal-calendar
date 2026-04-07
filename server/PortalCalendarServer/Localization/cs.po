@@ -46,8 +46,8 @@ msgstr "Vybraný displej: {0}"
 msgid "Last contact:"
 msgstr "Poslední kontakt:"
 
-msgid "{0} hours"
-msgstr "{0} hodin"
+msgid "{0} hours {1} minutes ago."
+msgstr "před {0} hodinami a {1} minutami."
 
 msgid "{0} minutes ago."
 msgstr "před {0} minutami."
@@ -527,4 +527,3 @@ msgstr "Automaticky (výchozí nastavení pro téma)"
 
 msgid "Font size"
 msgstr "Velikost písma"
-

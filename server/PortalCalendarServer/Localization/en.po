@@ -48,8 +48,8 @@ msgstr "Selected display: {0}"
 msgid "Last contact:"
 msgstr "Last contact:"
 
-msgid "{0} hours"
-msgstr "{0} hours"
+msgid "{0} hours {1} minutes ago."
+msgstr "{0} hours {1} minutes ago."
 
 msgid "{0} minutes ago."
 msgstr "{0} minutes ago."

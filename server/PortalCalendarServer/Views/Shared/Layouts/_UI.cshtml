@@ -194,9 +194,12 @@
                             var lc_minutes = last_contact_ago.Value.Minutes;
                             if (lc_hours > 0)
                             {
-                                @Localizer["{0} hours", lc_hours]
+                                @Localizer["{0} hours {1} minutes ago.", lc_hours, lc_minutes]
                             }
-                            @Localizer["{0} minutes ago.", lc_minutes]
+                            else
+                            {
+                                @Localizer["{0} minutes ago.", lc_minutes]
+                            }
                         }
                         else
                         {
