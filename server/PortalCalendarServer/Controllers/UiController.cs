@@ -42,7 +42,6 @@ public class UiController(
             .ToListAsync();
 
         ViewData["NavLink"] = "index";
-        ViewData["Title"] = "Displays";
 
         return View("DisplayList", displays);
     }
@@ -58,7 +57,6 @@ public class UiController(
         }
 
         ViewData["NavLink"] = "home";
-        ViewData["Title"] = $"Display {display.Name}";
         ViewBag.Display = display; // for global layout
 
         return View("Index", display);
@@ -75,7 +73,6 @@ public class UiController(
         }
 
         ViewData["NavLink"] = "compare";
-        ViewData["Title"] = $"Test - {display.Name}";
         ViewBag.Display = display; // for global layout
 
         return View("Test", display);
@@ -92,7 +89,6 @@ public class UiController(
         }
 
         ViewData["NavLink"] = "compare";
-        ViewData["Title"] = $"Test - {display.Name}";
         ViewBag.Display = display; // for global layout
 
         return View("TestMultiResolution", display);
@@ -140,6 +136,8 @@ public class UiController(
             return NotFound("Display with this ID not found");
         }
 
+        ApplyDisplayLanguage(display);
+
         if (!string.IsNullOrEmpty(force_error))
         {
             _logger.LogWarning("Forcing error page for display {DisplayId}: {ErrorMessage}", displayNumber, force_error);
@@ -178,7 +176,6 @@ public class UiController(
         }
 
         ViewData["NavLink"] = "config_ui";
-        ViewData["Title"] = $"Configuration - {display.Name}";
         ViewData["Themes"] = await _themeService.GetActiveThemesAsync();
         ViewData["LastVoltage"] = _displayService.GetVoltage(display);
         ViewData["LastVoltageRaw"] = _displayService.GetConfig(display, "_last_voltage_raw");
@@ -391,6 +388,16 @@ public class UiController(
     /// Used both from action methods (for view model preparation errors)
     /// and from the result filter (for .cshtml rendering errors).
     /// </summary>
+    /// <summary>
+    /// Sets CurrentUICulture to the display's configured culture so that
+    /// @Localizer["..."] in theme views resolves against the display locale.
+    /// </summary>
+    private void ApplyDisplayLanguage(Display display)
+    {
+        var language = _displayService.GetDisplayLanguage(display);
+        HttpContext.Items["ForcedUICulture"] = language;
+    }
+
     private ViewResult CalendarErrorView(Exception ex, Display display)
     {
         var error = new ErrorComponent

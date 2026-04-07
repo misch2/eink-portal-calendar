@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Options;
@@ -75,8 +76,12 @@ builder.Services.AddDbContext<SessionContext>(options =>
 // Add services to the container
 // Support for both API and MVC controllers
 builder.Services.AddControllersWithViews(options =>
-    options.ModelBinderProviders.Insert(0, new FlexibleBoolBinderProvider())
-    );
+    {
+        options.ModelBinderProviders.Insert(0, new FlexibleBoolBinderProvider());
+        options.Filters.Add<PortalCalendarServer.Controllers.Filters.ForceUICultureFilter>();
+    }
+    )
+    .AddViewLocalization();
 
 builder.Services.AddAntiforgery(options =>
 {
@@ -84,10 +89,10 @@ builder.Services.AddAntiforgery(options =>
 });
 
 // Add memory cache for HTTP response caching
-builder.Services.AddMemoryCache(options =>
-{
-    options.SizeLimit = 100 * 1024 * 1024; // 100MB cache limit
-});
+// Note: SizeLimit is intentionally not set because OrchardCore's LocalizationManager
+// uses IMemoryCache internally without setting Size on its entries, which would throw.
+// The cache still evicts entries under memory pressure via GC compaction.
+builder.Services.AddMemoryCache();
 
 // Trust X-Forwarded-For from the local reverse proxy so rate limiting uses the real client IP.
 // By default only loopback (127.0.0.1 / ::1) is a known proxy, which is correct for local deployments.
@@ -259,6 +264,28 @@ var invariant = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentCulture = invariant;
 CultureInfo.DefaultThreadCurrentUICulture = invariant;
 
+// Localization: use OrchardCore PO files for UI string translations.
+// PO files live in Localization/ (e.g. Localization/cs.po).
+builder.Services.AddPortableObjectLocalization(options =>
+{
+    options.ResourcesPath = "Localization";
+});
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var supportedCultures = new[] { "en", "cs" };
+    options.SetDefaultCulture("en")
+           .AddSupportedCultures(supportedCultures)
+           .AddSupportedUICultures(supportedCultures);
+
+    // Only use the cookie provider so the language picker controls the UI culture.
+    // The cookie name matches CookieRequestCultureProvider.DefaultCookieName.
+    options.RequestCultureProviders = new List<IRequestCultureProvider>
+    {
+        new CookieRequestCultureProvider()
+    };
+});
+builder.Services.AddLocalization();
+
 // Configure OpenAPI with custom settings
 builder.Services.AddOpenApi(options =>
 {
@@ -340,8 +367,17 @@ if (app.Environment.IsDevelopment())
     }); // Available at /scalar/v1
 }
 
-//// Use request localization
-//app.UseRequestLocalization();
+// Use request localization (reads culture from cookie, query string, or Accept-Language header)
+app.UseRequestLocalization();
+
+// The localization middleware above sets both CurrentCulture and CurrentUICulture from the cookie.
+// We only want UICulture to change (for @Localizer["…"] translations); CurrentCulture must stay
+// invariant so that numbers use '.' as the decimal separator everywhere (SVG coords, API URLs, etc.).
+app.Use((context, next) =>
+{
+    CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+    return next();
+});
 
 //app.UseHttpsRedirection();    // Not needed since this is typically run behind a reverse proxy that handles TLS termination
 

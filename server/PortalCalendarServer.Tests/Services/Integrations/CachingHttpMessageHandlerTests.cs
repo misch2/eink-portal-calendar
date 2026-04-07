@@ -22,7 +22,7 @@ public class CachingHttpMessageHandlerTests : IDisposable
         _mockInnerHandler = new Mock<HttpMessageHandler>();
         _memoryCache = new MemoryCache(new MemoryCacheOptions
         {
-            SizeLimit = 1024 * 1024 * 10 // 10MB
+            //SizeLimit = 1024 * 1024 * 10 // 10MB
         });
         _mockLogger = new Mock<ILogger<CachingHttpMessageHandler>>();
 

@@ -203,7 +203,6 @@ public class GoogleFitAuthController : Controller
         }
 
         ViewData["NavLink"] = "config_ui";
-        ViewData["Title"] = "Google Fit Authentication Successful";
         ViewData["AccessToken"] = accessToken;
         ViewData["RefreshToken"] = _displayService.GetConfig(display, "_googlefit_refresh_token");
         ViewBag.Display = display;

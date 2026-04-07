@@ -94,7 +94,7 @@ public class MetNoIconsMapping
     /// <summary>
     /// Map symbol code to localized description
     /// </summary>
-    public string? MapDescription(string? code, string language = "cz")
+    public string? MapDescription(string? code, string language)
     {
         var details = GetSymbolDetails(code);
         if (details == null)
@@ -102,9 +102,8 @@ public class MetNoIconsMapping
 
         return language.ToLower() switch
         {
-            "cz" or "cs" => details.DescriptionCz,
-            "en" => details.DescriptionEn,
-            _ => details.DescriptionCz
+            "cs" => details.DescriptionCz,
+            _ => details.DescriptionEn
         };
     }
 }

@@ -1,5 +1,6 @@
 @model PortalCalendarServer.Models.DatabaseEntities.Display
 @using PortalCalendarServer.Services
+@inject IViewLocalizer Localizer
 
 @{
     var displayService = (DisplayService)ViewData["DisplayService"]!;
@@ -18,7 +19,7 @@
                    id="_@(integrationName)_override_global" 
                    data-integration="@integrationName"
                    @(hasOverride ? "checked" : "")>
-            <label class="form-check-label" for="_@(integrationName)_override_global">Override global settings</label>
+            <label class="form-check-label" for="_@(integrationName)_override_global">@Localizer["Override global settings"]</label>
         </div>
     </div>
 }
@@ -33,7 +34,7 @@
                data-default-checked="@(defaultValue ? "true" : "false")"
                @(currentValue ? "checked" : "")
                @(isDisabled ? "disabled" : "")>
-        <label class="form-check-label" for="@integrationName">Integration enabled</label>
+        <label class="form-check-label" for="@integrationName">@Localizer["Integration enabled"]</label>
     </div>
 </div>
 

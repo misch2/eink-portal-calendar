@@ -59,7 +59,7 @@ public abstract class IntegrationServiceTestBase : IDisposable
         // Setup memory cache
         MemoryCache = new MemoryCache(new MemoryCacheOptions
         {
-            SizeLimit = 1024 * 1024 * 10 // 10MB
+            //SizeLimit = 1024 * 1024 * 10 // 10MB
         });
 
         // Setup logger

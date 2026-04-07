@@ -101,6 +101,22 @@ public class DisplayService(
         return new CultureInfo(cultureName);
     }
 
+    public string GetDisplayLanguage(Display display)
+    {
+        var culture = GetDateCultureInfo(display);
+        if (culture.IsNeutralCulture || culture.Equals(CultureInfo.InvariantCulture))
+            return "en";
+        return culture.TwoLetterISOLanguageName;
+    }
+
+    public string GetDisplayCountryCode(Display display)
+    {
+        var culture = GetDateCultureInfo(display);
+        if (culture.IsNeutralCulture || culture.Equals(CultureInfo.InvariantCulture))
+            return "US";
+        return new RegionInfo(culture.Name).TwoLetterISORegionName;
+    }
+
     /// <summary>
     /// Get configuration value for a display, with fallback to default display (ID = 0)
     /// </summary>

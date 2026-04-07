@@ -16,7 +16,6 @@ public class UsersController(UserService userService) : Controller
         var users = await userService.GetAllUsersAsync();
 
         ViewData["NavLink"] = "users";
-        ViewData["Title"] = "Users";
 
         return View("~/Views/Users/Index.cshtml", users);
     }
@@ -80,7 +79,6 @@ public class UsersController(UserService userService) : Controller
     public IActionResult ChangePassword()
     {
         ViewData["NavLink"] = "change-password";
-        ViewData["Title"] = "Change Password";
 
         return View("~/Views/Users/ChangePassword.cshtml");
     }
@@ -94,7 +92,6 @@ public class UsersController(UserService userService) : Controller
         [FromForm] string confirmPassword)
     {
         ViewData["NavLink"] = "change-password";
-        ViewData["Title"] = "Change Password";
 
         if (string.IsNullOrWhiteSpace(newPassword))
         {

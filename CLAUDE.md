@@ -92,10 +92,29 @@ Registered in `Program.cs`: bitmap pre-generation, cache cleanup, missed connect
 | `server/localdata/` | Dev-only SQLite databases and generated images |
 | `GxEPD2/` | E-paper display library (git submodule) |
 
+## Localization
+
+The server UI uses **OrchardCore Localization** with GNU gettext `.po` files. Localization is UI-only — the REST API is not localized.
+
+- **Package**: `OrchardCore.Localization.Core`
+- **Translation files**: `server/PortalCalendarServer/Localization/{culture}.po` (currently `en.po` and `cs.po`)
+- **Culture selection**: Cookie-based only (`CookieRequestCultureProvider`), no Accept-Language fallback
+- **Thread culture**: Explicitly set to `InvariantCulture` to avoid disturbing number formatting in forms and logs; UI culture is separate
+
+### Adding/updating translations
+1. Use `@Localizer["Key"]` in Razor views (supports parameters: `@Localizer["Text {0}", value]`)
+2. Add the corresponding `msgid`/`msgstr` entries to **all** `.po` files
+3. Run `bash server/check-missing-localizations.sh` to verify no keys are missing — this also runs in CI
+
+### Adding a new language
+1. Create a new `{culture}.po` file in `server/PortalCalendarServer/Localization/`
+2. Add the culture code to the `supportedCultures` array in `Program.cs`
+3. The language switcher in the sidebar auto-discovers supported cultures
+
 ## CI/CD
 
 - `.github/workflows/client-build.yml` — PlatformIO builds on self-hosted Linux runner
-- `.github/workflows/server-build.yml` — .NET 9 build + xUnit tests
+- `.github/workflows/server-build.yml` — .NET 9 build + xUnit tests + localization check
 - `.github/workflows/server-release.yml` — Release automation
 
 ### Command Execution (ALL AGENTS)

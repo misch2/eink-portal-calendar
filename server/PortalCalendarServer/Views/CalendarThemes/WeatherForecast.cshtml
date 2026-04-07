@@ -3,7 +3,9 @@
 @using PortalCalendarServer.Models.DatabaseEntities
 @using PortalCalendarServer.Models.Weather
 @using PortalCalendarServer.Services
+@using Microsoft.AspNetCore.Mvc.Localization
 @inject IDisplayService displayService
+@inject IViewLocalizer Localizer
 @{
     Layout = "~/Views/Shared/Layouts/Epaper/_InsetLayout.cshtml";
     ViewBag.Title = "Calendar - Weather";
@@ -58,7 +60,7 @@
                 string? nameForDay = null;
                 if (holidayInfo != null)
                 {
-                    nameForDay = holidayInfo.LocalName;
+                    nameForDay = holidayInfo.Name;
                 }
                 else if (nameDayInfo != null)
                 {
@@ -103,10 +105,19 @@
                 <i class="wi wi-strong-wind wi-inline"></i> @wind m/s
                 @{
                     var windFrom = (int)(currentWeather.WindFrom / 45 + 0.5) % 8; // 0 - 7, 0 = N, 1 = NE, ...
-                    var windNameCz = new[] { "S", "SV", "V", "JV", "J", "JZ", "Z", "SZ" }[windFrom];
+                    var windDirections = new[] {
+                        Localizer["N"].Value,
+                        Localizer["NE"].Value,
+                        Localizer["E"].Value,
+                        Localizer["SE"].Value,
+                        Localizer["S"].Value,
+                        Localizer["SW"].Value,
+                        Localizer["W"].Value,
+                        Localizer["NW"].Value
+                    };
                 }
                 <br>
-                @windNameCz
+                @windDirections[windFrom]
             </div>
 
             <div class="current-clouds">
@@ -147,11 +158,11 @@
             string dayDescription;
             if (dt.Date == Model.Date.Date)
             {
-                dayDescription = "dnes";
+                dayDescription = Localizer["today"].Value;
             }
             else if (dt.Date == Model.Date.Date.AddDays(1))
             {
-                dayDescription = "zítra";
+                dayDescription = Localizer["tomorrow"].Value;
             }
             else
             {

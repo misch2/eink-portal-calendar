@@ -3,31 +3,35 @@
 @using PortalCalendarServer.Models.DatabaseEntities
 @using PortalCalendarServer.Services
 @inject IDisplayService displayService
+@inject IViewLocalizer Localizer
+@{
+    ViewData["Title"] = Localizer["Displays"].Value;
+}
 
 <div class="mb-3">
     @Html.AntiForgeryToken()
     <button id="pairing-btn" class="btn btn-secondary btn-sm" onclick="togglePairing()">
-        Enable Pairing Mode (5 min)
+        @Localizer["Enable Pairing Mode (5 min)"]
     </button>
 </div>
 
 <table class="table table-hover">
     <thead>
         <tr>
-            <th scope="col">Name</th>
-            <th scope="col">Resolution</th>
-            <th scope="col">Display type</th>
-            <th scope="col">Firmware</th>
-            <th scope="col">Battery</th>
+            <th scope="col">@Localizer["Name"]</th>
+            <th scope="col">@Localizer["Resolution"]</th>
+            <th scope="col">@Localizer["Display type"]</th>
+            <th scope="col">@Localizer["Firmware"]</th>
+            <th scope="col">@Localizer["Battery"]</th>
             <th scope="col">
-                Next wakeup
+                @Localizer["Next wakeup"]
                 <br />
-                (local time)
+                @Localizer["(local time)"]
             </th>
-            <th scope="col">Status</th>
-            <th scope="col">Last image</th>
-            <th scope="col">Bitmap age</th>
-            <th scope="col">Action</th>
+            <th scope="col">@Localizer["Status"]</th>
+            <th scope="col">@Localizer["Last image"]</th>
+            <th scope="col">@Localizer["Bitmap age"]</th>
+            <th scope="col">@Localizer["Action"]</th>
         </tr>
     </thead>
     <tbody>
@@ -76,7 +80,7 @@
                         var minutes = Math.Round(nextWakeupInfo.SleepInSeconds / 60.0);
                         @($"{TimeZoneInfo.ConvertTimeFromUtc(nextWakeupInfo.NextWakeup, tz).ToString("g", dateCulture)}")
                         <br />
-                        @($"(in {minutes} minutes)")
+                        @Localizer["(in {0} minutes)", minutes]
                     }
                 </td>
                 <td>
@@ -90,21 +94,21 @@
                             var lastVisit = displayService.GetLastVisit(d);
                             var lastVisitLocalStr = lastVisit.HasValue
                             ? TimeZoneInfo.ConvertTimeFromUtc(lastVisit.Value, tz).ToString("g", dateCulture)
-                            : "unknown";
+                            : Localizer["unknown"].Value;
 
                             if (missedConnects >= minFailures)
                             {
-                                <span class="badge bg-danger">Frozen since @lastVisitLocalStr</span>
+                                <span class="badge bg-danger">@Localizer["Frozen since {0}", lastVisitLocalStr]</span>
                             }
                             else
                             {
-                                <span class="badge bg-info">Possibly frozen since @lastVisitLocalStr</span>
+                                <span class="badge bg-info">@Localizer["Possibly frozen since {0}", lastVisitLocalStr]</span>
                             }
                             <br />
-                            @if (lastVisit.HasValue)
+                            if (lastVisit.HasValue)
                             {
                                 var hoursSince = (int)((DateTime.UtcNow - lastVisit.Value).TotalHours + 0.5);
-                                <text>@($"{hoursSince} hours, {missedConnects} missed connect(s)")</text>
+                                <text>@Localizer["{0} hours, {1} missed connect(s)", hoursSince, missedConnects]</text>
                             }
                         }
                         else
@@ -114,11 +118,11 @@
 
                         if (d.ApiKey == null)
                         {
-                            <span class="badge bg-warning text-dark">Keyless</span>
+                            <span class="badge bg-warning text-dark">@Localizer["Keyless"]</span>
                         }
                         if (displayService.GetConfigBool(d, "ota_mode"))
                         {
-                            <span class="badge bg-warning text-dark">OTA mode active</span>
+                            <span class="badge bg-warning text-dark">@Localizer["OTA mode active"]</span>
                         }
                     }
                 </td>
@@ -155,7 +159,7 @@
                                 data-bs-target="#delete_modal"
                                 data-display-id="@d.Id"
                                 data-display-name="@d.Name">
-                            Delete
+                            @Localizer["Delete"]
                         </button>
                     }
                 </td>
@@ -169,19 +173,17 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Delete display</h5>
+                <h5 class="modal-title">@Localizer["Delete display"]</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                Do you really want to <b>completely delete</b> display
-                #<span class="delete_modal_display_id"></span>
-                <b>"<span class="delete_modal_display_name"></span>"</b>?
+                @Localizer["Do you really want to <b>completely delete</b> display #{0} <b>\"{1}\"</b>?", "<span class='delete_modal_display_id'></span>", "<span class='delete_modal_display_name'></span>"]
             </div>
             <div class="modal-footer">
                 <form id="delete_form" method="post" action="">
                     @Html.AntiForgeryToken()
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Cancel"]</button>
+                    <button type="submit" class="btn btn-danger">@Localizer["Delete"]</button>
                 </form>
             </div>
         </div>
@@ -190,6 +192,11 @@
 
 @section Scripts {
     <script>
+        var jsL = {
+            pairingActive: '@Html.Raw(Localizer["Pairing active, {0}s remaining (click to disable)"].Value)',
+            enablePairing: '@Html.Raw(Localizer["Enable Pairing Mode (5 min)"].Value)'
+        };
+
         // Pairing mode UI
         var pairingTimer = null;
         var pairingActive = false;
@@ -210,12 +217,12 @@
             return el ? el.value : '';
         }
 
-        function pairingLabel(s) { return 'Pairing active, ' + s + 's remaining (click to disable)'; }
+        function pairingLabel(s) { return jsL.pairingActive.replace('{0}', s); }
 
         function stopPairingCountdown() {
             clearInterval(pairingTimer);
             pairingActive = false;
-            document.getElementById('pairing-btn').textContent = 'Enable Pairing Mode (5 min)';
+            document.getElementById('pairing-btn').textContent = jsL.enablePairing;
         }
 
         function startPairingCountdown(seconds) {

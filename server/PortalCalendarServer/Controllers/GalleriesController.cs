@@ -15,7 +15,6 @@ public class GalleriesController(IGalleryService galleryService) : Controller
         var galleries = await galleryService.GetAllGalleriesAsync();
 
         ViewData["NavLink"] = "galleries";
-        ViewData["Title"] = "Galleries";
 
         return View("~/Views/Galleries/Index.cshtml", galleries);
     }

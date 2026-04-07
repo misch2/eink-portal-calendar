@@ -1,9 +1,9 @@
-﻿namespace PortalCalendarServer.Services.Integrations
+namespace PortalCalendarServer.Services.Integrations
 {
     public interface INameDayService : IIntegrationService
     {
-        NameDayInfo? GetNameDay(DateTime date, string countryCode = "CZ");
-        List<NameDayInfo> GetNameDaysForMonth(int year, int month, string countryCode = "CZ");
+        NameDayInfo? GetNameDay(DateTime date, string countryCode);
+        List<NameDayInfo> GetNameDaysForMonth(int year, int month, string countryCode);
     }
 
     /// <summary>
@@ -12,19 +12,14 @@
     public class NameDayInfo
     {
         /// <summary>
-        /// Name(s) celebrated on this day
-        /// </summary>
-        public string Name { get; set; } = string.Empty;
-
-        /// <summary>
         /// Date of the name day
         /// </summary>
         public DateTime Date { get; set; }
 
         /// <summary>
-        /// Country code (e.g., "CZ" for Czech Republic)
+        /// Name(s) celebrated on this day
         /// </summary>
-        public string CountryCode { get; set; } = "CZ";
+        public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// Additional description or alternative names

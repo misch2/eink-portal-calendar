@@ -2,14 +2,18 @@
 @using PortalCalendarServer.Models.DatabaseEntities
 @using PortalCalendarServer.Services
 @using PortalCalendarServer.Services.BackgroundJobs
+@using Microsoft.AspNetCore.Localization
+@using Microsoft.Extensions.Options
 @inject IDisplayService displayService
 @inject IGalleryService galleryService
 @inject ImageRegenerationService imageRegenerationService
 @inject IWebHostEnvironment environment
 @inject IConfiguration configuration
+@inject IViewLocalizer Localizer
+@inject IOptions<RequestLocalizationOptions> localizationOptions
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="@System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -63,10 +67,10 @@
             <div class="sidebar-body">
                 <nav class="nav flex-column">
 
-                    <span class="nav-section-title">Displays</span>
+                    <span class="nav-section-title">@Localizer["Displays"]</span>
                     <a class="nav-link @(navLink == "index" ? "active" : "")"
                        href="@Url.Action(nameof(UiController.SelectDisplay), "Ui")">
-                        All displays
+                        @Localizer["All displays"]
                     </a>
 
                     @foreach (var disp in allDisplays)
@@ -79,10 +83,10 @@
                         </a>
                     }
 
-                    <span class="nav-section-title mt-3">Image galleries</span>
+                    <span class="nav-section-title mt-3">@Localizer["Image galleries"]</span>
                     <a class="nav-link @(navLink == "galleries" ? "active" : "")"
                        href="/galleries">
-                        All galleries
+                        @Localizer["All galleries"]
                     </a>
 
                     @{
@@ -98,14 +102,14 @@
                         </a>
                     }
 
-                    <span class="nav-section-title mt-3">Administration</span>
+                    <span class="nav-section-title mt-3">@Localizer["Administration"]</span>
                     <a class="nav-link @(navLink == "users" ? "active" : "")"
                        href="/users">
-                        Users
+                        @Localizer["Users"]
                     </a>
                     <a class="nav-link @(navLink == "change-password" ? "active" : "")"
                        href="/change-password">
-                        Change password
+                        @Localizer["Change password"]
                     </a>
 
                 </nav>
@@ -113,12 +117,30 @@
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     <div class="mt-auto p-2">
+                        @{
+                            var currentCulture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+                            var supportedCultures = localizationOptions.Value.SupportedUICultures!;
+                        }
+                        <div class="d-flex justify-content-center gap-1 mb-2">
+                            @foreach (var culture in supportedCultures)
+                            {
+                                var isActive = culture.Name == currentCulture;
+                                var cultureNativeName = @culture.NativeName.Split(' ')[0]; // Get the first word of the native name (e.g., "English" from "English (United States)")
+                                var cultureCapitalizeFirst = char.ToUpper(cultureNativeName[0]) + cultureNativeName.Substring(1).ToLower();
+                                <button type="button"
+                                        class="btn btn-sm @(isActive ? "btn-secondary" : "btn-outline-secondary")"
+                                        @(isActive ? "disabled" : "")
+                                        onclick="document.cookie='@(CookieRequestCultureProvider.DefaultCookieName)=c='+encodeURIComponent('@culture.Name')+'|uic='+encodeURIComponent('@culture.Name')+';path=/;max-age=31536000;samesite=lax';location.reload();">
+                                    @cultureCapitalizeFirst
+                                </button>
+                            }
+                        </div>
                         <div class="text-muted text-center mb-2" style="font-size: 0.7rem;">
-                            version: @deployedVersion
+                            @Localizer["version: {0}", deployedVersion]
                         </div>
                         <form method="post" action="/logout">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-outline-secondary btn-sm w-100">Logout</button>
+                            <button type="submit" class="btn btn-outline-secondary btn-sm w-100">@Localizer["Logout"]</button>
                         </form>
                     </div>
                 }
@@ -140,7 +162,7 @@
                     @if (display != null)
                     {
                         <text>
-                            Selected display: @display.Name
+                            @Localizer["Selected display: {0}", display.Name]
                         </text>
                     }
                     else if (!string.IsNullOrEmpty(ViewData["Title"]?.ToString()))
@@ -165,33 +187,36 @@
                 if (!display.IsDefault())
                 {
                     <p class="row-fluid">
-                        Last contact:
+                        @Localizer["Last contact:"]
                         @if (last_contact_ago.HasValue)
                         {
                             var lc_hours = last_contact_ago.Value.Hours;
                             var lc_minutes = last_contact_ago.Value.Minutes;
                             if (lc_hours > 0)
                             {
-                                @($"{lc_hours} hours ")
+                                @Localizer["{0} hours {1} minutes ago.", lc_hours, lc_minutes]
                             }
-                            @($"{lc_minutes} minutes ago.")
+                            else
+                            {
+                                @Localizer["{0} minutes ago.", lc_minutes]
+                            }
                         }
                         else
                         {
-                            @($"never.")
+                            @Localizer["never."]
                         }
 
-                        Next wakeup:
+                        @Localizer["Next wakeup:"]
                         @{
                             var nextWakeupInfo = displayService.GetNextWakeupTime(display);
                             int nw_minutes = nextWakeupInfo.SleepInSeconds / 60;
                             int nw_seconds = nextWakeupInfo.SleepInSeconds % 60;
-                            @($"in {nw_minutes} minutes and {nw_seconds} seconds.")
+                            @Localizer["in {0} minutes and {1} seconds.", nw_minutes, nw_seconds]
                         }
 
-                        Voltage: @(last_voltage?.ToString("F2") ?? "(unknown)") V (@(battery_percent?.ToString("F0") ?? "unknown") %).
+                        @Localizer["Voltage: {0} V ({1} %).", last_voltage?.ToString("F2") ?? "(?)", battery_percent?.ToString("F0") ?? "?"]
 
-                        OTA mode: @(displayService.GetConfigBool(display, "ota_mode") ? "on" : "off").
+                        @Localizer["OTA mode:"] @(displayService.GetConfigBool(display, "ota_mode") ? Localizer["on"] : Localizer["off"]).
 
                     </p>
                 }
@@ -202,17 +227,17 @@
                             @if (!display.IsDefault())
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link @(navLink == "home" ? "active" : "")" href="@Url.Action(nameof(UiController.Home), "Ui", new { displayNumber = display.Id })">Home</a>
+                                    <a class="nav-link @(navLink == "home" ? "active" : "")" href="@Url.Action(nameof(UiController.Home), "Ui", new { displayNumber = display.Id })">@Localizer["Home"]</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link @(navLink == "compare" ? "active" : "")" href="@Url.Action(nameof(UiController.Test), "Ui", new { displayNumber = display.Id })">Test page</a>
+                                    <a class="nav-link @(navLink == "compare" ? "active" : "")" href="@Url.Action(nameof(UiController.Test), "Ui", new { displayNumber = display.Id })">@Localizer["Test page"]</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link @(navLink == "compare" ? "active" : "")" href="@Url.Action(nameof(UiController.TestMultiResolution), "Ui", new { displayNumber = display.Id })">Test multiple resolutions</a>
+                                    <a class="nav-link @(navLink == "compare" ? "active" : "")" href="@Url.Action(nameof(UiController.TestMultiResolution), "Ui", new { displayNumber = display.Id })">@Localizer["Test multiple resolutions"]</a>
                                 </li>
                             }
                             <li class="nav-item">
-                                <a class="nav-link @(navLink == "config_ui" ? "active" : "")" href="@Url.Action(nameof(UiController.ConfigUiShow), "Ui", new { displayNumber = display.Id })">Config</a>
+                                <a class="nav-link @(navLink == "config_ui" ? "active" : "")" href="@Url.Action(nameof(UiController.ConfigUiShow), "Ui", new { displayNumber = display.Id })">@Localizer["Config"]</a>
                             </li>
                         </ul>
                     </div>

@@ -8,7 +8,8 @@ namespace PortalCalendarServer.Services.PageGeneratorComponents;
 /// </summary>
 public class PublicHolidayComponent(
     ILogger<PageGeneratorService> logger,
-    IPublicHolidayService publicHolidayService)
+    IPublicHolidayService publicHolidayService,
+    string countryCode)
 {
     /// <summary>
     /// Get public holiday information for the specified date.
@@ -16,8 +17,8 @@ public class PublicHolidayComponent(
     /// </summary>
     public PublicHolidayInfo? GetPublicHolidayInfo(DateTime date)
     {
-        logger.LogDebug("Getting public holiday information for {Date}", date);
-        return publicHolidayService.GetPublicHoliday(date);
+        logger.LogDebug("Getting public holiday information for {Date} in {CountryCode}", date, countryCode);
+        return publicHolidayService.GetPublicHoliday(date, countryCode);
     }
 
     /// <summary>
@@ -25,7 +26,7 @@ public class PublicHolidayComponent(
     /// </summary>
     public List<PublicHolidayInfo> GetYearHolidays(DateTime date)
     {
-        return publicHolidayService.GetPublicHolidaysForYear(date.Year);
+        return publicHolidayService.GetPublicHolidaysForYear(date.Year, countryCode);
     }
 
     /// <summary>
@@ -33,7 +34,7 @@ public class PublicHolidayComponent(
     /// </summary>
     public bool IsPublicHoliday(DateTime date)
     {
-        return publicHolidayService.IsPublicHoliday(date);
+        return publicHolidayService.IsPublicHoliday(date, countryCode);
     }
 
     /// <summary>
@@ -41,6 +42,6 @@ public class PublicHolidayComponent(
     /// </summary>
     public PublicHolidayInfo? GetNextHoliday(DateTime date)
     {
-        return publicHolidayService.GetNextPublicHoliday(date);
+        return publicHolidayService.GetNextPublicHoliday(date, countryCode);
     }
 }

@@ -1,6 +1,11 @@
 @model Display
 @using PortalCalendarServer.Controllers
 @using PortalCalendarServer.Models.DatabaseEntities
+@inject IViewLocalizer Localizer
+
+@{
+    ViewData["Title"] = Localizer["Test - {0}", Model.Name].Value;
+}
 
 <!-- https://css-tricks.com/snippets/css/a-guide-to-flexbox/ -->
 <div style="display: flex; flex-flow: row wrap; justify-content: space-around;">
@@ -8,7 +13,7 @@
         @{
             var pageUrl = Url.Action(nameof(UiController.CalendarHtmlDefaultDate), "Ui", new { displayNumber = Model.Id, preview_colors = true });
         }
-        Calendar page <a href="@pageUrl">as HTML</a>:
+        @Localizer["Calendar page <a href='{0}'>as HTML</a>:", pageUrl]
         <br>
         <iframe src="@pageUrl"
                 width="@Model.VirtualWidth()"
@@ -19,9 +24,11 @@
     <div>
         @{
             var bitmapUrl = Url.Action(nameof(UiController.Bitmap), "Ui", new { displayNumber = Model.Id });
-            var rendered_ago = Model.RenderedAt.HasValue ? $"rendered {(DateTime.UtcNow - Model.RenderedAt.Value).TotalMinutes:F0} minutes ago" : "never rendered";
+            var rendered_ago = Model.RenderedAt.HasValue
+                ? Localizer["rendered {0} minutes ago", $"{(DateTime.UtcNow - Model.RenderedAt.Value).TotalMinutes:F0}"]
+                : Localizer["never rendered"];
         }
-        Calendar page <a href="@bitmapUrl">as IMG</a> with fixed size (@rendered_ago):
+        @Localizer["Calendar page <a href='{0}'>as IMG</a> with fixed size ({1}):", bitmapUrl, rendered_ago]
         <br>
         <img src="@bitmapUrl"
              style="border: 1px solid black"

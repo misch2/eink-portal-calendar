@@ -1,0 +1,532 @@
+# Portal Calendar – English (source language)
+# This file contains the canonical English strings.
+# Translators: copy this file as a starting point for new locales.
+msgid ""
+msgstr ""
+"Project-Id-Version: PortalCalendar\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# ── Shared layout (_UI.cshtml) ──────────────────────────
+
+msgid "Displays"
+msgstr "Displays"
+
+msgid "All displays"
+msgstr "All displays"
+
+msgid "Image galleries"
+msgstr "Image galleries"
+
+msgid "All galleries"
+msgstr "All galleries"
+
+msgid "Administration"
+msgstr "Administration"
+
+msgid "Users"
+msgstr "Users"
+
+msgid "Change password"
+msgstr "Change password"
+
+msgid "Login"
+msgstr "Login"
+
+msgid "Logout"
+msgstr "Logout"
+
+msgid "Selected display: {0}"
+msgstr "Selected display: {0}"
+
+msgid "Last contact:"
+msgstr "Last contact:"
+
+msgid "{0} hours {1} minutes ago."
+msgstr "{0} hours {1} minutes ago."
+
+msgid "{0} minutes ago."
+msgstr "{0} minutes ago."
+
+msgid "never."
+msgstr "never."
+
+msgid "Next wakeup:"
+msgstr "Next wakeup:"
+
+msgid "in {0} minutes and {1} seconds."
+msgstr "in {0} minutes and {1} seconds."
+
+msgid "OTA mode:"
+msgstr "OTA mode:"
+
+msgid "on"
+msgstr "on"
+
+msgid "off"
+msgstr "off"
+
+msgid "Home"
+msgstr "Home"
+
+msgid "Test page"
+msgstr "Test page"
+
+msgid "Test multiple resolutions"
+msgstr "Test multiple resolutions"
+
+msgid "Config"
+msgstr "Config"
+
+msgid "version: {0}"
+msgstr "version: {0}"
+
+# ── Page titles ─────────────────────────────────────────
+
+msgid "Galleries"
+msgstr "Galleries"
+
+msgid "Display {0}"
+msgstr "Display {0}"
+
+msgid "Test - {0}"
+msgstr "Test - {0}"
+
+msgid "Configuration - {0}"
+msgstr "Configuration - {0}"
+
+msgid "Google Fit Authentication Successful"
+msgstr "Google Fit Authentication Successful"
+
+# ── Login ────────────────────────────────────────────────
+
+msgid "Portal Calendar"
+msgstr "Portal Calendar"
+
+msgid "Username"
+msgstr "Username"
+
+msgid "Password"
+msgstr "Password"
+
+msgid "Sign in"
+msgstr "Sign in"
+
+# ── Config UI – Main tab ────────────────────────────────
+
+msgid "Configuration"
+msgstr "Configuration"
+
+msgid "Save Configuration"
+msgstr "Save Configuration"
+
+msgid "Name (title)"
+msgstr "Name (title)"
+
+msgid "Theme"
+msgstr "Theme"
+
+msgid "Theme-specific Settings"
+msgstr "Theme-specific Settings"
+
+msgid "Select a theme above to see available customization options"
+msgstr "Select a theme above to see available customization options"
+
+msgid "Location and locale"
+msgstr "Location and locale"
+
+msgid "Override global settings"
+msgstr "Override global settings"
+
+msgid "Integration enabled"
+msgstr "Integration enabled"
+
+# ── Config UI – Home Assistant ──────────────────────────
+
+msgid "Home Assistant URL"
+msgstr "Home Assistant URL"
+
+msgid "Base URL of your Home Assistant instance (e.g. http://homeassistant.local:8123)"
+msgstr "Base URL of your Home Assistant instance (e.g. http://homeassistant.local:8123)"
+
+msgid "Long-Lived Access Token"
+msgstr "Long-Lived Access Token"
+
+msgid "Generate in Home Assistant: Profile → Security → Long-Lived Access Tokens"
+msgstr "Generate in Home Assistant: Profile → Security → Long-Lived Access Tokens"
+
+# ── Theme views ─────────────────────────────────────────
+
+msgid "No moisture sensors configured."
+msgstr "No moisture sensors configured."
+
+msgid "N/A"
+msgstr "N/A"
+
+msgid "Unassigned"
+msgstr "Unassigned"
+
+msgid "Next wakeup at {0}."
+msgstr "Next wakeup at {0}."
+
+msgid "Last render at {0}"
+msgstr "Last render at {0}"
+
+# ── Voltage / battery ───────────────────────────────────
+
+msgid "Voltage: {0} V ({1} %)."
+msgstr "Voltage: {0} V ({1} %)."
+
+# ── Test page (Test.cshtml) ─────────────────────────────
+
+msgid "Calendar page <a href='{0}'>as HTML</a>:"
+msgstr "Calendar page <a href='{0}'>as HTML</a>:"
+
+msgid "Calendar page <a href='{0}'>as IMG</a> with fixed size ({1}):"
+msgstr "Calendar page <a href='{0}'>as IMG</a> with fixed size ({1}):"
+
+msgid "rendered {0} minutes ago"
+msgstr "rendered {0} minutes ago"
+
+msgid "never rendered"
+msgstr "never rendered"
+
+# ── Home page (Index.cshtml) ────────────────────────────
+
+msgid "Image for the ePaper display (if you'd like to see the original image generated from HTML+CSS template then look at the <a href='{0}'>test page</a>)."
+msgstr "Image for the ePaper display (if you'd like to see the original image generated from HTML+CSS template then look at the <a href='{0}'>test page</a>)."
+
+# ── Display list (DisplayList.cshtml) ───────────────────
+
+msgid "Enable Pairing Mode (5 min)"
+msgstr "Enable Pairing Mode (5 min)"
+
+msgid "Pairing active, {0}s remaining (click to disable)"
+msgstr "Pairing active, {0}s remaining (click to disable)"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Resolution"
+msgstr "Resolution"
+
+msgid "Display type"
+msgstr "Display type"
+
+msgid "Firmware"
+msgstr "Firmware"
+
+msgid "Battery"
+msgstr "Battery"
+
+msgid "Next wakeup"
+msgstr "Next wakeup"
+
+msgid "(local time)"
+msgstr "(local time)"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Last image"
+msgstr "Last image"
+
+msgid "Bitmap age"
+msgstr "Bitmap age"
+
+msgid "Action"
+msgstr "Action"
+
+msgid "(in {0} minutes)"
+msgstr "(in {0} minutes)"
+
+msgid "unknown"
+msgstr "unknown"
+
+msgid "Frozen since {0}"
+msgstr "Frozen since {0}"
+
+msgid "Possibly frozen since {0}"
+msgstr "Possibly frozen since {0}"
+
+msgid "{0} hours, {1} missed connect(s)"
+msgstr "{0} hours, {1} missed connect(s)"
+
+msgid "Keyless"
+msgstr "Keyless"
+
+msgid "OTA mode active"
+msgstr "OTA mode active"
+
+msgid "Delete"
+msgstr "Delete"
+
+msgid "Delete display"
+msgstr "Delete display"
+
+msgid "Do you really want to <b>completely delete</b> display #{0} <b>\"{1}\"</b>?"
+msgstr "Do you really want to <b>completely delete</b> display #{0} <b>\"{1}\"</b>?"
+
+msgid "Cancel"
+msgstr "Cancel"
+
+# ── Galleries list (Galleries/Index.cshtml) ─────────────
+
+msgid "Id"
+msgstr "Id"
+
+msgid "Images"
+msgstr "Images"
+
+msgid "Created"
+msgstr "Created"
+
+msgid "Rename gallery"
+msgstr "Rename gallery"
+
+msgid "Copy gallery"
+msgstr "Copy gallery"
+
+msgid "Delete gallery"
+msgstr "Delete gallery"
+
+msgid "New Gallery"
+msgstr "New Gallery"
+
+msgid "Create New Gallery"
+msgstr "Create New Gallery"
+
+msgid "Create"
+msgstr "Create"
+
+msgid "Do you really want to delete gallery <b>\"{0}\"</b> and all its images?"
+msgstr "Do you really want to delete gallery <b>\"{0}\"</b> and all its images?"
+
+msgid "Copy gallery <b>\"{0}\"</b> and all its images."
+msgstr "Copy gallery <b>\"{0}\"</b> and all its images."
+
+msgid "New gallery name"
+msgstr "New gallery name"
+
+msgid "Copy"
+msgstr "Copy"
+
+msgid "New name"
+msgstr "New name"
+
+msgid "Rename"
+msgstr "Rename"
+
+# ── Gallery detail (Galleries/Detail.cshtml) ────────────
+
+msgid "Upload Image"
+msgstr "Upload Image"
+
+msgid "No images in this gallery yet."
+msgstr "No images in this gallery yet."
+
+msgid "Show"
+msgstr "Show"
+
+msgid "Hide"
+msgstr "Hide"
+
+msgid "Rotate 90°"
+msgstr "Rotate 90°"
+
+msgid "Copy to gallery"
+msgstr "Copy to gallery"
+
+msgid "Edit"
+msgstr "Edit"
+
+msgid "No description"
+msgstr "No description"
+
+msgid "Image file"
+msgstr "Image file"
+
+msgid "Description (optional)"
+msgstr "Description (optional)"
+
+msgid "Upload"
+msgstr "Upload"
+
+msgid "Delete image"
+msgstr "Delete image"
+
+msgid "Do you really want to delete this image?"
+msgstr "Do you really want to delete this image?"
+
+msgid "Edit image"
+msgstr "Edit image"
+
+msgid "Description"
+msgstr "Description"
+
+msgid "Replace image (optional)"
+msgstr "Replace image (optional)"
+
+msgid "Save"
+msgstr "Save"
+
+# ── Users (Users/Index.cshtml) ──────────────────────────
+
+msgid "you"
+msgstr "you"
+
+msgid "Add New User"
+msgstr "Add New User"
+
+msgid "Add User"
+msgstr "Add User"
+
+msgid "Delete user"
+msgstr "Delete user"
+
+msgid "Do you really want to delete user <b>\"{0}\"</b>?"
+msgstr "Do you really want to delete user <b>\"{0}\"</b>?"
+
+# ── Change password (Users/ChangePassword.cshtml) ───────
+
+msgid "Change Password"
+msgstr "Change Password"
+
+msgid "Current Password"
+msgstr "Current Password"
+
+msgid "New Password"
+msgstr "New Password"
+
+msgid "Confirm New Password"
+msgstr "Confirm New Password"
+
+# ── Test multi-resolution (TestMultiResolution.cshtml) ──
+
+msgid "Landscape"
+msgstr "Landscape"
+
+msgid "Portrait"
+msgstr "Portrait"
+
+# ── Google Fit auth ─────────────────────────────────────
+
+msgid "Success!"
+msgstr "Success!"
+
+msgid "Google Fit authentication successful."
+msgstr "Google Fit authentication successful."
+
+msgid "Auth token:"
+msgstr "Auth token:"
+
+msgid "Refresh token:"
+msgstr "Refresh token:"
+
+msgid "Return to Configuration"
+msgstr "Return to Configuration"
+
+msgid "Authentication Error"
+msgstr "Authentication Error"
+
+msgid "Authentication Failed"
+msgstr "Authentication Failed"
+
+msgid "Return to Home"
+msgstr "Return to Home"
+
+msgid "Authorize calendar to use Google Fit with the values below"
+msgstr "Authorize calendar to use Google Fit with the values below"
+
+msgid "See <a href='{0}'>{0}</a> to get client ID and secret values:"
+msgstr "See <a href='{0}'>{0}</a> to get client ID and secret values:"
+
+# ── Weather theme (WeatherForecast.cshtml) ────────────
+
+msgid "today"
+msgstr "today"
+
+msgid "tomorrow"
+msgstr "tomorrow"
+
+# Wind direction abbreviations (compass)
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "N"
+msgstr "N"
+
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "NE"
+msgstr "NE"
+
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "E"
+msgstr "E"
+
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "SE"
+msgstr "SE"
+
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "S"
+msgstr "S"
+
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "SW"
+msgstr "SW"
+
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "W"
+msgstr "W"
+
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "NW"
+msgstr "NW"
+
+# -- Calendar theme --
+
+msgctxt "Views.CalendarThemes.MultidayCalendar"
+msgid "Today and tomorrow"
+msgstr "Today and tomorrow"
+
+msgctxt "Views.CalendarThemes.MultidayCalendar"
+msgid "Next 7 days"
+msgstr "Next 7 days"
+
+msgctxt "Views.CalendarThemes.MultidayCalendar"
+msgid "Later events"
+msgstr "Later events"
+
+msgctxt "Views.CalendarThemes.MultidayCalendar"
+msgid "approx. {0} hrs"
+msgstr "approx. {0} hrs"
+
+# ── Auto-added missing keys ───────────────────────────
+
+msgid "Altitude (m)"
+msgstr "Altitude (m)"
+
+msgid "Date style"
+msgstr "Date style"
+
+msgid "Latitude (+N/-S)"
+msgstr "Latitude (+N/-S)"
+
+msgid "Longitude (+E/-W)"
+msgstr "Longitude (+E/-W)"
+
+msgid "Time Zone (format: \"UTC\", \"Europe/Prague\" etc.)"
+msgstr "Time Zone (format: \"UTC\", \"Europe/Prague\" etc.)"
+
+# ── Auto-added missing keys ───────────────────────────
+
+msgid "Auto (theme default)"
+msgstr "Auto (theme default)"
+
+msgid "Font size"
+msgstr "Font size"

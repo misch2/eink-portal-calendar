@@ -1,16 +1,17 @@
 @using PortalCalendarServer.Controllers
+@inject IViewLocalizer Localizer
 @{
     Layout = "Layouts/_UI";
-    ViewData["Title"] = "Authentication Error";
+    ViewData["Title"] = Localizer["Authentication Error"].Value;
 }
 
 <h1>@ViewData["Title"]</h1>
 
 <div class="alert alert-danger">
-    <h4>Authentication Failed</h4>
+    <h4>@Localizer["Authentication Failed"]</h4>
     <p>@ViewData["Error"]</p>
 </div>
 
 <p>
-    <a href="@Url.Action(nameof(UiController.SelectDisplay), "Ui")" class="btn btn-primary">Return to Home</a>
+    <a href="@Url.Action(nameof(UiController.SelectDisplay), "Ui")" class="btn btn-primary">@Localizer["Return to Home"]</a>
 </p>

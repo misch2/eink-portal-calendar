@@ -17,6 +17,7 @@ public class MetNoWeatherService : IntegrationServiceBase
     private readonly double _latitude;
     private readonly double _longitude;
     private readonly double _altitude;
+    private readonly string _language;
     private readonly MetNoIconsMapping _iconMapping;
 
     public MetNoWeatherService(
@@ -27,12 +28,14 @@ public class MetNoWeatherService : IntegrationServiceBase
         CalendarContext context,
         double latitude,
         double longitude,
-        double altitude)
+        double altitude,
+        string language)
         : base(logger, httpClientFactory, memoryCache, databaseCacheFactory, context)
     {
         _latitude = latitude;
         _longitude = longitude;
         _altitude = altitude;
+        _language = language;
         _iconMapping = new MetNoIconsMapping();
     }
 
@@ -47,7 +50,7 @@ public class MetNoWeatherService : IntegrationServiceBase
         var lat = Math.Round(_latitude, 3);
         var lon = Math.Round(_longitude, 3);
 
-        return $"https://api.met.no/weatherapi/locationforecast/2.0/complete?lat={lat:F3}&lon={lon:F3}&altitude={_altitude}";
+        return $"https://api.met.no/weatherapi/locationforecast/2.0/complete?lat={lat:F3}&lon={lon:F3}&altitude={_altitude:F0}";
     }
 
     /// <summary>
@@ -115,7 +118,7 @@ public class MetNoWeatherService : IntegrationServiceBase
             Precipitation = next1h.Details?.PrecipitationAmount ?? 0,
             ProviderSymbolCode = symbolCode,
             WiSymbolCode = _iconMapping.MapSymbol(symbolCode),
-            Description = _iconMapping.MapDescription(symbolCode) ?? string.Empty,
+            Description = _iconMapping.MapDescription(symbolCode, _language) ?? string.Empty,
             TimeStart = timeStart,
             TimeEnd = timeEnd,
             TimeIsDay = isDay,

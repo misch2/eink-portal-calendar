@@ -22,6 +22,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Install gettext (msgfmt)
+        run: |
+          if ! command -v msgfmt &>/dev/null; then
+            sudo apt-get update -qq && sudo apt-get install -y -qq gettext
+          fi
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -34,3 +39,5 @@ jobs:
         run: dotnet build --no-restore
       - name: Test
         run: dotnet test --no-build --verbosity normal
+      - name: Check missing localizations
+        run: bash check-missing-localizations.sh
