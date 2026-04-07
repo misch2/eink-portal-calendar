@@ -50,7 +50,7 @@ public class MetNoWeatherService : IntegrationServiceBase
         var lat = Math.Round(_latitude, 3);
         var lon = Math.Round(_longitude, 3);
 
-        return $"https://api.met.no/weatherapi/locationforecast/2.0/complete?lat={lat:F3}&lon={lon:F3}&altitude={_altitude}";
+        return $"https://api.met.no/weatherapi/locationforecast/2.0/complete?lat={lat:F3}&lon={lon:F3}&altitude={_altitude:F0}";
     }
 
     /// <summary>

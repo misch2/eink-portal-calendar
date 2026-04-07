@@ -40,14 +40,14 @@ public class MetNoIconsMappingTests
     }
 
     [Theory]
-    [InlineData("clearsky", "cz", "Jasno")]
+    [InlineData("clearsky", "cs", "Jasno")]
     [InlineData("clearsky", "en", "Clear sky")]
-    [InlineData("clearsky_day", "cz", "Jasno")] // Also tests suffix stripping
-    [InlineData("rain", "cz", "Déšť")]
-    [InlineData("snow", "cz", "Sníh")]
-    [InlineData("fog", "cz", "Mlha")]
-    [InlineData("cloudy", "cz", "Zataženo")]
-    [InlineData("rainandthunder", "cz", "Déšť a bouřky")]
+    [InlineData("clearsky_day", "cs", "Jasno")] // Also tests suffix stripping
+    [InlineData("rain", "cs", "Déšť")]
+    [InlineData("snow", "cs", "Sníh")]
+    [InlineData("fog", "cs", "Mlha")]
+    [InlineData("cloudy", "cs", "Zataženo")]
+    [InlineData("rainandthunder", "cs", "Déšť a bouřky")]
     public void MapDescription_WithVariousInputs_ReturnsCorrectTranslations(
         string code, string language, string expectedDescription)
     {

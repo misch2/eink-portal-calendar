@@ -367,6 +367,15 @@ if (app.Environment.IsDevelopment())
 // Use request localization (reads culture from cookie, query string, or Accept-Language header)
 app.UseRequestLocalization();
 
+// The localization middleware above sets both CurrentCulture and CurrentUICulture from the cookie.
+// We only want UICulture to change (for @Localizer["…"] translations); CurrentCulture must stay
+// invariant so that numbers use '.' as the decimal separator everywhere (SVG coords, API URLs, etc.).
+app.Use((context, next) =>
+{
+    CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+    return next();
+});
+
 //app.UseHttpsRedirection();    // Not needed since this is typically run behind a reverse proxy that handles TLS termination
 
 // Security headers
