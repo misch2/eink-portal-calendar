@@ -281,7 +281,7 @@ public class HomeAssistantComponent(
                 }
             }
 
-            result[entityId] = points;
+            result[entityId] = points.OrderBy(p => p.Time).ToList();
         }
 
         return result;
