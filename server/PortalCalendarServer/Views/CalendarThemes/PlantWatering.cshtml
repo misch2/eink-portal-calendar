@@ -59,17 +59,30 @@
         var dry = sensorDryThresholds.GetValueOrDefault(d.EntityId, dryThreshold);
         var wet = sensorWetThresholds.GetValueOrDefault(d.EntityId, wetThreshold);
 
+        var entityHistory = history.GetValueOrDefault(d.EntityId) ?? (IReadOnlyList<HistoryPoint>)[];
+
         if (d.Entity != null && double.TryParse(d.Entity.State, System.Globalization.NumberStyles.Float,
                 System.Globalization.CultureInfo.InvariantCulture, out var val))
         {
             moisture = val;
-            if (val < dry) status = "dry";
-            else if (val > wet) status = "wet";
-            else status = "ok";
         }
-        else if (d.Entity != null && d.Entity.State != "unavailable" && d.Entity.State != "unknown")
+
+        if (moisture == null)
         {
-            status = "unavailable";
+            // try to get last known value from history (max 1 hour old) if current state is unavailable
+            var lastKnown = entityHistory.LastOrDefault(p => p.Time >= DateTime.UtcNow.AddHours(-1));
+            if (lastKnown != null)
+            {
+                moisture = lastKnown.Value;
+                status = "stale";   // won't get used in this case, but could be used to e.g. show a warning icon in the future if desired
+            }
+        }
+
+        if (moisture != null)
+        {
+            if (moisture < dry) status = "dry";
+            else if (moisture > wet) status = "wet";
+            else status = "ok";
         }
 
         var modifiedDeviceName = d.DeviceName;
@@ -88,7 +101,7 @@
             Status = status,
             DryThreshold = dry,
             WetThreshold = wet,
-            History = history.GetValueOrDefault(d.EntityId) ?? (IReadOnlyList<HistoryPoint>)[],
+            History = entityHistory
         };
     }).ToList();
 
