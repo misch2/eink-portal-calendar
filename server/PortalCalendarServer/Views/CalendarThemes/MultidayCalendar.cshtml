@@ -169,7 +169,7 @@
                                     @evt.Summary
                                     @if (evt.DurationHours.HasValue)
                                     {
-                                        <text> (@(Localizer["approx. {0} hrs", (int)(evt.DurationHours.Value + 0.5)].Value))</text>
+                                        <text> (@Localizer["approx. {0} hrs", (int)(evt.DurationHours.Value + 0.5)])</text>
                                     }
                                 }
                             </div>

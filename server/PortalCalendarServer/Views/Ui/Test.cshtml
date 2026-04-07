@@ -25,8 +25,8 @@
         @{
             var bitmapUrl = Url.Action(nameof(UiController.Bitmap), "Ui", new { displayNumber = Model.Id });
             var rendered_ago = Model.RenderedAt.HasValue
-                ? Localizer["rendered {0} minutes ago", $"{(DateTime.UtcNow - Model.RenderedAt.Value).TotalMinutes:F0}"].Value
-                : Localizer["never rendered"].Value;
+                ? Localizer["rendered {0} minutes ago", $"{(DateTime.UtcNow - Model.RenderedAt.Value).TotalMinutes:F0}"]
+                : Localizer["never rendered"];
         }
         @Localizer["Calendar page <a href='{0}'>as IMG</a> with fixed size ({1}):", bitmapUrl, rendered_ago]
         <br>

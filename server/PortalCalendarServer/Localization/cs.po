@@ -174,7 +174,7 @@ msgid "Next wakeup at {0}."
 msgstr "Další probuzení v {0}."
 
 msgid "Last render at {0}"
-msgstr "Poslední vykreslení v {0}"
+msgstr "Poslední generování v {0}"
 
 # ── Voltage / battery ───────────────────────────────────
 
@@ -190,10 +190,10 @@ msgid "Calendar page <a href='{0}'>as IMG</a> with fixed size ({1}):"
 msgstr "Stránka kalendáře <a href='{0}'>jako IMG</a> s pevnou velikostí ({1}):"
 
 msgid "rendered {0} minutes ago"
-msgstr "vykresleno před {0} minutami"
+msgstr "vygenerování před {0} minutami"
 
 msgid "never rendered"
-msgstr "nikdy nevykresleno"
+msgstr "zatím nevygenerováno"
 
 # ── Home page (Index.cshtml) ────────────────────────────
 
