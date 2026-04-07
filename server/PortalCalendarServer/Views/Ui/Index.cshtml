@@ -4,6 +4,7 @@
 @inject IViewLocalizer Localizer
 
 @{
+    ViewData["Title"] = Localizer["Display {0}", Model.Name].Value;
     var width = Model.VirtualWidth();
     var height = Model.VirtualHeight();
     var borderSize = 50;

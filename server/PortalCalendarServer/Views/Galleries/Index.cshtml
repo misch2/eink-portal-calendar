@@ -1,6 +1,9 @@
 @model List<PortalCalendarServer.Models.DatabaseEntities.Gallery>
 @using PortalCalendarServer.Controllers
 @inject IViewLocalizer Localizer
+@{
+    ViewData["Title"] = Localizer["Galleries"].Value;
+}
 
 <table class="table table-hover">
     <thead>

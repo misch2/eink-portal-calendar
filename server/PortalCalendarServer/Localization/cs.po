@@ -1,7 +1,14 @@
 # Portal Calendar – Czech translation
 msgid ""
 msgstr ""
+"Project-Id-Version: PortalCalendar\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: cs\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n>=2 && n<=4 ? 1 : 2);\n"
 
 # ── Shared layout (_UI.cshtml) ──────────────────────────
@@ -26,6 +33,9 @@ msgstr "Uživatelé"
 
 msgid "Change password"
 msgstr "Změnit heslo"
+
+msgid "Login"
+msgstr "Přihlášení"
 
 msgid "Logout"
 msgstr "Odhlásit"
@@ -74,6 +84,23 @@ msgstr "Konfigurace"
 
 msgid "version: {0}"
 msgstr "verze: {0}"
+
+# ── Page titles ─────────────────────────────────────────
+
+msgid "Galleries"
+msgstr "Galerie"
+
+msgid "Display {0}"
+msgstr "Displej {0}"
+
+msgid "Test - {0}"
+msgstr "Test - {0}"
+
+msgid "Configuration - {0}"
+msgstr "Konfigurace - {0}"
+
+msgid "Google Fit Authentication Successful"
+msgstr ""
 
 # ── Login ────────────────────────────────────────────────
 
@@ -350,7 +377,7 @@ msgstr "Uložit"
 # ── Users (Users/Index.cshtml) ──────────────────────────
 
 msgid "you"
-msgstr "vy"
+msgstr "to jste vy"
 
 msgid "Add New User"
 msgstr "Přidat nového uživatele"
@@ -417,3 +444,87 @@ msgstr "Autorizovat kalendář pro použití Google Fit s hodnotami níže"
 
 msgid "See <a href='{0}'>{0}</a> to get client ID and secret values:"
 msgstr "Viz <a href='{0}'>{0}</a> pro získání Client ID a Client secret:"
+
+# ── Weather theme (WeatherForecast.cshtml) ────────────
+
+msgid "today"
+msgstr "dnes"
+
+msgid "tomorrow"
+msgstr "zítra"
+
+# Wind direction abbreviations (compass)
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "N"
+msgstr "S"
+
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "NE"
+msgstr "SV"
+
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "E"
+msgstr "V"
+
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "SE"
+msgstr "JV"
+
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "S"
+msgstr "J"
+
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "SW"
+msgstr "JZ"
+
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "W"
+msgstr "Z"
+
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "NW"
+msgstr "SZ"
+
+# -- Calendar theme --
+
+msgctxt "Views.CalendarThemes.MultidayCalendar"
+msgid "Today and tomorrow"
+msgstr "Dnes a zítra"
+
+msgctxt "Views.CalendarThemes.MultidayCalendar"
+msgid "Next 7 days"
+msgstr "Nejbližších 7 dní"
+
+msgctxt "Views.CalendarThemes.MultidayCalendar"
+msgid "Later events"
+msgstr "Pozdější události"
+
+msgctxt "Views.CalendarThemes.MultidayCalendar"
+msgid "approx. {0} hrs"
+msgstr "~ {0} hod."
+
+# ── Auto-added missing keys ───────────────────────────
+
+msgid "Altitude (m)"
+msgstr "Nadmořská výška (m)"
+
+msgid "Date style"
+msgstr "Jazyk a místní formát"
+
+msgid "Latitude (+N/-S)"
+msgstr "Zeměpisná šířka (+S/-J)"
+
+msgid "Longitude (+E/-W)"
+msgstr "Zeměpisná délka (+V/-Z)"
+
+msgid "Time Zone (format: \"UTC\", \"Europe/Prague\" etc.)"
+msgstr "Časové pásmo (formát: \"UTC\", \"Europe/Prague\" atd.)"
+# ── Auto-added missing keys ───────────────────────────
+
+msgid "Auto (theme default)"
+msgstr "Automaticky (výchozí nastavení pro téma)"
+
+msgid "Font size"
+msgstr "Velikost písma"
+

@@ -422,7 +422,7 @@ public class NameDayService : INameDayService
     /// <param name="date">The date to lookup</param>
     /// <param name="countryCode">Country code (currently only "CZ" is supported)</param>
     /// <returns>Name day information or null if not found</returns>
-    public NameDayInfo? GetNameDay(DateTime date, string countryCode = "CZ")
+    public NameDayInfo? GetNameDay(DateTime date, string countryCode)
     {
         if (countryCode != "CZ")
         {
@@ -439,8 +439,7 @@ public class NameDayService : INameDayService
             return new NameDayInfo
             {
                 Name = name,
-                Date = date,
-                CountryCode = countryCode
+                Date = date
             };
         }
 
@@ -455,7 +454,7 @@ public class NameDayService : INameDayService
     /// <param name="month">Month (1-12)</param>
     /// <param name="countryCode">Country code</param>
     /// <returns>List of name days in the specified month</returns>
-    public List<NameDayInfo> GetNameDaysForMonth(int year, int month, string countryCode = "CZ")
+    public List<NameDayInfo> GetNameDaysForMonth(int year, int month, string countryCode)
     {
         if (countryCode != "CZ")
         {

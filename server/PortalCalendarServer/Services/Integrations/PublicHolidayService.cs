@@ -46,7 +46,7 @@ public class PublicHolidayService : IPublicHolidayService
     /// <param name="date">The date to check</param>
     /// <param name="countryCode">Country code (currently only "CZ" is supported)</param>
     /// <returns>Public holiday information or null if not a holiday</returns>
-    public PublicHolidayInfo? GetPublicHoliday(DateTime date, string countryCode = "CZ")
+    public PublicHolidayInfo? GetPublicHoliday(DateTime date, string countryCode)
     {
         if (countryCode != "CZ")
         {
@@ -76,17 +76,15 @@ public class PublicHolidayService : IPublicHolidayService
         // Get names from our mapping, or use library values as fallback
         var dateKey = date.ToString("MM-dd");
         var (englishName, czechName) = CzechHolidayNames.GetValueOrDefault(dateKey,
-            (holiday.EnglishName ?? "Public Holiday", holiday.Name ?? "Státní svátek"));
+            (holiday.EnglishName ?? "Public Holiday", holiday.Name ?? "Státní svátek")); // FIXME
 
-        _logger.LogDebug("Found public holiday: {EnglishName} ({CzechName}) on {Date}",
+        _logger.LogDebug("Found public holiday: {EnglishName} ({CzechName}) on {Date}", // FIXME
             englishName, czechName, date);
 
         return new PublicHolidayInfo
         {
-            Name = englishName,
-            LocalName = czechName,
-            Date = holiday.HolidayDate,
-            CountryCode = countryCode
+            Name = czechName,
+            Date = holiday.HolidayDate
         };
     }
 
@@ -96,7 +94,7 @@ public class PublicHolidayService : IPublicHolidayService
     /// <param name="year">The year to query</param>
     /// <param name="countryCode">Country code (currently only "CZ" is supported)</param>
     /// <returns>List of public holidays in the year</returns>
-    public List<PublicHolidayInfo> GetPublicHolidaysForYear(int year, string countryCode = "CZ")
+    public List<PublicHolidayInfo> GetPublicHolidaysForYear(int year, string countryCode)
     {
         if (countryCode != "CZ")
         {
@@ -118,10 +116,8 @@ public class PublicHolidayService : IPublicHolidayService
 
             result.Add(new PublicHolidayInfo
             {
-                Name = englishName,
-                LocalName = czechName,
-                Date = h.HolidayDate,
-                CountryCode = countryCode
+                Name = czechName,
+                Date = h.HolidayDate
             });
         }
 
@@ -135,7 +131,7 @@ public class PublicHolidayService : IPublicHolidayService
     /// <param name="endDate">End date (inclusive)</param>
     /// <param name="countryCode">Country code (currently only "CZ" is supported)</param>
     /// <returns>List of public holidays in the date range</returns>
-    public List<PublicHolidayInfo> GetPublicHolidaysBetween(DateTime startDate, DateTime endDate, string countryCode = "CZ")
+    public List<PublicHolidayInfo> GetPublicHolidaysBetween(DateTime startDate, DateTime endDate, string countryCode)
     {
         if (countryCode != "CZ")
         {
@@ -167,7 +163,7 @@ public class PublicHolidayService : IPublicHolidayService
     /// <param name="date">The date to check</param>
     /// <param name="countryCode">Country code (currently only "CZ" is supported)</param>
     /// <returns>True if the date is a public holiday, false otherwise</returns>
-    public bool IsPublicHoliday(DateTime date, string countryCode = "CZ")
+    public bool IsPublicHoliday(DateTime date, string countryCode)
     {
         if (countryCode != "CZ")
         {
@@ -185,7 +181,7 @@ public class PublicHolidayService : IPublicHolidayService
     /// <param name="date">The date to start searching from</param>
     /// <param name="countryCode">Country code (currently only "CZ" is supported)</param>
     /// <returns>The next public holiday or null if none found in the current or next year</returns>
-    public PublicHolidayInfo? GetNextPublicHoliday(DateTime date, string countryCode = "CZ")
+    public PublicHolidayInfo? GetNextPublicHoliday(DateTime date, string countryCode)
     {
         if (countryCode != "CZ")
         {

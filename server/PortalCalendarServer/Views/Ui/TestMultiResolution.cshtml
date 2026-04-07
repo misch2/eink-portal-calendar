@@ -3,6 +3,10 @@
 @using PortalCalendarServer.Models.DatabaseEntities
 @inject IViewLocalizer Localizer
 
+@{
+    ViewData["Title"] = Localizer["Test - {0}", Model.Name].Value;
+}
+
 <!-- https://css-tricks.com/snippets/css/a-guide-to-flexbox/ -->
 <div style="display: flex; flex-direction: column; gap: 1.5rem;">
     @{

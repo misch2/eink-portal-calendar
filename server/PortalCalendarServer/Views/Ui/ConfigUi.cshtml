@@ -6,6 +6,7 @@
 @inject IViewLocalizer Localizer
 
 @{
+    ViewData["Title"] = Localizer["Configuration - {0}", Model.Name].Value;
     var displayService = (DisplayService)ViewData["DisplayService"]!;
     var moduleTabs = (IReadOnlyList<IPortalModule>)ViewData["ModuleTabs"]!;
 }

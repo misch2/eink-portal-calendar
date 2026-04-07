@@ -3,7 +3,14 @@
 # Translators: copy this file as a starting point for new locales.
 msgid ""
 msgstr ""
+"Project-Id-Version: PortalCalendar\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 # ── Shared layout (_UI.cshtml) ──────────────────────────
@@ -28,6 +35,9 @@ msgstr "Users"
 
 msgid "Change password"
 msgstr "Change password"
+
+msgid "Login"
+msgstr "Login"
 
 msgid "Logout"
 msgstr "Logout"
@@ -76,6 +86,23 @@ msgstr "Config"
 
 msgid "version: {0}"
 msgstr "version: {0}"
+
+# ── Page titles ─────────────────────────────────────────
+
+msgid "Galleries"
+msgstr "Galleries"
+
+msgid "Display {0}"
+msgstr "Display {0}"
+
+msgid "Test - {0}"
+msgstr "Test - {0}"
+
+msgid "Configuration - {0}"
+msgstr "Configuration - {0}"
+
+msgid "Google Fit Authentication Successful"
+msgstr "Google Fit Authentication Successful"
 
 # ── Login ────────────────────────────────────────────────
 
@@ -419,3 +446,87 @@ msgstr "Authorize calendar to use Google Fit with the values below"
 
 msgid "See <a href='{0}'>{0}</a> to get client ID and secret values:"
 msgstr "See <a href='{0}'>{0}</a> to get client ID and secret values:"
+
+# ── Weather theme (WeatherForecast.cshtml) ────────────
+
+msgid "today"
+msgstr "today"
+
+msgid "tomorrow"
+msgstr "tomorrow"
+
+# Wind direction abbreviations (compass)
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "N"
+msgstr "N"
+
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "NE"
+msgstr "NE"
+
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "E"
+msgstr "E"
+
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "SE"
+msgstr "SE"
+
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "S"
+msgstr "S"
+
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "SW"
+msgstr "SW"
+
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "W"
+msgstr "W"
+
+msgctxt "Views.CalendarThemes.WeatherForecast"
+msgid "NW"
+msgstr "NW"
+
+# -- Calendar theme --
+
+msgctxt "Views.CalendarThemes.MultidayCalendar"
+msgid "Today and tomorrow"
+msgstr "Today and tomorrow"
+
+msgctxt "Views.CalendarThemes.MultidayCalendar"
+msgid "Next 7 days"
+msgstr "Next 7 days"
+
+msgctxt "Views.CalendarThemes.MultidayCalendar"
+msgid "Later events"
+msgstr "Later events"
+
+msgctxt "Views.CalendarThemes.MultidayCalendar"
+msgid "approx. {0} hrs"
+msgstr "approx. {0} hrs"
+
+# ── Auto-added missing keys ───────────────────────────
+
+msgid "Altitude (m)"
+msgstr "Altitude (m)"
+
+msgid "Date style"
+msgstr "Date style"
+
+msgid "Latitude (+N/-S)"
+msgstr "Latitude (+N/-S)"
+
+msgid "Longitude (+E/-W)"
+msgstr "Longitude (+E/-W)"
+
+msgid "Time Zone (format: \"UTC\", \"Europe/Prague\" etc.)"
+msgstr "Time Zone (format: \"UTC\", \"Europe/Prague\" etc.)"
+
+# ── Auto-added missing keys ───────────────────────────
+
+msgid "Auto (theme default)"
+msgstr "Auto (theme default)"
+
+msgid "Font size"
+msgstr "Font size"

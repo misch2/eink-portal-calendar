@@ -33,12 +33,11 @@ public class NameDayServiceTests
     public void GetNameDay_ForVariousDates_ReturnsCorrectNames(int month, int day, string expectedName)
     {
         var date = new DateTime(2024, month, day);
-        var result = _service.GetNameDay(date);
+        var result = _service.GetNameDay(date, "CZ");
 
         Assert.NotNull(result);
         Assert.Equal(expectedName, result.Name);
         Assert.Equal(date, result.Date);
-        Assert.Equal("CZ", result.CountryCode);
     }
 
     [Theory]
@@ -49,7 +48,7 @@ public class NameDayServiceTests
     public void GetNameDaysForMonth_ForVariousMonths_ReturnsCorrectEntries(
         int year, int month, int expectedCount, string? containsFirst, string? containsLast)
     {
-        var result = _service.GetNameDaysForMonth(year, month);
+        var result = _service.GetNameDaysForMonth(year, month, "CZ");
 
         Assert.Equal(expectedCount, result.Count);
         Assert.All(result, nd => Assert.Equal(month, nd.Date.Month));
@@ -80,8 +79,8 @@ public class NameDayServiceTests
     [Fact]
     public void GetNameDay_WithDifferentYears_ReturnsSameNameForSameDayMonth()
     {
-        var result2024 = _service.GetNameDay(new DateTime(2024, 3, 19));
-        var result2025 = _service.GetNameDay(new DateTime(2025, 3, 19));
+        var result2024 = _service.GetNameDay(new DateTime(2024, 3, 19), "CZ");
+        var result2025 = _service.GetNameDay(new DateTime(2025, 3, 19), "CZ");
 
         Assert.NotNull(result2024);
         Assert.NotNull(result2025);
@@ -98,10 +97,9 @@ public class NameDayServiceTests
 
         while (date <= endDate)
         {
-            var result = _service.GetNameDay(date);
+            var result = _service.GetNameDay(date, "CZ");
             Assert.NotNull(result);
             Assert.Equal(date, result.Date);
-            Assert.Equal("CZ", result.CountryCode);
             Assert.False(string.IsNullOrWhiteSpace(result.Name));
 
             count++;

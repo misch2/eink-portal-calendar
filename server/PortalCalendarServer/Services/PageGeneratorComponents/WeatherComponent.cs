@@ -54,6 +54,7 @@ public class WeatherComponent(
 
         try
         {
+            var lang = displayService.GetDisplayLanguage(display);
             var service = new MetNoWeatherService(
                 loggerFactory.CreateLogger<MetNoWeatherService>(),
                 httpClientFactory,
@@ -62,7 +63,8 @@ public class WeatherComponent(
                 context,
                 lat.Value,
                 lon.Value,
-                alt.Value
+                alt.Value,
+                lang
             );
 
             var detailedForecast = await service.GetForecastAsync();
@@ -112,7 +114,7 @@ public class WeatherComponent(
         var apiKey = displayService.GetConfig(display, "openweather_api_key");
         var lat = displayService.GetConfigDouble(display, "lat");
         var lon = displayService.GetConfigDouble(display, "lon");
-        var lang = displayService.GetConfig(display, "openweather_lang") ?? "en";
+        var lang = displayService.GetConfig(display, "openweather_lang") ?? displayService.GetDisplayLanguage(display);
 
         if (string.IsNullOrWhiteSpace(apiKey) || lat == null || lon == null)
         {

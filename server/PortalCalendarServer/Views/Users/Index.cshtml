@@ -2,6 +2,9 @@
 @using PortalCalendarServer.Controllers
 @using System.Security.Claims
 @inject IViewLocalizer Localizer
+@{
+    ViewData["Title"] = Localizer["Users"].Value;
+}
 
 <table class="table table-hover">
     <thead>

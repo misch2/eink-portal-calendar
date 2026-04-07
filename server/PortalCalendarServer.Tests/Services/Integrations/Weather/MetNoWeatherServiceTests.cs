@@ -26,7 +26,8 @@ public class MetNoWeatherServiceTests : IntegrationServiceTestBase
             Context,
             TestLat,
             TestLon,
-            TestAlt);
+            TestAlt,
+            "cs");
     }
 
     [Fact]

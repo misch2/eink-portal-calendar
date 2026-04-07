@@ -59,10 +59,10 @@ public class MetNoIconsMappingTests
     }
 
     [Fact]
-    public void MapDescription_WithoutLanguageParameter_DefaultsToCzech()
+    public void MapDescription_WithCzechLanguage_ReturnsCzechDescription()
     {
         // Act
-        var result = _mapping.MapDescription("clearsky");
+        var result = _mapping.MapDescription("clearsky", "cs");
 
         // Assert
         Assert.Equal("Jasno", result);

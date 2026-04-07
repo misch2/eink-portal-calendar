@@ -20,8 +20,10 @@ public class PublicHolidayModule : IPortalModule
 
     public object? CreatePageGeneratorComponent(IServiceProvider services, Display display, DateTime date)
     {
+        var displayService = services.GetRequiredService<IDisplayService>();
+        var countryCode = displayService.GetDisplayCountryCode(display);
         var logger = services.GetRequiredService<ILogger<PageGeneratorService>>();
         var publicHolidayService = services.GetRequiredService<IPublicHolidayService>();
-        return new PublicHolidayComponent(logger, publicHolidayService);
+        return new PublicHolidayComponent(logger, publicHolidayService, countryCode);
     }
 }

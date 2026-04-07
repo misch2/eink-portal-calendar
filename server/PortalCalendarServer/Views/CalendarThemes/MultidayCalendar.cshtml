@@ -4,6 +4,7 @@
 @using PortalCalendarServer.Services
 @using PortalCalendarServer.Services.PageGeneratorComponents
 @inject IDisplayService displayService
+@inject IViewLocalizer Localizer
 @{
     Layout = "~/Views/Shared/Layouts/Epaper/_InsetLayout.cshtml";
     ViewBag.Title = "Calendar - Multiday";
@@ -25,7 +26,7 @@
     {
         new {
             Id = "2days",
-            Title = "Dnes a zítra",
+            Title = Localizer["Today and tomorrow"].Value,
             Class = "calendar-event-block-today",
             Condition = (Func<CalendarEvent, bool>)(evt => {
                 var deltaDays = (evt.StartTime.Date - Model.Date.Date).Days;
@@ -35,7 +36,7 @@
         },
         new {
             Id = "week",
-            Title = "Nejbližších 7 dní",
+            Title = Localizer["Next 7 days"].Value,
             Class = "calendar-event-block-week",
             Condition = (Func<CalendarEvent, bool>)(evt => {
                 var deltaDays = (evt.StartTime.Date - Model.Date.Date).Days;
@@ -44,7 +45,7 @@
         },
         new {
             Id = "rest",
-            Title = "Pozdější události",
+            Title = Localizer["Later events"].Value,
             Class = "calendar-event-block-rest",
             Condition = (Func<CalendarEvent, bool>)(evt => {
                 var deltaDays = (evt.StartTime.Date - Model.Date.Date).Days;
@@ -168,7 +169,7 @@
                                     @evt.Summary
                                     @if (evt.DurationHours.HasValue)
                                     {
-                                        <text> (~@((int)(evt.DurationHours.Value + 0.5)) hod.)</text>
+                                        <text> (@(Localizer["approx. {0} hrs", (int)(evt.DurationHours.Value + 0.5)].Value))</text>
                                     }
                                 }
                             </div>

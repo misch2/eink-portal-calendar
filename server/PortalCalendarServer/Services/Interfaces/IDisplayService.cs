@@ -39,6 +39,18 @@ public interface IDisplayService
     CultureInfo GetDateCultureInfo(Display display);
 
     /// <summary>
+    /// Get the two-letter ISO language code for a display (e.g. "cs" from "cs-CZ").
+    /// Falls back to "en" if date_culture is not set.
+    /// </summary>
+    string GetDisplayLanguage(Display display);
+
+    /// <summary>
+    /// Get the two-letter ISO country code for a display (e.g. "CZ" from "cs-CZ").
+    /// Falls back to "US" if date_culture is not set or has no region.
+    /// </summary>
+    string GetDisplayCountryCode(Display display);
+
+    /// <summary>
     /// Get configuration value for a display, with fallback to default display (ID = 0)
     /// </summary>
     string? GetConfig(Display display, string name);

@@ -4,6 +4,9 @@
 @using PortalCalendarServer.Services
 @inject IDisplayService displayService
 @inject IViewLocalizer Localizer
+@{
+    ViewData["Title"] = Localizer["Displays"].Value;
+}
 
 <div class="mb-3">
     @Html.AntiForgeryToken()

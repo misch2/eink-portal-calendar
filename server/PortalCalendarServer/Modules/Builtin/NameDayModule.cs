@@ -20,8 +20,10 @@ public class NameDayModule : IPortalModule
 
     public object? CreatePageGeneratorComponent(IServiceProvider services, Display display, DateTime date)
     {
+        var displayService = services.GetRequiredService<IDisplayService>();
+        var countryCode = displayService.GetDisplayCountryCode(display);
         var logger = services.GetRequiredService<ILogger<PageGeneratorService>>();
         var nameDayService = services.GetRequiredService<INameDayService>();
-        return new NameDayComponent(logger, nameDayService);
+        return new NameDayComponent(logger, nameDayService, countryCode!);
     }
 }

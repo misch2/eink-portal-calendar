@@ -41,7 +41,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="Localization\*.po" CopyToPublishDirectory="PreserveNewest" />
+      <Content Include="Localization\**" CopyToPublishDirectory="PreserveNewest" />
     </ItemGroup>
 
 </Project>

@@ -20,11 +20,11 @@
         <div class="form-group row mb-4">
             @await Html.PartialAsync("_ConfigSelect", new ConfigSelectModel
             {
-                Display = Model, Key = "font_size", Label = "Font size",
+                Display = Model, Key = "font_size", Label = Localizer["Font size"].Value,
                 ColClass = "col-md-2",
                 Options = new List<SelectOption>
                 {
-                    new SelectOption { Value = "", Text = "Auto (theme default)" },
+                    new SelectOption { Value = "", Text = Localizer["Auto (theme default)"].Value },
                     new SelectOption { Value = "8", Text = "8 pt" },
                     new SelectOption { Value = "9", Text = "9 pt" },
                     new SelectOption { Value = "10", Text = "10 pt" },
@@ -85,26 +85,26 @@
     <div class="form-group row">
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
         {
-            Display = Model, Key = "lat", Label = "Latitude (+N/-S)", ColClass = "col-md-4"
+            Display = Model, Key = "lat", Label = Localizer["Latitude (+N/-S)"].Value, ColClass = "col-md-4"
                 })
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
                 {
-            Display = Model, Key = "lon", Label = "Longitude (+E/-W)", ColClass = "col-md-4"
+            Display = Model, Key = "lon", Label = Localizer["Longitude (+E/-W)"].Value, ColClass = "col-md-4"
                 })
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
                 {
-            Display = Model, Key = "alt", Label = "Altitude (m)", ColClass = "col-md-4"
+            Display = Model, Key = "alt", Label = Localizer["Altitude (m)"].Value, ColClass = "col-md-4"
                 })
     </div>
     <div class="form-group row mt-2">
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
                 {
-            Display = Model, Key = "timezone", Label = "Time Zone (format: \"UTC\", \"Europe/Prague\" etc.)",
+            Display = Model, Key = "timezone", Label = Localizer["Time Zone (format: \"UTC\", \"Europe/Prague\" etc.)"].Value,
                 ColClass = "col-md-4"
                 })
         @await Html.PartialAsync("_ConfigSelect", new ConfigSelectModel
                 {
-            Display = Model, Key = "date_culture", Label = "Date style",
+            Display = Model, Key = "date_culture", Label = Localizer["Date style"].Value,
                 ColClass = "col-md-4",
                 AllowEmpty = true,
                 Options = new List<SelectOption>

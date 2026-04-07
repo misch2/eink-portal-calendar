@@ -5,11 +5,11 @@ namespace PortalCalendarServer.Services.Integrations;
 /// </summary>
 public interface IPublicHolidayService : IIntegrationService
 {
-    PublicHolidayInfo? GetPublicHoliday(DateTime date, string countryCode = "CZ");
-    List<PublicHolidayInfo> GetPublicHolidaysForYear(int year, string countryCode = "CZ");
-    List<PublicHolidayInfo> GetPublicHolidaysBetween(DateTime startDate, DateTime endDate, string countryCode = "CZ");
-    bool IsPublicHoliday(DateTime date, string countryCode = "CZ");
-    PublicHolidayInfo? GetNextPublicHoliday(DateTime date, string countryCode = "CZ");
+    PublicHolidayInfo? GetPublicHoliday(DateTime date, string countryCode);
+    List<PublicHolidayInfo> GetPublicHolidaysForYear(int year, string countryCode);
+    List<PublicHolidayInfo> GetPublicHolidaysBetween(DateTime startDate, DateTime endDate, string countryCode);
+    bool IsPublicHoliday(DateTime date, string countryCode);
+    PublicHolidayInfo? GetNextPublicHoliday(DateTime date, string countryCode);
 }
 
 /// <summary>
@@ -18,24 +18,14 @@ public interface IPublicHolidayService : IIntegrationService
 public class PublicHolidayInfo
 {
     /// <summary>
-    /// English name of the holiday
-    /// </summary>
-    public string Name { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Local name of the holiday (in the country's language)
-    /// </summary>
-    public string LocalName { get; set; } = string.Empty;
-
-    /// <summary>
     /// Date of the holiday
     /// </summary>
     public DateTime Date { get; set; }
 
     /// <summary>
-    /// Country code (e.g., "CZ" for Czech Republic)
+    /// Local name of the holiday (in the country's language)
     /// </summary>
-    public string CountryCode { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     /// Additional description or notes about the holiday

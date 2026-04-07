@@ -2,6 +2,9 @@
 @using PortalCalendarServer.Controllers
 @using PortalCalendarServer.Models.DatabaseEntities
 @inject IViewLocalizer Localizer
+@{
+    ViewData["Title"] = Localizer["Google Fit Authentication Successful"].Value;
+}
 
 <h1>@Localizer["Success!"]</h1>
 

@@ -10,6 +10,29 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 VIEWS_DIR="$SCRIPT_DIR/PortalCalendarServer/Views"
 LOCALIZATION_DIR="$SCRIPT_DIR/PortalCalendarServer/Localization"
 
+# ── 0. Validate .po file syntax with msgfmt ──────────────────
+
+if ! command -v msgfmt &>/dev/null; then
+    echo "::error::msgfmt not found. Install gettext (e.g. apt-get install gettext)."
+    exit 1
+fi
+
+msgfmt_failed=0
+for po_file in "$LOCALIZATION_DIR"/*.po; do
+    lang=$(basename "$po_file")
+    if ! msgfmt --check "$po_file" -o /dev/null 2>&1; then
+        echo "::error::$lang failed msgfmt validation (see above)."
+        msgfmt_failed=1
+    fi
+done
+if [[ "$msgfmt_failed" -eq 1 ]]; then
+    echo ""
+    echo "FAIL: One or more .po files have syntax or header errors."
+    exit 1
+fi
+echo "msgfmt: All .po files are valid."
+echo ""
+
 # ── 1. Extract Localizer keys from .cshtml files ─────────────
 
 extract_keys() {
