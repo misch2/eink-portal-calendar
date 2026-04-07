@@ -76,7 +76,10 @@ builder.Services.AddDbContext<SessionContext>(options =>
 // Add services to the container
 // Support for both API and MVC controllers
 builder.Services.AddControllersWithViews(options =>
-    options.ModelBinderProviders.Insert(0, new FlexibleBoolBinderProvider())
+    {
+        options.ModelBinderProviders.Insert(0, new FlexibleBoolBinderProvider());
+        options.Filters.Add<PortalCalendarServer.Controllers.Filters.ForceUICultureFilter>();
+    }
     )
     .AddViewLocalization();
 

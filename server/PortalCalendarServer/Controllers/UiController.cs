@@ -395,7 +395,7 @@ public class UiController(
     private void ApplyDisplayLanguage(Display display)
     {
         var language = _displayService.GetDisplayLanguage(display);
-        System.Globalization.CultureInfo.CurrentUICulture = new System.Globalization.CultureInfo(language);
+        HttpContext.Items["ForcedUICulture"] = language;
     }
 
     private ViewResult CalendarErrorView(Exception ex, Display display)
