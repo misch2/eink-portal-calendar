@@ -170,11 +170,11 @@ msgstr "N/A"
 msgid "Unassigned"
 msgstr "Nepřiřazeno"
 
-msgid "Next wakeup at {0}."
-msgstr "Další probuzení v {0}."
+msgid "Next wakeup at {0}"
+msgstr "Další probuzení v {0}"
 
-msgid "Last render at {0}"
-msgstr "Poslední generování v {0}"
+msgid "State from {0}"
+msgstr "Stav z {0}"
 
 # ── Voltage / battery ───────────────────────────────────
 

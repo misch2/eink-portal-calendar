@@ -19,5 +19,5 @@
     @* Next refresh *@
     <iconify-icon icon="material-symbols:refresh" style="vertical-align: text-bottom"></iconify-icon>
 
-    <span>@Localizer["Next wakeup at {0}.", TimeZoneInfo.ConvertTimeFromUtc(nextWakeup, tz).ToString("t", dateCulture)]</span>
+    <span>@Localizer["Next wakeup at {0}", TimeZoneInfo.ConvertTimeFromUtc(nextWakeup, tz).ToString("t", dateCulture)]</span>
 }

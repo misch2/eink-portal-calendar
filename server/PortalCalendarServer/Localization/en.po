@@ -172,11 +172,11 @@ msgstr "N/A"
 msgid "Unassigned"
 msgstr "Unassigned"
 
-msgid "Next wakeup at {0}."
-msgstr "Next wakeup at {0}."
+msgid "Next wakeup at {0}"
+msgstr "Next wakeup at {0}"
 
-msgid "Last render at {0}"
-msgstr "Last render at {0}"
+msgid "State from {0}"
+msgstr "State from {0}"
 
 # ── Voltage / battery ───────────────────────────────────
 
