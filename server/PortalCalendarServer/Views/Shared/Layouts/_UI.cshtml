@@ -227,8 +227,15 @@
                             @if (!display.IsDefault())
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link @(navLink == "home" ? "active" : "")" href="@Url.Action(nameof(UiController.Home), "Ui", new { displayNumber = display.Id })">@Localizer["Home"]</a>
+                                    <a class="nav-link @(navLink == "home" ? "active" : "")" href="@Url.Action(nameof(UiController.Home), "Ui", new { displayNumber = display.Id })">@Localizer["Preview"]</a>
                                 </li>
+                            }
+                            <li class="nav-item">
+                                <a class="nav-link @(navLink == "config_ui" ? "active" : "")" href="@Url.Action(nameof(UiController.ConfigUiShow), "Ui", new { displayNumber = display.Id })">@Localizer["Config"]</a>
+                            </li>
+                            @if (!display.IsDefault())
+                            {
+
                                 <li class="nav-item">
                                     <a class="nav-link @(navLink == "compare" ? "active" : "")" href="@Url.Action(nameof(UiController.Test), "Ui", new { displayNumber = display.Id })">@Localizer["Test page"]</a>
                                 </li>
@@ -236,9 +243,6 @@
                                     <a class="nav-link @(navLink == "compare" ? "active" : "")" href="@Url.Action(nameof(UiController.TestMultiResolution), "Ui", new { displayNumber = display.Id })">@Localizer["Test multiple resolutions"]</a>
                                 </li>
                             }
-                            <li class="nav-item">
-                                <a class="nav-link @(navLink == "config_ui" ? "active" : "")" href="@Url.Action(nameof(UiController.ConfigUiShow), "Ui", new { displayNumber = display.Id })">@Localizer["Config"]</a>
-                            </li>
                         </ul>
                     </div>
                 </nav>

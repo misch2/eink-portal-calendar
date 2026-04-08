@@ -73,6 +73,9 @@ msgstr "vypnuto"
 msgid "Home"
 msgstr "Domů"
 
+msgid "Preview"
+msgstr "Náhled"
+
 msgid "Test page"
 msgstr "Testovací stránka"
 
@@ -101,6 +104,38 @@ msgstr "Konfigurace - {0}"
 
 msgid "Google Fit Authentication Successful"
 msgstr ""
+
+# ── Theme names from the database ─────────────────────────────────────────
+
+msgid "Default"
+msgstr "Výchozí"
+
+msgid "Weather"
+msgstr "Počasí"
+
+msgid "Portal Style Calendar with Icons"
+msgstr "Kalendář ve stylu hry Portal"
+
+msgid "Google Fit Weight with Calendar and Icons"
+msgstr "Kalendář s ikonami a váhovými údaji z Google Fit"
+
+msgid "Multi-day Calendar"
+msgstr "Vícedenní kalendář"
+
+msgid "XKCD"
+msgstr "XKCD komiks"
+
+msgid "Image from web"
+msgstr "Obrázek z webu"
+
+msgid "Gallery"
+msgstr "Galerie"
+
+msgid "Plant Watering Monitor"
+msgstr "Zalévání rostlin"
+
+msgid "Test - Color Wheel"
+msgstr "Test - barvy"
 
 # ── Login ────────────────────────────────────────────────
 

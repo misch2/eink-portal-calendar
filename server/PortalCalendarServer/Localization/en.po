@@ -75,6 +75,9 @@ msgstr "off"
 msgid "Home"
 msgstr "Home"
 
+msgid "Preview"
+msgstr "Preview"
+
 msgid "Test page"
 msgstr "Test page"
 

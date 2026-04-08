@@ -14,64 +14,68 @@
         </div>
     </fieldset>
 
-    <fieldset class="row mb-4">
+    <div class="form-group row mb-4">
+        @await Html.PartialAsync("_ConfigSelect", new ConfigSelectModel
+        {
+            Display = Model, Key = "font_size", Label = Localizer["Font size"].Value,
+            ColClass = "col-md-3",
+            Options = new List<SelectOption>
+            {
+                new SelectOption { Value = "", Text = Localizer["Auto (theme default)"].Value },
+                new SelectOption { Value = "8", Text = "8 pt" },
+                new SelectOption { Value = "9", Text = "9 pt" },
+                new SelectOption { Value = "10", Text = "10 pt" },
+                new SelectOption { Value = "11", Text = "11 pt" },
+                new SelectOption { Value = "12", Text = "12 pt" },
+                new SelectOption { Value = "14", Text = "14 pt" },
+                new SelectOption { Value = "16", Text = "16 pt" },
+                new SelectOption { Value = "18", Text = "18 pt" },
+                new SelectOption { Value = "20", Text = "20 pt" },
+                new SelectOption { Value = "22", Text = "22 pt" },
+                new SelectOption { Value = "24", Text = "24 pt" },
+                new SelectOption { Value = "26", Text = "26 pt" },
+                new SelectOption { Value = "28", Text = "28 pt" },
+                new SelectOption { Value = "30", Text = "30 pt" },
+                new SelectOption { Value = "32", Text = "32 pt" },
+                new SelectOption { Value = "34", Text = "34 pt" },
+                new SelectOption { Value = "36", Text = "36 pt" },
+                }
+            })
+    </div>
+
+    <fieldset class="mb-4">
         <legend class="col-md-12">@Localizer["Theme"]</legend>
 
-        <div class="form-group row mb-4">
-            @await Html.PartialAsync("_ConfigSelect", new ConfigSelectModel
-            {
-                Display = Model, Key = "font_size", Label = Localizer["Font size"].Value,
-                ColClass = "col-md-2",
-                Options = new List<SelectOption>
-                {
-                    new SelectOption { Value = "", Text = Localizer["Auto (theme default)"].Value },
-                    new SelectOption { Value = "8", Text = "8 pt" },
-                    new SelectOption { Value = "9", Text = "9 pt" },
-                    new SelectOption { Value = "10", Text = "10 pt" },
-                    new SelectOption { Value = "11", Text = "11 pt" },
-                    new SelectOption { Value = "12", Text = "12 pt" },
-                    new SelectOption { Value = "14", Text = "14 pt" },
-                    new SelectOption { Value = "16", Text = "16 pt" },
-                    new SelectOption { Value = "18", Text = "18 pt" },
-                    new SelectOption { Value = "20", Text = "20 pt" },
-                    new SelectOption { Value = "22", Text = "22 pt" },
-                    new SelectOption { Value = "24", Text = "24 pt" },
-                    new SelectOption { Value = "26", Text = "26 pt" },
-                    new SelectOption { Value = "28", Text = "28 pt" },
-                    new SelectOption { Value = "30", Text = "30 pt" },
-                    new SelectOption { Value = "32", Text = "32 pt" },
-                    new SelectOption { Value = "34", Text = "34 pt" },
-                    new SelectOption { Value = "36", Text = "36 pt" },
+        <div class="row mt-3">
+            @{
+                var themes = (List<Theme>)ViewData["Themes"]!;
+            }
+            <div class="col-md-6">
+                <select id="theme_id" name="theme_id" class="form-select">
+                    <option value=""></option>
+                    @foreach (var theme in themes)
+                    {
+                        <option value="@theme.Id"
+                                data-has-config="@theme.HasCustomConfig.ToString().ToLower()"
+                                selected="@(Model.ThemeId == theme.Id)">
+                            @Localizer[theme.DisplayName]
+                        </option>
                     }
-                })
+                </select>
+            </div>
         </div>
 
-        @{
-            var themes = (List<Theme>)ViewData["Themes"]!;
-        }
-        <div class="col-md-2">
-            <select id="theme_id" name="theme_id" class="form-select">
-                <option value=""></option>
-                @foreach (var theme in themes)
-                {
-                    <option value="@theme.Id"
-                            data-has-config="@theme.HasCustomConfig.ToString().ToLower()"
-                            selected="@(Model.ThemeId == theme.Id)">
-                        @theme.DisplayName
-                    </option>
-                }
-            </select>
-        </div>
-
-        <div class="col-md-10">
-            <div class="card Xborder-primary Xborder-1 Xbg-light">
-                <div class="card-body">
-                    <h6 class="card-subtitle mb-3 text-muted">
-                        <i class="bi bi-gear"></i> @Localizer["Theme-specific Settings"]
-                    </h6>
-                    <div id="theme-customization" class="row">
-                        <div class="col-12">
-                            <small>@Localizer["Select a theme above to see available customization options"]</small>
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <div class="card Xborder-primary Xborder-1 Xbg-light">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-3 text-muted">
+                            <i class="bi bi-gear"></i> @Localizer["Theme-specific Settings"]
+                        </h6>
+                        <div id="theme-customization" class="row">
+                            <div class="col-12">
+                                <small>@Localizer["Select a theme above to see available customization options"]</small>
+                            </div>
                         </div>
                     </div>
                 </div>
