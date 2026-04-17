@@ -34,20 +34,9 @@ public class GalleryComponent(
 
         var random = new Random(seed);
 
-        // Weighted random selection of a gallery
-        var totalWeight = candidates.Sum(c => c.Ratio);
-        var roll = random.NextDouble() * totalWeight;
-        var cumulative = 0.0;
-        var selected = candidates[^1]; // fallback to last
-        foreach (var candidate in candidates)
-        {
-            cumulative += candidate.Ratio;
-            if (roll < cumulative)
-            {
-                selected = candidate;
-                break;
-            }
-        }
+        var selected = WeightedRandomSelector.Select(candidates, c => c.Ratio, random);
+        if (selected == null)
+            return null;
 
         var gallery = galleryService.GetGalleryByIdAsync(selected.GalleryId).GetAwaiter().GetResult();
         if (gallery == null || gallery.Images.Count == 0)
