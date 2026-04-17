@@ -2,17 +2,20 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PortalCalendarServer.Data;
 
 #nullable disable
 
-namespace PortalCalendarServer.Migrations
+namespace PortalCalendarServer.Data.Migrations
 {
     [DbContext(typeof(CalendarContext))]
-    partial class CalendarContextModelSnapshot : ModelSnapshot
+    [Migration("20260417193525_NameIsRequired")]
+    partial class NameIsRequired
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.12");
