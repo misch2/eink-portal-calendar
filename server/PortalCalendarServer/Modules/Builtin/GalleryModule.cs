@@ -6,7 +6,7 @@ namespace PortalCalendarServer.Modules.Builtin;
 
 public class GalleryModule : IPortalModule
 {
-    public const int MaxGalleries = 5;
+    public const int MaxGalleries = 10;
 
     public string ModuleId => "gallery";
     public string? ConfigTabDisplayName => null;

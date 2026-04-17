@@ -9,7 +9,7 @@ namespace PortalCalendarServer.Modules.Builtin;
 /// </summary>
 public class PlantWateringModule : IPortalModule
 {
-    public const int MaxSensors = 20;
+    public const int MaxSensors = 30;
 
     public string ModuleId => "plantwatering";
     public string? ConfigTabDisplayName => null;
