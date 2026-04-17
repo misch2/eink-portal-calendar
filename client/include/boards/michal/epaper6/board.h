@@ -1,5 +1,6 @@
 #include "driver/laskakit_espink_v3_5.h"
-#include "epaper/GDEY075Z08_3C_BWR_inverted_red.h"
+// #include "epaper/GDEY075Z08_3C_BWR_inverted_red.h"
+#include "epaper/GDEM075F52_4C_BWRY.h"
 
 #define DEBUG
 
