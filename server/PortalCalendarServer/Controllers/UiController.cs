@@ -232,7 +232,7 @@ public class UiController(
             }
             else
             {
-                display.Name = null;
+                display.Name = String.Empty;
             }
             if (form.ContainsKey("display_mac"))
             {

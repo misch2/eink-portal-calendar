@@ -8,7 +8,7 @@ public partial class Display
 
     public string? Mac { get; set; } = null;
 
-    public string? Name { get; set; } = null;
+    public string Name { get; set; } = String.Empty;
 
     public int Width { get; set; } = 0;
 
