@@ -14,14 +14,24 @@ namespace PortalCalendarServer.Services;
 public interface IDisplayService
 {
     /// <summary>
-    /// Get all displays in the system
+    /// Get all displays visible to the current user
     /// </summary>
-    IEnumerable<Display> GetAllDisplays();
+    IEnumerable<Display> GetVisibleDisplays();
 
     /// <summary>
-    /// Get a display by its ID
+    /// Get all displays without access filtering
     /// </summary>
-    Display GetDisplayById(int displayNumber);
+    IEnumerable<Display> GetAllDisplaysUnfiltered();
+
+    /// <summary>
+    /// Get a display by its ID, respecting visibility rules
+    /// </summary>
+    Display? GetVisibleDisplayById(int displayNumber);
+
+    /// <summary>
+    /// Get a display by its ID without access filtering
+    /// </summary>
+    Display GetDisplayByIdUnfiltered(int displayNumber);
 
     /// <summary>
     /// Get the default display (ID = 0) which holds default configuration values

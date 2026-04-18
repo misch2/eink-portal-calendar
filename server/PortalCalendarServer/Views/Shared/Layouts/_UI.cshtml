@@ -56,12 +56,7 @@
             display = d;
         }
         var activeCount = imageRegenerationService.GetActiveTaskCount();
-        var allDisplays = displayService.GetAllDisplays().Where(x => !x.IsDefault()).ToList();
-        if (!currentUser.IsAdmin)
-        {
-            var userId = currentUser.UserId;
-            allDisplays = allDisplays.Where(d => !d.HideFromOtherUsers || d.OwnerId == userId).ToList();
-        }
+        var allDisplays = displayService.GetVisibleDisplays().Where(x => !x.IsDefault()).ToList();
         var navLink = ViewData["NavLink"]?.ToString();
         var deployedVersion = configuration["Deployment:Version"] ?? "unknown";
     }

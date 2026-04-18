@@ -4,9 +4,11 @@ namespace PortalCalendarServer.Services
 {
     public interface IGalleryService
     {
-        Task<List<Gallery>> GetAllGalleriesAsync();
+        Task<List<Gallery>> GetVisibleGalleriesAsync();
+        Task<List<Gallery>> GetAllGalleriesUnfilteredAsync();
         Task<List<Gallery>> GetFastGalleryListAsync();
-        Task<Gallery?> GetGalleryByIdAsync(int id);
+        Task<Gallery?> GetVisibleGalleryByIdAsync(int id);
+        Task<Gallery?> GetGalleryByIdUnfilteredAsync(int id);
         Task<Gallery> CreateGalleryAsync(string name);
         Task<Gallery> CopyGalleryAsync(int sourceGalleryId, string newName);
         Task RenameGalleryAsync(int id, string newName);

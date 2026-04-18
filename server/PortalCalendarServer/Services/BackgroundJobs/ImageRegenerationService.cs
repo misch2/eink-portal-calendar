@@ -41,7 +41,7 @@ public class ImageRegenerationService : QueuedBackgroundService<ImageRegeneratio
         var pageGeneratorService = scope.ServiceProvider.GetRequiredService<PageGeneratorService>();
         var displayService = scope.ServiceProvider.GetRequiredService<IDisplayService>();
 
-        var display = displayService.GetDisplayById(request.DisplayId);
+        var display = displayService.GetDisplayByIdUnfiltered(request.DisplayId);
         if (display == null)
         {
             _logger.LogWarning("Display {DisplayId} not found, cannot regenerate image", request.DisplayId);

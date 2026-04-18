@@ -12,15 +12,7 @@ public class GalleriesController(IGalleryService galleryService, ICurrentUserPro
     [HttpGet("/galleries")]
     public async Task<IActionResult> Index()
     {
-        var galleries = await galleryService.GetAllGalleriesAsync();
-
-        if (!currentUser.IsAdmin)
-        {
-            var userId = currentUser.UserId;
-            galleries = galleries
-                .Where(g => !g.HideFromOtherUsers || g.OwnerId == userId)
-                .ToList();
-        }
+        var galleries = await galleryService.GetVisibleGalleriesAsync();
 
         ViewData["NavLink"] = "galleries";
 
@@ -48,7 +40,7 @@ public class GalleriesController(IGalleryService galleryService, ICurrentUserPro
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Copy(int id, [FromForm] string name)
     {
-        var source = await galleryService.GetGalleryByIdAsync(id);
+        var source = await galleryService.GetVisibleGalleryByIdAsync(id);
         if (source == null)
         {
             TempData["Error"] = "Source gallery not found.";
@@ -71,7 +63,7 @@ public class GalleriesController(IGalleryService galleryService, ICurrentUserPro
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Rename(int id, [FromForm] string name)
     {
-        var gallery = await galleryService.GetGalleryByIdAsync(id);
+        var gallery = await galleryService.GetVisibleGalleryByIdAsync(id);
         if (gallery == null)
         {
             TempData["Error"] = "Gallery not found.";
@@ -95,7 +87,7 @@ public class GalleriesController(IGalleryService galleryService, ICurrentUserPro
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
-        var gallery = await galleryService.GetGalleryByIdAsync(id);
+        var gallery = await galleryService.GetVisibleGalleryByIdAsync(id);
         if (gallery == null)
         {
             TempData["Error"] = "Gallery not found.";
@@ -111,7 +103,7 @@ public class GalleriesController(IGalleryService galleryService, ICurrentUserPro
     [HttpGet("/galleries/{id:int}")]
     public async Task<IActionResult> Detail(int id)
     {
-        var gallery = await galleryService.GetGalleryByIdAsync(id);
+        var gallery = await galleryService.GetVisibleGalleryByIdAsync(id);
         if (gallery == null)
         {
             return NotFound();
@@ -131,7 +123,7 @@ public class GalleriesController(IGalleryService galleryService, ICurrentUserPro
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateSettings(int id, [FromForm] IFormCollection form)
     {
-        var gallery = await galleryService.GetGalleryByIdAsync(id);
+        var gallery = await galleryService.GetVisibleGalleryByIdAsync(id);
         if (gallery == null)
         {
             return NotFound();
@@ -164,7 +156,7 @@ public class GalleriesController(IGalleryService galleryService, ICurrentUserPro
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Upload(int id, IFormFile file, [FromForm] string? description)
     {
-        var gallery = await galleryService.GetGalleryByIdAsync(id);
+        var gallery = await galleryService.GetVisibleGalleryByIdAsync(id);
         if (gallery == null)
         {
             return NotFound();
@@ -245,7 +237,7 @@ public class GalleriesController(IGalleryService galleryService, ICurrentUserPro
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CopyImageToGallery(int galleryId, int imageId, int targetGalleryId)
     {
-        var targetGallery = await galleryService.GetGalleryByIdAsync(targetGalleryId);
+        var targetGallery = await galleryService.GetVisibleGalleryByIdAsync(targetGalleryId);
         if (targetGallery == null)
         {
             return NotFound(new { error = "Target gallery not found." });
@@ -260,7 +252,7 @@ public class GalleriesController(IGalleryService galleryService, ICurrentUserPro
     [Authorize("CookiesOrInternalToken")]
     public async Task<IActionResult> ServeImage(int galleryId, int imageId)
     {
-        var gallery = await galleryService.GetGalleryByIdAsync(galleryId);
+        var gallery = await galleryService.GetGalleryByIdUnfilteredAsync(galleryId);
         if (gallery == null)
         {
             return NotFound();

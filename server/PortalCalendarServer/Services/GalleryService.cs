@@ -11,7 +11,7 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
     private readonly string _galleryImagesPath = configuration["Paths:GalleryImages"]!;
     private readonly ICurrentUserProvider _currentUser = currentUser;
 
-    public async Task<List<Gallery>> GetAllGalleriesAsync()
+    public async Task<List<Gallery>> GetAllGalleriesUnfilteredAsync()
     {
         return await _context.Galleries
             .Include(g => g.Images)
@@ -19,6 +19,16 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
             .OrderBy(g => g.Id)
             .AsSplitQuery()
             .ToListAsync();
+    }
+
+    public async Task<List<Gallery>> GetVisibleGalleriesAsync()
+    {
+        var all = await GetAllGalleriesUnfilteredAsync();
+        if (!_currentUser.IsAuthenticated || _currentUser.IsAdmin)
+            return all;
+
+        var userId = _currentUser.UserId;
+        return all.Where(g => !g.HideFromOtherUsers || g.OwnerId == userId).ToList();
     }
 
     // For listing galleries without loading all images (e.g. for gallery overview)
@@ -29,7 +39,7 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
             .ToListAsync();
     }
 
-    public async Task<Gallery?> GetGalleryByIdAsync(int id)
+    public async Task<Gallery?> GetGalleryByIdUnfilteredAsync(int id)
     {
         return await _context.Galleries
             .Include(g => g.Images)
@@ -37,6 +47,18 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
             .Include(g => g.Owner)
             .AsSplitQuery()
             .FirstOrDefaultAsync(g => g.Id == id);
+    }
+
+    public async Task<Gallery?> GetVisibleGalleryByIdAsync(int id)
+    {
+        var gallery = await GetGalleryByIdUnfilteredAsync(id);
+        if (gallery == null) return null;
+
+        if (_currentUser.IsAuthenticated && !_currentUser.IsAdmin
+            && gallery.HideFromOtherUsers && gallery.OwnerId != _currentUser.UserId)
+            return null;
+
+        return gallery;
     }
 
     public async Task<Gallery> CreateGalleryAsync(string name)

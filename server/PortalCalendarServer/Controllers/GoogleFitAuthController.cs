@@ -40,7 +40,7 @@ public class GoogleFitAuthController : Controller
     [HttpGet("/auth/googlefit/{displayNumber:int}")]
     public IActionResult GoogleFitRedirect(int displayNumber)
     {
-        var display = _displayService.GetDisplayById(displayNumber);
+        var display = _displayService.GetVisibleDisplayById(displayNumber);
         if (display == null)
         {
             return BadRequest(new { error = "Display not found" });
@@ -188,7 +188,7 @@ public class GoogleFitAuthController : Controller
     [HttpGet("/auth/googlefit/success/{displayNumber:int}")]
     public IActionResult AuthSuccess(int displayNumber)
     {
-        var display = _displayService.GetDisplayById(displayNumber);
+        var display = _displayService.GetVisibleDisplayById(displayNumber);
         if (display == null)
         {
             _logger.LogError("Display {DisplayId} not found", displayNumber);

@@ -50,7 +50,7 @@ public class MissedConnectionsCheckService : PeriodicBackgroundService
         // Collect IDs first, then load each display fully via GetDisplayById() which
         // includes .Include(d => d.Configs) so that per-display config values
         // (_last_visit, _missed_connects, etc.) are available.
-        var displayIds = displayService.GetAllDisplays()
+        var displayIds = displayService.GetAllDisplaysUnfiltered()
             .Where(d => !d.IsDefault())
             .Select(d => d.Id)
             .ToList();
@@ -59,7 +59,7 @@ public class MissedConnectionsCheckService : PeriodicBackgroundService
         {
             try
             {
-                var display = displayService.GetDisplayById(displayId);
+                var display = displayService.GetDisplayByIdUnfiltered(displayId);
 
                 var lastVisit = displayService.GetLastVisit(display);
                 if (lastVisit == null)
