@@ -307,16 +307,20 @@ public class UiController(
                 }
             }
 
-            display.HideFromOtherUsers = form.ContainsKey("hide_from_other_users");
+            // Only the owner or an admin can change ownership/visibility settings
+            if (_currentUser.IsAdmin || display.OwnerId == null || display.OwnerId == _currentUser.UserId)
+            {
+                display.HideFromOtherUsers = form.ContainsKey("hide_from_other_users");
 
-            if (_currentUser.IsAdmin && form.ContainsKey("owner_id"))
-            {
-                var ownerIdStr = form["owner_id"].ToString();
-                display.OwnerId = string.IsNullOrEmpty(ownerIdStr) ? null : int.Parse(ownerIdStr);
-            }
-            else if (display.OwnerId == null)
-            {
-                display.OwnerId = _currentUser.UserId;
+                if (_currentUser.IsAdmin && form.ContainsKey("owner_id"))
+                {
+                    var ownerIdStr = form["owner_id"].ToString();
+                    display.OwnerId = string.IsNullOrEmpty(ownerIdStr) ? null : int.Parse(ownerIdStr);
+                }
+                else if (display.OwnerId == null)
+                {
+                    display.OwnerId = _currentUser.UserId;
+                }
             }
 
             // If the color variant is not valid for the display type (this may happen if the user changes display type or color variant), set the color variant to first available for the display type to avoid rendering errors.

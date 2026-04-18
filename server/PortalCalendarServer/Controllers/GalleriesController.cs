@@ -129,16 +129,20 @@ public class GalleriesController(IGalleryService galleryService, ICurrentUserPro
             return NotFound();
         }
 
-        gallery.HideFromOtherUsers = form.ContainsKey("hide_from_other_users");
+        // Only the owner or an admin can change ownership/visibility settings
+        if (currentUser.IsAdmin || gallery.OwnerId == null || gallery.OwnerId == currentUser.UserId)
+        {
+            gallery.HideFromOtherUsers = form.ContainsKey("hide_from_other_users");
 
-        if (currentUser.IsAdmin && form.ContainsKey("owner_id"))
-        {
-            var ownerIdStr = form["owner_id"].ToString();
-            gallery.OwnerId = string.IsNullOrEmpty(ownerIdStr) ? null : int.Parse(ownerIdStr);
-        }
-        else if (gallery.OwnerId == null)
-        {
-            gallery.OwnerId = currentUser.UserId;
+            if (currentUser.IsAdmin && form.ContainsKey("owner_id"))
+            {
+                var ownerIdStr = form["owner_id"].ToString();
+                gallery.OwnerId = string.IsNullOrEmpty(ownerIdStr) ? null : int.Parse(ownerIdStr);
+            }
+            else if (gallery.OwnerId == null)
+            {
+                gallery.OwnerId = currentUser.UserId;
+            }
         }
 
         await galleryService.SaveChangesAsync();
