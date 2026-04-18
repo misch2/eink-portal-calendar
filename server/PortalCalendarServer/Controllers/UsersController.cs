@@ -7,13 +7,13 @@ namespace PortalCalendarServer.Controllers;
 
 [Controller]
 [Authorize]
-public class UsersController(UserService userService, ICurrentUserProvider currentUser) : Controller
+public class UsersController(UserService userService) : Controller
 {
     // GET /users
     [HttpGet("/users")]
     public async Task<IActionResult> Index()
     {
-        var users = await userService.GetAllUsersAsync();
+        var users = await userService.GetVisibleUsersAsync();
 
         ViewData["NavLink"] = "users";
 
@@ -25,27 +25,30 @@ public class UsersController(UserService userService, ICurrentUserProvider curre
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> AddUser([FromForm] string username, [FromForm] string password)
     {
-        if (!currentUser.IsAdmin)
+        try
         {
-            return Forbid();
-        }
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            {
+                TempData["Error"] = "Username and password are required.";
+                return RedirectToAction(nameof(Index));
+            }
 
-        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
-        {
-            TempData["Error"] = "Username and password are required.";
+            var existing = await userService.GetUserByUsernameAsync(username);
+            if (existing != null)
+            {
+                TempData["Error"] = $"User '{username}' already exists.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            await userService.CreateUserAsync(username, password);
+            TempData["Message"] = $"User '{username}' created.";
             return RedirectToAction(nameof(Index));
         }
-
-        var existing = await userService.GetUserByUsernameAsync(username);
-        if (existing != null)
+        catch (UnauthorizedAccessException ex)
         {
-            TempData["Error"] = $"User '{username}' already exists.";
+            TempData["Error"] = ex.Message;
             return RedirectToAction(nameof(Index));
         }
-
-        await userService.CreateUserAsync(username, password);
-        TempData["Message"] = $"User '{username}' created.";
-        return RedirectToAction(nameof(Index));
     }
 
     // POST /users/delete/{id}
@@ -53,35 +56,31 @@ public class UsersController(UserService userService, ICurrentUserProvider curre
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteUser(int id)
     {
-        if (!currentUser.IsAdmin)
+        try
         {
-            return Forbid();
-        }
+            var userCount = await userService.GetUserCountAsync();
+            if (userCount <= 1)
+            {
+                TempData["Error"] = "Cannot delete the last user.";
+                return RedirectToAction(nameof(Index));
+            }
 
-        var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        if (id == currentUserId)
-        {
-            TempData["Error"] = "You cannot delete your own account.";
+            var user = await userService.GetVisibleUserByIdAsync(id);
+            if (user == null)
+            {
+                TempData["Error"] = "User not found.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            await userService.DeleteUserAsync(id);
+            TempData["Message"] = $"User '{user.Username}' deleted.";
             return RedirectToAction(nameof(Index));
         }
-
-        var userCount = await userService.GetUserCountAsync();
-        if (userCount <= 1)
+        catch (UnauthorizedAccessException ex)
         {
-            TempData["Error"] = "Cannot delete the last user.";
+            TempData["Error"] = ex.Message;
             return RedirectToAction(nameof(Index));
         }
-
-        var user = await userService.GetUserByIdAsync(id);
-        if (user == null)
-        {
-            TempData["Error"] = "User not found.";
-            return RedirectToAction(nameof(Index));
-        }
-
-        await userService.DeleteUserAsync(id);
-        TempData["Message"] = $"User '{user.Username}' deleted.";
-        return RedirectToAction(nameof(Index));
     }
 
     // POST /users/toggle-admin/{id}
@@ -89,31 +88,27 @@ public class UsersController(UserService userService, ICurrentUserProvider curre
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ToggleAdmin(int id)
     {
-        if (!currentUser.IsAdmin)
+        try
         {
-            return Forbid();
-        }
+            var user = await userService.GetVisibleUserByIdAsync(id);
+            if (user == null)
+            {
+                TempData["Error"] = "User not found.";
+                return RedirectToAction(nameof(Index));
+            }
 
-        var user = await userService.GetUserByIdAsync(id);
-        if (user == null)
-        {
-            TempData["Error"] = "User not found.";
+            await userService.ToggleAdminAsync(id);
+            user = await userService.GetVisibleUserByIdAsync(id);
+            TempData["Message"] = user!.IsAdmin
+                ? $"User '{user.Username}' is now an admin."
+                : $"User '{user.Username}' is no longer an admin.";
             return RedirectToAction(nameof(Index));
         }
-
-        // Prevent removing admin from yourself
-        if (id == currentUser.UserId && user.IsAdmin)
+        catch (UnauthorizedAccessException ex)
         {
-            TempData["Error"] = "You cannot remove admin from your own account.";
+            TempData["Error"] = ex.Message;
             return RedirectToAction(nameof(Index));
         }
-
-        user.IsAdmin = !user.IsAdmin;
-        await userService.SaveChangesAsync();
-        TempData["Message"] = user.IsAdmin
-            ? $"User '{user.Username}' is now an admin."
-            : $"User '{user.Username}' is no longer an admin.";
-        return RedirectToAction(nameof(Index));
     }
 
     // GET /change-password

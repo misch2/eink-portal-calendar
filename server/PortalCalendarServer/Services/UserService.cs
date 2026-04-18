@@ -6,17 +6,30 @@ using System.Security.Cryptography;
 
 namespace PortalCalendarServer.Services;
 
-public class UserService(CalendarContext context)
+public class UserService(CalendarContext context, ICurrentUserProvider currentUser)
 {
     private readonly CalendarContext _context = context;
 
-    public async Task<List<AppUser>> GetAllUsersAsync()
+    /// <summary>
+    /// Returns all users for admins, or only the current user for non-admins.
+    /// </summary>
+    public async Task<List<AppUser>> GetVisibleUsersAsync()
     {
-        return await _context.Users.OrderBy(u => u.Id).ToListAsync();
+        if (currentUser.IsAdmin)
+            return await _context.Users.OrderBy(u => u.Id).ToListAsync();
+
+        var user = await _context.Users.FindAsync(currentUser.UserId);
+        return user != null ? [user] : [];
     }
 
-    public async Task<AppUser?> GetUserByIdAsync(int id)
+    /// <summary>
+    /// Returns the user if the current user is allowed to see them (admins see all, non-admins see only themselves).
+    /// </summary>
+    public async Task<AppUser?> GetVisibleUserByIdAsync(int id)
     {
+        if (!currentUser.IsAdmin && id != currentUser.UserId)
+            return null;
+
         return await _context.Users.FindAsync(id);
     }
 
@@ -43,6 +56,8 @@ public class UserService(CalendarContext context)
 
     public async Task<AppUser> CreateUserAsync(string username, string password)
     {
+        RequireAdmin();
+
         var user = new AppUser
         {
             Username = username,
@@ -56,6 +71,11 @@ public class UserService(CalendarContext context)
 
     public async Task<bool> DeleteUserAsync(int id)
     {
+        RequireAdmin();
+
+        if (id == currentUser.UserId)
+            throw new UnauthorizedAccessException("You cannot delete your own account.");
+
         var user = await _context.Users.FindAsync(id);
         if (user == null)
         {
@@ -69,6 +89,9 @@ public class UserService(CalendarContext context)
 
     public async Task<bool> ChangePasswordAsync(int userId, string newPassword)
     {
+        if (!currentUser.IsAdmin && userId != currentUser.UserId)
+            throw new UnauthorizedAccessException("You can only change your own password.");
+
         var user = await _context.Users.FindAsync(userId);
         if (user == null)
         {
@@ -88,6 +111,26 @@ public class UserService(CalendarContext context)
     public async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();
+    }
+
+    public async Task ToggleAdminAsync(int userId)
+    {
+        RequireAdmin();
+
+        if (userId == currentUser.UserId)
+            throw new UnauthorizedAccessException("You cannot change your own admin status.");
+
+        var user = await _context.Users.FindAsync(userId)
+            ?? throw new ArgumentException($"User {userId} not found");
+
+        user.IsAdmin = !user.IsAdmin;
+        await _context.SaveChangesAsync();
+    }
+
+    private void RequireAdmin()
+    {
+        if (!currentUser.IsAdmin)
+            throw new UnauthorizedAccessException("This operation requires admin privileges.");
     }
 
     public static string HashPassword(string password)

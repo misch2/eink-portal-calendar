@@ -113,7 +113,7 @@ public class GalleriesController(IGalleryService galleryService, ICurrentUserPro
         ViewData["GalleryId"] = gallery.Id;
         ViewData["Title"] = gallery.Name;
         ViewData["AllGalleries"] = await galleryService.GetFastGalleryListAsync();
-        ViewData["AllUsers"] = currentUser.IsAdmin ? await userService.GetAllUsersAsync() : null;
+        ViewData["AllUsers"] = currentUser.IsAdmin ? await userService.GetVisibleUsersAsync() : null;
 
         return View("~/Views/Galleries/Detail.cshtml", gallery);
     }
