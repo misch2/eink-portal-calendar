@@ -30,7 +30,7 @@
                 @Localizer["(local time)"]
             </th>
             <th scope="col">@Localizer["Status"]</th>
-            <th scope="col">@Localizer["Visibility"]</th>
+            <th scope="col">@Localizer["Owner"]</th>
             <th scope="col">@Localizer["Last image"]</th>
             <th scope="col">@Localizer["Bitmap age"]</th>
             <th scope="col">@Localizer["Action"]</th>
@@ -131,13 +131,13 @@
                 <td>
                     @if (!d.IsDefault())
                     {
-                        if (d.HideFromOtherUsers)
-                        {
-                            <span class="badge bg-secondary"><i class="bi bi-person-lock"></i> @Localizer["Hidden to others"]</span>
-                        }
                         if (CurrentUser.IsAdmin && d.Owner != null)
                         {
                             <small class="text-muted">@d.Owner.Username</small>
+                        }
+                        if (d.HideFromOtherUsers)
+                        {
+                            <span class="badge bg-secondary"><i class="bi bi-person-lock"></i> @Localizer["Hidden to others"]</span>
                         }
                     }
                 </td>
