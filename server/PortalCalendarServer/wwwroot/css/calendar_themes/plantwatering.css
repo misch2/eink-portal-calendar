@@ -125,11 +125,15 @@ body {
 
 .moisture-bar-marker {
     position: absolute;
-    top: -1px;
-    bottom: -1px;
+    top: 0px;
+    bottom: 0px;
     width: 1px;
-    border-left: 1px dashed var(--epd-black);
-    opacity: 0.5;
+    /*    border-left: 1px dashed var(--epd-black);*/
+    border-left: none;
+    background-image: repeating-linear-gradient( to bottom, var(--epd-black) 0 2px, var(--epd-white) 2px 4px );
+    background-repeat: repeat-y;
+    background-position: center;
+    /*    opacity: 0.5;*/
 }
 
 /* --- Unavailable state --- */
@@ -166,7 +170,7 @@ body {
 }
 
 .sparkline-threshold {
-/*    stroke: var(--epd-black);
+    /*    stroke: var(--epd-black);
     stroke-width: 0.5;
     stroke-dasharray: 2 2;
     opacity: 0.3;
