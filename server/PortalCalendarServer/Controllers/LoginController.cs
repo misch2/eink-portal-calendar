@@ -36,6 +36,10 @@ public class LoginController(UserService userService) : Controller
                 new(ClaimTypes.Name, user.Username),
                 new(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
+            if (user.IsAdmin)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+            }
             var identity = new ClaimsIdentity(claims, "Cookies");
             var principal = new ClaimsPrincipal(identity);
 

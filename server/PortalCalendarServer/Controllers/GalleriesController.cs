@@ -6,13 +6,13 @@ namespace PortalCalendarServer.Controllers;
 
 [Controller]
 [Authorize]
-public class GalleriesController(IGalleryService galleryService) : Controller
+public class GalleriesController(IGalleryService galleryService, ICurrentUserProvider currentUser, UserService userService) : Controller
 {
     // GET /galleries
     [HttpGet("/galleries")]
     public async Task<IActionResult> Index()
     {
-        var galleries = await galleryService.GetAllGalleriesAsync();
+        var galleries = await galleryService.GetVisibleGalleriesAsync();
 
         ViewData["NavLink"] = "galleries";
 
@@ -40,7 +40,7 @@ public class GalleriesController(IGalleryService galleryService) : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Copy(int id, [FromForm] string name)
     {
-        var source = await galleryService.GetGalleryByIdAsync(id);
+        var source = await galleryService.GetVisibleGalleryByIdAsync(id);
         if (source == null)
         {
             TempData["Error"] = "Source gallery not found.";
@@ -63,7 +63,7 @@ public class GalleriesController(IGalleryService galleryService) : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Rename(int id, [FromForm] string name)
     {
-        var gallery = await galleryService.GetGalleryByIdAsync(id);
+        var gallery = await galleryService.GetVisibleGalleryByIdAsync(id);
         if (gallery == null)
         {
             TempData["Error"] = "Gallery not found.";
@@ -87,7 +87,7 @@ public class GalleriesController(IGalleryService galleryService) : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
-        var gallery = await galleryService.GetGalleryByIdAsync(id);
+        var gallery = await galleryService.GetVisibleGalleryByIdAsync(id);
         if (gallery == null)
         {
             TempData["Error"] = "Gallery not found.";
@@ -103,7 +103,7 @@ public class GalleriesController(IGalleryService galleryService) : Controller
     [HttpGet("/galleries/{id:int}")]
     public async Task<IActionResult> Detail(int id)
     {
-        var gallery = await galleryService.GetGalleryByIdAsync(id);
+        var gallery = await galleryService.GetVisibleGalleryByIdAsync(id);
         if (gallery == null)
         {
             return NotFound();
@@ -113,8 +113,45 @@ public class GalleriesController(IGalleryService galleryService) : Controller
         ViewData["GalleryId"] = gallery.Id;
         ViewData["Title"] = gallery.Name;
         ViewData["AllGalleries"] = await galleryService.GetFastGalleryListAsync();
+        ViewData["AllUsers"] = currentUser.IsAdmin ? await userService.GetVisibleUsersAsync() : null;
 
         return View("~/Views/Galleries/Detail.cshtml", gallery);
+    }
+
+    // POST /galleries/{id}/settings
+    [HttpPost("/galleries/{id:int}/settings")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateSettings(int id, [FromForm] IFormCollection form)
+    {
+        var gallery = await galleryService.GetVisibleGalleryByIdAsync(id);
+        if (gallery == null)
+        {
+            return NotFound();
+        }
+
+        // Only the owner or an admin can change ownership/visibility settings
+        if (currentUser.IsAdmin || gallery.OwnerId == null || gallery.OwnerId == currentUser.UserId)
+        {
+            gallery.HideFromOtherUsers = form.ContainsKey("hide_from_other_users");
+
+            if (currentUser.IsAdmin && form.ContainsKey("owner_id"))
+            {
+                var ownerIdStr = form["owner_id"].ToString();
+                gallery.OwnerId = string.IsNullOrEmpty(ownerIdStr) ? null : int.Parse(ownerIdStr);
+            }
+            else if (gallery.OwnerId == null)
+            {
+                gallery.OwnerId = currentUser.UserId;
+            }
+        }
+
+        await galleryService.SaveChangesAsync();
+
+        if (form.ContainsKey("return_to_list"))
+        {
+            return RedirectToAction(nameof(Index));
+        }
+        return RedirectToAction(nameof(Detail), new { id });
     }
 
     // POST /galleries/{id}/upload
@@ -123,7 +160,7 @@ public class GalleriesController(IGalleryService galleryService) : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Upload(int id, IFormFile file, [FromForm] string? description)
     {
-        var gallery = await galleryService.GetGalleryByIdAsync(id);
+        var gallery = await galleryService.GetVisibleGalleryByIdAsync(id);
         if (gallery == null)
         {
             return NotFound();
@@ -204,7 +241,7 @@ public class GalleriesController(IGalleryService galleryService) : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CopyImageToGallery(int galleryId, int imageId, int targetGalleryId)
     {
-        var targetGallery = await galleryService.GetGalleryByIdAsync(targetGalleryId);
+        var targetGallery = await galleryService.GetVisibleGalleryByIdAsync(targetGalleryId);
         if (targetGallery == null)
         {
             return NotFound(new { error = "Target gallery not found." });
@@ -219,7 +256,7 @@ public class GalleriesController(IGalleryService galleryService) : Controller
     [Authorize("CookiesOrInternalToken")]
     public async Task<IActionResult> ServeImage(int galleryId, int imageId)
     {
-        var gallery = await galleryService.GetGalleryByIdAsync(galleryId);
+        var gallery = await galleryService.As(new ImpersonatedUserProvider(null)).GetVisibleGalleryByIdAsync(galleryId);
         if (gallery == null)
         {
             return NotFound();

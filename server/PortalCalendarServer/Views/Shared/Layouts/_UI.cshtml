@@ -9,6 +9,7 @@
 @inject ImageRegenerationService imageRegenerationService
 @inject IWebHostEnvironment environment
 @inject IConfiguration configuration
+@inject ICurrentUserProvider currentUser
 @inject IViewLocalizer Localizer
 @inject IOptions<RequestLocalizationOptions> localizationOptions
 
@@ -55,7 +56,7 @@
             display = d;
         }
         var activeCount = imageRegenerationService.GetActiveTaskCount();
-        var allDisplays = displayService.GetAllDisplays().Where(x => !x.IsDefault()).ToList();
+        var allDisplays = displayService.GetVisibleDisplays().Where(x => !x.IsDefault()).ToList();
         var navLink = ViewData["NavLink"]?.ToString();
         var deployedVersion = configuration["Deployment:Version"] ?? "unknown";
     }
@@ -91,6 +92,11 @@
 
                     @{
                         var allGalleries = await galleryService.GetFastGalleryListAsync();
+                        if (!currentUser.IsAdmin)
+                        {
+                            var userId = currentUser.UserId;
+                            allGalleries = allGalleries.Where(g => !g.HideFromOtherUsers || g.OwnerId == userId).ToList();
+                        }
                         var currentGalleryId = ViewData["GalleryId"] as int?;
                     }
                     @foreach (var gal in allGalleries)

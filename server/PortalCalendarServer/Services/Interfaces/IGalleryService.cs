@@ -4,9 +4,14 @@ namespace PortalCalendarServer.Services
 {
     public interface IGalleryService
     {
-        Task<List<Gallery>> GetAllGalleriesAsync();
+        /// <summary>
+        /// Returns a new service instance that performs access checks as the specified user.
+        /// </summary>
+        IGalleryService As(ICurrentUserProvider user);
+
+        Task<List<Gallery>> GetVisibleGalleriesAsync();
         Task<List<Gallery>> GetFastGalleryListAsync();
-        Task<Gallery?> GetGalleryByIdAsync(int id);
+        Task<Gallery?> GetVisibleGalleryByIdAsync(int id);
         Task<Gallery> CreateGalleryAsync(string name);
         Task<Gallery> CopyGalleryAsync(int sourceGalleryId, string newName);
         Task RenameGalleryAsync(int id, string newName);
@@ -20,5 +25,6 @@ namespace PortalCalendarServer.Services
         Task<bool> SetImageRotationAsync(int galleryId, int imageId, int rotation);
         Task CopyImageToGalleryAsync(int imageId, int targetGalleryId);
         string GetImageFilePath(GalleryImage image);
+        Task SaveChangesAsync();
     }
 }

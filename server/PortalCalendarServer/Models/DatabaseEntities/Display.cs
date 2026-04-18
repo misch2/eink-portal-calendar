@@ -47,5 +47,9 @@ public partial class Display
     public DateTime? RenderedAt { get; set; }
     public string? RenderErrors { get; set; }
 
+    public int? OwnerId { get; set; }
+    public AppUser? Owner { get; set; }
+    public bool HideFromOtherUsers { get; set; }
+
     public ICollection<Config> Configs { get; set; } = null!;
 }

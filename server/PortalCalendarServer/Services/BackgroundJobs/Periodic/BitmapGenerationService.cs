@@ -60,13 +60,13 @@ public class BitmapGenerationService : PeriodicBackgroundService
         var displayService = scope.ServiceProvider.GetRequiredService<IDisplayService>();
 
         var now = DateTime.UtcNow;
-        var displays = displayService.GetAllDisplays().Where(d => !d.IsDefault()).ToList();
+        var displays = displayService.As(new ImpersonatedUserProvider(null)).GetVisibleDisplays().Where(d => !d.IsDefault()).ToList();
 
         foreach (var display in displays)
         {
             try
             {
-                var fullDisplay = displayService.GetDisplayById(display.Id);
+                var fullDisplay = displayService.As(new ImpersonatedUserProvider(null)).GetVisibleDisplayById(display.Id);
                 var wakeupInfo = displayService.GetNextWakeupTime(fullDisplay, now);
                 var timeUntilWakeup = wakeupInfo.NextWakeup - now;
                 var enqueued = false;

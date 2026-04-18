@@ -562,3 +562,40 @@ msgstr "Automaticky (výchozí nastavení pro téma)"
 
 msgid "Font size"
 msgstr "Velikost písma"
+
+# ── Visibility / Ownership ──────────────────────────────
+
+msgid "Visibility"
+msgstr "Viditelnost"
+
+msgid "Hide from other users"
+msgstr "Skrýt ostatním uživatelům"
+
+msgid "Show to other users"
+msgstr "Zobrazit ostatním uživatelům"
+
+msgid "Owner"
+msgstr "Vlastník"
+
+msgid "(none)"
+msgstr "(nikdo)"
+
+msgid "Hidden to others"
+msgstr "Skryto ostatním"
+
+# ── Users – Roles ───────────────────────────────────────
+
+msgid "Role"
+msgstr "Role"
+
+msgid "Admin"
+msgstr "Administrátor"
+
+msgid "User"
+msgstr "Uživatel"
+
+msgid "Make admin"
+msgstr "Nastavit jako administrátora"
+
+msgid "Remove admin"
+msgstr "Odebrat administrátora"

@@ -1,6 +1,8 @@
 @model List<PortalCalendarServer.Models.DatabaseEntities.AppUser>
 @using PortalCalendarServer.Controllers
+@using PortalCalendarServer.Services
 @using System.Security.Claims
+@inject ICurrentUserProvider CurrentUser
 @inject IViewLocalizer Localizer
 @{
     ViewData["Title"] = Localizer["Users"].Value;
@@ -11,7 +13,11 @@
         <tr>
             <th scope="col">@Localizer["Id"]</th>
             <th scope="col">@Localizer["Username"]</th>
-            <th scope="col">@Localizer["Action"]</th>
+            <th scope="col">@Localizer["Role"]</th>
+            @if (CurrentUser.IsAdmin)
+            {
+                <th scope="col">@Localizer["Action"]</th>
+            }
         </tr>
     </thead>
     <tbody>
@@ -28,68 +34,94 @@
                     }
                 </td>
                 <td>
-                    @if (!isCurrentUser)
+                    @if (user.IsAdmin)
                     {
-                        <button type="button" class="btn btn-danger btn-sm"
-                                data-bs-toggle="modal"
-                                data-bs-target="#delete_user_modal"
-                                data-user-id="@user.Id"
-                                data-user-name="@user.Username">
-                            @Localizer["Delete"]
-                        </button>
+                        <span class="badge bg-primary">@Localizer["Admin"]</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">@Localizer["User"]</span>
+                    }
+                    @if (CurrentUser.IsAdmin && !(isCurrentUser && user.IsAdmin))
+                    {
+                        <form method="post" action="/users/toggle-admin/@user.Id" style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-secondary ms-1"
+                                    title="@(user.IsAdmin ? Localizer["Remove admin"].Value : Localizer["Make admin"].Value)">
+                                <i class="bi @(user.IsAdmin ? "bi-person-dash" : "bi-person-check")"></i>
+                            </button>
+                        </form>
                     }
                 </td>
+                @if (CurrentUser.IsAdmin)
+                {
+                    <td>
+                        @if (!isCurrentUser)
+                        {
+                            <button type="button" class="btn btn-danger btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#delete_user_modal"
+                                    data-user-id="@user.Id"
+                                    data-user-name="@user.Username">
+                                @Localizer["Delete"]
+                            </button>
+                        }
+                    </td>
+                }
             </tr>
         }
     </tbody>
 </table>
 
-<h4>@Localizer["Add New User"]</h4>
-<form method="post" action="/users/add" class="row g-3 mb-4" style="max-width: 500px;">
-    @Html.AntiForgeryToken()
-    <div class="col-12">
-        <label class="form-label">@Localizer["Username"]</label>
-        <input type="text" name="username" class="form-control" required />
-    </div>
-    <div class="col-12">
-        <label class="form-label">@Localizer["Password"]</label>
-        <input type="password" name="password" class="form-control" required />
-    </div>
-    <div class="col-12">
-        <button type="submit" class="btn btn-primary">@Localizer["Add User"]</button>
-    </div>
-</form>
+@if (CurrentUser.IsAdmin)
+{
+    <h4>@Localizer["Add New User"]</h4>
+    <form method="post" action="/users/add" class="row g-3 mb-4" style="max-width: 500px;">
+        @Html.AntiForgeryToken()
+        <div class="col-12">
+            <label class="form-label">@Localizer["Username"]</label>
+            <input type="text" name="username" class="form-control" required />
+        </div>
+        <div class="col-12">
+            <label class="form-label">@Localizer["Password"]</label>
+            <input type="password" name="password" class="form-control" required />
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">@Localizer["Add User"]</button>
+        </div>
+    </form>
 
-<!-- Delete User Modal -->
-<div class="modal fade" id="delete_user_modal" tabindex="-1">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">@Localizer["Delete user"]</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                @Localizer["Do you really want to delete user <b>\"{0}\"</b>?", "<span class='delete_modal_user_name'></span>"]
-            </div>
-            <div class="modal-footer">
-                <form id="delete_user_form" method="post" action="">
-                    @Html.AntiForgeryToken()
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Cancel"]</button>
-                    <button type="submit" class="btn btn-danger">@Localizer["Delete"]</button>
-                </form>
+    <!-- Delete User Modal -->
+    <div class="modal fade" id="delete_user_modal" tabindex="-1">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@Localizer["Delete user"]</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    @Localizer["Do you really want to delete user <b>\"{0}\"</b>?", "<span class='delete_modal_user_name'></span>"]
+                </div>
+                <div class="modal-footer">
+                    <form id="delete_user_form" method="post" action="">
+                        @Html.AntiForgeryToken()
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Cancel"]</button>
+                        <button type="submit" class="btn btn-danger">@Localizer["Delete"]</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-@section Scripts {
-    <script>
-        $('#delete_user_modal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            var modal = $(this);
-            var userId = button.data('user-id');
-            modal.find('.delete_modal_user_name').text(button.data('user-name'));
-            modal.find('#delete_user_form').attr('action', '/users/delete/' + userId);
-        });
-    </script>
+    @section Scripts {
+        <script>
+            $('#delete_user_modal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var modal = $(this);
+                var userId = button.data('user-id');
+                modal.find('.delete_modal_user_name').text(button.data('user-name'));
+                modal.find('#delete_user_form').attr('action', '/users/delete/' + userId);
+            });
+        </script>
+    }
 }

@@ -5,17 +5,35 @@ using SixLabors.ImageSharp;
 
 namespace PortalCalendarServer.Services;
 
-public class GalleryService(CalendarContext context, IConfiguration configuration) : IGalleryService
+public class GalleryService(CalendarContext context, IConfiguration configuration, ICurrentUserProvider currentUser) : IGalleryService
 {
     private readonly CalendarContext _context = context;
     private readonly string _galleryImagesPath = configuration["Paths:GalleryImages"]!;
+    private readonly ICurrentUserProvider _currentUser = currentUser;
 
-    public async Task<List<Gallery>> GetAllGalleriesAsync()
+    public IGalleryService As(ICurrentUserProvider user)
+    {
+        return new GalleryService(_context, configuration, user);
+    }
+
+    private async Task<List<Gallery>> GetAllGalleriesUnfilteredAsync()
     {
         return await _context.Galleries
             .Include(g => g.Images)
+            .Include(g => g.Owner)
             .OrderBy(g => g.Id)
+            .AsSplitQuery()
             .ToListAsync();
+    }
+
+    public async Task<List<Gallery>> GetVisibleGalleriesAsync()
+    {
+        var all = await GetAllGalleriesUnfilteredAsync();
+        if (!_currentUser.IsAuthenticated || _currentUser.IsAdmin)
+            return all;
+
+        var userId = _currentUser.UserId;
+        return all.Where(g => !g.HideFromOtherUsers || g.OwnerId == userId).ToList();
     }
 
     // For listing galleries without loading all images (e.g. for gallery overview)
@@ -26,13 +44,26 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
             .ToListAsync();
     }
 
-    public async Task<Gallery?> GetGalleryByIdAsync(int id)
+    private async Task<Gallery?> GetGalleryByIdUnfilteredAsync(int id)
     {
         return await _context.Galleries
             .Include(g => g.Images)
             .Include(g => g.ImageLinks)
-            .AsSingleQuery()
+            .Include(g => g.Owner)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(g => g.Id == id);
+    }
+
+    public async Task<Gallery?> GetVisibleGalleryByIdAsync(int id)
+    {
+        var gallery = await GetGalleryByIdUnfilteredAsync(id);
+        if (gallery == null) return null;
+
+        if (_currentUser.IsAuthenticated && !_currentUser.IsAdmin
+            && gallery.HideFromOtherUsers && gallery.OwnerId != _currentUser.UserId)
+            return null;
+
+        return gallery;
     }
 
     public async Task<Gallery> CreateGalleryAsync(string name)
@@ -40,7 +71,8 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
         var gallery = new Gallery
         {
             Name = name,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            OwnerId = _currentUser.UserId
         };
         _context.Galleries.Add(gallery);
         await _context.SaveChangesAsync();
@@ -61,7 +93,8 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
         var copy = new Gallery
         {
             Name = newName,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            OwnerId = _currentUser.UserId
         };
 
         // Link the same images (many-to-many, no file duplication)
@@ -269,6 +302,11 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
     public string GetImageFilePath(GalleryImage image)
     {
         return Path.Combine(GetImageDirectory(image.PrimaryFolder), image.FileName);
+    }
+
+    public async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
     }
 
     private string GetImageDirectory(string primaryFolder)

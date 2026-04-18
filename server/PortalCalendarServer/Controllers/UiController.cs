@@ -22,7 +22,8 @@ public class UiController(
     PageGeneratorService pageGeneratorService,
     IDisplayService displayService,
     ThemeService themeService,
-    ModuleRegistry moduleRegistry
+    ModuleRegistry moduleRegistry,
+    ICurrentUserProvider currentUser
     ) : Controller, IAsyncResultFilter
 {
     private readonly CalendarContext _context = context;
@@ -32,14 +33,13 @@ public class UiController(
     private readonly IDisplayService _displayService = displayService;
     private readonly ThemeService _themeService = themeService;
     private readonly ModuleRegistry _moduleRegistry = moduleRegistry;
+    private readonly ICurrentUserProvider _currentUser = currentUser;
 
     // GET /
     [HttpGet("/")]
     public async Task<IActionResult> SelectDisplay()
     {
-        var displays = await _context.Displays
-            .OrderBy(d => d.Id)
-            .ToListAsync();
+        var displays = _displayService.GetVisibleDisplays().ToList();
 
         ViewData["NavLink"] = "index";
 
@@ -50,7 +50,7 @@ public class UiController(
     [HttpGet("/home/{displayNumber:int}")]
     public IActionResult Home(int displayNumber)
     {
-        var display = _displayService.GetDisplayById(displayNumber);
+        var display = _displayService.GetVisibleDisplayById(displayNumber);
         if (display == null)
         {
             return NotFound();
@@ -66,7 +66,7 @@ public class UiController(
     [HttpGet("/test/{displayNumber:int}")]
     public IActionResult Test(int displayNumber)
     {
-        var display = _displayService.GetDisplayById(displayNumber);
+        var display = _displayService.GetVisibleDisplayById(displayNumber);
         if (display == null)
         {
             return NotFound();
@@ -82,7 +82,7 @@ public class UiController(
     [HttpGet("/test-multi-resolution/{displayNumber:int}")]
     public IActionResult TestMultiResolution(int displayNumber)
     {
-        var display = _displayService.GetDisplayById(displayNumber);
+        var display = _displayService.GetVisibleDisplayById(displayNumber);
         if (display == null)
         {
             return NotFound();
@@ -99,7 +99,7 @@ public class UiController(
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteDisplay(int displayNumber)
     {
-        var display = _displayService.GetDisplayById(displayNumber);
+        var display = _displayService.GetVisibleDisplayById(displayNumber);
         if (display == null)
         {
             return NotFound();
@@ -130,7 +130,7 @@ public class UiController(
     [DisplayRenderErrorHandling]
     public IActionResult CalendarHtmlSpecificDate(int displayNumber, DateTime date, [FromQuery] bool preview_colors = false, [FromQuery] string? force_error = null)
     {
-        var display = _displayService.GetDisplayById(displayNumber);
+        var display = _displayService.As(new ImpersonatedUserProvider(null)).GetVisibleDisplayById(displayNumber);
         if (display == null)
         {
             return NotFound("Display with this ID not found");
@@ -169,7 +169,7 @@ public class UiController(
     [HttpGet("/config_ui/{displayNumber:int}")]
     public async Task<IActionResult> ConfigUiShow(int displayNumber)
     {
-        var display = _displayService.GetDisplayById(displayNumber);
+        var display = _displayService.GetVisibleDisplayById(displayNumber);
         if (display == null)
         {
             return NotFound();
@@ -185,6 +185,7 @@ public class UiController(
         // Pass DisplayService and Display to the view through ViewData
         ViewData["DisplayService"] = _displayService;
         ViewData["Display"] = display;
+        ViewData["AllUsers"] = _currentUser.IsAdmin ? await _context.Users.OrderBy(u => u.Id).ToListAsync() : null;
 
         return View("ConfigUi", display);
     }
@@ -194,7 +195,7 @@ public class UiController(
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ConfigUiSave(int displayNumber, [FromForm] IFormCollection form)
     {
-        var display = _displayService.GetDisplayById(displayNumber);
+        var display = _displayService.GetVisibleDisplayById(displayNumber);
         if (display == null)
         {
             return NotFound();
@@ -306,6 +307,22 @@ public class UiController(
                 }
             }
 
+            // Only the owner or an admin can change ownership/visibility settings
+            if (_currentUser.IsAdmin || display.OwnerId == null || display.OwnerId == _currentUser.UserId)
+            {
+                display.HideFromOtherUsers = form.ContainsKey("hide_from_other_users");
+
+                if (_currentUser.IsAdmin && form.ContainsKey("owner_id"))
+                {
+                    var ownerIdStr = form["owner_id"].ToString();
+                    display.OwnerId = string.IsNullOrEmpty(ownerIdStr) ? null : int.Parse(ownerIdStr);
+                }
+                else if (display.OwnerId == null)
+                {
+                    display.OwnerId = _currentUser.UserId;
+                }
+            }
+
             // If the color variant is not valid for the display type (this may happen if the user changes display type or color variant), set the color variant to first available for the display type to avoid rendering errors.
             var validColorVariants = _displayService.GetColorVariants().Where(cv => cv.DisplayTypeCode == display.DisplayTypeCode).ToList();
             if (!validColorVariants.Any(cv => cv.Code == display.ColorVariantCode))
@@ -330,7 +347,7 @@ public class UiController(
     [HttpGet("/config_ui/theme/{displayNumber:int}")]
     public async Task<IActionResult> ConfigUiThemeShow(int displayNumber, [FromQuery] int? themeId)
     {
-        var display = _displayService.GetDisplayById(displayNumber);
+        var display = _displayService.GetVisibleDisplayById(displayNumber);
         if (display == null)
         {
             return NotFound();
@@ -416,7 +433,7 @@ public class UiController(
     public IActionResult Bitmap(
         int displayNumber)
     {
-        var display = _displayService.GetDisplayById(displayNumber);
+        var display = _displayService.GetVisibleDisplayById(displayNumber);
         if (display == null)
         {
             return NotFound();
@@ -479,7 +496,7 @@ public class UiController(
             if (context.RouteData.Values.TryGetValue("displayNumber", out var dn)
                 && int.TryParse(dn?.ToString(), out var displayNumber))
             {
-                try { display = _displayService.GetDisplayById(displayNumber); }
+                try { display = _displayService.As(new ImpersonatedUserProvider(null)).GetVisibleDisplayById(displayNumber); }
                 catch { /* ignore */ }
             }
             display ??= _displayService.GetDefaultDisplay();

@@ -19,16 +19,32 @@ public class DisplayService(
     CalendarContext context,
     ILogger<DisplayService> logger,
     IConfiguration _configuration,
-    ImageRegenerationService imageRegenerationService) : IDisplayService
+    ImageRegenerationService imageRegenerationService,
+    ICurrentUserProvider currentUser) : IDisplayService
 {
-    public IEnumerable<Display> GetAllDisplays()
+    public IDisplayService As(ICurrentUserProvider user)
+    {
+        return new DisplayService(context, logger, _configuration, imageRegenerationService, user);
+    }
+
+    private IEnumerable<Display> GetAllDisplaysUnfiltered()
     {
         return context.Displays
             .OrderBy(d => d.Id)
             .ToList();
     }
 
-    public Display GetDisplayById(int displayNumber)
+    public IEnumerable<Display> GetVisibleDisplays()
+    {
+        var all = GetAllDisplaysUnfiltered();
+        if (!currentUser.IsAuthenticated || currentUser.IsAdmin)
+            return all;
+
+        var userId = currentUser.UserId;
+        return all.Where(d => !d.HideFromOtherUsers || d.OwnerId == userId).ToList();
+    }
+
+    private Display GetDisplayByIdUnfiltered(int displayNumber)
     {
         var display = context.Displays
             .Include(d => d.Configs)
@@ -39,8 +55,20 @@ public class DisplayService(
             .Include(d => d.ColorVariant)
                 .ThenInclude(cv => cv.DisplayType)
             .Include(d => d.Theme)
+            .Include(d => d.Owner)
             .AsSplitQuery()
             .Single(d => d.Id == displayNumber);
+        return display;
+    }
+
+    public Display? GetVisibleDisplayById(int displayNumber)
+    {
+        var display = GetDisplayByIdUnfiltered(displayNumber);
+
+        if (currentUser.IsAuthenticated && !currentUser.IsAdmin
+            && display.HideFromOtherUsers && display.OwnerId != currentUser.UserId)
+            return null;
+
         return display;
     }
 
@@ -247,7 +275,7 @@ public class DisplayService(
 
     public void EnqueueAllImageRegenerationRequest()
     {
-        var displays = GetAllDisplays().Where(d => !d.IsDefault()).ToList();
+        var displays = GetAllDisplaysUnfiltered().Where(d => !d.IsDefault()).ToList();
         foreach (var display in displays)
         {
             EnqueueImageRegenerationRequest(display);
@@ -940,7 +968,7 @@ public class DisplayService(
     {
         var ret = new BitmapResult();
 
-        var display = GetDisplayById(displayId);
+        var display = GetDisplayByIdUnfiltered(displayId);
         if (display == null)
         {
             ret.ErrorMessage = "Display not found";

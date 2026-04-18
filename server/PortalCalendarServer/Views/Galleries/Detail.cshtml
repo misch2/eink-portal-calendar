@@ -1,4 +1,7 @@
 @model PortalCalendarServer.Models.DatabaseEntities.Gallery
+@using PortalCalendarServer.Models.DatabaseEntities
+@using PortalCalendarServer.Services
+@inject ICurrentUserProvider CurrentUser
 @inject IViewLocalizer Localizer
 
 @functions {
@@ -21,6 +24,44 @@
     </button>
     <div></div>
 </div>
+
+<form method="post" action="/galleries/@Model.Id/settings" class="card mb-4">
+    @Html.AntiForgeryToken()
+    <div class="card-body">
+        <h6 class="card-subtitle mb-3 text-muted">
+            <i class="bi bi-person-lock"></i> @Localizer["Visibility"]
+        </h6>
+        <div class="row align-items-end">
+            <div class="col-auto">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="hide_from_other_users" name="hide_from_other_users"
+                           @(Model.HideFromOtherUsers ? "checked" : "")>
+                    <label class="form-check-label" for="hide_from_other_users">@Localizer["Hide from other users"]</label>
+                </div>
+            </div>
+            @if (CurrentUser.IsAdmin)
+            {
+                var allUsers = (List<AppUser>?)ViewData["AllUsers"];
+                if (allUsers != null)
+                {
+                    <div class="col-auto">
+                        <label class="form-label mb-0">@Localizer["Owner"]</label>
+                        <select name="owner_id" class="form-select form-select-sm" style="width: auto; display: inline-block; margin-left: 0.25rem;">
+                            <option value="">@Localizer["(none)"]</option>
+                            @foreach (var user in allUsers)
+                            {
+                                <option value="@user.Id" selected="@(Model.OwnerId == user.Id)">@user.Username</option>
+                            }
+                        </select>
+                    </div>
+                }
+            }
+            <div class="col-auto">
+                <button type="submit" class="btn btn-sm btn-outline-primary">@Localizer["Save"]</button>
+            </div>
+        </div>
+    </div>
+</form>
 
 @{
     var hiddenImageIds = Model.ImageLinks

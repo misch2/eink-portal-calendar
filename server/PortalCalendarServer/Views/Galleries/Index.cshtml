@@ -1,5 +1,7 @@
 @model List<PortalCalendarServer.Models.DatabaseEntities.Gallery>
 @using PortalCalendarServer.Controllers
+@using PortalCalendarServer.Services
+@inject ICurrentUserProvider CurrentUser
 @inject IViewLocalizer Localizer
 @{
     ViewData["Title"] = Localizer["Galleries"].Value;
@@ -12,6 +14,7 @@
             <th scope="col">@Localizer["Name"]</th>
             <th scope="col">@Localizer["Images"]</th>
             <th scope="col">@Localizer["Created"]</th>
+            <th scope="col">@Localizer["Owner"]</th>
             <th scope="col"></th>
         </tr>
     </thead>
@@ -25,7 +28,33 @@
                 </td>
                 <td>@gallery.Images.Count</td>
                 <td>@gallery.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>
+                    @if (gallery.Owner != null)
+                    {
+                        <small class="text-muted">@gallery.Owner.Username</small>
+                    }
+                    @if (gallery.HideFromOtherUsers)
+                    {
+                        <span class="badge bg-secondary"><i class="bi bi-person-lock"></i> @Localizer["Hidden to others"]</span>
+                    }
+                </td>
                 <td class="text-end">
+                    <form method="post" action="/galleries/@gallery.Id/settings" style="display:inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="return_to_list" value="1" />
+                        @if (!gallery.HideFromOtherUsers)
+                        {
+                            <input type="hidden" name="hide_from_other_users" value="on" />
+                        }
+                        @if (gallery.OwnerId != null)
+                        {
+                            <input type="hidden" name="owner_id" value="@gallery.OwnerId" />
+                        }
+                        <button type="submit" class="btn btn-sm @(gallery.HideFromOtherUsers ? "btn-outline-warning" : "btn-outline-secondary")"
+                                title="@(gallery.HideFromOtherUsers ? Localizer["Show to other users"].Value : Localizer["Hide from other users"].Value)">
+                            <i class="bi @(gallery.HideFromOtherUsers ? "bi-person-lock" : "bi-people")"></i>
+                        </button>
+                    </form>
                     <button type="button" class="btn btn-sm btn-outline-secondary"
                             data-bs-toggle="modal"
                             data-bs-target="#rename_gallery_modal"

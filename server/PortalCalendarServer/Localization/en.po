@@ -533,3 +533,40 @@ msgstr "Auto (theme default)"
 
 msgid "Font size"
 msgstr "Font size"
+
+# ── Visibility / Ownership ──────────────────────────────
+
+msgid "Visibility"
+msgstr "Visibility"
+
+msgid "Hide from other users"
+msgstr "Hide from other users"
+
+msgid "Show to other users"
+msgstr "Show to other users"
+
+msgid "Owner"
+msgstr "Owner"
+
+msgid "(none)"
+msgstr "(none)"
+
+msgid "Hidden to others"
+msgstr "Hidden to others"
+
+# ── Users – Roles ───────────────────────────────────────
+
+msgid "Role"
+msgstr "Role"
+
+msgid "Admin"
+msgstr "Admin"
+
+msgid "User"
+msgstr "User"
+
+msgid "Make admin"
+msgstr "Make admin"
+
+msgid "Remove admin"
+msgstr "Remove admin"

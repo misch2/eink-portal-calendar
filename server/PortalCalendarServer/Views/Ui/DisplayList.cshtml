@@ -3,6 +3,7 @@
 @using PortalCalendarServer.Models.DatabaseEntities
 @using PortalCalendarServer.Services
 @inject IDisplayService displayService
+@inject ICurrentUserProvider CurrentUser
 @inject IViewLocalizer Localizer
 @{
     ViewData["Title"] = Localizer["Displays"].Value;
@@ -29,6 +30,7 @@
                 @Localizer["(local time)"]
             </th>
             <th scope="col">@Localizer["Status"]</th>
+            <th scope="col">@Localizer["Owner"]</th>
             <th scope="col">@Localizer["Last image"]</th>
             <th scope="col">@Localizer["Bitmap age"]</th>
             <th scope="col">@Localizer["Action"]</th>
@@ -37,7 +39,8 @@
     <tbody>
         @foreach (var _d in Model)
         {
-            var d = displayService.GetDisplayById(_d.Id);
+            var d = displayService.GetVisibleDisplayById(_d.Id);
+            if (d == null) continue;
 
             var dateCulture = displayService.GetDateCultureInfo(d);
             var tz = displayService.GetTimeZoneInfo(d);
@@ -123,6 +126,19 @@
                         if (displayService.GetConfigBool(d, "ota_mode"))
                         {
                             <span class="badge bg-warning text-dark">@Localizer["OTA mode active"]</span>
+                        }
+                    }
+                </td>
+                <td>
+                    @if (!d.IsDefault())
+                    {
+                        if (d.Owner != null)
+                        {
+                            <small class="text-muted">@d.Owner.Username</small>
+                        }
+                        if (d.HideFromOtherUsers)
+                        {
+                            <span class="badge bg-secondary"><i class="bi bi-person-lock"></i> @Localizer["Hidden to others"]</span>
                         }
                     }
                 </td>

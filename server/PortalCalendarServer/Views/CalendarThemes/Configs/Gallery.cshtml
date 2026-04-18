@@ -7,7 +7,7 @@
 @inject IGalleryService galleryService
 
 @{
-    var galleries = await galleryService.GetAllGalleriesAsync();
+    var galleries = await galleryService.GetVisibleGalleriesAsync();
 }
 
 
