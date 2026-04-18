@@ -235,6 +235,11 @@ public class UiController(
             {
                 display.Name = String.Empty;
             }
+            if (form.ContainsKey("parent_id"))
+            {
+                var parentIdStr = form["parent_id"].ToString();
+                display.ParentId = string.IsNullOrEmpty(parentIdStr) ? null : int.Parse(parentIdStr);
+            }
             if (form.ContainsKey("display_mac"))
             {
                 display.Mac = form["display_mac"].ToString().Trim().ToLowerInvariant();

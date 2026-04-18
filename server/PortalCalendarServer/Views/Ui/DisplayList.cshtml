@@ -7,9 +7,46 @@
 @inject IViewLocalizer Localizer
 @{
     ViewData["Title"] = Localizer["Displays"].Value;
+
+    // Build tree-ordered list with depth
+    var displayDepths = new List<(Display Display, int Depth)>();
+    var allDisplays = Model;
+    var childrenLookup = allDisplays.ToLookup(d => d.ParentId);
+
+    void AddSubtree(int? parentId, int depth)
+    {
+        foreach (var child in childrenLookup[parentId].OrderBy(d => d.Id))
+        {
+            displayDepths.Add((child, depth));
+            AddSubtree(child.Id, depth + 1);
+        }
+    }
+
+    // Roots are displays with no parent
+    AddSubtree(null, 0);
+
+    // Add any orphans (parent not in visible set) that weren't included
+    var included = new HashSet<int>(displayDepths.Select(x => x.Display.Id));
+    foreach (var d in allDisplays.Where(d => !included.Contains(d.Id)))
+    {
+        displayDepths.Add((d, 0));
+    }
 }
 
 <div class="mb-3">
+
+<style>
+    .tree-elbow {
+        display: inline-block;
+        width: 0.9rem;
+        height: 0.8rem;
+        margin-right: 0.35rem;
+        border-left: 2px solid var(--bs-secondary-bg, #dee2e6);
+        border-bottom: 2px solid var(--bs-secondary-bg, #dee2e6);
+        border-bottom-left-radius: 0.35rem;
+        vertical-align: middle;
+    }
+</style>
     @Html.AntiForgeryToken()
     <button id="pairing-btn" class="btn btn-secondary btn-sm" onclick="togglePairing()">
         @Localizer["Enable Pairing Mode (5 min)"]
@@ -37,16 +74,20 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var _d in Model)
+        @foreach (var (rawDisplay, depth) in displayDepths)
         {
-            var d = displayService.GetVisibleDisplayById(_d.Id);
+            var d = displayService.GetVisibleDisplayById(rawDisplay.Id);
             if (d == null) continue;
 
             var dateCulture = displayService.GetDateCultureInfo(d);
             var tz = displayService.GetTimeZoneInfo(d);
 
             <tr>
-                <td>
+                <td style="padding-left: @(depth * 1.5 + 0.5)rem;">
+                    @if (depth > 0)
+                    {
+                        <span class="tree-elbow" aria-hidden="true"></span>
+                    }
                     @if (d.IsDefault())
                     {
                         <a href="@Url.Action(nameof(UiController.ConfigUiShow), "Ui", new { displayNumber = d.Id })">@d.Name</a>

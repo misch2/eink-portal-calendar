@@ -15,6 +15,23 @@
         </div>
     </fieldset>
 
+    <fieldset class="row mb-3">
+        <legend class="w-auto">@Localizer["Parent display"]</legend>
+        <div class="col-md-6">
+            @{
+                var allDisplays = DisplayService.GetVisibleDisplays().Where(d => d.Id != Model.Id).ToList();
+            }
+            <select id="parent_id" name="parent_id" class="form-select">
+                <option value="">@Localizer["(none - no inheritance)"]</option>
+                @foreach (var pd in allDisplays)
+                {
+                    <option value="@pd.Id" selected="@(Model.ParentId == pd.Id)">@pd.Name (ID @pd.Id)</option>
+                }
+            </select>
+            <small class="form-text text-muted">@Localizer["Configuration values not set on this display will be inherited from the parent."]</small>
+        </div>
+    </fieldset>
+
     <div class="form-group row mb-4">
         @await Html.PartialAsync("_ConfigSelect", new ConfigSelectModel
         {

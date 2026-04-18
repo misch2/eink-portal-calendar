@@ -56,6 +56,7 @@ public class DisplayService(
                 .ThenInclude(cv => cv.DisplayType)
             .Include(d => d.Theme)
             .Include(d => d.Owner)
+            .Include(d => d.Parent)
             .AsSplitQuery()
             .Single(d => d.Id == displayNumber);
         return display;
@@ -146,22 +147,31 @@ public class DisplayService(
     }
 
     /// <summary>
-    /// Get configuration value for a display, with fallback to default display (ID = 0)
+    /// Get configuration value for a display, walking up the parent chain for fallback
     /// </summary>
     public string? GetConfig(Display display, string name)
     {
-        // 1. real value (empty string usually means "unset" in HTML form)
-        var value = GetConfigWithoutDefaults(display, name);
-        if (!string.IsNullOrEmpty(value))
-        {
-            return value;
-        }
+        var visited = new HashSet<int>();
+        var current = display;
 
-        // 2. default value (modifiable)
-        var default_value = GetConfigDefaultsOnly(name);
-        if (!string.IsNullOrEmpty(default_value))
+        while (current != null)
         {
-            return default_value;
+            if (!visited.Add(current.Id))
+            {
+                logger.LogWarning("Circular parent chain detected at display {DisplayId}", current.Id);
+                break;
+            }
+
+            var value = GetConfigWithoutDefaults(current, name);
+            if (!string.IsNullOrEmpty(value))
+            {
+                return value;
+            }
+
+            if (current.ParentId == null)
+                break;
+
+            current = GetDisplayWithConfigs(current.ParentId.Value);
         }
 
         return null;
@@ -177,13 +187,27 @@ public class DisplayService(
     }
 
     /// <summary>
-    /// Get configuration value from default display only (ID = 0)
+    /// Get configuration value inherited from the parent display chain, skipping this display's own values.
+    /// Returns null if the display has no parent.
     /// </summary>
-    public string? GetConfigDefaultsOnly(string name)
+    public string? GetParentConfig(Display display, string name)
     {
-        var defaultConfig = GetDefaultDisplay().Configs?.FirstOrDefault(c => c.Name == name);
+        if (display.ParentId == null)
+            return null;
+        var parent = GetDisplayWithConfigs(display.ParentId.Value);
+        if (parent == null)
+            return null;
+        return GetConfig(parent, name);
+    }
 
-        return defaultConfig?.Value;
+    /// <summary>
+    /// Load a display with its Configs included (for parent chain walking).
+    /// </summary>
+    private Display? GetDisplayWithConfigs(int displayId)
+    {
+        return context.Displays
+            .Include(d => d.Configs)
+            .SingleOrDefault(d => d.Id == displayId);
     }
 
     /// <summary>

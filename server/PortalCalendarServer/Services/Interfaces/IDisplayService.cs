@@ -56,7 +56,7 @@ public interface IDisplayService
     string GetDisplayCountryCode(Display display);
 
     /// <summary>
-    /// Get configuration value for a display, with fallback to default display (ID = 0)
+    /// Get configuration value for a display, walking up the parent chain for fallback.
     /// </summary>
     string? GetConfig(Display display, string name);
 
@@ -66,9 +66,10 @@ public interface IDisplayService
     string? GetConfigWithoutDefaults(Display display, string name);
 
     /// <summary>
-    /// Get configuration value from default display only (ID = 0)
+    /// Get configuration value inherited from the parent display chain, skipping this display's own values.
+    /// Returns null if the display has no parent.
     /// </summary>
-    string? GetConfigDefaultsOnly(string name);
+    string? GetParentConfig(Display display, string name);
 
     /// <summary>
     /// Get configuration value as boolean

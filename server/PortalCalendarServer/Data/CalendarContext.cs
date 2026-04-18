@@ -143,6 +143,11 @@ public partial class CalendarContext : DbContext
                 .HasDefaultValue(false)
                 .HasColumnName("hide_from_other_users");
 
+            entity.Property(e => e.ParentId).HasColumnName("parent_id");
+
+            entity.HasOne(d => d.Parent).WithMany(d => d.Children)
+                .HasForeignKey(d => d.ParentId)
+                .OnDelete(DeleteBehavior.SetNull);
             entity.HasOne(d => d.Owner).WithMany(p => p.OwnedDisplays)
                 .HasForeignKey(d => d.OwnerId)
                 .OnDelete(DeleteBehavior.SetNull);

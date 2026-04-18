@@ -47,6 +47,10 @@ public partial class Display
     public DateTime? RenderedAt { get; set; }
     public string? RenderErrors { get; set; }
 
+    public int? ParentId { get; set; }
+    public Display? Parent { get; set; }
+    public ICollection<Display> Children { get; set; } = new List<Display>();
+
     public int? OwnerId { get; set; }
     public AppUser? Owner { get; set; }
     public bool HideFromOtherUsers { get; set; }

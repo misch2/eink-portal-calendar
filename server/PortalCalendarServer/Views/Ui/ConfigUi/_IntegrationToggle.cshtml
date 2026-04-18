@@ -7,7 +7,7 @@
     var integrationName = (string)ViewData["IntegrationName"]!;
     var hasOverride = !string.IsNullOrEmpty(displayService.GetConfigWithoutDefaults(Model, integrationName));
     var currentValue = displayService.GetConfig(Model, integrationName) == "1";
-    var defaultValue = displayService.GetConfigDefaultsOnly(integrationName) == "1";
+    var defaultValue = displayService.GetParentConfig(Model, integrationName) == "1";
     var isDisabled = !Model.IsDefault() && !hasOverride;
 }
 

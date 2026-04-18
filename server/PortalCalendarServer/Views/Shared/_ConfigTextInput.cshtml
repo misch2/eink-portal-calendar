@@ -4,7 +4,7 @@
 
 @{
     var currentValue = DisplayService.GetConfigWithoutDefaults(Model.Display, Model.Key);
-    var placeholder = DisplayService.GetConfigDefaultsOnly(Model.Key);
+    var placeholder = DisplayService.GetParentConfig(Model.Display, Model.Key);
     var wrapClass = string.Join(" ", new[] { Model.ColClass, Model.MarginClass }.Where(s => !string.IsNullOrEmpty(s)));
     var stepAttr = Model.InputType == "number" && Model.Step != null ? $"step=\"{Model.Step}\"" : null;
 }
