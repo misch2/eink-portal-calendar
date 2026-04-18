@@ -155,6 +155,8 @@ builder.Services.AddHttpClient(Options.DefaultName, client =>
 ;
 
 // Register services
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserProvider, CurrentUserProvider>();
 builder.Services.AddSingleton<IWeb2PngService, Web2PngService>();
 builder.Services.AddScoped<IDisplayService, DisplayService>();
 builder.Services.AddScoped<PageGeneratorService>();

@@ -3,6 +3,7 @@
 @using PortalCalendarServer.Models.POCOs
 @using PortalCalendarServer.Services
 @inject IDisplayService DisplayService
+@inject ICurrentUserProvider CurrentUser
 @inject IViewLocalizer Localizer
 
 @if (!Model.IsDefault())
@@ -120,3 +121,34 @@
                 })
     </div>
 </fieldset>
+
+@if (!Model.IsDefault())
+{
+    <fieldset class="row mb-3">
+        <legend class="w-auto">@Localizer["Visibility"]</legend>
+        <div class="col-md-12">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="hide_from_other_users" name="hide_from_other_users"
+                       @(Model.HideFromOtherUsers ? "checked" : "")>
+                <label class="form-check-label" for="hide_from_other_users">@Localizer["Hide from other users"]</label>
+            </div>
+        </div>
+        @if (CurrentUser.IsAdmin)
+        {
+            var allUsers = (List<AppUser>?)ViewData["AllUsers"];
+            if (allUsers != null)
+            {
+                <div class="col-md-4 mt-3">
+                    <label class="form-label">@Localizer["Owner"]</label>
+                    <select name="owner_id" class="form-select">
+                        <option value="">@Localizer["(none)"]</option>
+                        @foreach (var user in allUsers)
+                        {
+                            <option value="@user.Id" selected="@(Model.OwnerId == user.Id)">@user.Username</option>
+                        }
+                    </select>
+                </div>
+            }
+        }
+    </fieldset>
+}

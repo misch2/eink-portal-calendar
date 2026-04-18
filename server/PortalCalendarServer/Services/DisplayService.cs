@@ -39,6 +39,7 @@ public class DisplayService(
             .Include(d => d.ColorVariant)
                 .ThenInclude(cv => cv.DisplayType)
             .Include(d => d.Theme)
+            .Include(d => d.Owner)
             .AsSplitQuery()
             .Single(d => d.Id == displayNumber);
         return display;

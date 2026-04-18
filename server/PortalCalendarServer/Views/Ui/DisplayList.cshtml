@@ -3,6 +3,7 @@
 @using PortalCalendarServer.Models.DatabaseEntities
 @using PortalCalendarServer.Services
 @inject IDisplayService displayService
+@inject ICurrentUserProvider CurrentUser
 @inject IViewLocalizer Localizer
 @{
     ViewData["Title"] = Localizer["Displays"].Value;
@@ -29,6 +30,7 @@
                 @Localizer["(local time)"]
             </th>
             <th scope="col">@Localizer["Status"]</th>
+            <th scope="col">@Localizer["Visibility"]</th>
             <th scope="col">@Localizer["Last image"]</th>
             <th scope="col">@Localizer["Bitmap age"]</th>
             <th scope="col">@Localizer["Action"]</th>
@@ -123,6 +125,19 @@
                         if (displayService.GetConfigBool(d, "ota_mode"))
                         {
                             <span class="badge bg-warning text-dark">@Localizer["OTA mode active"]</span>
+                        }
+                    }
+                </td>
+                <td>
+                    @if (!d.IsDefault())
+                    {
+                        if (d.HideFromOtherUsers)
+                        {
+                            <span class="badge bg-secondary"><i class="bi bi-person-lock"></i> @Localizer["Hidden to others"]</span>
+                        }
+                        if (CurrentUser.IsAdmin && d.Owner != null)
+                        {
+                            <small class="text-muted">@d.Owner.Username</small>
                         }
                     }
                 </td>

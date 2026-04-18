@@ -85,6 +85,11 @@ public class UserService(CalendarContext context)
         return await _context.Users.CountAsync();
     }
 
+    public async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
+    }
+
     public static string HashPassword(string password)
     {
         var salt = RandomNumberGenerator.GetBytes(16);

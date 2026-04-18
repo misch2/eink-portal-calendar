@@ -138,7 +138,14 @@ public partial class CalendarContext : DbContext
                 .HasColumnType("DATETIME")
                 .HasColumnName("rendered_at");
             entity.Property(e => e.RenderErrors).HasColumnName("render_errors");
+            entity.Property(e => e.OwnerId).HasColumnName("owner_id");
+            entity.Property(e => e.HideFromOtherUsers)
+                .HasDefaultValue(false)
+                .HasColumnName("hide_from_other_users");
 
+            entity.HasOne(d => d.Owner).WithMany(p => p.OwnedDisplays)
+                .HasForeignKey(d => d.OwnerId)
+                .OnDelete(DeleteBehavior.SetNull);
             entity.HasOne(d => d.Theme).WithMany(p => p.Displays)
                 .HasForeignKey(d => d.ThemeId)
                 .OnDelete(DeleteBehavior.SetNull);
@@ -388,6 +395,9 @@ public partial class CalendarContext : DbContext
                 .IsRequired()
                 .HasColumnType("VARCHAR")
                 .HasColumnName("password_hash");
+            entity.Property(e => e.IsAdmin)
+                .HasDefaultValue(false)
+                .HasColumnName("is_admin");
         });
 
         modelBuilder.Entity<Gallery>(entity =>
@@ -404,6 +414,14 @@ public partial class CalendarContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("DATETIME")
                 .HasColumnName("created_at");
+            entity.Property(e => e.OwnerId).HasColumnName("owner_id");
+            entity.Property(e => e.HideFromOtherUsers)
+                .HasDefaultValue(false)
+                .HasColumnName("hide_from_other_users");
+
+            entity.HasOne(e => e.Owner).WithMany(p => p.OwnedGalleries)
+                .HasForeignKey(e => e.OwnerId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             entity.HasMany(e => e.Images)
                 .WithMany(e => e.Galleries)

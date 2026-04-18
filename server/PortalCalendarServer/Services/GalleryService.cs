@@ -5,16 +5,19 @@ using SixLabors.ImageSharp;
 
 namespace PortalCalendarServer.Services;
 
-public class GalleryService(CalendarContext context, IConfiguration configuration) : IGalleryService
+public class GalleryService(CalendarContext context, IConfiguration configuration, ICurrentUserProvider currentUser) : IGalleryService
 {
     private readonly CalendarContext _context = context;
     private readonly string _galleryImagesPath = configuration["Paths:GalleryImages"]!;
+    private readonly ICurrentUserProvider _currentUser = currentUser;
 
     public async Task<List<Gallery>> GetAllGalleriesAsync()
     {
         return await _context.Galleries
             .Include(g => g.Images)
+            .Include(g => g.Owner)
             .OrderBy(g => g.Id)
+            .AsSplitQuery()
             .ToListAsync();
     }
 
@@ -31,7 +34,8 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
         return await _context.Galleries
             .Include(g => g.Images)
             .Include(g => g.ImageLinks)
-            .AsSingleQuery()
+            .Include(g => g.Owner)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(g => g.Id == id);
     }
 
@@ -40,7 +44,8 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
         var gallery = new Gallery
         {
             Name = name,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            OwnerId = _currentUser.UserId
         };
         _context.Galleries.Add(gallery);
         await _context.SaveChangesAsync();
@@ -61,7 +66,8 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
         var copy = new Gallery
         {
             Name = newName,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            OwnerId = _currentUser.UserId
         };
 
         // Link the same images (many-to-many, no file duplication)
@@ -269,6 +275,11 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
     public string GetImageFilePath(GalleryImage image)
     {
         return Path.Combine(GetImageDirectory(image.PrimaryFolder), image.FileName);
+    }
+
+    public async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
     }
 
     private string GetImageDirectory(string primaryFolder)

@@ -22,7 +22,8 @@ public class UiController(
     PageGeneratorService pageGeneratorService,
     IDisplayService displayService,
     ThemeService themeService,
-    ModuleRegistry moduleRegistry
+    ModuleRegistry moduleRegistry,
+    ICurrentUserProvider currentUser
     ) : Controller, IAsyncResultFilter
 {
     private readonly CalendarContext _context = context;
@@ -32,12 +33,20 @@ public class UiController(
     private readonly IDisplayService _displayService = displayService;
     private readonly ThemeService _themeService = themeService;
     private readonly ModuleRegistry _moduleRegistry = moduleRegistry;
+    private readonly ICurrentUserProvider _currentUser = currentUser;
 
     // GET /
     [HttpGet("/")]
     public async Task<IActionResult> SelectDisplay()
     {
-        var displays = await _context.Displays
+        var query = _context.Displays.AsQueryable();
+        if (!_currentUser.IsAdmin)
+        {
+            var userId = _currentUser.UserId;
+            query = query.Where(d => !d.HideFromOtherUsers || d.OwnerId == userId);
+        }
+
+        var displays = await query
             .OrderBy(d => d.Id)
             .ToListAsync();
 
@@ -185,6 +194,7 @@ public class UiController(
         // Pass DisplayService and Display to the view through ViewData
         ViewData["DisplayService"] = _displayService;
         ViewData["Display"] = display;
+        ViewData["AllUsers"] = _currentUser.IsAdmin ? await _context.Users.OrderBy(u => u.Id).ToListAsync() : null;
 
         return View("ConfigUi", display);
     }
@@ -304,6 +314,18 @@ public class UiController(
                 {
                     display.DitheringTypeCode = form["dithering_type"].ToString();
                 }
+            }
+
+            display.HideFromOtherUsers = form.ContainsKey("hide_from_other_users");
+
+            if (_currentUser.IsAdmin && form.ContainsKey("owner_id"))
+            {
+                var ownerIdStr = form["owner_id"].ToString();
+                display.OwnerId = string.IsNullOrEmpty(ownerIdStr) ? null : int.Parse(ownerIdStr);
+            }
+            else if (display.OwnerId == null)
+            {
+                display.OwnerId = _currentUser.UserId;
             }
 
             // If the color variant is not valid for the display type (this may happen if the user changes display type or color variant), set the color variant to first available for the display type to avoid rendering errors.

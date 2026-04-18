@@ -20,5 +20,6 @@ namespace PortalCalendarServer.Services
         Task<bool> SetImageRotationAsync(int galleryId, int imageId, int rotation);
         Task CopyImageToGalleryAsync(int imageId, int targetGalleryId);
         string GetImageFilePath(GalleryImage image);
+        Task SaveChangesAsync();
     }
 }

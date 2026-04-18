@@ -6,13 +6,21 @@ namespace PortalCalendarServer.Controllers;
 
 [Controller]
 [Authorize]
-public class GalleriesController(IGalleryService galleryService) : Controller
+public class GalleriesController(IGalleryService galleryService, ICurrentUserProvider currentUser, UserService userService) : Controller
 {
     // GET /galleries
     [HttpGet("/galleries")]
     public async Task<IActionResult> Index()
     {
         var galleries = await galleryService.GetAllGalleriesAsync();
+
+        if (!currentUser.IsAdmin)
+        {
+            var userId = currentUser.UserId;
+            galleries = galleries
+                .Where(g => !g.HideFromOtherUsers || g.OwnerId == userId)
+                .ToList();
+        }
 
         ViewData["NavLink"] = "galleries";
 
@@ -113,8 +121,41 @@ public class GalleriesController(IGalleryService galleryService) : Controller
         ViewData["GalleryId"] = gallery.Id;
         ViewData["Title"] = gallery.Name;
         ViewData["AllGalleries"] = await galleryService.GetFastGalleryListAsync();
+        ViewData["AllUsers"] = currentUser.IsAdmin ? await userService.GetAllUsersAsync() : null;
 
         return View("~/Views/Galleries/Detail.cshtml", gallery);
+    }
+
+    // POST /galleries/{id}/settings
+    [HttpPost("/galleries/{id:int}/settings")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateSettings(int id, [FromForm] IFormCollection form)
+    {
+        var gallery = await galleryService.GetGalleryByIdAsync(id);
+        if (gallery == null)
+        {
+            return NotFound();
+        }
+
+        gallery.HideFromOtherUsers = form.ContainsKey("hide_from_other_users");
+
+        if (currentUser.IsAdmin && form.ContainsKey("owner_id"))
+        {
+            var ownerIdStr = form["owner_id"].ToString();
+            gallery.OwnerId = string.IsNullOrEmpty(ownerIdStr) ? null : int.Parse(ownerIdStr);
+        }
+        else if (gallery.OwnerId == null)
+        {
+            gallery.OwnerId = currentUser.UserId;
+        }
+
+        await galleryService.SaveChangesAsync();
+
+        if (form.ContainsKey("return_to_list"))
+        {
+            return RedirectToAction(nameof(Index));
+        }
+        return RedirectToAction(nameof(Detail), new { id });
     }
 
     // POST /galleries/{id}/upload

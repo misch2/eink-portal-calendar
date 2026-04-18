@@ -1,6 +1,8 @@
 @model List<PortalCalendarServer.Models.DatabaseEntities.AppUser>
 @using PortalCalendarServer.Controllers
+@using PortalCalendarServer.Services
 @using System.Security.Claims
+@inject ICurrentUserProvider CurrentUser
 @inject IViewLocalizer Localizer
 @{
     ViewData["Title"] = Localizer["Users"].Value;
@@ -11,6 +13,7 @@
         <tr>
             <th scope="col">@Localizer["Id"]</th>
             <th scope="col">@Localizer["Username"]</th>
+            <th scope="col">@Localizer["Role"]</th>
             <th scope="col">@Localizer["Action"]</th>
         </tr>
     </thead>
@@ -25,6 +28,26 @@
                     @if (isCurrentUser)
                     {
                         <span class="badge bg-info">@Localizer["you"]</span>
+                    }
+                </td>
+                <td>
+                    @if (user.IsAdmin)
+                    {
+                        <span class="badge bg-primary">@Localizer["Admin"]</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">@Localizer["User"]</span>
+                    }
+                    @if (CurrentUser.IsAdmin && !(isCurrentUser && user.IsAdmin))
+                    {
+                        <form method="post" action="/users/toggle-admin/@user.Id" style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-secondary ms-1"
+                                    title="@(user.IsAdmin ? Localizer["Remove admin"].Value : Localizer["Make admin"].Value)">
+                                <i class="bi @(user.IsAdmin ? "bi-person-dash" : "bi-person-check")"></i>
+                            </button>
+                        </form>
                     }
                 </td>
                 <td>

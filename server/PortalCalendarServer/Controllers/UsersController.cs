@@ -7,7 +7,7 @@ namespace PortalCalendarServer.Controllers;
 
 [Controller]
 [Authorize]
-public class UsersController(UserService userService) : Controller
+public class UsersController(UserService userService, ICurrentUserProvider currentUser) : Controller
 {
     // GET /users
     [HttpGet("/users")]
@@ -71,6 +71,38 @@ public class UsersController(UserService userService) : Controller
 
         await userService.DeleteUserAsync(id);
         TempData["Message"] = $"User '{user.Username}' deleted.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    // POST /users/toggle-admin/{id}
+    [HttpPost("/users/toggle-admin/{id:int}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ToggleAdmin(int id)
+    {
+        if (!currentUser.IsAdmin)
+        {
+            return Forbid();
+        }
+
+        var user = await userService.GetUserByIdAsync(id);
+        if (user == null)
+        {
+            TempData["Error"] = "User not found.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // Prevent removing admin from yourself
+        if (id == currentUser.UserId && user.IsAdmin)
+        {
+            TempData["Error"] = "You cannot remove admin from your own account.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        user.IsAdmin = !user.IsAdmin;
+        await userService.SaveChangesAsync();
+        TempData["Message"] = user.IsAdmin
+            ? $"User '{user.Username}' is now an admin."
+            : $"User '{user.Username}' is no longer an admin.";
         return RedirectToAction(nameof(Index));
     }
 
