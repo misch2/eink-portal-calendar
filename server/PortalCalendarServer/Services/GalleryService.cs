@@ -11,7 +11,12 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
     private readonly string _galleryImagesPath = configuration["Paths:GalleryImages"]!;
     private readonly ICurrentUserProvider _currentUser = currentUser;
 
-    public async Task<List<Gallery>> GetAllGalleriesUnfilteredAsync()
+    public IGalleryService As(ICurrentUserProvider user)
+    {
+        return new GalleryService(_context, configuration, user);
+    }
+
+    private async Task<List<Gallery>> GetAllGalleriesUnfilteredAsync()
     {
         return await _context.Galleries
             .Include(g => g.Images)
@@ -39,7 +44,7 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
             .ToListAsync();
     }
 
-    public async Task<Gallery?> GetGalleryByIdUnfilteredAsync(int id)
+    private async Task<Gallery?> GetGalleryByIdUnfilteredAsync(int id)
     {
         return await _context.Galleries
             .Include(g => g.Images)

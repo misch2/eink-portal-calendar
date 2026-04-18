@@ -22,7 +22,12 @@ public class DisplayService(
     ImageRegenerationService imageRegenerationService,
     ICurrentUserProvider currentUser) : IDisplayService
 {
-    public IEnumerable<Display> GetAllDisplaysUnfiltered()
+    public IDisplayService As(ICurrentUserProvider user)
+    {
+        return new DisplayService(context, logger, _configuration, imageRegenerationService, user);
+    }
+
+    private IEnumerable<Display> GetAllDisplaysUnfiltered()
     {
         return context.Displays
             .OrderBy(d => d.Id)
@@ -39,7 +44,7 @@ public class DisplayService(
         return all.Where(d => !d.HideFromOtherUsers || d.OwnerId == userId).ToList();
     }
 
-    public Display GetDisplayByIdUnfiltered(int displayNumber)
+    private Display GetDisplayByIdUnfiltered(int displayNumber)
     {
         var display = context.Displays
             .Include(d => d.Configs)

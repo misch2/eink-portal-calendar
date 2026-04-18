@@ -38,7 +38,8 @@ public class GalleryComponent(
         if (selected == null)
             return null;
 
-        var gallery = galleryService.GetGalleryByIdUnfilteredAsync(selected.GalleryId).GetAwaiter().GetResult();
+        var asOwner = galleryService.As(new ImpersonatedUserProvider(display.OwnerId));
+        var gallery = asOwner.GetVisibleGalleryByIdAsync(selected.GalleryId).GetAwaiter().GetResult();
         if (gallery == null || gallery.Images.Count == 0)
             return null;
 

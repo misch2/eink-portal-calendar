@@ -252,7 +252,7 @@ public class GalleriesController(IGalleryService galleryService, ICurrentUserPro
     [Authorize("CookiesOrInternalToken")]
     public async Task<IActionResult> ServeImage(int galleryId, int imageId)
     {
-        var gallery = await galleryService.GetGalleryByIdUnfilteredAsync(galleryId);
+        var gallery = await galleryService.As(new ImpersonatedUserProvider(null)).GetVisibleGalleryByIdAsync(galleryId);
         if (gallery == null)
         {
             return NotFound();

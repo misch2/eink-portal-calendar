@@ -130,7 +130,7 @@ public class UiController(
     [DisplayRenderErrorHandling]
     public IActionResult CalendarHtmlSpecificDate(int displayNumber, DateTime date, [FromQuery] bool preview_colors = false, [FromQuery] string? force_error = null)
     {
-        var display = _displayService.GetDisplayByIdUnfiltered(displayNumber);
+        var display = _displayService.As(new ImpersonatedUserProvider(null)).GetVisibleDisplayById(displayNumber);
         if (display == null)
         {
             return NotFound("Display with this ID not found");
@@ -492,7 +492,7 @@ public class UiController(
             if (context.RouteData.Values.TryGetValue("displayNumber", out var dn)
                 && int.TryParse(dn?.ToString(), out var displayNumber))
             {
-                try { display = _displayService.GetDisplayByIdUnfiltered(displayNumber); }
+                try { display = _displayService.As(new ImpersonatedUserProvider(null)).GetVisibleDisplayById(displayNumber); }
                 catch { /* ignore */ }
             }
             display ??= _displayService.GetDefaultDisplay();

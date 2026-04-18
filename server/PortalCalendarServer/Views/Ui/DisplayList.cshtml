@@ -39,7 +39,8 @@
     <tbody>
         @foreach (var _d in Model)
         {
-            var d = displayService.GetDisplayByIdUnfiltered(_d.Id);
+            var d = displayService.GetVisibleDisplayById(_d.Id);
+            if (d == null) continue;
 
             var dateCulture = displayService.GetDateCultureInfo(d);
             var tz = displayService.GetTimeZoneInfo(d);
