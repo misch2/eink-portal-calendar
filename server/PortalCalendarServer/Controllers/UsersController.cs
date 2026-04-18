@@ -25,6 +25,11 @@ public class UsersController(UserService userService, ICurrentUserProvider curre
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> AddUser([FromForm] string username, [FromForm] string password)
     {
+        if (!currentUser.IsAdmin)
+        {
+            return Forbid();
+        }
+
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
         {
             TempData["Error"] = "Username and password are required.";
@@ -48,6 +53,11 @@ public class UsersController(UserService userService, ICurrentUserProvider curre
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteUser(int id)
     {
+        if (!currentUser.IsAdmin)
+        {
+            return Forbid();
+        }
+
         var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         if (id == currentUserId)
         {

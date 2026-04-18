@@ -29,7 +29,7 @@
                 <td>@gallery.Images.Count</td>
                 <td>@gallery.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
                 <td>
-                    @if (CurrentUser.IsAdmin && gallery.Owner != null)
+                    @if (gallery.Owner != null)
                     {
                         <small class="text-muted">@gallery.Owner.Username</small>
                     }

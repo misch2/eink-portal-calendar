@@ -131,7 +131,7 @@
                 <td>
                     @if (!d.IsDefault())
                     {
-                        if (CurrentUser.IsAdmin && d.Owner != null)
+                        if (d.Owner != null)
                         {
                             <small class="text-muted">@d.Owner.Username</small>
                         }
