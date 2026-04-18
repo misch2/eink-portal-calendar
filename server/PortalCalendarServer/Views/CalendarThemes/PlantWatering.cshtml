@@ -75,8 +75,8 @@
 
         if (moisture == null)
         {
-            // try to get last known value from history (max 1 hour old) if current state is unavailable
-            var lastKnown = entityHistory.LastOrDefault(p => p.Time >= DateTime.UtcNow.AddHours(-1));
+            // try to get last known value from history (max 4 hours old) if current state is unavailable
+            var lastKnown = entityHistory.LastOrDefault(p => p.Time >= DateTime.UtcNow.AddHours(-4));
             if (lastKnown != null)
             {
                 moisture = lastKnown.Value;
