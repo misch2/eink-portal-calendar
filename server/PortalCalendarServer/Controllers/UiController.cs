@@ -312,7 +312,7 @@ public class UiController(
             {
                 if (form.ContainsKey("hide_from_other_users"))
                 {
-                    display.HideFromOtherUsers = form["hide_from_other_users"] == "1";
+                    display.HideFromOtherUsers = form["hide_from_other_users"] == "on";
                 }
 
 

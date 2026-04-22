@@ -134,7 +134,7 @@ public class GalleriesController(IGalleryService galleryService, ICurrentUserPro
         {
             if (form.ContainsKey("hide_from_other_users"))
             {
-                gallery.HideFromOtherUsers = form["hide_from_other_users"] == "1";
+                gallery.HideFromOtherUsers = form["hide_from_other_users"] == "on";
             }
 
             if (currentUser.IsAdmin && form.ContainsKey("owner_id"))
