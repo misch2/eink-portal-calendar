@@ -19,11 +19,12 @@
 
 @{
     var rotClass = imageInfo?.Rotation switch { 90 => "rot-90", 180 => "rot-180", 270 => "rot-270", _ => "" };
+    var sizingClass = imageInfo?.ImageSizing switch { "cover" => "sizing-cover", "fill" => "sizing-fill", _ => "" };
 }
 
 @if (imageInfo != null)
 {
-    <div id="gallery-container" class="@(hasDescription ? "with-description" : "") @rotClass" style="--gallery-bg: url('@imageInfo.ImageUrl')">
+    <div id="gallery-container" class="@(hasDescription ? "with-description" : "") @rotClass @sizingClass" style="--gallery-bg: url('@imageInfo.ImageUrl')">
         <img id="gallery-image" src="@imageInfo.ImageUrl" alt="@(imageInfo.Description ?? "Gallery image")" />
         @if (hasDescription)
         {

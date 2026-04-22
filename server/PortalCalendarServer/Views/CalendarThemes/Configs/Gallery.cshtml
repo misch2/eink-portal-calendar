@@ -12,8 +12,9 @@
 
 
 <div class="row mb-2">
-    <div class="col-md-5"><strong>Gallery</strong></div>
+    <div class="col-md-4"><strong>Gallery</strong></div>
     <div class="col-md-1"><strong>Hide descriptions</strong></div>
+    <div class="col-md-2"><strong>Image sizing</strong></div>
     <div class="col-md-2"><strong>Preference ratio</strong></div>
 </div>
 
@@ -22,7 +23,7 @@
     var currentValue = displayService.GetConfigWithoutDefaults(Model, $"gallery_id_{i}");
 
     <div class="row mb-2 align-items-center">
-        <div class="col-md-5">
+        <div class="col-md-4">
             <select id="@($"gallery_id_{i}")" name="@($"gallery_id_{i}")" class="form-select">
                 <option value=""></option>
                 @foreach (var gallery in galleries)
@@ -38,6 +39,18 @@
             Display = Model, Key = $"gallery_hide_descriptions_{i}",
             Label = "",
             ColClass = "col-md-1"
+        })
+        @await Html.PartialAsync("_ConfigSelect", new ConfigSelectModel
+        {
+            Display = Model, Key = $"gallery_image_sizing_{i}",
+            Label = "",
+            ColClass = "col-md-2",
+            Options = new List<SelectOption>
+            {
+                new() { Value = "", Text = "Fit (contain)" },
+                new() { Value = "cover", Text = "Crop (cover)" },
+                new() { Value = "fill", Text = "Stretch (fill)" },
+            }
         })
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
         {
