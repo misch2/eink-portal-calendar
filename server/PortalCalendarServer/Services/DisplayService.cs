@@ -147,10 +147,18 @@ public class DisplayService(
     }
 
     /// <summary>
-    /// Get configuration value for a display, walking up the parent chain for fallback
+    /// Get configuration value for a display, walking up the parent chain for fallback.
+    /// Device telemetry keys (prefixed with "_") are never inherited from parents.
     /// </summary>
     public string? GetConfig(Display display, string name)
     {
+        // Device telemetry keys (e.g. _last_visit, _missed_connects, _last_voltage)
+        // are per-device and must never inherit from parents.
+        if (name.StartsWith('_'))
+        {
+            return GetConfigWithoutDefaults(display, name);
+        }
+
         var visited = new HashSet<int>();
         var current = display;
 
