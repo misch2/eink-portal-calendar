@@ -144,8 +144,8 @@ msgstr "Select a theme above to see available customization options"
 msgid "Location and locale"
 msgstr "Location and locale"
 
-msgid "Override global settings"
-msgstr "Override global settings"
+msgid "Override inherited settings"
+msgstr "Override inherited settings"
 
 msgid "Integration enabled"
 msgstr "Integration enabled"

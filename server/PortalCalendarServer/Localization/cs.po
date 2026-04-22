@@ -174,8 +174,8 @@ msgstr "Vyberte motiv výše pro zobrazení možností přizpůsobení"
 msgid "Location and locale"
 msgstr "Poloha a jazyk"
 
-msgid "Override global settings"
-msgstr "Přepsat globální nastavení"
+msgid "Override inherited settings"
+msgstr "Přepsat zděděné nastavení"
 
 msgid "Integration enabled"
 msgstr "Integrace zapnuta"
