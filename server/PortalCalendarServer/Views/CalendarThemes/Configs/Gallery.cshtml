@@ -5,6 +5,7 @@
 @using PortalCalendarServer.Modules.Builtin;
 @inject IDisplayService displayService
 @inject IGalleryService galleryService
+@inject IViewLocalizer Localizer
 
 @{
     var galleries = await galleryService.GetVisibleGalleriesAsync();
@@ -12,10 +13,10 @@
 
 
 <div class="row mb-2">
-    <div class="col-md-4"><strong>Gallery</strong></div>
-    <div class="col-md-1"><strong>Hide descriptions</strong></div>
-    <div class="col-md-2"><strong>Image sizing</strong></div>
-    <div class="col-md-2"><strong>Preference ratio</strong></div>
+    <div class="col-md-4"><strong>@Localizer["Gallery"]</strong></div>
+    <div class="col-md-1"><strong>@Localizer["Hide descriptions"]</strong></div>
+    <div class="col-md-2"><strong>@Localizer["Image sizing"]</strong></div>
+    <div class="col-md-2"><strong>@Localizer["Preference ratio"]</strong></div>
 </div>
 
 @for (int i = 1; i <= GalleryModule.MaxGalleries; i++)
@@ -29,7 +30,7 @@
                 @foreach (var gallery in galleries)
                 {
                     <option value="@gallery.Id" selected="@(currentValue == gallery.Id.ToString())">
-                        @(i). @gallery.Name (@gallery.Images.Count images)
+                        @(i). @gallery.Name (@gallery.Images.Count @Localizer["images"])
                     </option>
                 }
             </select>
@@ -47,9 +48,9 @@
             ColClass = "col-md-2",
             Options = new List<SelectOption>
             {
-                new() { Value = "", Text = "Fit (contain)" },
-                new() { Value = "cover", Text = "Crop (cover)" },
-                new() { Value = "fill", Text = "Stretch (fill)" },
+                new() { Value = "", Text = Localizer["Fit (contain)"].Value },
+                new() { Value = "cover", Text = Localizer["Crop (cover)"].Value },
+                new() { Value = "fill", Text = Localizer["Stretch (fill)"].Value },
             }
         })
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel

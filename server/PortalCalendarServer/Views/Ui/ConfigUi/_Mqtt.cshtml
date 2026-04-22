@@ -1,5 +1,6 @@
 @model PortalCalendarServer.Models.DatabaseEntities.Display
 @using PortalCalendarServer.Models.POCOs
+@inject IViewLocalizer Localizer
 
 @{
     ViewData["IntegrationName"] = "mqtt";
@@ -11,19 +12,19 @@
     <div class="form-group row mt-3">
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
         {
-            Display = Model, Key = "mqtt_server", Label = "Server", ColClass = "col-md-3"
+            Display = Model, Key = "mqtt_server", Label = Localizer["Server"].Value, ColClass = "col-md-3"
         })
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
         {
-            Display = Model, Key = "mqtt_username", Label = "Username", ColClass = "col-md-3"
+            Display = Model, Key = "mqtt_username", Label = Localizer["Username"].Value, ColClass = "col-md-3"
         })
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
         {
-            Display = Model, Key = "mqtt_password", Label = "Password", ColClass = "col-md-3"
+            Display = Model, Key = "mqtt_password", Label = Localizer["Password"].Value, ColClass = "col-md-3"
         })
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
         {
-            Display = Model, Key = "mqtt_topic", Label = "Device topic", ColClass = "col-md-3"
+            Display = Model, Key = "mqtt_topic", Label = Localizer["Device topic"].Value, ColClass = "col-md-3"
         })
     </div>
 </fieldset>

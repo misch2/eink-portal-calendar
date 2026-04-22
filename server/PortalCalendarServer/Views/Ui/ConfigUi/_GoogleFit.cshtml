@@ -22,22 +22,22 @@
     </div>
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
     {
-        Display = Model, Key = "googlefit_client_id", Label = "Client ID",
+        Display = Model, Key = "googlefit_client_id", Label = Localizer["Client ID"].Value,
         ColClass = "col-md-12", MarginClass = "mt-2"
     })
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
     {
-        Display = Model, Key = "googlefit_client_secret", Label = "Client secret",
+        Display = Model, Key = "googlefit_client_secret", Label = Localizer["Client secret"].Value,
         ColClass = "col-md-12", MarginClass = "mt-2"
     })
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
     {
-        Display = Model, Key = "_googlefit_refresh_token", Label = "Refresh token (generated automatically)",
+        Display = Model, Key = "_googlefit_refresh_token", Label = Localizer["Refresh token (generated automatically)"].Value,
         ColClass = "col-md-12", MarginClass = "mt-2", Disabled = true
     })
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
     {
-        Display = Model, Key = "_googlefit_access_token", Label = "Auth token (generated automatically)",
+        Display = Model, Key = "_googlefit_access_token", Label = Localizer["Auth token (generated automatically)"].Value,
         ColClass = "col-md-12", MarginClass = "mt-2", Disabled = true
     })
 </fieldset>

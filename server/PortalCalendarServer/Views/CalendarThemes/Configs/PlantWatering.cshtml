@@ -9,6 +9,7 @@
 @inject IHttpClientFactory httpClientFactory
 @inject IMemoryCache memoryCache
 @inject ILoggerFactory loggerFactory
+@inject IViewLocalizer Localizer
 
 @{
     // Fetch moisture entities from Home Assistant
@@ -34,39 +35,39 @@
 
 @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
 {
-    Display = Model, Key = "display_title", Label = "Title",
+    Display = Model, Key = "display_title", Label = Localizer["Title"].Value,
     ColClass = "col-12", MarginClass = "mb-3"
 })
 
 <div class="row">
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
     {
-        Display = Model, Key = "plantwatering_threshold_dry", Label = "Global dry threshold (%)",
+        Display = Model, Key = "plantwatering_threshold_dry", Label = Localizer["Global dry threshold (%)"].Value,
         ColClass = "col-md-3", InputType = "number", Step = "1",
-        HelpText = "Below this moisture % the plant is considered too dry (default: 20)"
+        HelpText = Localizer["Below this moisture % the plant is considered too dry (default: 20)"].Value
     })
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
     {
-        Display = Model, Key = "plantwatering_threshold_wet", Label = "Global wet threshold (%)",
+        Display = Model, Key = "plantwatering_threshold_wet", Label = Localizer["Global wet threshold (%)"].Value,
         ColClass = "col-md-3", InputType = "number", Step = "1",
-        HelpText = "Above this moisture % the plant is considered too wet (default: 80)"
+        HelpText = Localizer["Above this moisture % the plant is considered too wet (default: 80)"].Value
     })
 </div>
 
 <div class="row mt-3">
     <div class="col-12">
-        <label class="form-label fw-bold">Moisture sensors</label>
+        <label class="form-label fw-bold">@Localizer["Moisture sensors"]</label>
         @if (!haConfigured)
         {
-            <div class="form-text text-warning mb-2">Enable and configure Home Assistant integration first to populate sensor list.</div>
+            <div class="form-text text-warning mb-2">@Localizer["Enable and configure Home Assistant integration first to populate sensor list."]</div>
         }
         else if (moistureEntities.Count == 0)
         {
-            <div class="form-text text-warning mb-2">No moisture sensors found in Home Assistant. Check your connection settings.</div>
+            <div class="form-text text-warning mb-2">@Localizer["No moisture sensors found in Home Assistant. Check your connection settings."]</div>
         }
         else
         {
-            <div class="form-text mb-2">Select moisture sensors to monitor (@moistureEntities.Count available).</div>
+            <div class="form-text mb-2">@Localizer["Select moisture sensors to monitor ({0} available).", moistureEntities.Count]</div>
         }
     </div>
 </div>
@@ -78,7 +79,7 @@
 
     <div class="row mb-2">
         <div class="col-md-5">
-            <label for="@key">Sensor @i</label>
+            <label for="@key">@Localizer["Sensor {0}", i]</label>
             <select id="@key" name="@key" class="form-select">
                 <option value=""></option>
                 @foreach (var entity in moistureEntities)
@@ -93,28 +94,28 @@
                 @if (!string.IsNullOrEmpty(currentValue) && !moistureEntities.Any(e => e.EntityId == currentValue))
                 {
                     @* Preserve previously saved value even if entity is no longer available *@
-                    <option value="@currentValue" selected="selected">@currentValue (not found)</option>
+                    <option value="@currentValue" selected="selected">@currentValue (@Localizer["not found"])</option>
                 }
             </select>
         </div>
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
         {
-            Display = Model, Key = $"plantwatering_sensor_{i}_threshold_dry", Label = "Dry threshold (%)",
+            Display = Model, Key = $"plantwatering_sensor_{i}_threshold_dry", Label = Localizer["Dry threshold (%)"].Value,
             ColClass = "col-md-2", InputType = "number", Step = "1"
         })
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
         {
-            Display = Model, Key = $"plantwatering_sensor_{i}_threshold_wet", Label = "Wet threshold (%)",
+            Display = Model, Key = $"plantwatering_sensor_{i}_threshold_wet", Label = Localizer["Wet threshold (%)"].Value,
             ColClass = "col-md-2", InputType = "number", Step = "1"
         })
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
         {
-            Display = Model, Key = $"plantwatering_sensor_{i}_name_override", Label = "Name override",
+            Display = Model, Key = $"plantwatering_sensor_{i}_name_override", Label = Localizer["Name override"].Value,
             ColClass = "col-md-2", InputType = "text"
         })
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
         {
-            Display = Model, Key = $"plantwatering_sensor_{i}_order_in_area", Label = "Order (in area)",
+            Display = Model, Key = $"plantwatering_sensor_{i}_order_in_area", Label = Localizer["Order (in area)"].Value,
             ColClass = "col-md-1", InputType = "number", Step = "1"
         })
 

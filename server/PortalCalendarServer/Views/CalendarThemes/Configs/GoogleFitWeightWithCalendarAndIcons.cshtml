@@ -1,28 +1,29 @@
 @model Display
 @using PortalCalendarServer.Models.DatabaseEntities
 @using PortalCalendarServer.Models.POCOs
+@inject IViewLocalizer Localizer
 
 @await Html.PartialAsync("_ConfigCheckbox", new ConfigInputModel
 {
     Display = Model, Key = "totally_random_icon",
-    Label = "Random icons instead of chamber-by-day",
+    Label = Localizer["Random icons instead of chamber-by-day"].Value,
     ColClass = "col-12", MarginClass = "mb-3"
 })
 
 <div class="row mb-3">
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
         {
-        Display = Model, Key = "min_random_icons", Label = "Min random icons count",
+        Display = Model, Key = "min_random_icons", Label = Localizer["Min random icons count"].Value,
         InputType = "number", ColClass = "col-md-4"
         })
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
         {
-        Display = Model, Key = "max_random_icons", Label = "Max random icons count",
+        Display = Model, Key = "max_random_icons", Label = Localizer["Max random icons count"].Value,
         InputType = "number", ColClass = "col-md-4"
         })
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
         {
-        Display = Model, Key = "max_icons_with_calendar", Label = "Max icons count for calendar event",
+        Display = Model, Key = "max_icons_with_calendar", Label = Localizer["Max icons count for calendar event"].Value,
         InputType = "number", ColClass = "col-md-4"
         })
 </div>

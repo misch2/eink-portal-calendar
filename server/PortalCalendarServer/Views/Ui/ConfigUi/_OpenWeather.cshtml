@@ -1,5 +1,6 @@
 @model PortalCalendarServer.Models.DatabaseEntities.Display
 @using PortalCalendarServer.Models.POCOs
+@inject IViewLocalizer Localizer
 
 @{
     ViewData["IntegrationName"] = "openweather";
@@ -10,13 +11,13 @@
 
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
     {
-        Display = Model, Key = "openweather_api_key", Label = "API key",
+        Display = Model, Key = "openweather_api_key", Label = Localizer["API key"].Value,
         ColClass = "col-md-12", MarginClass = "mt-3"
     })
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
     {
-        Display = Model, Key = "openweather_lang", Label = "Language",
+        Display = Model, Key = "openweather_lang", Label = Localizer["Language"].Value,
         ColClass = "col-md-4", MarginClass = "mt-3",
-        HelpText = "Language code, for example \"en\", \"cs\", etc."
+        HelpText = Localizer["Language code, for example \"en\", \"cs\", etc."].Value
     })
 </fieldset>

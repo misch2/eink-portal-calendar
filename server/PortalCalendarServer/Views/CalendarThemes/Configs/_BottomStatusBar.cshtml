@@ -1,24 +1,25 @@
 @model Display
 @using PortalCalendarServer.Models.DatabaseEntities
 @using PortalCalendarServer.Models.POCOs
+@inject IViewLocalizer Localizer
 
 <div class="row mb-3">
     @await Html.PartialAsync("_ConfigCheckbox", new ConfigInputModel
         {
         Display = Model, Key = "theme_config_status_wakeupinfo",
-        Label = "Show wakeup times at the bottom",
+        Label = Localizer["Show wakeup times at the bottom"].Value,
         ColClass = "col-3", MarginClass = ""
         })
     @await Html.PartialAsync("_ConfigCheckbox", new ConfigInputModel
         {
         Display = Model, Key = "theme_config_status_lastrenderinfo",
-        Label = "Show last render info at the bottom",
+        Label = Localizer["Show last render info at the bottom"].Value,
         ColClass = "col-3", MarginClass = ""
         })
     @await Html.PartialAsync("_ConfigCheckbox", new ConfigInputModel
         {
         Display = Model, Key = "theme_config_status_battery",
-        Label = "Show battery status at the bottom",
+        Label = Localizer["Show battery status at the bottom"].Value,
         ColClass = "col-3", MarginClass = ""
         })
 </div>

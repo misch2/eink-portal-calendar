@@ -570,3 +570,315 @@ msgstr "Make admin"
 
 msgid "Remove admin"
 msgstr "Remove admin"
+
+# ── Theme config – Gallery ─────────────────────────────
+
+msgid "Gallery"
+msgstr "Gallery"
+
+msgid "Hide descriptions"
+msgstr "Hide descriptions"
+
+msgid "Image sizing"
+msgstr "Image sizing"
+
+msgid "Preference ratio"
+msgstr "Preference ratio"
+
+msgid "images"
+msgstr "images"
+
+msgid "Fit (contain)"
+msgstr "Fit (with blurred background)"
+
+msgid "Crop (cover)"
+msgstr "Crop"
+
+msgid "Stretch (fill)"
+msgstr "Stretch (ignore aspect ratio)"
+
+# ── Theme config – Web Image ──────────────────────────
+
+msgid "Image URL"
+msgstr "Image URL"
+
+msgid "Cache for N hours"
+msgstr "Cache for N hours"
+
+# ── Theme config – Portal / Google Fit icons ──────────
+
+msgid "Random icons instead of chamber-by-day"
+msgstr "Random icons instead of chamber-by-day"
+
+msgid "Min random icons count"
+msgstr "Min random icons count"
+
+msgid "Max random icons count"
+msgstr "Max random icons count"
+
+msgid "Max icons count for calendar event"
+msgstr "Max icons count for calendar event"
+
+# ── Theme config – Multi-day Calendar ─────────────────
+
+msgid "Title"
+msgstr "Title"
+
+# ── Theme config – Weather Forecast ───────────────────
+
+msgid "Number of rows displayed"
+msgstr "Number of rows displayed"
+
+# ── Theme config – Bottom status bar ──────────────────
+
+msgid "Show wakeup times at the bottom"
+msgstr "Show wakeup times at the bottom"
+
+msgid "Show last render info at the bottom"
+msgstr "Show last render info at the bottom"
+
+msgid "Show battery status at the bottom"
+msgstr "Show battery status at the bottom"
+
+# ── Theme config – Plant Watering ─────────────────────
+
+msgid "Global dry threshold (%)"
+msgstr "Global dry threshold (%)"
+
+msgid "Global wet threshold (%)"
+msgstr "Global wet threshold (%)"
+
+msgid "Below this moisture % the plant is considered too dry (default: 20)"
+msgstr "Below this moisture % the plant is considered too dry (default: 20)"
+
+msgid "Above this moisture % the plant is considered too wet (default: 80)"
+msgstr "Above this moisture % the plant is considered too wet (default: 80)"
+
+msgid "Moisture sensors"
+msgstr "Moisture sensors"
+
+msgid "Enable and configure Home Assistant integration first to populate sensor list."
+msgstr "Enable and configure Home Assistant integration first to populate sensor list."
+
+msgid "No moisture sensors found in Home Assistant. Check your connection settings."
+msgstr "No moisture sensors found in Home Assistant. Check your connection settings."
+
+msgid "Select moisture sensors to monitor ({0} available)."
+msgstr "Select moisture sensors to monitor ({0} available)."
+
+msgid "Sensor {0}"
+msgstr "Sensor {0}"
+
+msgid "not found"
+msgstr "not found"
+
+msgid "Dry threshold (%)"
+msgstr "Dry threshold (%)"
+
+msgid "Wet threshold (%)"
+msgstr "Wet threshold (%)"
+
+msgid "Name override"
+msgstr "Name override"
+
+msgid "Order (in area)"
+msgstr "Order (in area)"
+
+# ── Config UI – Tab names ─────────────────────────────
+
+msgid "Main"
+msgstr "Main"
+
+msgid "ePaper display (client)"
+msgstr "ePaper display (client)"
+
+msgid "Calendar (ICS)"
+msgstr "Calendar (ICS)"
+
+msgid "Google Fit"
+msgstr "Google Fit"
+
+msgid "OpenWeather"
+msgstr "OpenWeather"
+
+msgid "Met.no weather"
+msgstr "Met.no weather"
+
+msgid "MQTT"
+msgstr "MQTT"
+
+msgid "Telegram"
+msgstr "Telegram"
+
+# ── Config UI – ePaper display (client) ───────────────
+
+msgid "OTA mode on"
+msgstr "OTA mode on"
+
+msgid "(Required for firmware update. It disables standard functionality and waits for OTA update indefinitely until a manual reset or a successful firmware download!)"
+msgstr "(Required for firmware update. It disables standard functionality and waits for OTA update indefinitely until a manual reset or a successful firmware download!)"
+
+msgid "MAC address"
+msgstr "MAC address"
+
+msgid "MAC address of the display in the aa:bb:cc:dd:ee:ff format."
+msgstr "MAC address of the display in the aa:bb:cc:dd:ee:ff format."
+
+msgid "API key for this specific display"
+msgstr "API key for this specific display"
+
+msgid "Color variant"
+msgstr "Color variant"
+
+msgid "Dithering"
+msgstr "Dithering"
+
+msgid "Rotation"
+msgstr "Rotation"
+
+msgid "180° ({0} × {1} but upside down)"
+msgstr "180° ({0} × {1} but upside down)"
+
+msgid "Gamma"
+msgstr "Gamma"
+
+msgid "Controls how grayscale/antialiased elements map to pure black and white. Values above 1.0 lighten the image (thinner lines), values below 1.0 darken it (thicker lines). Set to 1.0 for no correction."
+msgstr "Controls how grayscale/antialiased elements map to pure black and white. Values above 1.0 lighten the image (thinner lines), values below 1.0 darken it (thicker lines). Set to 1.0 for no correction."
+
+msgid "Preview frame top"
+msgstr "Preview frame top"
+
+msgid "Preview frame right"
+msgstr "Preview frame right"
+
+msgid "Preview frame bottom"
+msgstr "Preview frame bottom"
+
+msgid "Preview frame left"
+msgstr "Preview frame left"
+
+msgid "Preview frame border (how much the physical frame overlaps the display on each side)"
+msgstr "Preview frame border (how much the physical frame overlaps the display on each side)"
+
+msgid "Wake up (redraw) schedule"
+msgstr "Wake up (redraw) schedule"
+
+msgid "Schedule is in the <a href=\"https://crontab.guru/\" target=\"_blank\">crontab format</a>, for example \"0 * * * *\"."
+msgstr "Schedule is in the <a href=\"https://crontab.guru/\" target=\"_blank\">crontab format</a>, for example \"0 * * * *\"."
+
+msgid "Enforced lag when checking if display is alive (minutes)"
+msgstr "Enforced lag when checking if display is alive (minutes)"
+
+msgid "How many minutes to delay the check after the expected contact time"
+msgstr "How many minutes to delay the check after the expected contact time"
+
+msgid "Min. number of alive check failures"
+msgstr "Min. number of alive check failures"
+
+msgid "Minimal number of failures the display is considered to be frozen and before a notification is sent."
+msgstr "Minimal number of failures the display is considered to be frozen and before a notification is sent."
+
+# ── Config UI – Calendar (ICS) ────────────────────────
+
+msgid "ICS calendar #{0} enabled"
+msgstr "ICS calendar #{0} enabled"
+
+msgid "URL"
+msgstr "URL"
+
+# ── Config UI – Google Fit ────────────────────────────
+
+msgid "Client ID"
+msgstr "Client ID"
+
+msgid "Client secret"
+msgstr "Client secret"
+
+msgid "Refresh token (generated automatically)"
+msgstr "Refresh token (generated automatically)"
+
+msgid "Auth token (generated automatically)"
+msgstr "Auth token (generated automatically)"
+
+# ── Config UI – OpenWeather ───────────────────────────
+
+msgid "API key"
+msgstr "API key"
+
+msgid "Language"
+msgstr "Language"
+
+msgid "Language code, for example \"en\", \"cs\", etc."
+msgstr "Language code, for example \"en\", \"cs\", etc."
+
+# ── Config UI – Met.no weather ────────────────────────
+
+msgid "Aggregate forecast by how many hours"
+msgstr "Aggregate forecast by how many hours"
+
+# ── Config UI – MQTT ──────────────────────────────────
+
+msgid "Server"
+msgstr "Server"
+
+msgid "Device topic"
+msgstr "Device topic"
+
+# ── Config UI – Telegram ──────────────────────────────
+
+msgid "Chat ID"
+msgstr "Chat ID"
+
+msgid "See https://stackoverflow.com/questions/32423837/telegram-bot-how-to-get-a-group-chat-id to get the id."
+msgstr "See https://stackoverflow.com/questions/32423837/telegram-bot-how-to-get-a-group-chat-id to get the id."
+
+# ── Config UI – Display types ─────────────────────────
+
+msgid "Black and White"
+msgstr "Black and White"
+
+msgid "3 Colors"
+msgstr "3 Colors"
+
+msgid "4 Colors"
+msgstr "4 Colors"
+
+msgid "6 Colors"
+msgstr "6 Colors"
+
+# ── Config UI – Color variants ────────────────────────
+
+msgid "Black, White, Yellow"
+msgstr "Black, White, Yellow"
+
+msgid "Black, White, Red"
+msgstr "Black, White, Red"
+
+msgid "Black, White, Red - cheap with bad contrast"
+msgstr "Black, White, Red - cheap with bad contrast"
+
+msgid "Black, White, Red, Yellow"
+msgstr "Black, White, Red, Yellow"
+
+msgid "Black, White, Red, Yellow - GDEM075F52"
+msgstr "Black, White, Red, Yellow - GDEM075F52"
+
+msgid "Spectra E6 (Black, White, Red, Yellow, Blue, Green)"
+msgstr "Spectra E6 (Black, White, Red, Yellow, Blue, Green)"
+
+# ── Config UI – Dithering types ───────────────────────
+
+msgid "None"
+msgstr "None"
+
+msgid "Floyd-Steinberg"
+msgstr "Floyd-Steinberg"
+
+msgid "Atkinson"
+msgstr "Atkinson"
+
+msgid "Jarvis, Judice, Ninke"
+msgstr "Jarvis, Judice, Ninke"
+
+msgid "Stucki"
+msgstr "Stucki"
