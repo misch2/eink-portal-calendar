@@ -180,7 +180,7 @@ public class ApiController : ControllerBase
                 return BadRequest(new { error = $"No color variant found for display type code '{c}'" });
             }
 
-            // Create new display
+            // Create new display, inheriting from the default display (ID=0)
             display = new Display
             {
                 Mac = mac.ToLowerInvariant(),
@@ -196,6 +196,7 @@ public class ApiController : ControllerBase
                 BorderRight = 0,
                 BorderBottom = 0,
                 BorderLeft = 0,
+                ParentId = 0,
                 ThemeId = (await _themeService.GetDefaultThemeAsync()).Id
             };
 
