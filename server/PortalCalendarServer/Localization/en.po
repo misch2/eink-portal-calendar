@@ -872,13 +872,10 @@ msgid "None"
 msgstr "None"
 
 msgid "Floyd-Steinberg"
-msgstr "Floyd-Steinberg"
+msgstr "Floyd-Steinberg (standard)"
 
 msgid "Atkinson"
-msgstr "Atkinson"
-
-msgid "Jarvis, Judice, Ninke"
-msgstr "Jarvis, Judice, Ninke"
+msgstr "Atkinson (higher contrast in whites and blacks)"
 
 msgid "Stucki"
-msgstr "Stucki"
+msgstr "Stucki (more prominent edges)"

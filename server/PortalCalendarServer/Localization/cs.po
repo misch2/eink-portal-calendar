@@ -898,13 +898,10 @@ msgid "None"
 msgstr "Žádný"
 
 msgid "Floyd-Steinberg"
-msgstr "Floyd-Steinberg"
+msgstr "Floyd-Steinberg (standard)"
 
 msgid "Atkinson"
-msgstr "Atkinson"
-
-msgid "Jarvis, Judice, Ninke"
-msgstr "Jarvis, Judice, Ninke"
+msgstr "Atkinson (vyšší kontrast)"
 
 msgid "Stucki"
-msgstr "Stucki"
+msgstr "Stucki (výraznější hrany)"
