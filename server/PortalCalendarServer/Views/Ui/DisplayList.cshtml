@@ -8,43 +8,106 @@
 @{
     ViewData["Title"] = Localizer["Displays"].Value;
 
-    // Build tree-ordered list with depth
-    var displayDepths = new List<(Display Display, int Depth)>();
+    // Build tree-ordered list with depth and connector info per level.
+    // connectors[i] == true means "this ancestor level still has siblings below → draw │"
+    // connectors[i] == false means "this ancestor level was the last child → draw nothing"
+    // The last entry in connectors indicates whether this node itself is the last child (└ vs ├).
+    var displayDepths = new List<(Display Display, int Depth, List<bool> Connectors)>();
     var allDisplays = Model;
     var childrenLookup = allDisplays.ToLookup(d => d.ParentId);
 
-    void AddSubtree(int? parentId, int depth)
+    void AddSubtree(int? parentId, int depth, List<bool> parentConnectors)
     {
-        foreach (var child in childrenLookup[parentId].OrderBy(d => d.Id))
+        var siblings = childrenLookup[parentId].OrderBy(d => d.Id).ToList();
+        for (var i = 0; i < siblings.Count; i++)
         {
-            displayDepths.Add((child, depth));
-            AddSubtree(child.Id, depth + 1);
+            var child = siblings[i];
+            var isLast = i == siblings.Count - 1;
+            var connectors = new List<bool>(parentConnectors) { !isLast };
+            displayDepths.Add((child, depth, connectors));
+            AddSubtree(child.Id, depth + 1, connectors);
         }
     }
 
     // Roots are displays with no parent
-    AddSubtree(null, 0);
+    AddSubtree(null, 0, new List<bool>());
 
     // Add any orphans (parent not in visible set) that weren't included
     var included = new HashSet<int>(displayDepths.Select(x => x.Display.Id));
     foreach (var d in allDisplays.Where(d => !included.Contains(d.Id)))
     {
-        displayDepths.Add((d, 0));
+        displayDepths.Add((d, 0, new List<bool>()));
     }
 }
 
 <div class="mb-3">
 
 <style>
-    .tree-elbow {
+    .display-name-cell {
+        position: relative;
+        overflow: visible;
+    }
+    .tree-guides {
+        display: inline-flex;
+        align-items: stretch;
+        position: absolute;
+        top: -1px;
+        bottom: -1px;
+        left: 0;
+    }
+    .tree-guide {
         display: inline-block;
-        width: 0.9rem;
-        height: 0.8rem;
-        margin-right: 0.35rem;
-        border-left: 2px solid var(--bs-secondary-bg, #dee2e6);
-        border-bottom: 2px solid var(--bs-secondary-bg, #dee2e6);
-        border-bottom-left-radius: 0.35rem;
-        vertical-align: middle;
+        width: 1.4rem;
+        position: relative;
+        flex-shrink: 0;
+    }
+    /* The horizontal branch should sit at the text baseline, not at 50%.
+       Bootstrap table cell padding is ~0.5rem, half line-height ~0.6rem → ~1.1rem from top. */
+
+    /* vertical continuation line for ancestors that have more siblings: │ */
+    .tree-guide--pipe::before {
+        content: '';
+        position: absolute;
+        left: 0.45rem;
+        top: 0;
+        bottom: 0;
+        border-left: 2px solid #999;
+    }
+    /* tee connector: ├  (has more siblings below) */
+    .tree-guide--tee::before {
+        content: '';
+        position: absolute;
+        left: 0.45rem;
+        top: 0;
+        bottom: 0;
+        border-left: 2px solid #999;
+    }
+    .tree-guide--tee::after {
+        content: '';
+        position: absolute;
+        left: 0.45rem;
+        top: 1.1rem;
+        width: 0.7rem;
+        border-top: 2px solid #999;
+    }
+    /* elbow connector: └  (last child) */
+    .tree-guide--elbow::before {
+        content: '';
+        position: absolute;
+        left: 0.45rem;
+        top: 0;
+        height: 1.1rem;
+        border-left: 2px solid #999;
+        border-bottom: 2px solid #999;
+        border-bottom-left-radius: 0.3rem;
+        width: 0.7rem;
+    }
+    .tree-guide--elbow::after {
+        content: '';
+        position: absolute;
+        left: calc(0.45rem + 0.7rem);
+        top: 1.1rem;
+        width: 0;
     }
 </style>
     @Html.AntiForgeryToken()
@@ -74,7 +137,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var (rawDisplay, depth) in displayDepths)
+        @foreach (var (rawDisplay, depth, connectors) in displayDepths)
         {
             var d = displayService.GetVisibleDisplayById(rawDisplay.Id);
             if (d == null) continue;
@@ -83,10 +146,29 @@
             var tz = displayService.GetTimeZoneInfo(d);
 
             <tr>
-                <td style="padding-left: @(depth * 1.5 + 0.5)rem;">
-                    @if (depth > 0)
+                <td class="display-name-cell" style="padding-left: @(connectors.Count * 1.4 + 0.5)rem;">
+                    @if (connectors.Count > 0)
                     {
-                        <span class="tree-elbow" aria-hidden="true"></span>
+                        <span class="tree-guides" aria-hidden="true">
+                            @for (var lvl = 0; lvl < connectors.Count; lvl++)
+                            {
+                                var isLastLevel = lvl == connectors.Count - 1;
+                                var hasSiblingsBelow = connectors[lvl];
+
+                                if (isLastLevel)
+                                {
+                                    <span class="tree-guide @(hasSiblingsBelow ? "tree-guide--tee" : "tree-guide--elbow")"></span>
+                                }
+                                else if (hasSiblingsBelow)
+                                {
+                                    <span class="tree-guide tree-guide--pipe"></span>
+                                }
+                                else
+                                {
+                                    <span class="tree-guide"></span>
+                                }
+                            }
+                        </span>
                     }
                     @if (d.IsDefault())
                     {
