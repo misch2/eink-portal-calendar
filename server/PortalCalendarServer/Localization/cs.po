@@ -905,3 +905,17 @@ msgstr "Atkinson (vyšší kontrast)"
 
 msgid "Stucki"
 msgstr "Stucki (výraznější hrany)"
+
+# ── Config UI – Display hierarchy ─────────────────────
+
+msgid "Parent display"
+msgstr "Nadřazený displej"
+
+msgid "(none - no inheritance)"
+msgstr "(žádný – bez dědění)"
+
+msgid "Configuration values not set on this display will be inherited from the parent."
+msgstr "Hodnoty konfigurace nenastavené na tomto displeji budou zděděny z nadřazeného."
+
+msgid "(inherited: {0})"
+msgstr "(zděděno: {0})"

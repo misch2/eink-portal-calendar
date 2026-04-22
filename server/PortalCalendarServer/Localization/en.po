@@ -879,3 +879,17 @@ msgstr "Atkinson (higher contrast in whites and blacks)"
 
 msgid "Stucki"
 msgstr "Stucki (more prominent edges)"
+
+# ── Config UI – Display hierarchy ─────────────────────
+
+msgid "Parent display"
+msgstr "Parent display"
+
+msgid "(none - no inheritance)"
+msgstr "(none - no inheritance)"
+
+msgid "Configuration values not set on this display will be inherited from the parent."
+msgstr "Configuration values not set on this display will be inherited from the parent."
+
+msgid "(inherited: {0})"
+msgstr "(inherited: {0})"

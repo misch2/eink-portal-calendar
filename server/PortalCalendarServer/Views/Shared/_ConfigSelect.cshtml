@@ -1,9 +1,17 @@
 @model PortalCalendarServer.Models.POCOs.ConfigSelectModel
 @using PortalCalendarServer.Services
 @inject IDisplayService DisplayService
+@inject IViewLocalizer Localizer
 
 @{
     var currentValue = DisplayService.GetConfigWithoutDefaults(Model.Display, Model.Key);
+    var inheritedValue = DisplayService.GetParentConfig(Model.Display, Model.Key);
+    var inheritedLabel = "";
+    if (!string.IsNullOrEmpty(inheritedValue))
+    {
+        var matchingOption = Model.Options.FirstOrDefault(o => o.Value == inheritedValue);
+        inheritedLabel = matchingOption != null ? matchingOption.Text : inheritedValue;
+    }
     var wrapClass = string.Join(" ", new[] { Model.ColClass, Model.MarginClass }.Where(s => !string.IsNullOrEmpty(s)));
 }
 
@@ -17,7 +25,14 @@
             @(Model.Disabled ? Html.Raw("disabled") : Html.Raw(""))>
         @if (Model.AllowEmpty)
         {
-            <option value=""></option>
+            @if (!string.IsNullOrEmpty(inheritedLabel))
+            {
+                <option value="">@Localizer["(inherited: {0})", inheritedLabel]</option>
+            }
+            else
+            {
+                <option value=""></option>
+            }
         }
         @foreach (var option in Model.Options)
         {
