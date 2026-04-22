@@ -240,6 +240,12 @@ msgstr "Obrázek pro ePaper displej (pokud chcete vidět původní obrázek vyge
 msgid "Enable Pairing Mode (5 min)"
 msgstr "Zapnout režim párování (5 min)"
 
+msgid "Create Config Group"
+msgstr "Vytvořit konfigurační skupinu"
+
+msgid "Group"
+msgstr "Skupina"
+
 msgid "Pairing active, {0}s remaining (click to disable)"
 msgstr "Párování aktivní, zbývá {0}s (klikněte pro vypnutí)"
 

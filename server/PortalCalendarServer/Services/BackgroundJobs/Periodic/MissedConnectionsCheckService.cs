@@ -51,7 +51,7 @@ public class MissedConnectionsCheckService : PeriodicBackgroundService
         // includes .Include(d => d.Configs) so that per-display config values
         // (_last_visit, _missed_connects, etc.) are available.
         var displayIds = displayService.As(new ImpersonatedUserProvider(null)).GetVisibleDisplays()
-            .Where(d => !d.IsDefault())
+            .Where(d => !d.IsGroupOrDefault())
             .Select(d => d.Id)
             .ToList();
 

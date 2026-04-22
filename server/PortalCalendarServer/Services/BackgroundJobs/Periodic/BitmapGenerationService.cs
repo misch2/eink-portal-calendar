@@ -60,7 +60,7 @@ public class BitmapGenerationService : PeriodicBackgroundService
         var displayService = scope.ServiceProvider.GetRequiredService<IDisplayService>();
 
         var now = DateTime.UtcNow;
-        var displays = displayService.As(new ImpersonatedUserProvider(null)).GetVisibleDisplays().Where(d => !d.IsDefault()).ToList();
+        var displays = displayService.As(new ImpersonatedUserProvider(null)).GetVisibleDisplays().Where(d => !d.IsGroupOrDefault()).ToList();
 
         foreach (var display in displays)
         {

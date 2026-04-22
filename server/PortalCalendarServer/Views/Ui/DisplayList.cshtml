@@ -32,11 +32,17 @@
     }
 }
 
-<div class="mb-3">
+<div class="mb-3 d-flex gap-2">
     @Html.AntiForgeryToken()
     <button id="pairing-btn" class="btn btn-secondary btn-sm" onclick="togglePairing()">
         @Localizer["Enable Pairing Mode (5 min)"]
     </button>
+    <form method="post" action="@Url.Action(nameof(UiController.CreateGroupDisplay), "Ui")" class="d-inline">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-folder-plus"></i> @Localizer["Create Config Group"]
+        </button>
+    </form>
 </div>
 
 <style>
@@ -76,9 +82,10 @@
 
             <tr data-display-id="@d.Id" data-parent-id="@(d.ParentId?.ToString() ?? "")">
                 <td style="@(depth > 0 ? $"padding-left: {depth * 1.5 + 0.5}rem;" : "")">
-                    @if (d.IsDefault())
+                    @if (d.IsGroupOrDefault())
                     {
                         <a href="@Url.Action(nameof(UiController.ConfigUiShow), "Ui", new { displayNumber = d.Id })">@d.Name</a>
+                        <span class="badge bg-secondary"><i class="bi bi-folder"></i> @Localizer["Group"]</span>
                     }
                     else
                     {
@@ -86,7 +93,7 @@
                     }
                 </td>
                 <td>
-                    @if (!d.IsDefault())
+                    @if (!d.IsGroupOrDefault())
                     {
                         @($"{d.VirtualWidth()} × {d.VirtualHeight()}")
                     }
@@ -96,7 +103,7 @@
                 </td>
                 <td>@d.Firmware</td>
                 <td class="text-end">
-                    @if (!d.IsDefault())
+                    @if (!d.IsGroupOrDefault())
                     {
                         var batteryPercent = displayService.GetBatteryPercent(d);
                         if (batteryPercent.HasValue)
@@ -106,7 +113,7 @@
                     }
                 </td>
                 <td class="text-nowrap">
-                    @if (!d.IsDefault())
+                    @if (!d.IsGroupOrDefault())
                     {
                         var nextWakeupInfo = displayService.GetNextWakeupTime(d);
                         var minutes = Math.Round(nextWakeupInfo.SleepInSeconds / 60.0);
@@ -116,7 +123,7 @@
                     }
                 </td>
                 <td>
-                    @if (!d.IsDefault())
+                    @if (!d.IsGroupOrDefault())
                     {
                         var missedConnects = displayService.GetMissedConnects(d);
                         if (missedConnects > 0)
@@ -159,7 +166,7 @@
                     }
                 </td>
                 <td>
-                    @if (!d.IsDefault())
+                    @if (!d.IsGroupOrDefault())
                     {
                         if (d.Owner != null)
                         {
@@ -172,7 +179,7 @@
                     }
                 </td>
                 <td>
-                    @if (!d.IsDefault())
+                    @if (!d.IsGroupOrDefault())
                     {
                         <a href="@Url.Action(nameof(UiController.Home), "Ui", new { displayNumber = d.Id })">
                             <img src="@Url.Action(nameof(UiController.Bitmap), "Ui", new { displayNumber = d.Id })"
@@ -182,7 +189,7 @@
                     }
                 </td>
                 <td>
-                    @if (!d.IsDefault())
+                    @if (!d.IsGroupOrDefault())
                     {
                         var bitmapAge = d.RenderedAt.HasValue ? DateTime.UtcNow - d.RenderedAt.Value : (TimeSpan?)null;
                         if (bitmapAge.HasValue)

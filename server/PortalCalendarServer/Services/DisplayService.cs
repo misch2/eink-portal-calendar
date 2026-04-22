@@ -297,9 +297,9 @@ public class DisplayService(
     public void EnqueueImageRegenerationRequest(Display display)
     {
         // Enqueue image regeneration in background
-        if (display.IsDefault())
+        if (display.IsGroupOrDefault())
         {
-            logger.LogWarning("Skipping image regeneration request for default display (ID = 0)");
+            logger.LogDebug("Skipping image regeneration request for group-only display (ID = {DisplayId})", display.Id);
             return;
         }
         imageRegenerationService.EnqueueRequest(display.Id);
@@ -307,7 +307,7 @@ public class DisplayService(
 
     public void EnqueueAllImageRegenerationRequest()
     {
-        var displays = GetAllDisplaysUnfiltered().Where(d => !d.IsDefault()).ToList();
+        var displays = GetAllDisplaysUnfiltered().Where(d => !d.IsGroupOrDefault()).ToList();
         foreach (var display in displays)
         {
             EnqueueImageRegenerationRequest(display);

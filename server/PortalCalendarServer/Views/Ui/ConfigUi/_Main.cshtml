@@ -31,7 +31,10 @@
             <small class="form-text text-muted">@Localizer["Configuration values not set on this display will be inherited from the parent."]</small>
         </div>
     </fieldset>
+}
 
+@if (!Model.IsGroupOrDefault())
+{
     <div class="form-group row mb-4">
         @await Html.PartialAsync("_ConfigSelect", new ConfigSelectModel
         {

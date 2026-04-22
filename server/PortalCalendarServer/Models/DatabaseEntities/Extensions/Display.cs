@@ -10,6 +10,15 @@ namespace PortalCalendarServer.Models.DatabaseEntities
             return Id == 0;
         }
 
+        /// <summary>
+        /// Whether this display is a configuration-only group (no physical device, no bitmap rendering).
+        /// The default display (ID=0) is always treated as group-only regardless of the flag.
+        /// </summary>
+        public bool IsGroupOrDefault()
+        {
+            return IsGroupOnly || IsDefault();
+        }
+
         public int VirtualWidth()
         {
             return Rotation is DisplayRotation.None or DisplayRotation.Rotate180 ? Width : Height;

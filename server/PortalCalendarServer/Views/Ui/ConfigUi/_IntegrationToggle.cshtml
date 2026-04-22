@@ -8,10 +8,11 @@
     var hasOverride = !string.IsNullOrEmpty(displayService.GetConfigWithoutDefaults(Model, integrationName));
     var currentValue = displayService.GetConfig(Model, integrationName) == "1";
     var defaultValue = displayService.GetParentConfig(Model, integrationName) == "1";
-    var isDisabled = !Model.IsDefault() && !hasOverride;
+    var hasParent = Model.ParentId != null;
+    var isDisabled = hasParent && !hasOverride;
 }
 
-@if (!Model.IsDefault())
+@if (hasParent)
 {
     <div class="col-md-12 mt-2">
         <div class="form-check form-switch">

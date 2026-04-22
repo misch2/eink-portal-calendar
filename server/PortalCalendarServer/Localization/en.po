@@ -210,6 +210,12 @@ msgstr "Image for the ePaper display (if you'd like to see the original image ge
 msgid "Enable Pairing Mode (5 min)"
 msgstr "Enable Pairing Mode (5 min)"
 
+msgid "Create Config Group"
+msgstr "Create Config Group"
+
+msgid "Group"
+msgstr "Group"
+
 msgid "Pairing active, {0}s remaining (click to disable)"
 msgstr "Pairing active, {0}s remaining (click to disable)"
 

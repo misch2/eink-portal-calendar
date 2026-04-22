@@ -51,6 +51,8 @@ public partial class Display
     public Display? Parent { get; set; }
     public ICollection<Display> Children { get; set; } = new List<Display>();
 
+    public bool IsGroupOnly { get; set; }
+
     public int? OwnerId { get; set; }
     public AppUser? Owner { get; set; }
     public bool HideFromOtherUsers { get; set; }

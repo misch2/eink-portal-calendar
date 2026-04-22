@@ -143,6 +143,9 @@ public partial class CalendarContext : DbContext
                 .HasDefaultValue(false)
                 .HasColumnName("hide_from_other_users");
 
+            entity.Property(e => e.IsGroupOnly)
+                .HasDefaultValue(false)
+                .HasColumnName("is_group_only");
             entity.Property(e => e.ParentId).HasColumnName("parent_id");
 
             entity.HasOne(d => d.Parent).WithMany(d => d.Children)

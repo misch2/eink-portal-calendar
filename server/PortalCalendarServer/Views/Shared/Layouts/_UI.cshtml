@@ -56,7 +56,7 @@
             display = d;
         }
         var activeCount = imageRegenerationService.GetActiveTaskCount();
-        var allDisplays = displayService.GetVisibleDisplays().Where(x => !x.IsDefault()).ToList();
+        var allDisplays = displayService.GetVisibleDisplays().Where(x => !x.IsGroupOrDefault()).ToList();
         var navLink = ViewData["NavLink"]?.ToString();
         var deployedVersion = configuration["Deployment:Version"] ?? "unknown";
     }
@@ -190,7 +190,7 @@
                 var battery_percent = displayService.GetBatteryPercent(display);
 
 
-                if (!display.IsDefault())
+                if (!display.IsGroupOrDefault())
                 {
                     <p class="row-fluid">
                         @Localizer["Last contact:"]
@@ -230,7 +230,7 @@
                 <nav class="navbar navbar-expand navbar-light bg-light">
                     <div class="container-fluid">
                         <ul class="navbar-nav">
-                            @if (!display.IsDefault())
+                            @if (!display.IsGroupOrDefault())
                             {
                                 <li class="nav-item">
                                     <a class="nav-link @(navLink == "home" ? "active" : "")" href="@Url.Action(nameof(UiController.Home), "Ui", new { displayNumber = display.Id })">@Localizer["Preview"]</a>
@@ -239,7 +239,7 @@
                             <li class="nav-item">
                                 <a class="nav-link @(navLink == "config_ui" ? "active" : "")" href="@Url.Action(nameof(UiController.ConfigUiShow), "Ui", new { displayNumber = display.Id })">@Localizer["Config"]</a>
                             </li>
-                            @if (!display.IsDefault())
+                            @if (!display.IsGroupOrDefault())
                             {
 
                                 <li class="nav-item">

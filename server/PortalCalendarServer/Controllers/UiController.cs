@@ -94,6 +94,50 @@ public class UiController(
         return View("TestMultiResolution", display);
     }
 
+    // POST /create-group
+    [HttpPost("/create-group")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateGroupDisplay()
+    {
+        // Find a unique name
+        var baseName = "New Config Group";
+        var name = baseName;
+        var counter = 1;
+        while (await _context.Displays.AnyAsync(d => d.Name == name))
+        {
+            counter++;
+            name = $"{baseName} {counter}";
+        }
+
+        // Need a valid display type + color variant for the required FK columns
+        var defaultDisplayType = await _context.DisplayTypes.OrderBy(dt => dt.SortOrder).FirstAsync();
+        var defaultColorVariant = await _context.ColorVariants
+            .Where(cv => cv.DisplayTypeCode == defaultDisplayType.Code)
+            .OrderBy(cv => cv.SortOrder)
+            .FirstAsync();
+
+        var display = new Display
+        {
+            Name = name,
+            IsGroupOnly = true,
+            Mac = null,
+            Width = 0,
+            Height = 0,
+            DisplayTypeCode = defaultDisplayType.Code,
+            ColorVariantCode = defaultColorVariant.Code,
+            Gamma = 1.0,
+            ParentId = 0,
+            OwnerId = _currentUser.UserId
+        };
+
+        _context.Displays.Add(display);
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Created new config group display: ID={DisplayId}, Name={Name}", display.Id, display.Name);
+
+        return RedirectToAction(nameof(ConfigUiShow), new { displayNumber = display.Id });
+    }
+
     // POST /delete/{display_number}
     [HttpPost("/delete/{displayNumber:int}")]
     [ValidateAntiForgeryToken]
@@ -217,7 +261,7 @@ public class UiController(
             }
         }
 
-        // Update database columns in the 'displays' table
+        // Update database columns in the 'displays' table (non-default displays)
         if (!display.IsDefault())
         {
             if (form.ContainsKey("display_name"))
@@ -240,75 +284,80 @@ public class UiController(
                 var parentIdStr = form["parent_id"].ToString();
                 display.ParentId = string.IsNullOrEmpty(parentIdStr) ? null : int.Parse(parentIdStr);
             }
-            if (form.ContainsKey("display_mac"))
+
+            // Hardware-specific fields are only editable for non-group displays
+            if (!display.IsGroupOrDefault())
             {
-                display.Mac = form["display_mac"].ToString().Trim().ToLowerInvariant();
-                var macClash = await _context.Displays
-                    .AnyAsync(d => d.Id != display.Id && d.Mac == display.Mac);
-                if (macClash)
+                if (form.ContainsKey("display_mac"))
                 {
-                    TempData["Error"] = $"MAC address '{display.Mac}' is already used by another display.";
-                    return RedirectToAction(nameof(ConfigUiShow), new { displayNumber });
-                }
-            }
-            else
-            {
-                display.Mac = null;
-            }
-            if (form.ContainsKey("display_api_key"))
-            {
-                display.ApiKey = form["display_api_key"].ToString().Trim();
-                if (string.IsNullOrEmpty(display.ApiKey))
-                {
-                    display.ApiKey = null;
-                }
-            }
-            if (form.ContainsKey("display_rotation") && int.TryParse(form["display_rotation"], out var rotation))
-            {
-                display.Rotation = (DisplayRotation)rotation;
-            }
-            if (form.ContainsKey("display_gamma") && double.TryParse(form["display_gamma"], out var gamma))
-            {
-                display.Gamma = gamma;
-            }
-            if (form.ContainsKey("display_border_top") && int.TryParse(form["display_border_top"], out var borderTop))
-            {
-                display.BorderTop = borderTop;
-            }
-            if (form.ContainsKey("display_border_right") && int.TryParse(form["display_border_right"], out var borderRight))
-            {
-                display.BorderRight = borderRight;
-            }
-            if (form.ContainsKey("display_border_bottom") && int.TryParse(form["display_border_bottom"], out var borderBottom))
-            {
-                display.BorderBottom = borderBottom;
-            }
-            if (form.ContainsKey("display_border_left") && int.TryParse(form["display_border_left"], out var borderLeft))
-            {
-                display.BorderLeft = borderLeft;
-            }
-            if (form.ContainsKey("theme_id") && int.TryParse(form["theme_id"], out var theme_id))
-            {
-                display.ThemeId = theme_id;
-            }
-            if (form.ContainsKey("color_variant"))
-            {
-                display.ColorVariantCode = form["color_variant"].ToString();
-            }
-            if (form.ContainsKey("display_type"))
-            {
-                display.DisplayTypeCode = form["display_type"].ToString();
-            }
-            if (form.ContainsKey("dithering_type"))
-            {
-                var code = form["dithering_type"].ToString();
-                if (string.IsNullOrEmpty(code))
-                {
-                    display.DitheringTypeCode = null;
+                    display.Mac = form["display_mac"].ToString().Trim().ToLowerInvariant();
+                    var macClash = await _context.Displays
+                        .AnyAsync(d => d.Id != display.Id && d.Mac == display.Mac);
+                    if (macClash)
+                    {
+                        TempData["Error"] = $"MAC address '{display.Mac}' is already used by another display.";
+                        return RedirectToAction(nameof(ConfigUiShow), new { displayNumber });
+                    }
                 }
                 else
                 {
-                    display.DitheringTypeCode = form["dithering_type"].ToString();
+                    display.Mac = null;
+                }
+                if (form.ContainsKey("display_api_key"))
+                {
+                    display.ApiKey = form["display_api_key"].ToString().Trim();
+                    if (string.IsNullOrEmpty(display.ApiKey))
+                    {
+                        display.ApiKey = null;
+                    }
+                }
+                if (form.ContainsKey("display_rotation") && int.TryParse(form["display_rotation"], out var rotation))
+                {
+                    display.Rotation = (DisplayRotation)rotation;
+                }
+                if (form.ContainsKey("display_gamma") && double.TryParse(form["display_gamma"], out var gamma))
+                {
+                    display.Gamma = gamma;
+                }
+                if (form.ContainsKey("display_border_top") && int.TryParse(form["display_border_top"], out var borderTop))
+                {
+                    display.BorderTop = borderTop;
+                }
+                if (form.ContainsKey("display_border_right") && int.TryParse(form["display_border_right"], out var borderRight))
+                {
+                    display.BorderRight = borderRight;
+                }
+                if (form.ContainsKey("display_border_bottom") && int.TryParse(form["display_border_bottom"], out var borderBottom))
+                {
+                    display.BorderBottom = borderBottom;
+                }
+                if (form.ContainsKey("display_border_left") && int.TryParse(form["display_border_left"], out var borderLeft))
+                {
+                    display.BorderLeft = borderLeft;
+                }
+                if (form.ContainsKey("theme_id") && int.TryParse(form["theme_id"], out var theme_id))
+                {
+                    display.ThemeId = theme_id;
+                }
+                if (form.ContainsKey("color_variant"))
+                {
+                    display.ColorVariantCode = form["color_variant"].ToString();
+                }
+                if (form.ContainsKey("display_type"))
+                {
+                    display.DisplayTypeCode = form["display_type"].ToString();
+                }
+                if (form.ContainsKey("dithering_type"))
+                {
+                    var code = form["dithering_type"].ToString();
+                    if (string.IsNullOrEmpty(code))
+                    {
+                        display.DitheringTypeCode = null;
+                    }
+                    else
+                    {
+                        display.DitheringTypeCode = form["dithering_type"].ToString();
+                    }
                 }
             }
 
@@ -333,10 +382,13 @@ public class UiController(
             }
 
             // If the color variant is not valid for the display type (this may happen if the user changes display type or color variant), set the color variant to first available for the display type to avoid rendering errors.
-            var validColorVariants = _displayService.GetColorVariants().Where(cv => cv.DisplayTypeCode == display.DisplayTypeCode).ToList();
-            if (!validColorVariants.Any(cv => cv.Code == display.ColorVariantCode))
+            if (!display.IsGroupOrDefault())
             {
-                display.ColorVariantCode = validColorVariants.First().Code;
+                var validColorVariants = _displayService.GetColorVariants().Where(cv => cv.DisplayTypeCode == display.DisplayTypeCode).ToList();
+                if (!validColorVariants.Any(cv => cv.Code == display.ColorVariantCode))
+                {
+                    display.ColorVariantCode = validColorVariants.First().Code;
+                }
             }
 
             _context.Update(display);
