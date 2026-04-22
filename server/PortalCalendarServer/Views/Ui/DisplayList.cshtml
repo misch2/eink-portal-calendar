@@ -8,113 +8,42 @@
 @{
     ViewData["Title"] = Localizer["Displays"].Value;
 
-    // Build tree-ordered list with depth and connector info per level.
-    // connectors[i] == true means "this ancestor level still has siblings below → draw │"
-    // connectors[i] == false means "this ancestor level was the last child → draw nothing"
-    // The last entry in connectors indicates whether this node itself is the last child (└ vs ├).
-    var displayDepths = new List<(Display Display, int Depth, List<bool> Connectors)>();
+    // Build tree-ordered list so parents appear before their children, tracking depth for indentation.
+    var orderedDisplays = new List<(Display Display, int Depth)>();
     var allDisplays = Model;
     var childrenLookup = allDisplays.ToLookup(d => d.ParentId);
 
-    void AddSubtree(int? parentId, int depth, List<bool> parentConnectors)
+    void AddSubtree(int? parentId, int depth)
     {
-        var siblings = childrenLookup[parentId].OrderBy(d => d.Id).ToList();
-        for (var i = 0; i < siblings.Count; i++)
+        foreach (var child in childrenLookup[parentId].OrderBy(d => d.Id))
         {
-            var child = siblings[i];
-            var isLast = i == siblings.Count - 1;
-            var connectors = new List<bool>(parentConnectors) { !isLast };
-            displayDepths.Add((child, depth, connectors));
-            AddSubtree(child.Id, depth + 1, connectors);
+            orderedDisplays.Add((child, depth));
+            AddSubtree(child.Id, depth + 1);
         }
     }
 
-    // Roots are displays with no parent
-    AddSubtree(null, 0, new List<bool>());
+    AddSubtree(null, 0);
 
     // Add any orphans (parent not in visible set) that weren't included
-    var included = new HashSet<int>(displayDepths.Select(x => x.Display.Id));
+    var included = new HashSet<int>(orderedDisplays.Select(x => x.Display.Id));
     foreach (var d in allDisplays.Where(d => !included.Contains(d.Id)))
     {
-        displayDepths.Add((d, 0, new List<bool>()));
+        orderedDisplays.Add((d, 0));
     }
 }
 
 <div class="mb-3">
-
-<style>
-    .display-name-cell {
-        position: relative;
-        overflow: visible;
-    }
-    .tree-guides {
-        display: inline-flex;
-        align-items: stretch;
-        position: absolute;
-        top: -1px;
-        bottom: -1px;
-        left: 0;
-    }
-    .tree-guide {
-        display: inline-block;
-        width: 1.4rem;
-        position: relative;
-        flex-shrink: 0;
-    }
-    /* The horizontal branch should sit at the text baseline, not at 50%.
-       Bootstrap table cell padding is ~0.5rem, half line-height ~0.6rem → ~1.1rem from top. */
-
-    /* vertical continuation line for ancestors that have more siblings: │ */
-    .tree-guide--pipe::before {
-        content: '';
-        position: absolute;
-        left: 0.45rem;
-        top: 0;
-        bottom: 0;
-        border-left: 2px solid #999;
-    }
-    /* tee connector: ├  (has more siblings below) */
-    .tree-guide--tee::before {
-        content: '';
-        position: absolute;
-        left: 0.45rem;
-        top: 0;
-        bottom: 0;
-        border-left: 2px solid #999;
-    }
-    .tree-guide--tee::after {
-        content: '';
-        position: absolute;
-        left: 0.45rem;
-        top: 1.1rem;
-        width: 0.7rem;
-        border-top: 2px solid #999;
-    }
-    /* elbow connector: └  (last child) */
-    .tree-guide--elbow::before {
-        content: '';
-        position: absolute;
-        left: 0.45rem;
-        top: 0;
-        height: 1.1rem;
-        border-left: 2px solid #999;
-        border-bottom: 2px solid #999;
-        border-bottom-left-radius: 0.3rem;
-        width: 0.7rem;
-    }
-    .tree-guide--elbow::after {
-        content: '';
-        position: absolute;
-        left: calc(0.45rem + 0.7rem);
-        top: 1.1rem;
-        width: 0;
-    }
-</style>
     @Html.AntiForgeryToken()
     <button id="pairing-btn" class="btn btn-secondary btn-sm" onclick="togglePairing()">
         @Localizer["Enable Pairing Mode (5 min)"]
     </button>
 </div>
+
+<style>
+    .table > tbody > tr.group-highlight > td {
+        background-color: rgba(var(--bs-primary-rgb), 0.08);
+    }
+</style>
 
 <table class="table table-hover">
     <thead>
@@ -137,7 +66,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var (rawDisplay, depth, connectors) in displayDepths)
+        @foreach (var (rawDisplay, depth) in orderedDisplays)
         {
             var d = displayService.GetVisibleDisplayById(rawDisplay.Id);
             if (d == null) continue;
@@ -145,31 +74,8 @@
             var dateCulture = displayService.GetDateCultureInfo(d);
             var tz = displayService.GetTimeZoneInfo(d);
 
-            <tr>
-                <td class="display-name-cell" style="padding-left: @(connectors.Count * 1.4 + 0.5)rem;">
-                    @if (connectors.Count > 0)
-                    {
-                        <span class="tree-guides" aria-hidden="true">
-                            @for (var lvl = 0; lvl < connectors.Count; lvl++)
-                            {
-                                var isLastLevel = lvl == connectors.Count - 1;
-                                var hasSiblingsBelow = connectors[lvl];
-
-                                if (isLastLevel)
-                                {
-                                    <span class="tree-guide @(hasSiblingsBelow ? "tree-guide--tee" : "tree-guide--elbow")"></span>
-                                }
-                                else if (hasSiblingsBelow)
-                                {
-                                    <span class="tree-guide tree-guide--pipe"></span>
-                                }
-                                else
-                                {
-                                    <span class="tree-guide"></span>
-                                }
-                            }
-                        </span>
-                    }
+            <tr data-display-id="@d.Id" data-parent-id="@(d.ParentId?.ToString() ?? "")">
+                <td style="@(depth > 0 ? $"padding-left: {depth * 1.5 + 0.5}rem;" : "")">
                     @if (d.IsDefault())
                     {
                         <a href="@Url.Action(nameof(UiController.ConfigUiShow), "Ui", new { displayNumber = d.Id })">@d.Name</a>
@@ -397,6 +303,37 @@
         fetch('/api/pairing/status')
             .then(r => r.json())
             .then(data => { if (data.active && data.secondsRemaining > 0) startPairingCountdown(data.secondsRemaining); });
+
+        // Group highlight on hover: highlight parent + all its children
+        (function () {
+            var rows = document.querySelectorAll('tbody tr[data-display-id]');
+
+            function getDescendantIds(id) {
+                // Collect this display + all its descendants
+                var ids = new Set();
+                var queue = [id];
+                while (queue.length) {
+                    var current = queue.shift();
+                    ids.add(current);
+                    document.querySelectorAll('tr[data-parent-id="' + current + '"]').forEach(function (r) {
+                        queue.push(r.dataset.displayId);
+                    });
+                }
+                return ids;
+            }
+
+            rows.forEach(function (tr) {
+                tr.addEventListener('mouseenter', function () {
+                    var ids = getDescendantIds(tr.dataset.displayId);
+                    rows.forEach(function (r) {
+                        r.classList.toggle('group-highlight', ids.has(r.dataset.displayId));
+                    });
+                });
+                tr.addEventListener('mouseleave', function () {
+                    rows.forEach(function (r) { r.classList.remove('group-highlight'); });
+                });
+            });
+        })();
 
         $('#delete_modal').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget);
