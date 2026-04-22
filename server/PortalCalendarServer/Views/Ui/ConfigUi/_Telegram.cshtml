@@ -1,5 +1,6 @@
 @model PortalCalendarServer.Models.DatabaseEntities.Display
 @using PortalCalendarServer.Models.POCOs
+@inject IViewLocalizer Localizer
 
 @{
     ViewData["IntegrationName"] = "telegram";
@@ -10,13 +11,13 @@
 
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
     {
-        Display = Model, Key = "telegram_api_key", Label = "API key",
+        Display = Model, Key = "telegram_api_key", Label = Localizer["API key"].Value,
         ColClass = "col-md-12", MarginClass = "mt-3"
     })
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
     {
-        Display = Model, Key = "telegram_chat_id", Label = "Chat ID",
+        Display = Model, Key = "telegram_chat_id", Label = Localizer["Chat ID"].Value,
         ColClass = "col-md-12", MarginClass = "mt-3",
-        HelpText = "See https://stackoverflow.com/questions/32423837/telegram-bot-how-to-get-a-group-chat-id to get the id."
+        HelpText = Localizer["See https://stackoverflow.com/questions/32423837/telegram-bot-how-to-get-a-group-chat-id to get the id."].Value
     })
 </fieldset>

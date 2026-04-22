@@ -315,7 +315,11 @@ public class UiController(
             // Only the owner or an admin can change ownership/visibility settings
             if (_currentUser.IsAdmin || display.OwnerId == null || display.OwnerId == _currentUser.UserId)
             {
-                display.HideFromOtherUsers = form.ContainsKey("hide_from_other_users");
+                if (form.ContainsKey("hide_from_other_users"))
+                {
+                    display.HideFromOtherUsers = form["hide_from_other_users"] == "on";
+                }
+
 
                 if (_currentUser.IsAdmin && form.ContainsKey("owner_id"))
                 {

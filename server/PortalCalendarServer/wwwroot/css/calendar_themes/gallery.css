@@ -54,6 +54,15 @@ body {
     font-size: 1.5rem;
 }
 
+/* Image sizing modes */
+#gallery-container.sizing-cover #gallery-image {
+    object-fit: cover;
+}
+
+#gallery-container.sizing-fill #gallery-image {
+    object-fit: fill;
+}
+
 #gallery-no-image {
     display: flex;
     align-items: center;

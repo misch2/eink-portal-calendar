@@ -1,5 +1,6 @@
 @model PortalCalendarServer.Models.DatabaseEntities.Display
 @using PortalCalendarServer.Models.POCOs
+@inject IViewLocalizer Localizer
 
 @for (int i = 1; i <= 3; i++)
 {
@@ -7,12 +8,12 @@
         @await Html.PartialAsync("_ConfigCheckbox", new ConfigInputModel
         {
             Display = Model, Key = $"web_calendar{i}",
-            Label = $"ICS calendar #{i} enabled",
+            Label = string.Format(Localizer["ICS calendar #{0} enabled"].Value, i),
             ColClass = "col-md-12"
         })
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
         {
-            Display = Model, Key = $"web_calendar_ics_url{i}", Label = "URL",
+            Display = Model, Key = $"web_calendar_ics_url{i}", Label = Localizer["URL"].Value,
             ColClass = "col-md-12", MarginClass = "mt-2"
         })
     </fieldset>

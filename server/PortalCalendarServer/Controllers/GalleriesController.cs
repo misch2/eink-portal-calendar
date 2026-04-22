@@ -132,7 +132,10 @@ public class GalleriesController(IGalleryService galleryService, ICurrentUserPro
         // Only the owner or an admin can change ownership/visibility settings
         if (currentUser.IsAdmin || gallery.OwnerId == null || gallery.OwnerId == currentUser.UserId)
         {
-            gallery.HideFromOtherUsers = form.ContainsKey("hide_from_other_users");
+            if (form.ContainsKey("hide_from_other_users"))
+            {
+                gallery.HideFromOtherUsers = form["hide_from_other_users"] == "on";
+            }
 
             if (currentUser.IsAdmin && form.ContainsKey("owner_id"))
             {

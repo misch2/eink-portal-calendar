@@ -12,15 +12,15 @@
     <div class="form-group row mt-3">
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
         {
-            Display = Model, Key = "homeassistant_url", Label = "Home Assistant URL",
+            Display = Model, Key = "homeassistant_url", Label = Localizer["Home Assistant URL"].Value,
             ColClass = "col-md-6",
-            HelpText = "Base URL of your Home Assistant instance (e.g. http://homeassistant.local:8123)"
+            HelpText = Localizer["Base URL of your Home Assistant instance (e.g. http://homeassistant.local:8123)"].Value
         })
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
         {
-            Display = Model, Key = "homeassistant_token", Label = "Long-Lived Access Token",
+            Display = Model, Key = "homeassistant_token", Label = Localizer["Long-Lived Access Token"].Value,
             ColClass = "col-md-6",
-            HelpText = "Generate in Home Assistant: Profile → Security → Long-Lived Access Tokens"
+            HelpText = Localizer["Generate in Home Assistant: Profile → Security → Long-Lived Access Tokens"].Value
         })
     </div>
 </fieldset>

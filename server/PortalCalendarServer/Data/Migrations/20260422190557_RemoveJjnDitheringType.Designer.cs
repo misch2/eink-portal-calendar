@@ -2,17 +2,20 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PortalCalendarServer.Data;
 
 #nullable disable
 
-namespace PortalCalendarServer.Migrations
+namespace PortalCalendarServer.Data.Migrations
 {
     [DbContext(typeof(CalendarContext))]
-    partial class CalendarContextModelSnapshot : ModelSnapshot
+    [Migration("20260422190557_RemoveJjnDitheringType")]
+    partial class RemoveJjnDitheringType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.12");
@@ -459,10 +462,6 @@ namespace PortalCalendarServer.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("owner_id");
 
-                    b.Property<int?>("ParentId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("parent_id");
-
                     b.Property<string>("RenderErrors")
                         .HasColumnType("TEXT")
                         .HasColumnName("render_errors");
@@ -492,8 +491,6 @@ namespace PortalCalendarServer.Migrations
                     b.HasIndex("DitheringTypeCode");
 
                     b.HasIndex("OwnerId");
-
-                    b.HasIndex("ParentId");
 
                     b.HasIndex("ThemeId");
 
@@ -1007,11 +1004,6 @@ namespace PortalCalendarServer.Migrations
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("PortalCalendarServer.Models.DatabaseEntities.Display", "Parent")
-                        .WithMany("Children")
-                        .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("PortalCalendarServer.Models.DatabaseEntities.Theme", "Theme")
                         .WithMany("Displays")
                         .HasForeignKey("ThemeId")
@@ -1024,8 +1016,6 @@ namespace PortalCalendarServer.Migrations
                     b.Navigation("DitheringType");
 
                     b.Navigation("Owner");
-
-                    b.Navigation("Parent");
 
                     b.Navigation("Theme");
                 });
@@ -1075,8 +1065,6 @@ namespace PortalCalendarServer.Migrations
 
             modelBuilder.Entity("PortalCalendarServer.Models.DatabaseEntities.Display", b =>
                 {
-                    b.Navigation("Children");
-
                     b.Navigation("Configs");
                 });
 

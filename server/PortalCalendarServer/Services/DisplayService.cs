@@ -581,7 +581,6 @@ public class DisplayService(
             {
                 "fs" => KnownDitherings.FloydSteinberg,
                 "at" => KnownDitherings.Atkinson,
-                "jjn" => KnownDitherings.JarvisJudiceNinke,
                 "st" => KnownDitherings.Stucki,
                 _ => null
             };

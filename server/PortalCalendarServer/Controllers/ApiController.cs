@@ -45,7 +45,16 @@ public class ApiController : ControllerBase
 
     private static string? GenerateApiKeyForDisplayIfNeeded(Display display)
     {
-        var displayVersion = new Version(display.Firmware ?? "0.0.0");
+        Version displayVersion;
+        try
+        {
+            displayVersion = new Version(display.Firmware);
+        }
+        catch (Exception)
+        {
+            // If firmware version is not in a valid format, assume it's old
+            displayVersion = new Version("0.0.0");
+        }
 
         if (displayVersion >= firmwareVersionWithApiKeySupport)
         {

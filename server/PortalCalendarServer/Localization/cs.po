@@ -599,3 +599,309 @@ msgstr "Nastavit jako administrátora"
 
 msgid "Remove admin"
 msgstr "Odebrat administrátora"
+
+# ── Theme config – Gallery ─────────────────────────────
+
+msgid "Hide descriptions"
+msgstr "Skrýt popisy"
+
+msgid "Image sizing"
+msgstr "Velikost obrázku"
+
+msgid "Preference ratio"
+msgstr "Relativní priorita"
+
+msgid "images"
+msgstr "obrázků"
+
+msgid "Fit (contain)"
+msgstr "Standard (případné okraje doplnit rozmazaným pozadím)"
+
+msgid "Crop (cover)"
+msgstr "Oříznout"
+
+msgid "Stretch (fill)"
+msgstr "Roztáhnout (ignorovat poměr stran)"
+
+# ── Theme config – Web Image ──────────────────────────
+
+msgid "Image URL"
+msgstr "URL obrázku"
+
+msgid "Cache for N hours"
+msgstr "Cachovat po dobu N hodin"
+
+# ── Theme config – Portal / Google Fit icons ──────────
+
+msgid "Random icons instead of chamber-by-day"
+msgstr "Náhodné ikony místo místností podle dne"
+
+msgid "Min random icons count"
+msgstr "Min. počet náhodných ikon"
+
+msgid "Max random icons count"
+msgstr "Max. počet náhodných ikon"
+
+msgid "Max icons count for calendar event"
+msgstr "Max. počet ikon pro událost kalendáře"
+
+# ── Theme config – Multi-day Calendar ─────────────────
+
+msgid "Title"
+msgstr "Název"
+
+# ── Theme config – Weather Forecast ───────────────────
+
+msgid "Number of rows displayed"
+msgstr "Počet zobrazených řádků"
+
+# ── Theme config – Bottom status bar ──────────────────
+
+msgid "Show wakeup times at the bottom"
+msgstr "Zobrazit časy probuzení ve spodní liště"
+
+msgid "Show last render info at the bottom"
+msgstr "Zobrazit info o posledním vykreslení ve spodní liště"
+
+msgid "Show battery status at the bottom"
+msgstr "Zobrazit stav baterie ve spodní liště"
+
+# ── Theme config – Plant Watering ─────────────────────
+
+msgid "Global dry threshold (%)"
+msgstr "Globální práh sucha (%)"
+
+msgid "Global wet threshold (%)"
+msgstr "Globální práh vlhkosti (%)"
+
+msgid "Below this moisture % the plant is considered too dry (default: 20)"
+msgstr "Pod touto hodnotou vlhkosti (%) je rostlina považována za příliš suchou (výchozí: 20)"
+
+msgid "Above this moisture % the plant is considered too wet (default: 80)"
+msgstr "Nad touto hodnotou vlhkosti (%) je rostlina považována za příliš mokrou (výchozí: 80)"
+
+msgid "Moisture sensors"
+msgstr "Senzory vlhkosti"
+
+msgid "Enable and configure Home Assistant integration first to populate sensor list."
+msgstr "Nejprve zapněte a nakonfigurujte integraci Home Assistant pro načtení seznamu senzorů."
+
+msgid "No moisture sensors found in Home Assistant. Check your connection settings."
+msgstr "V Home Assistantovi nebyly nalezeny žádné senzory vlhkosti. Zkontrolujte nastavení připojení."
+
+msgid "Select moisture sensors to monitor ({0} available)."
+msgstr "Vyberte senzory vlhkosti ke sledování (k dispozici: {0})."
+
+msgid "Sensor {0}"
+msgstr "Senzor {0}"
+
+msgid "not found"
+msgstr "nenalezeno"
+
+msgid "Dry threshold (%)"
+msgstr "Práh sucha (%)"
+
+msgid "Wet threshold (%)"
+msgstr "Práh vlhkosti (%)"
+
+msgid "Name override"
+msgstr "Přepsání názvu"
+
+msgid "Order (in area)"
+msgstr "Pořadí (v oblasti)"
+
+# ── Config UI – Tab names ─────────────────────────────
+
+msgid "Main"
+msgstr "Hlavní"
+
+msgid "ePaper display (client)"
+msgstr "ePaper displej (klient)"
+
+msgid "Calendar (ICS)"
+msgstr "Kalendář (ICS)"
+
+msgid "Google Fit"
+msgstr "Google Fit"
+
+msgid "OpenWeather"
+msgstr "OpenWeather"
+
+msgid "Met.no weather"
+msgstr "Počasí Met.no"
+
+msgid "MQTT"
+msgstr "MQTT"
+
+msgid "Telegram"
+msgstr "Telegram"
+
+# ── Config UI – ePaper display (client) ───────────────
+
+msgid "OTA mode on"
+msgstr "OTA režim zapnut"
+
+msgid "(Required for firmware update. It disables standard functionality and waits for OTA update indefinitely until a manual reset or a successful firmware download!)"
+msgstr "(Vyžadováno pro aktualizaci firmwaru. Vypne standardní funkce a čeká na OTA aktualizaci neomezeně dlouho, dokud nedojde k ručnímu resetu nebo úspěšnému stažení firmwaru!)"
+
+msgid "MAC address"
+msgstr "MAC adresa"
+
+msgid "MAC address of the display in the aa:bb:cc:dd:ee:ff format."
+msgstr "MAC adresa displeje ve formátu aa:bb:cc:dd:ee:ff."
+
+msgid "API key for this specific display"
+msgstr "API klíč pro tento konkrétní displej"
+
+msgid "Color variant"
+msgstr "Barevná varianta"
+
+msgid "Dithering"
+msgstr "Dithering"
+
+msgid "Rotation"
+msgstr "Otočení"
+
+msgid "180° ({0} × {1} but upside down)"
+msgstr "180° ({0} × {1} ale vzhůru nohama)"
+
+msgid "Gamma"
+msgstr "Gamma"
+
+msgid "Controls how grayscale/antialiased elements map to pure black and white. Values above 1.0 lighten the image (thinner lines), values below 1.0 darken it (thicker lines). Set to 1.0 for no correction."
+msgstr "Ovlivňuje převod šedých/vyhlazených prvků na čistou černou a bílou. Hodnoty nad 1.0 zesvětlí obraz (tenčí čáry), hodnoty pod 1.0 ztmaví (silnější čáry). Nastavte 1.0 pro žádnou korekci."
+
+msgid "Preview frame top"
+msgstr "Rámeček náhledu nahoře"
+
+msgid "Preview frame right"
+msgstr "Rámeček náhledu vpravo"
+
+msgid "Preview frame bottom"
+msgstr "Rámeček náhledu dole"
+
+msgid "Preview frame left"
+msgstr "Rámeček náhledu vlevo"
+
+msgid "Preview frame border (how much the physical frame overlaps the display on each side)"
+msgstr "Rámeček náhledu (o kolik fyzický rámeček překrývá displej na každé straně)"
+
+msgid "Wake up (redraw) schedule"
+msgstr "Plán probuzení (překreslení)"
+
+msgid "Schedule is in the <a href=\"https://crontab.guru/\" target=\"_blank\">crontab format</a>, for example \"0 * * * *\"."
+msgstr "Plán je ve <a href=\"https://crontab.guru/\" target=\"_blank\">formátu crontab</a>, například \"0 * * * *\"."
+
+msgid "Enforced lag when checking if display is alive (minutes)"
+msgstr "Vynucené zpoždění při kontrole, zda je displej aktivní (minuty)"
+
+msgid "How many minutes to delay the check after the expected contact time"
+msgstr "Kolik minut počkat po očekávaném času kontaktu"
+
+msgid "Min. number of alive check failures"
+msgstr "Min. počet selhání kontroly aktivity"
+
+msgid "Minimal number of failures the display is considered to be frozen and before a notification is sent."
+msgstr "Minimální počet selhání, než je displej považován za zamrzlý a je odesláno upozornění."
+
+# ── Config UI – Calendar (ICS) ────────────────────────
+
+msgid "ICS calendar #{0} enabled"
+msgstr "ICS kalendář #{0} zapnut"
+
+msgid "URL"
+msgstr "URL"
+
+# ── Config UI – Google Fit ────────────────────────────
+
+msgid "Client ID"
+msgstr "Client ID"
+
+msgid "Client secret"
+msgstr "Client secret"
+
+msgid "Refresh token (generated automatically)"
+msgstr "Obnovovací token (generován automaticky)"
+
+msgid "Auth token (generated automatically)"
+msgstr "Autorizační token (generován automaticky)"
+
+# ── Config UI – OpenWeather ───────────────────────────
+
+msgid "API key"
+msgstr "API klíč"
+
+msgid "Language"
+msgstr "Jazyk"
+
+msgid "Language code, for example \"en\", \"cs\", etc."
+msgstr "Kód jazyka, například \"en\", \"cs\" atd."
+
+# ── Config UI – Met.no weather ────────────────────────
+
+msgid "Aggregate forecast by how many hours"
+msgstr "Agregovat předpověď po kolika hodinách"
+
+# ── Config UI – MQTT ──────────────────────────────────
+
+msgid "Server"
+msgstr "Server"
+
+msgid "Device topic"
+msgstr "Topic zařízení"
+
+# ── Config UI – Telegram ──────────────────────────────
+
+msgid "Chat ID"
+msgstr "Chat ID"
+
+msgid "See https://stackoverflow.com/questions/32423837/telegram-bot-how-to-get-a-group-chat-id to get the id."
+msgstr "Viz https://stackoverflow.com/questions/32423837/telegram-bot-how-to-get-a-group-chat-id pro získání ID."
+
+# ── Config UI – Display types ─────────────────────────
+
+msgid "Black and White"
+msgstr "Černobílý"
+
+msgid "3 Colors"
+msgstr "3 barvy"
+
+msgid "4 Colors"
+msgstr "4 barvy"
+
+msgid "6 Colors"
+msgstr "6 barev"
+
+# ── Config UI – Color variants ────────────────────────
+
+msgid "Black, White, Yellow"
+msgstr "Černá, bílá, žlutá"
+
+msgid "Black, White, Red"
+msgstr "Černá, bílá, červená"
+
+msgid "Black, White, Red - cheap with bad contrast"
+msgstr "Černá, bílá, červená – levný se špatným kontrastem"
+
+msgid "Black, White, Red, Yellow"
+msgstr "Černá, bílá, červená, žlutá"
+
+msgid "Black, White, Red, Yellow - GDEM075F52"
+msgstr "Černá, bílá, červená, žlutá – GDEM075F52"
+
+msgid "Spectra E6 (Black, White, Red, Yellow, Blue, Green)"
+msgstr "Spectra E6 (černá, bílá, červená, žlutá, modrá, zelená)"
+
+# ── Config UI – Dithering types ───────────────────────
+
+msgid "None"
+msgstr "Žádný"
+
+msgid "Floyd-Steinberg"
+msgstr "Floyd-Steinberg (standard)"
+
+msgid "Atkinson"
+msgstr "Atkinson (vyšší kontrast)"
+
+msgid "Stucki"
+msgstr "Stucki (výraznější hrany)"

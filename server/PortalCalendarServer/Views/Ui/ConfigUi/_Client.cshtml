@@ -4,6 +4,7 @@
 @using PortalCalendarServer.Services
 @using Microsoft.AspNetCore.Html
 @inject IDisplayService DisplayService
+@inject IViewLocalizer Localizer
 
 @functions {
     enum SwatchContext { DisplayType, ColorVariant }
@@ -47,8 +48,8 @@
     @await Html.PartialAsync("_ConfigCheckbox", new ConfigInputModel
     {
         Display = Model, Key = "ota_mode",
-        Label = "OTA mode on",
-        HelpText = "(Required for firmware update. ⚠️ It disables standard functionality and waits for OTA update indefinitely until a manual reset or a successful firmware download!)",
+        Label = Localizer["OTA mode on"].Value,
+        HelpText = Localizer["(Required for firmware update. It disables standard functionality and waits for OTA update indefinitely until a manual reset or a successful firmware download!)"].Value,
         ColClass = "col-md-12"
     })
 </fieldset>
@@ -57,15 +58,15 @@
 {
     <fieldset class="row mb-3">
         <div class="col-md-6">
-            <label for="display_mac">MAC address</label>
+            <label for="display_mac">@Localizer["MAC address"]</label>
             <input id="display_mac" name="display_mac" type="text" class="form-control" value="@Model.Mac">
-            <div class="form-text">MAC address of the display in the aa:bb:cc:dd:ee:ff format.</div>
+            <div class="form-text">@Localizer["MAC address of the display in the aa:bb:cc:dd:ee:ff format."]</div>
         </div>
 
         <div class="col-md-6">
-            <label for="display_api_key">API key</label>
+            <label for="display_api_key">@Localizer["API key"]</label>
             <input id="display_api_key" name="display_api_key" type="text" class="form-control" value="@Model.ApiKey">
-            <div class="form-text">API key for this specific display</div>
+            <div class="form-text">@Localizer["API key for this specific display"]</div>
         </div>
     </fieldset>
 
@@ -75,7 +76,7 @@
         }
 
         <div class="col-md-4">
-            <label for="display_type_btn">Display type</label>
+            <label for="display_type_btn">@Localizer["Display type"]</label>
             @{
                 var selectedType = DisplayService.GetDisplayTypes().First(t => t.Code == Model.DisplayTypeCode);
             }
@@ -89,7 +90,7 @@
                     <span class="d-flex gap-1">
                         @SwatchSpans(selectedTypeVariants.SelectMany(cv => cv.ColorPaletteLinks).DistinctBy(cl => cl.EpdColorCode).OrderBy(cl => cl.Id), SwatchContext.DisplayType, Model.DisplayTypeCode)
                     </span>
-                    <span>@(selectedType.Name)</span>
+                    <span>@Localizer[selectedType.Name]</span>
                 </button>
                 <ul class="dropdown-menu w-100" aria-labelledby="display_type_btn">
                     @foreach (var type in DisplayService.GetDisplayTypes())
@@ -103,7 +104,7 @@
                                 <span class="d-flex gap-1">
                                     @SwatchSpans(swatchColors, SwatchContext.DisplayType, type.Code)
                                 </span>
-                                <span>@type.Name</span>
+                                <span>@Localizer[type.Name]</span>
                             </button>
                         </li>
                     }
@@ -112,7 +113,7 @@
         </div>
 
         <div class="col-md-4">
-            <label for="color_variant_btn">Color variant</label>
+            <label for="color_variant_btn">@Localizer["Color variant"]</label>
             @{
                 var selectedVariant = allColorVariants.First(cv => cv.Code == Model.ColorVariantCode);
             }
@@ -123,7 +124,7 @@
                     <span class="d-flex gap-1">
                         @SwatchSpans(selectedVariant.ColorPaletteLinks.OrderBy(cl => cl.Id), SwatchContext.ColorVariant, selectedVariant.DisplayTypeCode)
                     </span>
-                    <span>@(selectedVariant.Name)</span>
+                    <span>@Localizer[selectedVariant.Name]</span>
                 </button>
                 <ul class="dropdown-menu w-100" aria-labelledby="color_variant_btn">
                     @foreach (var variant in allColorVariants)
@@ -136,7 +137,7 @@
                                 <span class="d-flex gap-1">
                                     @SwatchSpans(variant.ColorPaletteLinks.OrderBy(cl => cl.Id), SwatchContext.ColorVariant, variant.DisplayTypeCode)
                                 </span>
-                                <span>@variant.Name</span>
+                                <span>@Localizer[variant.Name]</span>
                             </button>
                         </li>
                     }
@@ -145,12 +146,12 @@
         </div>
 
         <div class="col-md-4">
-            <label for="dithering_type">Dithering</label>
+            <label for="dithering_type">@Localizer["Dithering"]</label>
             <select id="dithering_type" name="dithering_type" class="form-select">
                 <option value=""></option>
                 @foreach (var type in DisplayService.GetDitheringTypes())
                 {
-                    <option value="@type.Code" selected="@(Model.DitheringTypeCode == type.Code)">@type.Name</option>
+                    <option value="@type.Code" selected="@(Model.DitheringTypeCode == type.Code)">@Localizer[type.Name]</option>
                 }
             </select>
         </div>
@@ -158,40 +159,40 @@
 
     <fieldset class="row mb-3">
         <div class="col-md-6">
-            <label for="display_rotation">Rotation</label>
+            <label for="display_rotation">@Localizer["Rotation"]</label>
             <select id="display_rotation" name="display_rotation" class="form-select">
                 <option value="@((int)DisplayRotation.None)" selected="@(Model.Rotation == DisplayRotation.None)">0° (@Model.Width × @Model.Height)</option>
                 <option value="@((int)DisplayRotation.Rotate90)" selected="@(Model.Rotation == DisplayRotation.Rotate90)">90° (@Model.Height × @Model.Width)</option>
-                <option value="@((int)DisplayRotation.Rotate180)" selected="@(Model.Rotation == DisplayRotation.Rotate180)">180° (@Model.Width × @Model.Height but upside down)</option>
+                <option value="@((int)DisplayRotation.Rotate180)" selected="@(Model.Rotation == DisplayRotation.Rotate180)">@Localizer["180° ({0} × {1} but upside down)", Model.Width, Model.Height]</option>
                 <option value="@((int)DisplayRotation.Rotate270)" selected="@(Model.Rotation == DisplayRotation.Rotate270)">270° (@Model.Height × @Model.Width)</option>
             </select>
         </div>
         <div class="col-md-6">
-            <label for="display_gamma">Gamma</label>
+            <label for="display_gamma">@Localizer["Gamma"]</label>
             <input id="display_gamma" name="display_gamma" type="number" step="any" class="form-control" value="@Model.Gamma">
-            <div class="form-text">Controls how grayscale/antialiased elements map to pure black and white. Values above 1.0 lighten the image (thinner lines), values below 1.0 darken it (thicker lines). Set to 1.0 for no correction.</div>
+            <div class="form-text">@Localizer["Controls how grayscale/antialiased elements map to pure black and white. Values above 1.0 lighten the image (thinner lines), values below 1.0 darken it (thicker lines). Set to 1.0 for no correction."]</div>
         </div>
     </fieldset>
 
     <fieldset class="row mb-3">
         <div class="col-md-3">
-            <label for="display_border_top">Preview frame top</label>
+            <label for="display_border_top">@Localizer["Preview frame top"]</label>
             <input id="display_border_top" name="display_border_top" type="number" step="1" class="form-control" value="@Model.BorderTop">
         </div>
         <div class="col-md-3">
-            <label for="display_border_right">Preview frame right</label>
+            <label for="display_border_right">@Localizer["Preview frame right"]</label>
             <input id="display_border_right" name="display_border_right" type="number" step="1" class="form-control" value="@Model.BorderRight">
         </div>
         <div class="col-md-3">
-            <label for="display_border_bottom">Preview frame bottom</label>
+            <label for="display_border_bottom">@Localizer["Preview frame bottom"]</label>
             <input id="display_border_bottom" name="display_border_bottom" type="number" step="1" class="form-control" value="@Model.BorderBottom">
         </div>
         <div class="col-md-3">
-            <label for="display_border_left">Preview frame left</label>
+            <label for="display_border_left">@Localizer["Preview frame left"]</label>
             <input id="display_border_left" name="display_border_left" type="number" step="1" class="form-control" value="@Model.BorderLeft">
         </div>
         <div class="col-md-12 form-text">
-            Preview frame border (how much the physical frame overlaps the display on each side)
+            @Localizer["Preview frame border (how much the physical frame overlaps the display on each side)"]
         </div>
     </fieldset>
 }
@@ -199,24 +200,24 @@
 <fieldset class="row mb-3">
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
     {
-        Display = Model, Key = "wakeup_schedule", Label = "Wake up (redraw) schedule",
+        Display = Model, Key = "wakeup_schedule", Label = Localizer["Wake up (redraw) schedule"].Value,
         ColClass = "col-md-4",
         HelpTextIsHtml = true,
-        HelpText = "Schedule is in the <a href=\"https://crontab.guru/\" target=\"_blank\">crontab format</a>, for example \"0 * * * *\"."
+        HelpText = Localizer["Schedule is in the <a href=\"https://crontab.guru/\" target=\"_blank\">crontab format</a>, for example \"0 * * * *\"."].Value
     })
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
     {
         Display = Model, Key = "alive_check_safety_lag_minutes",
-        Label = "Enforced lag when checking if display is alive (minutes)",
+        Label = Localizer["Enforced lag when checking if display is alive (minutes)"].Value,
         InputType = "number", ColClass = "col-md-4",
-        HelpText = "How many minutes to delay the check after the expected contact time"
+        HelpText = Localizer["How many minutes to delay the check after the expected contact time"].Value
     })
     @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
     {
         Display = Model, Key = "alive_check_minimal_failure_count",
-        Label = "Min. number of alive check failures",
+        Label = Localizer["Min. number of alive check failures"].Value,
         InputType = "number", ColClass = "col-md-4",
-        HelpText = "Minimal number of failures the display is considered to be frozen and before a notification is sent."
+        HelpText = Localizer["Minimal number of failures the display is considered to be frozen and before a notification is sent."].Value
     })
 </fieldset>
 

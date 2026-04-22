@@ -31,6 +31,7 @@ public class GalleryModule : IPortalModule
             keys.Add($"gallery_id_{i}");
             keys.Add($"gallery_preference_ratio_{i}");
             keys.Add($"gallery_hide_descriptions_{i}");
+            keys.Add($"gallery_image_sizing_{i}");
         }
         return keys;
     }

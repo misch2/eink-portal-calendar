@@ -25,8 +25,9 @@ public class GalleryComponent(
             var ratio = double.TryParse(ratioStr, out var r) && r > 0 ? r : 1.0;
 
             var hideDescriptions = displayService.GetConfigBool(display, $"gallery_hide_descriptions_{i}");
+            var imageSizing = displayService.GetConfig(display, $"gallery_image_sizing_{i}");
 
-            candidates.Add(new GalleryCandidate(galleryId, ratio, hideDescriptions));
+            candidates.Add(new GalleryCandidate(galleryId, ratio, hideDescriptions, imageSizing));
         }
 
         if (candidates.Count == 0)
@@ -69,16 +70,18 @@ public class GalleryComponent(
             Description = image.Description,
             GalleryName = gallery.Name,
             Rotation = rotation,
-            HideDescriptions = selected.HideDescriptions
+            HideDescriptions = selected.HideDescriptions,
+            ImageSizing = selected.ImageSizing
         };
     }
 }
 
-public class GalleryCandidate(int galleryId, double ratio, bool hideDescriptions)
+public class GalleryCandidate(int galleryId, double ratio, bool hideDescriptions, string? imageSizing)
 {
     public int GalleryId { get; } = galleryId;
     public double Ratio { get; } = ratio;
     public bool HideDescriptions { get; } = hideDescriptions;
+    public string? ImageSizing { get; } = imageSizing;
 }
 
 public class GalleryImageInfo
@@ -89,6 +92,7 @@ public class GalleryImageInfo
     public required string GalleryName { get; set; }
     public int Rotation { get; set; }
     public bool HideDescriptions { get; set; }
+    public string? ImageSizing { get; set; }
 
     /// <summary>
     /// Returns the relative URL to the image served by GalleriesController.ServeImage.

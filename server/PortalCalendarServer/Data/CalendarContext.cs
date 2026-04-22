@@ -183,7 +183,6 @@ public partial class CalendarContext : DbContext
                 new DitheringType { Code = "", Name = "None", SortOrder = 100 },
                 new DitheringType { Code = "fs", Name = "Floyd-Steinberg", SortOrder = 200 },
                 new DitheringType { Code = "at", Name = "Atkinson", SortOrder = 300 },
-                new DitheringType { Code = "jjn", Name = "Jarvis, Judice, Ninke", SortOrder = 400 },
                 new DitheringType { Code = "st", Name = "Stucki", SortOrder = 500 }
              );
         });
