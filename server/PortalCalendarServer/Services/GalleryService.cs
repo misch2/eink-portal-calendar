@@ -181,6 +181,37 @@ public class GalleryService(CalendarContext context, IConfiguration configuratio
         return image;
     }
 
+    public async Task<GalleryImage> AddImageFromBytesAsync(int galleryId, byte[] imageBytes, string fileName, string contentType, string? description)
+    {
+        var gallery = await _context.Galleries.FindAsync(galleryId);
+        if (gallery == null) throw new ArgumentException($"Gallery {galleryId} not found");
+
+        var primaryFolder = galleryId.ToString();
+        var imageDir = GetImageDirectory(primaryFolder);
+        Directory.CreateDirectory(imageDir);
+
+        var image = new GalleryImage
+        {
+            PrimaryFolder = primaryFolder,
+            FileName = Guid.NewGuid().ToString() + Path.GetExtension(fileName),
+            Description = description,
+            ContentType = contentType,
+            UploadedAt = DateTime.UtcNow
+        };
+
+        var filePath = Path.Combine(imageDir, image.FileName);
+        await File.WriteAllBytesAsync(filePath, imageBytes);
+
+        image.FileSize = imageBytes.Length;
+        PopulateImageDimensions(image, filePath);
+
+        image.Galleries.Add(gallery);
+        _context.GalleryImages.Add(image);
+        await _context.SaveChangesAsync();
+
+        return image;
+    }
+
     public async Task DeleteImageAsync(int galleryId, int imageId)
     {
         var image = await _context.GalleryImages

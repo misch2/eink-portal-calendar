@@ -154,6 +154,16 @@ builder.Services.AddHttpClient(Options.DefaultName, client =>
 })
 ;
 
+// Named HttpClient for AI image generation — needs a much longer timeout than the default
+// because DALL-E 3 generation routinely takes 30–90 seconds (especially HD quality).
+// No retry/circuit-breaker: a failed generation falls back to the cached gallery image.
+builder.Services.AddHttpClient("AiImageGeneration", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(120);
+    client.DefaultRequestHeaders.Add("User-Agent",
+        "PortalCalendar/2.0 (github.com/misch2/eink-portal-calendar)");
+});
+
 // Register services
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserProvider, CurrentUserProvider>();
@@ -189,6 +199,7 @@ moduleRegistry.Register(new WeatherForecastModule());
 moduleRegistry.Register(new GalleryModule());
 moduleRegistry.Register(new HomeAssistantModule());
 moduleRegistry.Register(new PlantWateringModule());
+moduleRegistry.Register(new AiImageModule());
 builder.Services.AddSingleton(moduleRegistry);
 
 // Register periodic background services

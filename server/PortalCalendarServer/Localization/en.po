@@ -879,3 +879,32 @@ msgstr "Atkinson (higher contrast in whites and blacks)"
 
 msgid "Stucki"
 msgstr "Stucki (more prominent edges)"
+
+# ── Config UI – AI Image ──────────────────────────────
+
+msgid "OpenAI API key"
+msgstr "OpenAI API key"
+
+msgid "Prompt"
+msgstr "Prompt"
+
+msgid "Describe the image you want to generate..."
+msgstr "Describe the image you want to generate..."
+
+msgid "Save to gallery"
+msgstr "Save to gallery"
+
+msgid "(don't save)"
+msgstr "(don't save)"
+
+msgid "Quality"
+msgstr "Quality"
+
+msgid "Style"
+msgstr "Style"
+
+msgid "Natural"
+msgstr "Natural"
+
+msgid "Vivid"
+msgstr "Vivid"

@@ -1,0 +1,27 @@
+@model PortalCalendarServer.Services.PageViewModel
+@using PortalCalendarServer.Services.PageGeneratorComponents
+
+@{
+    Layout = "~/Views/Shared/Layouts/Epaper/_FullBleedLayout.cshtml";
+    ViewBag.Title = "AI Generated Image";
+
+    var aiImage = Model.GetComponent<AiImageComponent>("aiimage");
+    var imageInfo = aiImage?.GetOrGenerateImage(Model.Display);
+}
+
+@section Head {
+    <link rel="stylesheet" href="/css/calendar_themes/aiimage.css" asp-append-version="true" />
+}
+
+@if (imageInfo != null)
+{
+    <div id="aiimage-container">
+        <img id="aiimage-image" src="@imageInfo.ImageUrl" alt="@(imageInfo.Description ?? "AI generated image")" />
+    </div>
+}
+else
+{
+    <div id="aiimage-no-image">
+        No image available. Please configure an API key and prompt.
+    </div>
+}

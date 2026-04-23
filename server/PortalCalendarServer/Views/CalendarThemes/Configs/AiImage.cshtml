@@ -1,0 +1,70 @@
+@model Display
+@using PortalCalendarServer.Models.DatabaseEntities
+@using PortalCalendarServer.Models.POCOs
+@using PortalCalendarServer.Services
+@inject IDisplayService displayService
+@inject IGalleryService galleryService
+@inject IViewLocalizer Localizer
+
+@{
+    var galleries = await galleryService.GetVisibleGalleriesAsync();
+    var currentGalleryId = displayService.GetConfigWithoutDefaults(Model, "aiimage_gallery_id");
+}
+
+@await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+{
+    Display = Model, Key = "aiimage_api_key", Label = Localizer["OpenAI API key"].Value,
+    ColClass = "col-md-6", InputType = "password"
+})
+
+<div class="row mb-2 align-items-center">
+    <label for="aiimage_prompt" class="col-md-2 col-form-label">@Localizer["Prompt"]</label>
+    <div class="col-md-10">
+        <textarea id="aiimage_prompt" name="aiimage_prompt" class="form-control" rows="3"
+            placeholder="@Localizer["Describe the image you want to generate..."]"
+            >@(displayService.GetConfigWithoutDefaults(Model, "aiimage_prompt"))</textarea>
+    </div>
+</div>
+
+<div class="row mb-2 align-items-center">
+    <label for="aiimage_gallery_id" class="col-md-2 col-form-label">@Localizer["Save to gallery"]</label>
+    <div class="col-md-4">
+        <select id="aiimage_gallery_id" name="aiimage_gallery_id" class="form-select">
+            <option value="">@Localizer["(don't save)"]</option>
+            @foreach (var gallery in galleries)
+            {
+                <option value="@gallery.Id" selected="@(currentGalleryId == gallery.Id.ToString())">
+                    @gallery.Name (@gallery.Images.Count @Localizer["images"])
+                </option>
+            }
+        </select>
+    </div>
+</div>
+
+@await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
+{
+    Display = Model, Key = "aiimage_cache_hours", Label = Localizer["Cache for N hours"].Value,
+    ColClass = "col-md-3", InputType = "number"
+})
+
+@await Html.PartialAsync("_ConfigSelect", new ConfigSelectModel
+{
+    Display = Model, Key = "aiimage_quality", Label = Localizer["Quality"].Value,
+    ColClass = "col-md-3",
+    Options = new List<SelectOption>
+    {
+        new() { Value = "standard", Text = "Standard" },
+        new() { Value = "hd", Text = "HD" },
+    }
+})
+
+@await Html.PartialAsync("_ConfigSelect", new ConfigSelectModel
+{
+    Display = Model, Key = "aiimage_style", Label = Localizer["Style"].Value,
+    ColClass = "col-md-3",
+    Options = new List<SelectOption>
+    {
+        new() { Value = "natural", Text = Localizer["Natural"].Value },
+        new() { Value = "vivid", Text = Localizer["Vivid"].Value },
+    }
+})

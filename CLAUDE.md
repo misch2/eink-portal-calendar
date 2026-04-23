@@ -65,7 +65,7 @@ The client validates image checksums stored in RTC memory to skip re-rendering u
 5. `Data/CalendarContext.cs` — EF Core 9.0 + SQLite; entities: `Displays`, `Themes`, `Configs`, `Cache`, `Galleries`, `Users`
 
 ### Module System
-Pluggable modules registered in `Program.cs`. Each module contributes config UI and rendering logic. Built-in modules include: `CalendarModule`, `MetNoWeatherModule`, `OpenWeatherModule`, `GoogleFitModule`, `GalleryModule`, `XkcdModule`, `TelegramModule`, `MqttModule`, `PortalIconsModule`, `WebImageModule`.
+Pluggable modules registered in `Program.cs`. Each module contributes config UI and rendering logic. Built-in modules include: `CalendarModule`, `MetNoWeatherModule`, `OpenWeatherModule`, `GoogleFitModule`, `GalleryModule`, `XkcdModule`, `TelegramModule`, `MqttModule`, `PortalIconsModule`, `WebImageModule`, `HomeAssistantModule`, `PlantWateringModule`, `AiImageModule`, `PublicHolidayModule`, `NameDayModule`.
 
 ### Authentication
 Two schemes: Cookie auth (web UI) + InternalToken auth (ESP32 API). Sessions stored in a separate `sessions.db` SQLite database.
@@ -123,7 +123,8 @@ The server UI uses **OrchardCore Localization** with GNU gettext `.po` files. Lo
 ### Database migrations
 
 - Any database migrations should be created and applied via EF Core CLI (`dotnet ef migrations`)
-- `CalendarContext` is the common DB context here.
+- `CalendarContext` is the common DB context here. There are two DbContexts (`CalendarContext` and `SessionContext`), so `--context CalendarContext` is **required** on all `dotnet ef` commands — it fails without it.
+- Example: `dotnet ef migrations add MyMigration --project PortalCalendarServer --context CalendarContext` (run from `server/`)
 - Do not run `dotnet ef database update`. Only run `dotnet ef migrations add` as I want to preview all changes (also the server applies pending migrations at startup automatically)
 
 ### .NET code standards

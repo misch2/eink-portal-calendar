@@ -18,6 +18,7 @@ namespace PortalCalendarServer.Services
         Task DeleteGalleryAsync(int id);
 
         Task<GalleryImage> AddImageAsync(int galleryId, IFormFile file, string? description);
+        Task<GalleryImage> AddImageFromBytesAsync(int galleryId, byte[] imageBytes, string fileName, string contentType, string? description);
         Task DeleteImageAsync(int galleryId, int imageId);
         Task UpdateImageDescriptionAsync(int imageId, string? description);
         Task<GalleryImage?> ReplaceImageFileAsync(int imageId, IFormFile file);

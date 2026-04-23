@@ -905,3 +905,32 @@ msgstr "Atkinson (vyšší kontrast)"
 
 msgid "Stucki"
 msgstr "Stucki (výraznější hrany)"
+
+# ── Config UI – AI Image ──────────────────────────────
+
+msgid "OpenAI API key"
+msgstr "OpenAI API klíč"
+
+msgid "Prompt"
+msgstr "Prompt"
+
+msgid "Describe the image you want to generate..."
+msgstr "Popište obrázek, který chcete vygenerovat..."
+
+msgid "Save to gallery"
+msgstr "Uložit do galerie"
+
+msgid "(don't save)"
+msgstr "(neukládat)"
+
+msgid "Quality"
+msgstr "Kvalita"
+
+msgid "Style"
+msgstr "Styl"
+
+msgid "Natural"
+msgstr "Přirozený"
+
+msgid "Vivid"
+msgstr "Živý"

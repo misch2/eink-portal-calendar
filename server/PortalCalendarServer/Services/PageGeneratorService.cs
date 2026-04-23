@@ -206,4 +206,5 @@ public class PageViewModel
     public ErrorComponent? Error => GetComponent<ErrorComponent>("error");
     public GalleryComponent? Gallery => GetComponent<GalleryComponent>("gallery");
     public HomeAssistantComponent? HomeAssistant => GetComponent<HomeAssistantComponent>("homeassistant");
+    public AiImageComponent? AiImage => GetComponent<AiImageComponent>("aiimage");
 }
