@@ -1,7 +1,14 @@
 :root {
     /* Define orange as a mix of yellow + red, but only if both exist */
     --epd-orange: color-mix(in oklch, var(--epd-yellow) 50%, var(--epd-red) 50% );
-    --epd-darkyellow: color-mix(in oklch, var(--epd-yellow) 75%, var(--epd-black) 25% );
+    /* Checkerboard pattern for "dark yellow" — alternating yellow/black pixels
+       avoids error-diffusion dithering artifacts on e-ink */
+    /* 50:50 */
+    /*    --checkerboard-yellow-black: repeating-conic-gradient( var(--epd-black) 0% 25%, var(--epd-yellow) 0% 50% );*/
+    /* 25:75 - 1 of 4 pixels black */
+    --checkerboard-yellow-black: repeating-conic-gradient( var(--epd-black) 0% 25%, var(--epd-yellow) 0% 100% );
+    /* 75:25 - 3 of 4 pixels black */
+    /*    --checkerboard-yellow-black: repeating-conic-gradient( var(--epd-yellow) 0% 25%, var(--epd-black) 0% 100% );*/
 }
 
 
@@ -105,11 +112,18 @@ body {
 
 .status-dry .plant-name,
 .status-dry .plant-moisture {
-    color: var(--epd-darkyellow, var(--epd-red, var(--epd-black)));
+    background-image: var(--checkerboard-yellow-black);
+    background-size: 2px 2px;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: var(--epd-red, var(--epd-black)); /* fallback for non-webkit */
 }
 
 .status-dry .moisture-bar-fill {
-    background-color: var(--epd-darkyellow, var(--epd-red, var(--epd-black)));
+    background-image: var(--checkerboard-yellow-black);
+    background-size: 2px 2px;
+    background-color: transparent;
 }
 
 .status-wet .plant-name,
