@@ -67,6 +67,7 @@ public class BitmapGenerationService : PeriodicBackgroundService
             try
             {
                 var fullDisplay = displayService.As(new ImpersonatedUserProvider(null)).GetVisibleDisplayById(display.Id);
+                if (fullDisplay == null) continue;
                 var wakeupInfo = displayService.GetNextWakeupTime(fullDisplay, now);
                 var timeUntilWakeup = wakeupInfo.NextWakeup - now;
                 var enqueued = false;

@@ -11,7 +11,7 @@
 <div style="display: flex; flex-flow: row wrap; justify-content: space-around;">
     <div>
         @{
-            var pageUrl = Url.Action(nameof(UiController.CalendarHtmlDefaultDate), "Ui", new { displayNumber = Model.Id, preview_colors = true });
+            var pageUrl = Url.Action(nameof(UiController.CalendarHtmlDefaultDate), "Ui", new { displayNumber = Model.Id, preview_colors = true })!;
         }
         @Localizer["Calendar page <a href='{0}'>as HTML</a>:", pageUrl]
         <br>
@@ -23,7 +23,7 @@
     </div>
     <div>
         @{
-            var bitmapUrl = Url.Action(nameof(UiController.Bitmap), "Ui", new { displayNumber = Model.Id });
+            var bitmapUrl = Url.Action(nameof(UiController.Bitmap), "Ui", new { displayNumber = Model.Id })!;
             var rendered_ago = Model.RenderedAt.HasValue
                 ? Localizer["rendered {0} minutes ago", $"{(DateTime.UtcNow - Model.RenderedAt.Value).TotalMinutes:F0}"]
                 : Localizer["never rendered"];

@@ -60,6 +60,7 @@ public class MissedConnectionsCheckService : PeriodicBackgroundService
             try
             {
                 var display = displayService.As(new ImpersonatedUserProvider(null)).GetVisibleDisplayById(displayId);
+                if (display == null) continue;
 
                 var lastVisit = displayService.GetLastVisit(display);
                 if (lastVisit == null)

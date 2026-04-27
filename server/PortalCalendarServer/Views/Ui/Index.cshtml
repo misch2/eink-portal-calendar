@@ -38,7 +38,7 @@
 }
 
 @{
-    var testPageUrl = Url.Action(nameof(UiController.Test), "Ui", new { displayNumber = Model.Id });
+    var testPageUrl = Url.Action(nameof(UiController.Test), "Ui", new { displayNumber = Model.Id })!;
 }
 <p class="row-fluid pb-3">
     @Localizer["Image for the ePaper display (if you'd like to see the original image generated from HTML+CSS template then look at the <a href='{0}'>test page</a>).", testPageUrl]

@@ -48,7 +48,9 @@ public class ApiController : ControllerBase
         Version displayVersion;
         try
         {
-            displayVersion = new Version(display.Firmware);
+            displayVersion = string.IsNullOrWhiteSpace(display.Firmware)
+                ? new Version("0.0.0")
+                : new Version(display.Firmware);
         }
         catch (Exception)
         {
