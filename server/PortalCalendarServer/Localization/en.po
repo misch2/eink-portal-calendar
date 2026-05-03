@@ -681,8 +681,8 @@ msgstr "Wet threshold (%)"
 msgid "Name override"
 msgstr "Name override"
 
-msgid "Order (in area)"
-msgstr "Order (in area)"
+msgid "Order in a group"
+msgstr "Order in a group"
 
 # ── Config UI – Tab names ─────────────────────────────
 

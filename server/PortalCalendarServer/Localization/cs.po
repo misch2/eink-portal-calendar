@@ -707,8 +707,8 @@ msgstr "Práh vlhkosti (%)"
 msgid "Name override"
 msgstr "Přepsání názvu"
 
-msgid "Order (in area)"
-msgstr "Pořadí (v oblasti)"
+msgid "Order in a group"
+msgstr "Pořadí ve skupině"
 
 # ── Config UI – Tab names ─────────────────────────────
 

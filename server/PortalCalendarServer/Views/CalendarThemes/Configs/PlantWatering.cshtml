@@ -1,4 +1,5 @@
 @model Display
+@using PortalCalendarServer.Data
 @using PortalCalendarServer.Models.DatabaseEntities
 @using PortalCalendarServer.Models.POCOs
 @using PortalCalendarServer.Modules.Builtin
@@ -10,16 +11,18 @@
 @inject IMemoryCache memoryCache
 @inject ILoggerFactory loggerFactory
 @inject IViewLocalizer Localizer
+@inject CalendarContext calendarContext
 
 @{
     // Fetch moisture entities from Home Assistant
     var moistureEntities = new List<HomeAssistantEntity>();
     var haConfigured = displayService.GetConfigBool(Model, "homeassistant");
+    HomeAssistantComponent? haComponent = null;
     if (haConfigured)
     {
         try
         {
-            var haComponent = new HomeAssistantComponent(displayService, httpClientFactory, memoryCache, loggerFactory);
+            haComponent = new HomeAssistantComponent(displayService, httpClientFactory, memoryCache, loggerFactory);
             var allEntities = await haComponent.GetStatesAsync(Model);
             moistureEntities = allEntities
                 .Where(e => e.GetAttribute("device_class") == "moisture")
@@ -29,6 +32,91 @@
         catch
         {
             // HA unreachable — dropdowns will be empty
+            haComponent = null;
+        }
+    }
+
+    // Auto-resort configured sensors by (area, order_in_area, name) so that next time
+    // the config screen opens, slots are already in the user's preferred order.
+    // Requires HA to resolve the area for each sensor; skips silently if unreachable.
+    if (haComponent != null)
+    {
+        var slots = new List<(string SensorId, string Dry, string Wet, string Name, string OrderStr, int Order)>();
+        for (int i = 1; i <= PlantWateringModule.MaxSensors; i++)
+        {
+            var sid = displayService.GetConfigWithoutDefaults(Model, $"plantwatering_sensor_{i}");
+            if (string.IsNullOrWhiteSpace(sid)) continue;
+            var dry = displayService.GetConfigWithoutDefaults(Model, $"plantwatering_sensor_{i}_threshold_dry") ?? "";
+            var wet = displayService.GetConfigWithoutDefaults(Model, $"plantwatering_sensor_{i}_threshold_wet") ?? "";
+            var name = displayService.GetConfigWithoutDefaults(Model, $"plantwatering_sensor_{i}_name_override") ?? "";
+            var orderStr = displayService.GetConfigWithoutDefaults(Model, $"plantwatering_sensor_{i}_order_in_area") ?? "";
+            var order = int.TryParse(orderStr, out var o) ? o : int.MaxValue;
+            slots.Add((sid.Trim(), dry, wet, name, orderStr, order));
+        }
+
+        if (slots.Count > 0)
+        {
+            try
+            {
+                var uniqueSensorIds = slots.Select(s => s.SensorId).Distinct().ToList();
+                var details = await haComponent.GetEntityDetailsAsync(Model, uniqueSensorIds);
+                // Use GroupBy in case HA still returns duplicates for any reason
+                var detailsBySensorId = details
+                    .GroupBy(d => d.EntityId)
+                    .ToDictionary(g => g.Key, g => g.First());
+
+                var sorted = slots
+                    .Select(s =>
+                    {
+                        detailsBySensorId.TryGetValue(s.SensorId, out var d);
+                        var friendlyName = d?.Entity?.FriendlyName ?? s.SensorId;
+                        var nameForSort = !string.IsNullOrWhiteSpace(s.Name) ? s.Name : friendlyName;
+                        return new { Slot = s, Area = d?.AreaName ?? "", NameForSort = nameForSort };
+                    })
+                    // Sensors with no resolvable area sort after those that have one
+                    .OrderBy(x => string.IsNullOrEmpty(x.Area) ? 1 : 0)
+                    .ThenBy(x => x.Area)
+                    .ThenBy(x => x.Slot.Order)
+                    .ThenBy(x => x.NameForSort)
+                    .Select(x => x.Slot)
+                    .ToList();
+
+                bool anyChanges = false;
+                for (int i = 0; i < PlantWateringModule.MaxSensors; i++)
+                {
+                    int slotNo = i + 1;
+                    var newSensorId = i < sorted.Count ? sorted[i].SensorId : "";
+                    var newDry = i < sorted.Count ? sorted[i].Dry : "";
+                    var newWet = i < sorted.Count ? sorted[i].Wet : "";
+                    var newName = i < sorted.Count ? sorted[i].Name : "";
+                    var newOrder = i < sorted.Count ? sorted[i].OrderStr : "";
+
+                    void WriteIfChanged(string key, string newVal)
+                    {
+                        var cur = displayService.GetConfigWithoutDefaults(Model, key) ?? "";
+                        if (cur != newVal)
+                        {
+                            displayService.SetConfig(Model, key, newVal);
+                            anyChanges = true;
+                        }
+                    }
+
+                    WriteIfChanged($"plantwatering_sensor_{slotNo}", newSensorId);
+                    WriteIfChanged($"plantwatering_sensor_{slotNo}_threshold_dry", newDry);
+                    WriteIfChanged($"plantwatering_sensor_{slotNo}_threshold_wet", newWet);
+                    WriteIfChanged($"plantwatering_sensor_{slotNo}_name_override", newName);
+                    WriteIfChanged($"plantwatering_sensor_{slotNo}_order_in_area", newOrder);
+                }
+
+                if (anyChanges)
+                {
+                    await calendarContext.SaveChangesAsync();
+                }
+            }
+            catch
+            {
+                // HA call failed mid-resort — leave config as-is
+            }
         }
     }
 }
@@ -115,7 +203,7 @@
         })
         @await Html.PartialAsync("_ConfigTextInput", new ConfigInputModel
         {
-            Display = Model, Key = $"plantwatering_sensor_{i}_order_in_area", Label = Localizer["Order (in area)"].Value,
+            Display = Model, Key = $"plantwatering_sensor_{i}_order_in_area", Label = Localizer["Order in a group"].Value,
             ColClass = "col-md-1", InputType = "number", Step = "1"
         })
 
