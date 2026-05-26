@@ -20,10 +20,16 @@ void OTAManager::init() {
   });
 
   ArduinoOTA.begin();
+  initialized = true;
   logger.debug("OTA: Ready on %s.local", HOSTNAME);
 }
 
 void OTAManager::loop() {
+  if (!initialized) {
+    wdtManager.ping();
+    return;
+  }
+
   ArduinoOTA.handle();
   wdtManager.ping();
   if (otaFinished) {

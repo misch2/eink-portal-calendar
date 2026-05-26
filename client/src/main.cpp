@@ -94,7 +94,7 @@ void wakeupDisplayAndConnectWiFi() {
 
   if (!wifiConnectionManager.init()) {
     nextSleepTime = SECONDS_PER_HOUR * 1;
-    showErrorOnDisplay("WiFi connect/login unsuccessful.");
+    showErrorOnDisplay(wifiConnectionManager.getAutoconnectFailureMessage());
   }
 
   otaManager.init();

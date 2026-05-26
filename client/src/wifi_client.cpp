@@ -3,6 +3,9 @@
 #include <Arduino.h>
 #include <ArduinoOTA.h>
 
+#include "display_manager.h"
+#include "fonts/Open_Sans_Regular_16.h"
+#include "fonts/Open_Sans_Regular_24.h"
 #include "hw_config.h"
 #include "logger.h"
 #include "ota_manager.h"
@@ -12,6 +15,21 @@
 #ifdef USE_WIFI_MANAGER
 #include <WiFiManager.h>
 extern WiFiManager wifiManager;
+#endif
+extern DisplayManager displayManager;
+
+#ifdef USE_WIFI_MANAGER
+namespace {
+WiFiConnectionManager* activeConnectionManager = nullptr;
+
+void showConfigPortalOnDisplay(WiFiManager* manager) {
+  if (activeConnectionManager == nullptr) {
+    return;
+  }
+
+  activeConnectionManager->handleConfigPortalStarted(manager->getConfigPortalSSID(), WiFi.softAPIP());
+}
+}  // namespace
 #endif
 
 // WiFiClientWithBlockingReads implementation
@@ -74,6 +92,9 @@ bool WiFiConnectionManager::init() {
 
   logger.debug("Connecting to WiFi");
   unsigned long start = millis();
+  configPortalStarted = false;
+  lastConfigPortalSsid = "";
+  lastConfigPortalIp = IPAddress();
 
 #ifdef USE_WIFI_MANAGER
   wdtManager.stop();
@@ -81,7 +102,10 @@ bool WiFiConnectionManager::init() {
   wifiManager.setConnectRetries(3);
   wifiManager.setConnectTimeout(15);
   wifiManager.setConfigPortalTimeout(10 * 60);
+  activeConnectionManager = this;
+  wifiManager.setAPCallback(showConfigPortalOnDisplay);
   res = wifiManager.autoConnect();
+  activeConnectionManager = nullptr;
   wdtManager.init();
   if (!res) {
     logger.debug("Failed to connect");
@@ -109,6 +133,24 @@ bool WiFiConnectionManager::init() {
   logger.debug("MAC address: %s", WiFi.macAddress().c_str());
 
   return true;
+}
+
+void WiFiConnectionManager::handleConfigPortalStarted(const String& ssid, const IPAddress& ip) {
+  configPortalStarted = true;
+  lastConfigPortalSsid = ssid;
+  lastConfigPortalIp = ip;
+
+  String message = "Connect to AP:\n" + lastConfigPortalSsid + "\n\nOpen:\nhttp://" + lastConfigPortalIp.toString();
+  displayManager.displayText("WiFi Setup", message, &Open_Sans_Regular_24);
+}
+
+String WiFiConnectionManager::getAutoconnectFailureMessage() const {
+#ifdef USE_WIFI_MANAGER
+  if (configPortalStarted) {
+    return "WiFi setup timed out.\n\nConnect to AP:\n" + lastConfigPortalSsid + "\n\nOpen:\nhttp://" + lastConfigPortalIp.toString();
+  }
+#endif
+  return "WiFi connect/login unsuccessful.";
 }
 
 void WiFiConnectionManager::stop() {

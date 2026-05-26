@@ -9,6 +9,7 @@ class OTAManager {
  private:
   Logger& logger;
   WDTManager& wdtManager;
+  bool initialized = false;
   bool otaFinished = false;
 
  public:

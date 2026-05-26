@@ -25,11 +25,16 @@ class WiFiConnectionManager {
  private:
   Logger& logger;
   WDTManager& wdtManager;
+  String lastConfigPortalSsid;
+  IPAddress lastConfigPortalIp;
+  bool configPortalStarted = false;
 
  public:
   WiFiConnectionManager(Logger& logger, WDTManager& wdtManager);
 
+  void handleConfigPortalStarted(const String& ssid, const IPAddress& ip);
   bool init();
+  String getAutoconnectFailureMessage() const;
   void stop();
 };
 
