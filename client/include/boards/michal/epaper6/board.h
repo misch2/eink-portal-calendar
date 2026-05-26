@@ -1,18 +1,15 @@
 #include "driver/laskakit_espink_v3_5.h"
-// #include "epaper/GDEY075Z08_3C_BWR_inverted_red.h"
 #include "epaper/GDEM075F52_4C_BWRY.h"
 
-#define DEBUG
+// DIP switches:
+//    1 = on
+//    2 = off
 
-// #define MODE_EPAPER_LOCAL_TEST_ONLY
+// #define DEBUG
 
 #define USE_WIFI_MANAGER
 #define HOSTNAME "esp64-epaper6"
-#define CALENDAR_URL_HOST "portal-calendar.localnet" /* .NET server on Proxmox LXC */
-#define CALENDAR_URL_PORT 8084                       /* nginx port to log requests, real server runs on 5000 */
-
-#define SYSLOG_SERVER "logserver.localnet"
-#define SYSLOG_PORT 514
-#define SYSLOG_MYAPPNAME "epaper"
+#define CALENDAR_URL_HOST "portal-calendar.pve.land.cz" /* .NET server on Proxmox LXC */
+#define CALENDAR_URL_PORT 80                       /* nginx port to log requests, real server runs on 5000 */
 
 #define DISPLAY_ROTATION 2  // see hw_config.h for details

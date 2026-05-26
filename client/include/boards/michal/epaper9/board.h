@@ -1,6 +1,10 @@
 #include "driver/laskakit_espink_v3_5.h"
 #include "epaper/GDEM075F52_4C_BWRY.h"
 
+// DIP switches:
+//    1 = on
+//    2 = off
+
 #define DEBUG
 
 // #define MODE_EPAPER_LOCAL_TEST_ONLY

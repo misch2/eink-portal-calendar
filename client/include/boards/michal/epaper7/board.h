@@ -6,6 +6,11 @@
 #include "driver/laskakit_espink_v3_5.h"
 #include "epaper/GDEM075F52_4C_BWRY.h"
 
+// DIP switches:
+//    1 = off
+//    2 = off
+// ^ Is this OK?
+
 #define USE_WIFI_MANAGER
 #define USE_WDT
 #define WDT_TIMEOUT 120  // seconds
