@@ -93,8 +93,7 @@ void wakeupDisplayAndConnectWiFi() {
   displayManager.init();
 
   if (!wifiConnectionManager.init()) {
-    nextSleepTime = SECONDS_PER_HOUR * 1;
-    showErrorOnDisplay(wifiConnectionManager.getAutoconnectFailureMessage());
+    showFinalErrorOnDisplay(wifiConnectionManager.getAutoconnectFailureMessage());
   }
 
   otaManager.init();
@@ -139,6 +138,18 @@ void disconnectWiFiAndHibernateAll() {
   espDeepSleep(nextSleepTime);
 }
 
+void disconnectWiFiAndHibernateIndefinitely() {
+  timing.logStats();
+  displayManager.stop();
+  wdtManager.stop();
+
+  DEBUG_PRINT("Going to hibernate indefinitely");
+
+  wifiConnectionManager.stop();
+  boardSpecificDone();
+  espDeepSleepIndefinitely();
+}
+
 void showErrorOnDisplay(String message) {
   strcpy(lastChecksum, "");
   DEBUG_PRINT("Displaying error: %s", message.c_str());
@@ -146,10 +157,24 @@ void showErrorOnDisplay(String message) {
   disconnectWiFiAndHibernateAll();
 }
 
+void showFinalErrorOnDisplay(String message) {
+  strcpy(lastChecksum, "");
+  DEBUG_PRINT("Displaying final error: %s", message.c_str());
+  displayManager.displayText("Error", message, &DejaVu_Sans_Mono_16);
+  disconnectWiFiAndHibernateIndefinitely();
+}
+
 void espDeepSleep(uint64_t seconds) {
   wdtManager.stop();
   TRACE_PRINT("Going to deep sleep for %lu s", seconds);
   esp_sleep_enable_timer_wakeup(seconds * uS_PER_S);
+  esp_deep_sleep_start();
+}
+
+void espDeepSleepIndefinitely() {
+  wdtManager.stop();
+  TRACE_PRINT("Going to deep sleep indefinitely");
+  esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
   esp_deep_sleep_start();
 }
 

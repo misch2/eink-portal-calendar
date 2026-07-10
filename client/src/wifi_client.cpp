@@ -18,6 +18,11 @@ extern WiFiManager wifiManager;
 #endif
 extern DisplayManager displayManager;
 
+namespace {
+constexpr uint32_t WIFI_SETUP_TIMEOUT_MINUTES = 5;
+constexpr uint32_t WIFI_SETUP_TIMEOUT_SECONDS = WIFI_SETUP_TIMEOUT_MINUTES * 60;
+}  // namespace
+
 #ifdef USE_WIFI_MANAGER
 namespace {
 WiFiConnectionManager* activeConnectionManager = nullptr;
@@ -101,7 +106,7 @@ bool WiFiConnectionManager::init() {
   wifiManager.setHostname(HOSTNAME);
   wifiManager.setConnectRetries(3);
   wifiManager.setConnectTimeout(15);
-  wifiManager.setConfigPortalTimeout(10 * 60);
+  wifiManager.setConfigPortalTimeout(WIFI_SETUP_TIMEOUT_SECONDS);
   activeConnectionManager = this;
   wifiManager.setAPCallback(showConfigPortalOnDisplay);
   res = wifiManager.autoConnect();
@@ -140,14 +145,15 @@ void WiFiConnectionManager::handleConfigPortalStarted(const String& ssid, const 
   lastConfigPortalSsid = ssid;
   lastConfigPortalIp = ip;
 
-  String message = "Connect to AP:\n" + lastConfigPortalSsid + "\n\nOpen:\nhttp://" + lastConfigPortalIp.toString();
+  String message = "Connect to AP:\n" + lastConfigPortalSsid + "\n\nOpen:\nhttp://" + lastConfigPortalIp.toString() + "\n\nSetup will stay active for " +
+                   String(WIFI_SETUP_TIMEOUT_MINUTES) + " minutes.";
   displayManager.displayText("WiFi Setup", message, &Open_Sans_Regular_24);
 }
 
 String WiFiConnectionManager::getAutoconnectFailureMessage() const {
 #ifdef USE_WIFI_MANAGER
   if (configPortalStarted) {
-    return "WiFi setup timed out.\n\nConnect to AP:\n" + lastConfigPortalSsid + "\n\nOpen:\nhttp://" + lastConfigPortalIp.toString();
+    return "WiFi setup unsuccessful.\n\nGoing to sleep.\nPress reset to wake up.";
   }
 #endif
   return "WiFi connect/login unsuccessful.";

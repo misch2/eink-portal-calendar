@@ -9,11 +9,14 @@ void minimalHardwareInit();
 void wakeupDisplayAndConnectWiFi();
 
 void disconnectWiFiAndHibernateAll();
+void disconnectWiFiAndHibernateIndefinitely();
 void showErrorOnDisplay(String message);
+void showFinalErrorOnDisplay(String message);
 
 void logRuntimeStats();
 
 void espDeepSleep(uint64_t seconds);
+void espDeepSleepIndefinitely();
 
 #define uS_PER_S 1000000
 #define SECONDS_PER_HOUR 3600
